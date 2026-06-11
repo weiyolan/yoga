@@ -1,0 +1,400 @@
+/* ============================================================
+   Yoga, Zen & Tonic — BOLD BOHEMIAN LAYER  (v3)
+   Loads after styles-v3.css. Turns the calm editorial base into
+   a loud, energetic, alive layout: fatty borders, hard offset
+   shadows, punchy multi-accent colour, cranked holographic
+   shimmer, two-direction infinite review marquees, a bordered
+   accordion FAQ that folds open, gliding staggered reveals and
+   playful hover motion everywhere.
+   ============================================================ */
+
+/* ---------- global rhythm: heavier, tighter, louder ---------- */
+h1, h2, h3, h4 { font-weight: var(--display-weight); }
+.section__title { font-size: clamp(2.4rem, 5.6vw, 4.6rem); letter-spacing: -0.035em; line-height: 1.0; }
+.section__sub { font-size: 1.14rem; font-weight: 500; }
+.eyebrow {
+  font-weight: 800; letter-spacing: 0.22em; font-size: 0.74rem;
+  color: var(--accent-ink); background: var(--accent);
+  padding: 0.42em 0.9em; border-radius: 999px; border: var(--bd-w) solid var(--ink);
+  box-shadow: var(--hard-sm);
+}
+.eyebrow::before { display: none !important; }
+.hero .eyebrow, .immersive .eyebrow { color: var(--ink); }
+
+/* ============================================================
+   SHIMMER — make the holographic glin unmistakable
+   ============================================================ */
+@keyframes shimmer-pan { to { background-position: 240% 50%; } }
+.shimmer-text {
+  background-image: var(--shimmer);
+  background-size: 240% 100%; background-position: 0 50%;
+  -webkit-background-clip: text; background-clip: text;
+  -webkit-text-fill-color: transparent; color: transparent;
+  animation: shimmer-pan 5s linear infinite;
+}
+html[data-shimmer="off"] .shimmer-text {
+  background: none; -webkit-text-fill-color: currentColor; color: var(--accent); animation: none;
+}
+/* hero swash + about highlight glow holographic (CSS-driven, survives lang switch) */
+.hero__title .swash {
+  background-image: var(--shimmer); background-size: 240% 100%; background-position: 0 50%;
+  -webkit-background-clip: text; background-clip: text;
+  -webkit-text-fill-color: transparent; color: transparent;
+  animation: shimmer-pan 5s linear infinite;
+}
+.about__big .hl {
+  display: inline-block;
+  background-image: var(--shimmer); background-size: 240% 100%; background-position: 0 50%;
+  -webkit-background-clip: text; background-clip: text;
+  -webkit-text-fill-color: transparent; color: transparent;
+  animation: shimmer-pan 5s linear infinite; font-weight: 800;
+}
+html[data-shimmer="off"] .hero__title .swash { background: none; -webkit-text-fill-color: currentColor; color: oklch(0.93 0.01 80); animation: none; }
+html[data-shimmer="off"] .about__big .hl { background: none; -webkit-text-fill-color: currentColor; color: var(--accent); animation: none; }
+/* shimmer marquee text */
+.marquee span { color: var(--ink); }
+
+/* progress rail thicker + glowing */
+.progress { height: 5px; box-shadow: 0 0 14px 1px color-mix(in oklab, var(--accent) 60%, transparent); }
+
+/* ============================================================
+   BUTTONS — chunky, bordered, springy press
+   ============================================================ */
+.btn {
+  font-weight: 800; font-size: 0.98rem; letter-spacing: -0.01em;
+  padding: 1.05em 1.7em; border: var(--bd-w) solid var(--ink);
+  box-shadow: var(--hard-sm);
+  transition: transform .16s cubic-bezier(.3,1.4,.5,1), box-shadow .16s ease, background .2s, color .2s;
+}
+.btn--primary { background: var(--accent); color: var(--accent-ink); }
+.btn--primary:hover { transform: translate(-2px,-2px); box-shadow: 7px 7px 0 var(--ink); }
+.btn--primary:active { transform: translate(2px,2px); box-shadow: 1px 1px 0 var(--ink); }
+.btn--ghost { background: var(--surface); color: var(--ink); }
+.btn--ghost:hover { transform: translate(-2px,-2px); box-shadow: var(--hard); border-color: var(--ink); background: var(--accent-3); }
+.btn--light { background: var(--accent); color: var(--accent-ink); }
+.btn--light:hover { transform: translate(-2px,-2px); box-shadow: var(--hard); }
+.btn--ondark { background: var(--surface); color: var(--ink); border-color: var(--ink); }
+.btn--ondark:hover { transform: translate(-2px,-2px); box-shadow: 6px 6px 0 oklch(0 0 0 / 0.5); }
+.btn--clear { background: oklch(1 0 0 / 0.08); color: #fff; border-color: #fff; box-shadow: 4px 4px 0 oklch(0 0 0 / 0.35); }
+.btn--clear:hover { transform: translate(-2px,-2px); background: oklch(1 0 0 / 0.18); }
+
+/* pills / tags / chips / facts / traits — bold bordered */
+.pill, .hero__chip, .fact, .trait, .offer__meta, .card__tag {
+  border: 2px solid var(--ink) !important; font-weight: 700;
+}
+.pill { background: var(--accent-3); color: var(--ink); box-shadow: var(--hard-sm); }
+.immersive .pill, .immersive .fact { color: #fff; border-color: #fff !important; box-shadow: 3px 3px 0 oklch(0 0 0 / 0.4); }
+.hero__chip { color: var(--ink); background: var(--surface); box-shadow: var(--hard-sm); border-color: var(--ink) !important; }
+.hero__chip .ic { color: var(--accent); }
+.trait { background: var(--surface); color: var(--ink); }
+.trait:nth-child(3n+1) { background: color-mix(in oklab, var(--accent) 22%, var(--surface)); }
+.trait:nth-child(3n+2) { background: color-mix(in oklab, var(--accent-2) 22%, var(--surface)); }
+.trait:nth-child(3n+3) { background: color-mix(in oklab, var(--accent-3) 38%, var(--surface)); }
+
+/* ============================================================
+   NAV — bolder
+   ============================================================ */
+.nav.is-stuck { border-bottom: var(--bd-w) solid var(--ink); box-shadow: 0 6px 0 -2px var(--ink); }
+.brand { font-weight: 800; }
+.brand .mark { color: var(--accent); }
+.nav__links a { font-weight: 700; }
+.nav__links a::after { height: 3px; background: var(--accent); border-radius: 2px; }
+.langtog { border: 2px solid var(--ink); font-weight: 800; }
+.langtog button.active { background: var(--accent); color: var(--accent-ink); }
+
+/* ============================================================
+   HERO — louder
+   ============================================================ */
+.hero__title { font-weight: 800; letter-spacing: -0.04em; }
+.hero__sun { color: oklch(1 0 0 / 0.22); }
+
+/* ---------- marquee band ---------- */
+.marquee-wrap { border-top: var(--bd-w) solid var(--ink); border-bottom: var(--bd-w) solid var(--ink); background: var(--accent-3); }
+html[data-theme="night"] .marquee-wrap { background: var(--surface-2); }
+.marquee { animation-duration: 32s; }
+.marquee span { font-weight: 800; letter-spacing: 0.18em; color: var(--ink); }
+.marquee span::after { content: "✦"; color: var(--accent); font-size: 0.8rem; opacity: 1; }
+
+/* ============================================================
+   ABOUT — bold numbered values
+   ============================================================ */
+.about__big { font-weight: 700; }
+.values { border-top: var(--bd-w) solid var(--ink); }
+.value { border-bottom: var(--bd-w) solid var(--ink); transition: transform .25s cubic-bezier(.3,1.2,.5,1), background .25s, padding-left .25s; padding-inline: 0.6rem; border-radius: 0; }
+.value:hover { background: color-mix(in oklab, var(--accent-3) 40%, var(--surface)); transform: translateX(8px); }
+.value__no { font-weight: 800; font-size: 1.05rem; color: var(--accent); }
+.value:hover .value__no { color: var(--ink); }
+.value__ic { color: var(--accent); }
+.about__media .ph { border: var(--bd-w) solid var(--ink); }
+.about__shot--a .ph { box-shadow: 7px 7px 0 var(--accent); }
+.about__shot--b .ph { box-shadow: 7px 7px 0 var(--accent-2); }
+.about__note { border-left: 5px solid var(--accent); font-weight: 600; }
+
+/* ============================================================
+   IMMERSIVE FEATURE — bold card on image
+   ============================================================ */
+.immersive__card {
+  background: var(--surface); color: var(--ink); border: var(--bd-w) solid var(--ink);
+  border-radius: var(--radius-lg); padding: clamp(1.6rem, 3vw, 2.6rem);
+  box-shadow: 10px 10px 0 var(--accent); max-width: 44rem;
+}
+.immersive__title, .immersive__sub, .immersive__list li, .immersive__price, .immersive__note { color: var(--ink); }
+.immersive__sub { color: var(--ink-soft); }
+.immersive .pill { background: var(--accent-3); color: var(--ink); border-color: var(--ink) !important; box-shadow: var(--hard-sm); }
+.immersive .fact { color: var(--ink); border-color: var(--ink) !important; background: var(--surface); box-shadow: 3px 3px 0 var(--ink); }
+.immersive .fact .ic { color: var(--accent); }
+.immersive .pill .ic { color: var(--ink); }
+/* btn--clear lives on a light card now → give it ink colours */
+.immersive__card .btn--clear { color: var(--ink); border-color: var(--ink); background: var(--surface); box-shadow: var(--hard-sm); }
+.immersive__card .btn--clear:hover { transform: translate(-2px,-2px); box-shadow: var(--hard); background: var(--accent-3); }
+.immersive__list .ic-plate { background: var(--accent); border: 2px solid var(--ink); }
+.immersive__list .ic-plate .ic { color: var(--accent-ink); }
+.immersive__list li:hover .ic-plate { background: var(--accent-2); transform: rotate(-8deg) scale(1.1); }
+.immersive__note { opacity: 1; color: var(--ink-soft); font-weight: 600; }
+
+/* ============================================================
+   RETREAT CARDS — fatty colour frames + springy hover
+   ============================================================ */
+.cards { gap: clamp(28px, 3vw, 44px); }
+.card {
+  background: var(--surface); border: var(--bd-w) solid var(--ink);
+  border-radius: var(--radius-lg); padding: 14px 14px 0;
+  box-shadow: var(--hard);
+  transition: transform .28s cubic-bezier(.3,1.3,.5,1), box-shadow .28s ease, background .28s;
+}
+.card:nth-child(3n+1) { box-shadow: 7px 7px 0 var(--accent); }
+.card:nth-child(3n+2) { box-shadow: 7px 7px 0 var(--accent-2); }
+.card:nth-child(3n+3) { box-shadow: 7px 7px 0 var(--accent-3); }
+.card:hover { transform: translate(-4px,-6px) rotate(-1deg); }
+.card:nth-child(3n+1):hover { box-shadow: 12px 14px 0 var(--accent); }
+.card:nth-child(3n+2):hover { box-shadow: 12px 14px 0 var(--accent-2); }
+.card:nth-child(3n+3):hover { box-shadow: 12px 14px 0 var(--accent-3); }
+.card__media .ph { border: 2px solid var(--ink); border-radius: var(--radius); }
+.card__tag { background: var(--surface); box-shadow: var(--hard-sm); top: 18px; left: 18px; }
+.card__date { border: 2px solid var(--ink); box-shadow: var(--hard-sm); width: 60px; height: 60px; }
+.card__body { padding: 1.2rem 0.5rem 1.2rem; }
+.card__title { font-weight: 800; }
+.card__loc { font-weight: 800; }
+.card__foot { border-top: var(--bd-w) solid var(--ink); }
+.card__price { font-weight: 800; }
+.card__go { font-weight: 800; }
+
+/* ============================================================
+   OFFERS — bold bordered, rotating accent on hover
+   ============================================================ */
+.offer {
+  border: var(--bd-w) solid var(--ink); border-radius: var(--radius-lg);
+  box-shadow: var(--hard); padding: 1.9rem 1.7rem;
+  transition: transform .26s cubic-bezier(.3,1.3,.5,1), box-shadow .26s ease, background .26s;
+}
+.offer:nth-child(4n+1):hover { background: color-mix(in oklab, var(--accent) 18%, var(--surface)); }
+.offer:nth-child(4n+2):hover { background: color-mix(in oklab, var(--accent-2) 18%, var(--surface)); }
+.offer:nth-child(4n+3):hover { background: color-mix(in oklab, var(--accent-3) 40%, var(--surface)); }
+.offer:nth-child(4n+4):hover { background: color-mix(in oklab, var(--blush) 30%, var(--surface)); }
+.offer:hover { transform: translate(-3px,-5px) rotate(1deg); box-shadow: 10px 12px 0 var(--ink); border-color: var(--ink); }
+.offer__ic { border: 2px solid var(--ink); background: var(--accent-3); color: var(--ink); border-radius: var(--radius-sm); }
+.offer:nth-child(4n+2) .offer__ic { background: var(--accent-2); color: var(--accent-ink); }
+.offer:nth-child(4n+1) .offer__ic { background: var(--accent); color: var(--accent-ink); }
+.offer h3 { font-weight: 800; }
+.offer__meta { display: inline-flex; align-self: flex-start; padding: 0.4em 0.8em; border-radius: 999px; background: var(--surface); box-shadow: var(--hard-sm); }
+
+/* ============================================================
+   TEAM — bordered portraits that pop
+   ============================================================ */
+.member .ph {
+  border: var(--bd-w) solid var(--ink); box-shadow: var(--hard-sm);
+  transition: transform .26s cubic-bezier(.3,1.3,.5,1), box-shadow .26s;
+}
+.member:nth-child(5n+1) .ph { box-shadow: 5px 5px 0 var(--accent); }
+.member:nth-child(5n+2) .ph { box-shadow: 5px 5px 0 var(--accent-2); }
+.member:nth-child(5n+3) .ph { box-shadow: 5px 5px 0 var(--accent-3); }
+.member:nth-child(5n+4) .ph { box-shadow: 5px 5px 0 var(--blush); }
+.member:nth-child(5n+5) .ph { box-shadow: 5px 5px 0 var(--accent); }
+.member:hover .ph { transform: translateY(-6px) rotate(-2deg); box-shadow: 9px 11px 0 var(--ink); }
+.member h4 { font-weight: 800; }
+.member .role { font-weight: 800; }
+
+/* ============================================================
+   FOOD — bold framed images
+   ============================================================ */
+.food__imgs .ph { border: var(--bd-w) solid var(--ink); box-shadow: var(--hard-sm); }
+.food__imgs .ph:first-child { box-shadow: var(--hard); }
+.food blockquote { font-weight: 800; }
+.food cite { font-weight: 800; }
+
+/* ============================================================
+   GALLERY — bold frames, playful hover
+   ============================================================ */
+.gallery .ph {
+  border: var(--bd-w) solid var(--ink); box-shadow: var(--hard-sm);
+  transition: transform .24s cubic-bezier(.3,1.4,.5,1), box-shadow .24s, z-index 0s;
+}
+.gallery .ph:hover { transform: scale(1.04) rotate(-1.5deg); box-shadow: var(--hard); z-index: 3; position: relative; }
+
+/* ============================================================
+   TESTIMONIALS — TWO-DIRECTION INFINITE MARQUEE
+   ============================================================ */
+.review-marquees { display: grid; gap: clamp(16px, 2vw, 24px); }
+.review-row {
+  overflow: hidden; -webkit-mask: linear-gradient(90deg, transparent, #000 6%, #000 94%, transparent);
+          mask: linear-gradient(90deg, transparent, #000 6%, #000 94%, transparent);
+}
+.review-track { display: flex; gap: clamp(16px, 2vw, 24px); width: max-content; will-change: transform; }
+.review-row--l .review-track { animation: review-left 46s linear infinite; }
+.review-row--r .review-track { animation: review-right 52s linear infinite; }
+.review-marquees:hover .review-track { animation-play-state: paused; }
+@keyframes review-left  { from { transform: translateX(0); } to { transform: translateX(-50%); } }
+@keyframes review-right { from { transform: translateX(-50%); } to { transform: translateX(0); } }
+@media (prefers-reduced-motion: reduce) {
+  .review-track { animation: none !important; }
+  .review-row { -webkit-mask: none; mask: none; overflow-x: auto; }
+}
+.quote {
+  flex: 0 0 clamp(300px, 80vw, 420px); width: clamp(300px, 80vw, 420px);
+  border: var(--bd-w) solid var(--ink); border-radius: var(--radius-lg);
+  padding: 1.8rem 1.7rem; background: var(--surface);
+  transition: transform .22s cubic-bezier(.3,1.3,.5,1), box-shadow .22s;
+}
+.review-track .quote:nth-child(4n+1) { box-shadow: 6px 6px 0 var(--accent); }
+.review-track .quote:nth-child(4n+2) { box-shadow: 6px 6px 0 var(--accent-2); }
+.review-track .quote:nth-child(4n+3) { box-shadow: 6px 6px 0 var(--accent-3); }
+.review-track .quote:nth-child(4n+4) { box-shadow: 6px 6px 0 var(--blush); }
+.quote:hover { transform: translateY(-5px) rotate(-1deg); box-shadow: 10px 12px 0 var(--ink); }
+.quote p { font-weight: 700; }
+.quote .stars { color: var(--accent); }
+.quote__who { margin-top: auto; align-items: center; }
+.quote__who > div:last-child { flex: 1 1 auto; min-width: 0; }
+.quote__who b { white-space: nowrap; }
+.quote__who .ph { border: 2px solid var(--ink); }
+.quote__who b { font-weight: 800; }
+
+/* ============================================================
+   FAQ — BORDERED ACCORDION, FOLDS OPEN SMOOTHLY
+   ============================================================ */
+.faq { border-top: 0; display: grid; gap: 16px; max-width: 880px; }
+.faq details {
+  border: var(--bd-w) solid var(--ink); border-radius: var(--radius);
+  background: var(--surface); box-shadow: var(--hard-sm); overflow: hidden;
+  transition: box-shadow .22s ease, transform .22s cubic-bezier(.3,1.2,.5,1), background .22s;
+}
+.faq details:hover { transform: translate(-2px,-2px); box-shadow: var(--hard); }
+.faq details.open { box-shadow: 6px 6px 0 var(--accent); background: var(--surface); }
+.faq summary {
+  padding: 1.25rem 1.4rem; font-weight: 800; font-size: clamp(1.05rem, 2vw, 1.3rem);
+  gap: 1rem; align-items: center;
+}
+.faq summary:hover { color: var(--accent); }
+.faq summary .plus {
+  width: 34px; height: 34px; border: 2px solid var(--ink); border-radius: 9px;
+  display: grid; place-content: center; background: var(--accent-3); color: var(--ink);
+  transition: transform .3s cubic-bezier(.3,1.4,.5,1), background .25s;
+}
+.faq summary .plus::before { inset: 15px 7px; height: 2.4px; }
+.faq summary .plus::after { inset: 7px 15px; width: 2.4px; }
+.faq details.open summary .plus { transform: rotate(135deg); background: var(--accent); color: var(--accent-ink); }
+/* Fold-open: collapse is owned by display:none/block toggled via the .open
+   class in JS. display isn't animatable, so it applies instantly in every
+   context — the answer's layout is never trapped behind an un-advancing
+   transition. The glide is a pure opacity + translate keyframe layered on
+   top, disabled for reduced-motion. */
+.faq__wrap { display: block; }
+.faq details:not(.open) .faq__wrap { display: none; }
+.faq__inner { overflow: hidden; }
+.faq details.open .faq__inner { animation: faqReveal .5s cubic-bezier(.22,.85,.3,1) both; }
+@keyframes faqReveal {
+  from { opacity: 0; transform: translateY(-14px); }
+  to   { opacity: 1; transform: none; }
+}
+.faq__a { padding: 0 1.4rem 1.4rem; font-weight: 500; color: var(--ink-soft); }
+@media (prefers-reduced-motion: reduce) { .faq details.open .faq__inner { animation: none; } }
+
+/* ============================================================
+   CTA — bold panel
+   ============================================================ */
+.cta {
+  border: var(--bd-w) solid var(--ink); box-shadow: var(--hard);
+  background: var(--accent-3); color: var(--ink);
+}
+html[data-theme="night"] .cta { background: var(--surface-2); }
+.cta h2 { font-weight: 800; color: var(--ink); }
+.cta .eyebrow { background: var(--accent); color: var(--accent-ink); }
+.subscribe input { border: var(--bd-w) solid var(--ink); box-shadow: var(--hard-sm); background: var(--surface); }
+.subscribe input:focus { outline: none; box-shadow: var(--hard); }
+.subscribe .btn--light { background: var(--accent); color: var(--accent-ink); border-color: var(--ink); }
+
+/* ============================================================
+   FOOTER — keep dark, add bold accents
+   ============================================================ */
+.footer h5 { font-weight: 800; }
+.socials a { border: 2px solid color-mix(in oklab, var(--page-bg) 40%, transparent); }
+.footer__bottom { border-top: 2px solid color-mix(in oklab, var(--page-bg) 24%, transparent); }
+
+/* ============================================================
+   BAND SEPARATORS — bolder
+   ============================================================ */
+.tband { opacity: 0.85; height: 30px; }
+.tband.in { opacity: 0.85; }
+
+/* ============================================================
+   GLIDING STAGGERED REVEALS — bigger, springier
+   ============================================================ */
+html.js .reveal { opacity: 0; transform: translateY(46px) scale(0.97); filter: none;
+  transition: opacity .7s cubic-bezier(.2,.7,.25,1), transform .8s cubic-bezier(.18,.9,.25,1); }
+html.js .reveal.in { opacity: 1; transform: none; }
+html.js .reveal[data-reveal="left"]  { transform: translateX(-56px) rotate(-2deg); }
+html.js .reveal[data-reveal="right"] { transform: translateX(56px) rotate(2deg); }
+html.js .reveal[data-reveal="pop"]   { transform: scale(0.78) rotate(-3deg); }
+html.js .reveal[data-reveal="rise"]  { transform: translateY(70px); }
+html.js .reveal[data-reveal].in { transform: none; }
+/* deeper auto-stagger for grouped children */
+html.js [data-stagger] > .reveal { transition-delay: calc(var(--i, 0) * .09s); }
+@media (prefers-reduced-motion: reduce) { html.js .reveal { opacity: 1; transform: none; transition: none; } }
+
+/* ============================================================
+   BOLD STAR / SPARKLE BOHEMIAN DECORATIONS
+   4-point stars + bursts that spin & pulse on a calm canvas
+   ============================================================ */
+:root {
+  --u-star4: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Cpath d='M50 0 C54 38 62 46 100 50 C62 54 54 62 50 100 C46 62 38 54 0 50 C38 46 46 38 50 0Z' fill='%23000'/%3E%3C/svg%3E");
+  --u-flower: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Cg fill='%23000'%3E%3Ccircle cx='50' cy='18' r='15'/%3E%3Ccircle cx='50' cy='82' r='15'/%3E%3Ccircle cx='18' cy='50' r='15'/%3E%3Ccircle cx='82' cy='50' r='15'/%3E%3Ccircle cx='28' cy='28' r='13'/%3E%3Ccircle cx='72' cy='28' r='13'/%3E%3Ccircle cx='28' cy='72' r='13'/%3E%3Ccircle cx='72' cy='72' r='13'/%3E%3C/g%3E%3Ccircle cx='50' cy='50' r='15' fill='%23fff'/%3E%3C/svg%3E");
+  --u-gear: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Cg fill='%23000'%3E%3Ccircle cx='50' cy='50' r='30'/%3E%3Cg%3E%3Crect x='44' y='2' width='12' height='20'/%3E%3Crect x='44' y='2' width='12' height='20' transform='rotate(45 50 50)'/%3E%3Crect x='44' y='2' width='12' height='20' transform='rotate(90 50 50)'/%3E%3Crect x='44' y='2' width='12' height='20' transform='rotate(135 50 50)'/%3E%3C/g%3E%3C/g%3E%3Ccircle cx='50' cy='50' r='12' fill='%23fff'/%3E%3C/svg%3E");
+}
+.star-deco {
+  position: absolute; z-index: 0; pointer-events: none; display: block;
+  width: var(--sz, 56px); height: var(--sz, 56px);
+  background-color: var(--c, var(--accent)); opacity: var(--op, 0.9);
+  will-change: transform;
+}
+.star-deco.s-star4  { -webkit-mask: var(--u-star4)  center/contain no-repeat; mask: var(--u-star4)  center/contain no-repeat; }
+.star-deco.s-flower { -webkit-mask: var(--u-flower) center/contain no-repeat; mask: var(--u-flower) center/contain no-repeat; }
+.star-deco.s-gear   { -webkit-mask: var(--u-gear)   center/contain no-repeat; mask: var(--u-gear)   center/contain no-repeat; }
+.star-deco.s-shimmer { background-color: transparent; background-image: var(--shimmer); background-size: 240% 100%; animation: shimmer-pan 5s linear infinite; }
+html[data-shimmer="off"] .star-deco.s-shimmer { background-image: none; background-color: var(--accent); animation: none; }
+@keyframes star-spin { to { transform: rotate(360deg); } }
+@keyframes star-spin-rev { to { transform: rotate(-360deg); } }
+@keyframes star-pulse { 0%,100% { transform: scale(1) rotate(0deg); } 50% { transform: scale(1.22) rotate(18deg); } }
+@keyframes star-bob { 0%,100% { transform: translateY(0) rotate(-8deg); } 50% { transform: translateY(-16px) rotate(8deg); } }
+.star-deco.spin   { animation: star-spin 18s linear infinite; }
+.star-deco.spin-r { animation: star-spin-rev 24s linear infinite; }
+.star-deco.pulse  { animation: star-pulse 4.5s ease-in-out infinite; }
+.star-deco.bob    { animation: star-bob 7s ease-in-out infinite; }
+html[data-deco="off"] .star-deco { display: none; }
+@media (prefers-reduced-motion: reduce) { .star-deco { animation: none !important; } }
+@media (max-width: 720px) { .star-deco[data-mobile="hide"] { display: none; } }
+
+/* keep section content above star decos */
+.section > .wrap, .immersive__inner, .hero__inner { position: relative; z-index: 2; }
+
+/* ============================================================
+   SECTION HEADING — bold drawn underline accent
+   ============================================================ */
+.section__head .section__title { display: inline-block; }
+.head-motif { color: var(--accent); }
+
+/* ============================================================
+   RESPONSIVE bold tweaks
+   ============================================================ */
+@media (max-width: 720px) {
+  :root { --bd-w: 2px; --hard: 4px 4px 0 var(--ink); --hard-sm: 3px 3px 0 var(--ink); }
+  .card:hover, .offer:hover, .member:hover .ph, .quote:hover { transform: none; }
+}

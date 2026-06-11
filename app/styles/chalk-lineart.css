@@ -1,0 +1,76 @@
+/* ============================================================
+   Yoga, Zen & Tonic — LINE-ART + ICON MOTION  (v3)
+   Loads after bold-v3.css. Adds more bohemian line-art motifs
+   and ambient icon animation.
+   ============================================================ */
+
+/* ============================================================
+   MORE BOHEMIAN LINE ART
+   .deco-line — drawn line-art motifs tucked in section corners.
+   They animate-draw via tribal-deco.js (.draw) on scroll-in.
+   ============================================================ */
+.deco-line {
+  position: absolute; z-index: 0; pointer-events: none;
+  color: var(--accent); opacity: 0.55;
+}
+.deco-line--2 { color: var(--accent-2); }
+.deco-line--3 { color: var(--accent-3); opacity: 0.8; }
+.deco-line--soft { opacity: 0.32; }
+html[data-deco="off"] .deco-line { display: none; }
+@media (max-width: 720px) {
+  .deco-line[data-mobile="hide"] { display: none; }
+  .deco-line { opacity: 0.4; }
+}
+
+/* extra tribal band variants already defined in base; add a dotted rule motif */
+.boho-rule {
+  display: flex; align-items: center; justify-content: center; gap: 1rem;
+  color: var(--accent); padding-block: clamp(8px, 2vw, 20px);
+}
+.boho-rule svg { width: clamp(220px, 40vw, 460px); height: 34px; }
+html[data-deco="off"] .boho-rule { display: none; }
+
+/* ============================================================
+   3. AMBIENT ICON ANIMATION
+   Idle motion on the decorative icon *plates* (so the inner .ic
+   keeps its hover spin un-conflicted), plus twinkling sparkles.
+   ============================================================ */
+@keyframes ic-wobble { 0%, 100% { transform: rotate(-7deg); } 50% { transform: rotate(7deg); } }
+@keyframes ic-bob    { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-5px); } }
+@keyframes ic-pulse  { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.08) rotate(4deg); } }
+@keyframes ic-spin   { to { transform: rotate(360deg); } }
+@keyframes twinkle   { 0%, 100% { opacity: 0.45; transform: scale(0.78); } 50% { opacity: 1; transform: scale(1.12); } }
+
+.offer__ic   { animation: ic-wobble 5.5s ease-in-out infinite; transform-origin: 50% 60%; }
+.offer:nth-child(2n) .offer__ic { animation-name: ic-bob; animation-duration: 4.5s; }
+.value__ic   { animation: ic-bob 4.8s ease-in-out infinite; }
+.value:nth-child(2n) .value__ic { animation-duration: 6s; animation-delay: .6s; }
+.ic-plate    { animation: ic-pulse 5s ease-in-out infinite; }
+.immersive__list li:nth-child(2) .ic-plate { animation-delay: .5s; }
+.immersive__list li:nth-child(3) .ic-plate { animation-delay: 1s; }
+.head-motif  { animation: ic-bob 6s ease-in-out infinite; }
+.cta__motif  { animation: ic-spin 26s linear infinite; transform-origin: 50% 50%; }
+.offer:hover .offer__ic, .value:hover .value__ic, .immersive__list li:hover .ic-plate { animation-play-state: paused; }
+
+/* sparkle stars twinkle (rating sparkles + hero chip spark) */
+.stars .star { transform-origin: center; animation: twinkle 2.8s ease-in-out infinite; }
+.stars .star:nth-child(2) { animation-delay: .25s; }
+.stars .star:nth-child(3) { animation-delay: .5s; }
+.stars .star:nth-child(4) { animation-delay: .75s; }
+.stars .star:nth-child(5) { animation-delay: 1s; }
+
+/* nav logo mark gently breathes */
+@keyframes mark-beat { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.08); } }
+.brand .mark { animation: mark-beat 4.5s ease-in-out infinite; transform-origin: 50% 60%; }
+
+/* offer icon idle should win over the inner .ic hover; keep inner spin */
+.offer:hover .offer__ic .ic, .value:hover .value__ic .ic { animation: ic-spin 1.2s ease; }
+
+html[data-deco="off"] .offer__ic, html[data-deco="off"] .value__ic, html[data-deco="off"] .ic-plate,
+html[data-deco="off"] .head-motif, html[data-deco="off"] .stars .star, html[data-deco="off"] .brand .mark {
+  animation: none !important;
+}
+@media (prefers-reduced-motion: reduce) {
+  .offer__ic, .value__ic, .ic-plate, .head-motif, .cta__motif,
+  .stars .star, .brand .mark { animation: none !important; }
+}
