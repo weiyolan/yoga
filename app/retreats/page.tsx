@@ -1,4 +1,10 @@
-import StubPage from "@/components/StubPage";
+import type { CSSProperties } from "react";
+import SvgSprite from "@/components/SvgSprite";
+import Nav from "@/components/Nav";
+import Footer from "@/components/Footer";
+import RetreatCard from "@/components/RetreatCard";
+import { TribalDivider } from "@/components/Deco";
+import { retreats } from "@/data/retreats";
 
 export const metadata = {
   title: "Retreats — Yoga, Zen & Tonic",
@@ -6,13 +12,56 @@ export const metadata = {
 
 export default function RetreatsPage() {
   return (
-    <StubPage
-      eyebrowNl="alle retreats"
-      eyebrowEn="all retreats"
-      titleNl="De volledige catalogus komt eraan"
-      titleEn="The full catalogue is coming"
-      bodyNl="We bouwen een filterbare overzichtspagina met alle komende en voorbije retreats — op locatie, groepsgrootte, extra's, prijs en datum. Binnenkort hier."
-      bodyEn="We're building a filterable catalogue of every upcoming and past retreat — by location, group size, extras, price and date. Here soon."
-    />
+    <>
+      <div className="progress" id="prog" aria-hidden="true"></div>
+      <SvgSprite />
+      <Nav />
+      <main id="top">
+        <section className="section" data-screen-label="Alle retreats">
+          <span
+            className="orbit m-daisy spin"
+            data-drift="0.2"
+            data-mobile="hide"
+            style={{ "--sz": "72px", "--op": ".12", top: "7%", right: "3%" } as CSSProperties}
+            aria-hidden="true"
+          ></span>
+          <span
+            className="star-deco s-flower spin s-shimmer"
+            data-mobile="hide"
+            style={{ "--sz": "58px", "--op": ".85", bottom: "8%", left: "4%" } as CSSProperties}
+            aria-hidden="true"
+          ></span>
+          <div className="wrap">
+            <div className="section__head reveal">
+              <span className="eyebrow" data-nl="alle retreats" data-en="all retreats">
+                alle retreats
+              </span>
+              <h1 className="section__title" data-nl="Vind jouw volgende retreat" data-en="Find your next retreat">
+                Vind jouw volgende retreat
+              </h1>
+              <p
+                className="section__sub"
+                data-nl="Van freediven aan de Rode Zee tot hiken in de Eifel en spa in de Ardennen. Kleine groepen, warme mensen en telkens iets unieks. Kies de jouwe en reserveer je plek."
+                data-en="From freediving in the Red Sea to hiking in the Eifel and spa in the Ardennes. Small groups, warm people and something unique every time. Pick yours and reserve your spot."
+              >
+                Van freediven aan de Rode Zee tot hiken in de Eifel en spa in de Ardennen. Kleine groepen, warme mensen en telkens iets unieks. Kies de jouwe en reserveer je plek.
+              </p>
+            </div>
+            <div className="cards">
+              {retreats.map((retreat, i) => (
+                <RetreatCard key={retreat.slug} retreat={retreat} delay={i} />
+              ))}
+            </div>
+            <div className="retreats__foot reveal">
+              <a href="/#aanmelden" className="btn btn--ghost" data-nl="Vragen? Neem contact op →" data-en="Questions? Get in touch →">
+                Vragen? Neem contact op →
+              </a>
+            </div>
+          </div>
+        </section>
+      </main>
+      <TribalDivider />
+      <Footer />
+    </>
   );
 }
