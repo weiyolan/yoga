@@ -1,8 +1,17 @@
 import type { CSSProperties } from "react";
+import { LaFig, LaSprig } from "@/components/LineArt";
 
 export default function Food() {
   return (
     <section className="section section--alt" data-screen-label="Food">
+      <LaFig
+        className="la-fig--accent"
+        drift={0.12}
+        mobileHide
+        style={{ "--sz": "120px", "--op": ".5", bottom: "8%", left: "2.5%" } as CSSProperties}
+      >
+        <LaSprig />
+      </LaFig>
       <svg
         className="deco-line draw deco-line--3"
         data-mobile="hide"

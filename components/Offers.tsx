@@ -1,8 +1,17 @@
 import type { CSSProperties } from "react";
+import { LaFig, LaLotus } from "@/components/LineArt";
 
 export default function Offers() {
   return (
     <section className="section section--alt" id="aanbod" data-screen-label="Aanbod">
+      <LaFig
+        className="la-fig--accent"
+        drift={0.12}
+        mobileHide
+        style={{ "--sz": "210px", "--op": ".5", top: "6%", left: "3%" } as CSSProperties}
+      >
+        <LaLotus />
+      </LaFig>
       <svg
         className="deco-float deco-float--breathe draw"
         style={{ top: "clamp(20px,5vw,72px)", right: "clamp(16px,4vw,60px)" }}

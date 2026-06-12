@@ -1,0 +1,505 @@
+/* ============================================================
+   Yoga, Zen & Tonic — DESIGN MODES + "INK & LINE" LAYER (v1)
+   Loads last. Owns the live design switch:
+
+     html[data-design="bold"]   → the punchy bordered shadowbox
+                                  theme (bold-v3.css, untouched)
+     html[data-design="lines"]  → a clean, airy bohemian design
+                                  that puts intricate 2D SVG line
+                                  drawings forward: paper canvas,
+                                  hairlines, arch shapes, drawn
+                                  motifs that wipe themselves on.
+
+   Also owns tokens both designs share:
+     html[data-space]  → breathing room scale  (--sp)
+     html[data-ink]    → line-art stroke weight (--la-sw)
+     html[data-paper]  → subtle paper grain (lines design)
+   ============================================================ */
+
+/* ---------- BREATHING ROOM (both designs) ---------- */
+:root { --sp: 1; }
+html[data-space="cozy"] { --sp: 0.8; }
+html[data-space="airy"] { --sp: 1; }
+html[data-space="vast"] { --sp: 1.35; }
+
+.section { padding-block: calc(clamp(76px, 11vw, 168px) * var(--sp)); }
+.section--tight { padding-block: calc(clamp(56px, 8vw, 112px) * var(--sp)); }
+.section__head { margin-bottom: calc(clamp(40px, 6vw, 76px) * var(--sp)); }
+.hero__inner { padding-block: calc(clamp(48px, 8vw, 104px) * var(--sp)); }
+
+/* ---------- LINE-ART PLUMBING ---------- */
+/* figures & lines-only elements stay out of the bold design */
+.la-fig, .la-only { display: none; }
+html[data-design="lines"] .la-only { display: block; }
+html[data-design="lines"] .la-fig { display: block; }
+html[data-design="lines"][data-deco="off"] .la-fig,
+html[data-design="lines"][data-deco="off"] .la-sep,
+html[data-design="lines"][data-deco="off"] .la-hero-scene { display: none; }
+
+.la-fig {
+  position: absolute; z-index: 0; pointer-events: none;
+  color: var(--ink); opacity: var(--op, 0.55);
+  width: var(--sz, 120px); height: auto; will-change: translate;
+}
+.la-fig svg { width: 100%; height: auto; display: block; }
+.la-fig--accent { color: var(--accent); }
+.la-fig--accent2 { color: var(--accent-2); }
+.la-fig--soft { opacity: 0.3; }
+
+/* stroke weight follows the panel's ink control */
+html { --la-sw: 1.6; }
+html[data-ink="fine"] { --la-sw: 1.15; }
+html[data-ink="medium"] { --la-sw: 1.6; }
+html[data-ink="bold"] { --la-sw: 2.3; }
+.la-art { stroke-width: var(--la-sw); }
+.la-art :where(path, line, polyline, polygon, circle, rect, ellipse) {
+  vector-effect: non-scaling-stroke;
+}
+.la-art .la-thin { stroke-width: calc(var(--la-sw) * 0.72); }
+/* dotted/dashed strokes skipped by the draw script fade in instead */
+.la-art.draw [data-nodraw] { opacity: 0; transition: opacity 1s ease 0.9s; }
+.la-art.draw.drawn [data-nodraw] { opacity: 1; }
+
+@media (max-width: 720px) {
+  html[data-design="lines"] .la-fig[data-mobile="hide"] { display: none; }
+  .la-fig { opacity: calc(var(--op, 0.55) * 0.7); }
+}
+
+/* ============================================================
+   ============  INK & LINE DESIGN  (data-design="lines") ======
+   ============================================================ */
+
+/* ---------- tokens: soften the bold machinery ---------- */
+html[data-design="lines"] {
+  /* hard offset shadows melt into soft paper shadows */
+  --hard: 0 24px 50px -32px var(--shadow);
+  --hard-sm: 0 14px 34px -24px var(--shadow);
+  --hard-accent: 0 24px 50px -32px var(--shadow);
+  --bd-w: 1.25px;
+  --radius: 18px;
+  --radius-sm: 12px;
+  --radius-lg: 30px;
+  /* extra air on top of the user's spacing choice */
+  --display-tracking: -0.018em;
+}
+html[data-design="lines"] .section { padding-block: calc(clamp(88px, 12.5vw, 196px) * var(--sp)); }
+html[data-design="lines"][data-font="grotesk"] { --display-weight: 600; }
+html[data-design="lines"][data-font="space"] { --display-weight: 500; }
+html[data-design="lines"][data-font="uniform"] { --display-weight: 600; }
+
+html[data-design="lines"] body { line-height: 1.7; }
+
+/* paper grain (toggle) */
+html[data-design="lines"][data-paper="on"] body::before {
+  content: ""; position: fixed; inset: 0; z-index: 2147483000;
+  pointer-events: none; opacity: 0.05; mix-blend-mode: multiply;
+  background-image:
+    radial-gradient(var(--ink) 0.5px, transparent 0.6px),
+    radial-gradient(var(--ink) 0.4px, transparent 0.5px);
+  background-size: 9px 11px, 13px 17px;
+  background-position: 0 0, 5px 7px;
+}
+html[data-design="lines"][data-paper="on"][data-theme="night"] body::before {
+  mix-blend-mode: screen; opacity: 0.04;
+}
+
+/* hide the bold-mode decoration systems */
+html[data-design="lines"] .orbit,
+html[data-design="lines"] .star-deco,
+html[data-design="lines"] .band-sep .tband { display: none; }
+html[data-design="lines"] .band-sep { padding-block: 0; }
+/* the drawn deco that already exists fits the ink look — keep & lift it */
+html[data-design="lines"] .deco-line { opacity: 0.5; }
+html[data-design="lines"] .deco-watermark { opacity: 0.07; }
+
+/* drawn moon-phase separators replace the masked bands */
+.la-sep { justify-content: center; padding: calc(clamp(20px, 4vw, 52px) * var(--sp)) var(--pad); color: var(--accent); }
+html[data-design="lines"] .la-sep.la-only { display: flex; }
+.la-sep svg { width: clamp(280px, 38vw, 480px); height: auto; opacity: 0.85; }
+
+/* ---------- typography & headings ---------- */
+html[data-design="lines"] .section__title { font-size: clamp(2.2rem, 5vw, 4.1rem); line-height: 1.05; letter-spacing: var(--display-tracking); }
+html[data-design="lines"] .section__sub { font-size: 1.06rem; font-weight: 400; }
+/* hand-drawn wavy underline beneath section titles */
+html[data-design="lines"] .section__head .section__title::after {
+  content: ""; display: block; width: 92px; height: 11px; margin-top: 16px;
+  background: var(--accent); opacity: 0.9;
+  -webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 92 11'%3E%3Cpath d='M2 7 Q12 1 23 6 T44 6 T66 6 T90 4' fill='none' stroke='black' stroke-width='2.2' stroke-linecap='round'/%3E%3C/svg%3E") left center/contain no-repeat;
+          mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 92 11'%3E%3Cpath d='M2 7 Q12 1 23 6 T44 6 T66 6 T90 4' fill='none' stroke='black' stroke-width='2.2' stroke-linecap='round'/%3E%3C/svg%3E") left center/contain no-repeat;
+}
+html[data-design="lines"] .section__head.center .section__title::after { margin-inline: auto; }
+
+/* eyebrow back to quiet tracked caps with the drawn tick */
+html[data-design="lines"] .eyebrow {
+  background: transparent; color: var(--accent);
+  border: 0; box-shadow: none; padding: 0; border-radius: 0;
+  font-weight: 600; letter-spacing: 0.26em; font-size: 0.72rem;
+}
+html[data-design="lines"] .eyebrow::before { display: inline-block !important; }
+html[data-design="lines"] .section__head.center .eyebrow::before,
+html[data-design="lines"] .hero .eyebrow::before,
+html[data-design="lines"] .immersive .eyebrow::before { display: none !important; }
+html[data-design="lines"] .hero .eyebrow, html[data-design="lines"] .immersive .eyebrow { color: var(--accent); }
+
+/* shimmer text becomes plain warm accent (clean look) */
+html[data-design="lines"] .shimmer-text,
+html[data-design="lines"] .about__big .hl,
+html[data-design="lines"] .hero__title .swash {
+  background: none; -webkit-text-fill-color: currentColor; color: var(--accent); animation: none;
+}
+html[data-design="lines"] .about__big .hl { font-weight: 650; font-style: italic; }
+
+/* progress rail: a quiet ink line */
+html[data-design="lines"] .progress {
+  height: 2.5px; background-image: none; background-color: var(--accent);
+  animation: none; box-shadow: none;
+}
+
+/* ---------- buttons: ink outlines, calm spring ---------- */
+html[data-design="lines"] .btn {
+  font-weight: 600; font-size: 0.93rem; letter-spacing: 0.01em;
+  border: 1.25px solid var(--ink); box-shadow: none;
+  background: transparent; color: var(--ink);
+  transition: transform 0.25s cubic-bezier(0.2, 0.8, 0.3, 1), box-shadow 0.25s ease, background 0.25s, color 0.25s, border-color 0.25s;
+}
+html[data-design="lines"] .btn:hover { transform: translateY(-2px); }
+html[data-design="lines"] .btn:active { transform: translateY(0); box-shadow: none; }
+html[data-design="lines"] .btn--primary { background: var(--ink); color: var(--page-bg); }
+html[data-design="lines"] .btn--primary:hover {
+  background: var(--accent); border-color: var(--accent); color: var(--accent-ink);
+  box-shadow: 0 18px 34px -20px var(--accent);
+}
+html[data-design="lines"] .btn--ghost { background: transparent; border-color: var(--line); }
+html[data-design="lines"] .btn--ghost:hover { border-color: var(--ink); background: var(--surface); box-shadow: var(--hard-sm); }
+html[data-design="lines"] .btn--light { background: var(--ink); color: var(--page-bg); border-color: var(--ink); }
+html[data-design="lines"] .btn--light:hover { background: var(--accent); border-color: var(--accent); color: var(--accent-ink); box-shadow: 0 18px 34px -20px var(--accent); }
+html[data-design="lines"] .btn--ondark { background: var(--ink); color: var(--page-bg); border-color: var(--ink); box-shadow: none; }
+html[data-design="lines"] .btn--ondark:hover { background: var(--accent); border-color: var(--accent); color: var(--accent-ink); }
+html[data-design="lines"] .btn--clear { background: transparent; color: var(--ink); border-color: var(--ink); box-shadow: none; }
+html[data-design="lines"] .btn--clear:hover { background: var(--ink); color: var(--page-bg); }
+
+/* pills / chips / facts / traits → hairline ink pen strokes */
+html[data-design="lines"] .pill,
+html[data-design="lines"] .hero__chip,
+html[data-design="lines"] .fact,
+html[data-design="lines"] .trait,
+html[data-design="lines"] .card__tag {
+  border: 1px solid var(--line) !important; font-weight: 500;
+  background: transparent; box-shadow: none; color: var(--ink-soft);
+}
+html[data-design="lines"] .pill { color: var(--accent); border-color: color-mix(in oklab, var(--accent) 40%, transparent) !important; }
+html[data-design="lines"] .trait { background: transparent; color: var(--ink-soft); }
+
+/* ---------- nav ---------- */
+html[data-design="lines"] .nav.is-stuck { border-bottom: 1px solid var(--line); box-shadow: 0 14px 34px -28px var(--shadow); }
+html[data-design="lines"] .brand { font-weight: 600; }
+html[data-design="lines"] .nav__links a { font-weight: 500; }
+html[data-design="lines"] .nav__links a::after { height: 1.5px; background: var(--accent); border-radius: 0; }
+html[data-design="lines"] .langtog { border: 1px solid var(--line); font-weight: 600; }
+html[data-design="lines"] .langtog button.active { background: var(--ink); color: var(--page-bg); }
+
+/* ============================================================
+   HERO — the photo gives way to a huge drawn scene on paper
+   ============================================================ */
+html[data-design="lines"] .hero {
+  background: var(--page-bg);
+  min-height: min(94vh, 880px); align-items: center;
+}
+html[data-design="lines"] .hero__media,
+html[data-design="lines"] .hero__scrim,
+html[data-design="lines"] .hero__sun { display: none; }
+
+.la-hero-scene {
+  position: absolute; z-index: 0; pointer-events: none;
+  right: clamp(-40px, 2vw, 90px); top: 50%; translate: 0 -50%;
+  width: min(46vw, 700px); color: var(--ink); opacity: 0.85;
+  will-change: transform;
+}
+html[data-design="lines"] .la-only.la-hero-scene { display: block; }
+.la-hero-scene .la-accent { color: var(--accent); }
+@media (max-width: 980px) {
+  .la-hero-scene { width: 58vw; opacity: 0.26; right: -10vw; }
+}
+@media (max-width: 640px) {
+  .la-hero-scene { width: 96vw; right: -28vw; opacity: 0.16; }
+}
+
+html[data-design="lines"] .hero__copy { color: var(--ink); }
+html[data-design="lines"] .hero__title {
+  color: var(--ink); font-weight: var(--display-weight);
+  letter-spacing: var(--display-tracking);
+  font-size: clamp(2.8rem, 7.6vw, 6rem);
+}
+html[data-design="lines"] .hero__title .swash { color: var(--accent); letter-spacing: 0.3em; font-weight: 600; }
+html[data-design="lines"] .hero__lede { color: var(--ink-soft); font-weight: 400; }
+html[data-design="lines"] .hero__copy .eyebrow { color: var(--accent); }
+html[data-design="lines"] .hero__chip { color: var(--ink-soft); backdrop-filter: none; }
+html[data-design="lines"] .hero__chip .ic { color: var(--accent); }
+html[data-design="lines"] .hero__side { color: var(--ink-soft); }
+
+/* ---------- marquee: quiet ink ribbon ---------- */
+html[data-design="lines"] .marquee-wrap {
+  background: transparent;
+  border-top: 1px solid var(--line); border-bottom: 1px solid var(--line);
+}
+html[data-design="lines"] .marquee { animation-duration: 56s; }
+html[data-design="lines"] .marquee span { font-weight: 500; letter-spacing: 0.3em; color: var(--ink-soft); }
+html[data-design="lines"] .marquee span::after { background: var(--accent); opacity: 0.7; width: 8px; height: 8px; }
+
+/* ============================================================
+   ABOUT — arch photos, hairline value list
+   ============================================================ */
+html[data-design="lines"] .about__big { font-weight: 500; }
+html[data-design="lines"] .values { border-top: 1px solid var(--line); }
+html[data-design="lines"] .value {
+  border-bottom: 1px solid var(--line); padding-inline: 0.2rem;
+  transition: padding-left 0.3s cubic-bezier(0.2, 0.8, 0.3, 1), background 0.3s;
+}
+html[data-design="lines"] .value:hover { background: transparent; transform: none; padding-left: 1.1rem; }
+html[data-design="lines"] .value__no { font-weight: 600; font-size: 0.9rem; color: var(--accent); }
+html[data-design="lines"] .value:hover .value__no { color: var(--accent); }
+html[data-design="lines"] .about__media .ph { border: 1px solid var(--line); }
+html[data-design="lines"] .about__shot--a .ph {
+  box-shadow: var(--hard); border-radius: 999px 999px var(--radius) var(--radius);
+}
+html[data-design="lines"] .about__shot--b .ph {
+  box-shadow: var(--hard-sm); border-radius: var(--radius);
+}
+html[data-design="lines"] .about__note { border-left: 1.5px solid var(--accent); font-weight: 400; font-style: italic; }
+
+/* ============================================================
+   IMMERSIVE — photo stays (parallax!), card becomes washed paper
+   ============================================================ */
+html[data-design="lines"] .immersive__card {
+  background: color-mix(in oklab, var(--page-bg) 88%, transparent);
+  -webkit-backdrop-filter: blur(14px) saturate(120%); backdrop-filter: blur(14px) saturate(120%);
+  border: 1px solid color-mix(in oklab, var(--ink) 14%, transparent);
+  box-shadow: 0 40px 80px -48px oklch(0 0 0 / 0.55);
+  border-radius: var(--radius-lg) var(--radius-lg) var(--radius) var(--radius);
+  padding: clamp(1.8rem, 3.4vw, 3rem);
+}
+html[data-design="lines"] .immersive .pill { background: transparent; color: var(--accent); box-shadow: none; }
+html[data-design="lines"] .immersive .fact {
+  color: var(--ink); background: transparent; box-shadow: none;
+  border: 1px solid var(--line) !important; font-weight: 500;
+}
+html[data-design="lines"] .immersive .fact .ic { color: var(--accent); }
+html[data-design="lines"] .immersive__list .ic-plate {
+  background: transparent; border: 1px solid var(--line); animation: none;
+}
+html[data-design="lines"] .immersive__list .ic-plate .ic { color: var(--accent); }
+html[data-design="lines"] .immersive__list li:hover .ic-plate { background: var(--surface-2); border-color: var(--ink-soft); transform: scale(1.05); }
+html[data-design="lines"] .immersive__note { font-weight: 400; }
+html[data-design="lines"] .immersive__card .btn--clear { color: var(--ink); border-color: var(--ink); background: transparent; box-shadow: none; }
+html[data-design="lines"] .immersive__card .btn--clear:hover { background: var(--ink); color: var(--page-bg); box-shadow: none; }
+
+/* ============================================================
+   RETREAT CARDS — open, airy, arch-window media
+   ============================================================ */
+html[data-design="lines"] .cards { gap: clamp(36px, 4.4vw, 64px); }
+html[data-design="lines"] .card {
+  background: transparent; border: 0; border-radius: 0; padding: 0;
+  box-shadow: none !important;
+  transition: transform 0.45s cubic-bezier(0.2, 0.8, 0.25, 1);
+}
+html[data-design="lines"] .card:hover { transform: translateY(-8px) rotate(0deg); }
+html[data-design="lines"] .card__media .ph {
+  border: 1px solid var(--line);
+  border-radius: 999px 999px var(--radius) var(--radius);
+  transition: box-shadow 0.45s ease, border-radius 0.45s ease;
+}
+html[data-design="lines"] .card:hover .card__media .ph { box-shadow: var(--hard); }
+/* drawn sprig replaces the tribal corner bracket on hover */
+html[data-design="lines"] .card__media::after,
+html[data-design="lines"] .rcard__media::after {
+  top: auto; bottom: 12px; right: 14px; width: 30px; height: 30px;
+  -webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Cg fill='none' stroke='black' stroke-width='2' stroke-linecap='round'%3E%3Cpath d='M6 28 C10 18 16 10 28 4'/%3E%3Cpath d='M10 21 q-6 -2 -7 -8 q7 0 9 6'/%3E%3Cpath d='M15 14 q-2 -7 3 -11 q4 6 -1 11'/%3E%3Cpath d='M13 17.5 q7 -3 11 1 q-6 5 -11 1'/%3E%3C/g%3E%3C/svg%3E") center/contain no-repeat;
+          mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Cg fill='none' stroke='black' stroke-width='2' stroke-linecap='round'%3E%3Cpath d='M6 28 C10 18 16 10 28 4'/%3E%3Cpath d='M10 21 q-6 -2 -7 -8 q7 0 9 6'/%3E%3Cpath d='M15 14 q-2 -7 3 -11 q4 6 -1 11'/%3E%3Cpath d='M13 17.5 q7 -3 11 1 q-6 5 -11 1'/%3E%3C/g%3E%3C/svg%3E") center/contain no-repeat;
+}
+html[data-design="lines"] .card__tag { background: color-mix(in oklab, var(--page-bg) 86%, transparent); backdrop-filter: blur(6px); color: var(--ink); top: 16px; left: 16px; }
+html[data-design="lines"] .card__date {
+  background: var(--page-bg); color: var(--ink);
+  border: 1.25px solid var(--ink); box-shadow: none;
+  width: 58px; height: 58px; bottom: 12px; left: 14px; right: auto;
+}
+html[data-design="lines"] .card__body { padding: 1.5rem 0.15rem 0; }
+html[data-design="lines"] .card__title { font-weight: var(--display-weight); }
+html[data-design="lines"] .card__loc { font-weight: 600; letter-spacing: 0.18em; }
+html[data-design="lines"] .card__foot { border-top: 1px dashed color-mix(in oklab, var(--ink) 26%, transparent); }
+html[data-design="lines"] .card__price { font-weight: 600; }
+html[data-design="lines"] .card__go { font-weight: 600; }
+
+/* ============================================================
+   OFFERS — boxes dissolve into an editorial rule grid
+   ============================================================ */
+html[data-design="lines"] .section--alt { background: transparent; }
+html[data-design="lines"] .offers { gap: clamp(28px, 3.4vw, 56px); }
+html[data-design="lines"] .offer {
+  background: transparent; border: 0; border-radius: 0; box-shadow: none;
+  border-top: 1.25px solid var(--ink); padding: 1.7rem 0.1rem 0.4rem;
+  transition: transform 0.4s cubic-bezier(0.2, 0.8, 0.25, 1), border-color 0.3s;
+}
+html[data-design="lines"] .offer:hover {
+  background: transparent; transform: translateY(-7px); box-shadow: none;
+  border-top-color: var(--accent);
+}
+html[data-design="lines"] .offer__ic {
+  width: auto; height: auto; border: 0; background: transparent !important;
+  color: var(--accent) !important; border-radius: 0; margin-bottom: 0.3rem;
+  animation: none !important;
+}
+html[data-design="lines"] .offer__ic svg { width: 34px; height: 34px; }
+html[data-design="lines"] .offer h3 { font-weight: var(--display-weight); }
+html[data-design="lines"] .offer__meta {
+  background: transparent; border: 0 !important; box-shadow: none;
+  padding: 0; border-radius: 0; color: var(--accent); font-weight: 600;
+  letter-spacing: 0.08em; text-transform: uppercase; font-size: 0.74rem;
+}
+
+/* ============================================================
+   TEAM — arch portraits in thin frames
+   ============================================================ */
+html[data-design="lines"] .member .ph {
+  border: 1px solid var(--line); box-shadow: none;
+  border-radius: 999px 999px var(--radius) var(--radius);
+  transition: transform 0.4s cubic-bezier(0.2, 0.8, 0.25, 1), box-shadow 0.4s ease;
+}
+html[data-design="lines"] .member:hover .ph { transform: translateY(-7px); box-shadow: var(--hard); }
+html[data-design="lines"] .member h4 { font-weight: var(--display-weight); }
+html[data-design="lines"] .member .role { font-weight: 600; }
+
+/* ============================================================
+   FOOD — organic shapes, italic serif-feel quote
+   ============================================================ */
+html[data-design="lines"] .food__imgs .ph { border: 1px solid var(--line); box-shadow: none; }
+html[data-design="lines"] .food__imgs .ph:first-child { box-shadow: var(--hard-sm); border-radius: 999px 999px var(--radius) var(--radius); }
+html[data-design="lines"] .food__imgs .ph:nth-child(2) { border-radius: 50%; }
+html[data-design="lines"] .food__imgs .ph:nth-child(3) { border-radius: var(--radius) 50% var(--radius) 50%; }
+html[data-design="lines"] .food blockquote { font-weight: 500; font-style: italic; letter-spacing: -0.01em; }
+html[data-design="lines"] .food cite { font-weight: 600; }
+
+/* ============================================================
+   GALLERY — mixed organic frames
+   ============================================================ */
+html[data-design="lines"] .gallery { gap: 20px; }
+html[data-design="lines"] .gallery .ph {
+  border: 1px solid var(--line); box-shadow: none;
+  transition: transform 0.4s cubic-bezier(0.2, 0.8, 0.25, 1), box-shadow 0.4s ease;
+}
+html[data-design="lines"] .gallery .ph:hover { transform: translateY(-5px) scale(1.015) rotate(0); box-shadow: var(--hard); }
+html[data-design="lines"] .gallery .g1 { border-radius: 999px 999px var(--radius) var(--radius); }
+html[data-design="lines"] .gallery .g4 { border-radius: 50%/38%; }
+html[data-design="lines"] .gallery .g5 { border-radius: var(--radius) var(--radius) 999px 999px; }
+html[data-design="lines"] .gallery .g6 { border-radius: var(--radius) 999px var(--radius) 999px; }
+
+/* ============================================================
+   TESTIMONIALS — clean cards on the moving marquee
+   ============================================================ */
+html[data-design="lines"] .quote {
+  position: relative; border: 1px solid var(--line); border-radius: var(--radius-lg);
+  background: var(--surface); box-shadow: none; padding: 2rem 1.9rem 1.8rem;
+  transition: transform 0.4s cubic-bezier(0.2, 0.8, 0.25, 1), box-shadow 0.4s ease;
+}
+html[data-design="lines"] .review-track .quote { box-shadow: none; }
+html[data-design="lines"] .quote:hover { transform: translateY(-6px) rotate(0); box-shadow: var(--hard); }
+html[data-design="lines"] .quote::before {
+  content: "”"; position: absolute; top: 0.4rem; right: 1.3rem;
+  font-family: var(--font-display); font-weight: var(--display-weight);
+  font-size: 4.4rem; line-height: 1; color: var(--accent); opacity: 0.22;
+  pointer-events: none;
+}
+html[data-design="lines"] .quote p { font-weight: 450; }
+html[data-design="lines"] .quote__who b { font-weight: 600; }
+html[data-design="lines"] .quote__who .ph { border: 1px solid var(--line); }
+html[data-design="lines"] .stars .star { animation: none; }
+
+/* ============================================================
+   FAQ — hairline editorial accordion
+   ============================================================ */
+html[data-design="lines"] .faq { gap: 0; border-top: 1px solid var(--line); max-width: 840px; }
+html[data-design="lines"] .faq details {
+  border: 0; border-bottom: 1px solid var(--line); border-radius: 0;
+  background: transparent; box-shadow: none !important; transform: none !important;
+}
+html[data-design="lines"] .faq details.open { background: transparent; }
+html[data-design="lines"] .faq summary { padding: 1.45rem 0.2rem; font-weight: var(--display-weight); font-size: 1.16rem; }
+html[data-design="lines"] .faq summary .plus {
+  width: 30px; height: 30px; border: 1px solid var(--line); border-radius: 50%;
+  background: transparent; color: var(--ink);
+}
+html[data-design="lines"] .faq details.open summary .plus { background: var(--ink); border-color: var(--ink); color: var(--page-bg); }
+html[data-design="lines"] .faq__a { padding: 0 0.2rem 1.5rem; font-weight: 400; }
+
+/* ============================================================
+   CTA — paper invitation with a slowly spinning drawn mandala
+   ============================================================ */
+html[data-design="lines"] .cta {
+  background: var(--surface); border: 1px solid var(--line);
+  box-shadow: var(--hard);
+  border-radius: 999px 999px var(--radius-lg) var(--radius-lg);
+  padding-top: clamp(72px, 9vw, 128px);
+}
+html[data-design="lines"] .cta .eyebrow { background: transparent; color: var(--accent); }
+html[data-design="lines"] .cta__rings { opacity: 0.1; }
+html[data-design="lines"] .cta__rings--rev { opacity: 0.06; }
+html[data-design="lines"] .subscribe input {
+  border: 1px solid var(--line); box-shadow: none; background: var(--page-bg);
+}
+html[data-design="lines"] .subscribe input:focus { outline: none; border-color: var(--ink); box-shadow: 0 0 0 3px color-mix(in oklab, var(--accent) 22%, transparent); }
+/* half-risen behind the arch crown — .cta clips the top half */
+.la-cta-mandala {
+  position: absolute; top: 0; left: 50%; translate: -50% -52%;
+  width: clamp(150px, 18vw, 230px); color: var(--accent); opacity: 0.55;
+  pointer-events: none;
+}
+html[data-design="lines"] .la-only.la-cta-mandala { display: block; }
+html[data-design="lines"] .la-cta-mandala svg { animation: tspin 110s linear infinite; }
+
+/* ============================================================
+   FOOTER — ink on paper instead of the dark slab
+   ============================================================ */
+html[data-design="lines"] .footer {
+  background: transparent; color: var(--ink-soft);
+  border-top: 1px solid var(--line);
+}
+html[data-design="lines"] .footer h5 { color: var(--ink); font-weight: 600; }
+html[data-design="lines"] .footer .brand { color: var(--ink); }
+html[data-design="lines"] .footer .brand small { color: var(--ink-soft); }
+html[data-design="lines"] .footer__lead { opacity: 1; color: var(--ink-soft); }
+html[data-design="lines"] .socials a { border: 1px solid var(--line); color: var(--ink); }
+html[data-design="lines"] .socials a:hover { background: var(--ink); color: var(--page-bg); }
+html[data-design="lines"] .footer__motifs { color: var(--accent); }
+html[data-design="lines"] .footer__bottom { border-top: 1px solid var(--line); opacity: 0.85; }
+html[data-design="lines"] .tribal-divider { color: var(--accent); opacity: 0.9; }
+
+/* ============================================================
+   MOTION — gentle ink-wash reveals (vs the bold spring)
+   stagger preserved via [data-stagger] indexing
+   ============================================================ */
+html.js[data-design="lines"] .reveal {
+  opacity: 0; transform: translateY(30px); filter: blur(7px);
+  transition:
+    opacity 0.95s cubic-bezier(0.2, 0.65, 0.25, 1),
+    transform 1s cubic-bezier(0.2, 0.65, 0.25, 1),
+    filter 0.9s ease;
+}
+html.js[data-design="lines"] .reveal.in { opacity: 1; transform: none; filter: none; }
+html.js[data-design="lines"] .reveal[data-reveal="left"] { transform: translateX(-40px); }
+html.js[data-design="lines"] .reveal[data-reveal="right"] { transform: translateX(40px); }
+html.js[data-design="lines"] .reveal[data-reveal="pop"] { transform: scale(0.95); }
+html.js[data-design="lines"] .reveal[data-reveal="rise"] { transform: translateY(58px); }
+html.js[data-design="lines"] .reveal[data-reveal].in { transform: none; }
+html.js[data-design="lines"] [data-stagger] > .reveal { transition-delay: calc(var(--i, 0) * 0.1s); }
+
+@media (prefers-reduced-motion: reduce) {
+  html.js[data-design="lines"] .reveal { opacity: 1; transform: none; filter: none; transition: none; }
+  html[data-design="lines"] .la-cta-mandala svg { animation: none; }
+}
+
+/* mobile: relax hover lifts (match bold behaviour) */
+@media (max-width: 720px) {
+  html[data-design="lines"] .card:hover,
+  html[data-design="lines"] .offer:hover,
+  html[data-design="lines"] .member:hover .ph,
+  html[data-design="lines"] .quote:hover { transform: none; }
+}

@@ -1,8 +1,16 @@
 import type { CSSProperties } from "react";
+import { LaFig, LaMoon } from "@/components/LineArt";
 
 export default function Team() {
   return (
     <section className="section" id="team" data-screen-label="Team">
+      <LaFig
+        drift={-0.14}
+        mobileHide
+        style={{ "--sz": "140px", "--op": ".45", top: "8%", right: "4%" } as CSSProperties}
+      >
+        <LaMoon />
+      </LaFig>
       <span
         className="orbit m-spark shimmer"
         data-drift="-0.16"

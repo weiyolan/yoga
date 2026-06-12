@@ -1,3 +1,6 @@
+import type { CSSProperties } from "react";
+import { LaFig, LaSprig } from "@/components/LineArt";
+
 function FaqItem({
   startOpen = false,
   qNl,
@@ -31,6 +34,14 @@ function FaqItem({
 export default function Faq() {
   return (
     <section className="section" id="faq" data-screen-label="FAQ">
+      <LaFig
+        className="la-fig--accent"
+        drift={-0.1}
+        mobileHide
+        style={{ "--sz": "120px", "--op": ".5", top: "10%", right: "5%" } as CSSProperties}
+      >
+        <LaSprig />
+      </LaFig>
       <svg className="deco-watermark" viewBox="0 0 240 240" fill="none" stroke="currentColor" strokeLinecap="round" aria-hidden="true">
         <circle cx="120" cy="120" r="116" strokeWidth="1.4" strokeDasharray="3 12" />
         <circle cx="120" cy="120" r="90" strokeWidth="2.4" />

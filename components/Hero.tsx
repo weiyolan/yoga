@@ -1,4 +1,5 @@
 import type { CSSProperties } from "react";
+import { LaHeroScene, LaFig, LaSprig } from "@/components/LineArt";
 
 export default function Hero() {
   return (
@@ -14,6 +15,18 @@ export default function Hero() {
       <svg className="hero__sun" aria-hidden="true">
         <use href="#m-sunburst" />
       </svg>
+      {/* design B: the intricate drawn arch scene IS the hero artwork */}
+      <div className="la-hero-scene la-only" data-parallax="-0.07" aria-hidden="true">
+        <LaHeroScene />
+      </div>
+      <LaFig
+        className="la-fig--accent"
+        drift={-0.12}
+        mobileHide
+        style={{ "--sz": "110px", "--op": ".5", bottom: "14%", left: "4%" } as CSSProperties}
+      >
+        <LaSprig />
+      </LaFig>
       <span
         className="orbit m-spark shimmer"
         data-drift="-0.24"

@@ -1,10 +1,26 @@
 import type { CSSProperties } from "react";
 import RetreatCard from "@/components/RetreatCard";
 import { retreats } from "@/data/retreats";
+import { LaFig, LaSun, LaArch } from "@/components/LineArt";
 
 export default function RetreatCards() {
   return (
     <section className="section" id="retreats" data-screen-label="Komende retreats">
+      <LaFig
+        className="la-fig--accent"
+        drift={0.14}
+        mobileHide
+        style={{ "--sz": "190px", "--op": ".5", top: "4%", left: "2.5%" } as CSSProperties}
+      >
+        <LaSun />
+      </LaFig>
+      <LaFig
+        drift={-0.12}
+        mobileHide
+        style={{ "--sz": "200px", "--op": ".35", bottom: "5%", right: "3%" } as CSSProperties}
+      >
+        <LaArch />
+      </LaFig>
       <span
         className="orbit m-daisy spin"
         data-drift="0.22"

@@ -163,6 +163,12 @@ html[data-font="uniform"] {
   --font-accent: "Hanken Grotesque", system-ui, sans-serif;
   --display-weight: 800; --display-tracking: -0.022em;
 }
+html[data-font="fraunces"] {
+  --font-display: "Fraunces", Georgia, serif;
+  --font-body: "Hanken Grotesque", system-ui, sans-serif;
+  --font-accent: "Fraunces", Georgia, serif;
+  --display-weight: 540; --display-tracking: -0.012em;
+}
 
 /* ---------- BASE ---------- */
 html { scroll-behavior: smooth; }

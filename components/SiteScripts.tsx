@@ -8,6 +8,16 @@ import { useEffect, useRef } from "react";
  * orbit drift, review-marquee cloning, stagger indexing) and tribal-deco.js
  * (SVG line-draw + pattern-band reveal + pointer parallax) — run once after
  * hydration. Returns null; it only orchestrates DOM the static markup renders.
+ *
+ * v2 additions for the live design switch:
+ *  - reveals are IntersectionObserver-driven so the fade-in stagger really
+ *    plays on scroll (the old 1.6s "reveal everything" failsafe only rescues
+ *    elements already on screen now)
+ *  - card grids drift at alternating speeds while scrolling (data-driftless
+ *    opts a grid out)
+ *  - line-art figures (.la-fig[data-drift]) join the orbit drift system
+ *  - the "yzt:tweaks" event (fired by the Tweaks panel) re-measures motion
+ *    state after a design/spacing change reflows the page
  */
 export default function SiteScripts() {
   const didInit = useRef(false);
@@ -74,32 +84,41 @@ export default function SiteScripts() {
       ?.querySelectorAll("a")
       .forEach((a) => a.addEventListener("click", closeDrawer));
 
-    /* ---------- reveal on scroll (position-based, robust) ---------- */
+    /* ---------- reveal on scroll (IO-driven, staggered) ---------- */
     root.classList.add("js");
-    const reveals = Array.from(
-      document.querySelectorAll<HTMLElement>(".reveal")
+    const pending = new Set<HTMLElement>(
+      Array.from(document.querySelectorAll<HTMLElement>(".reveal"))
     );
-    function revealInView() {
-      const trigger = window.innerHeight * 0.92;
-      for (let i = reveals.length - 1; i >= 0; i--) {
-        const el = reveals[i];
-        if (el.getBoundingClientRect().top < trigger) {
-          el.classList.add("in");
-          reveals.splice(i, 1);
-        }
-      }
+    let revealIO: IntersectionObserver | null = null;
+    const show = (el: HTMLElement) => {
+      el.classList.add("in");
+      pending.delete(el);
+      revealIO?.unobserve(el);
+    };
+    if ("IntersectionObserver" in window && !reduce) {
+      revealIO = new IntersectionObserver(
+        (entries) => {
+          entries.forEach((e) => {
+            if (e.isIntersecting) show(e.target as HTMLElement);
+          });
+        },
+        { threshold: 0.08, rootMargin: "0px 0px -6% 0px" }
+      );
+      pending.forEach((el) => revealIO!.observe(el));
+    } else {
+      pending.forEach(show);
     }
-    window.addEventListener("scroll", revealInView, { passive: true });
-    window.addEventListener("resize", revealInView, { passive: true });
-    revealInView();
-    // failsafe: never leave content hidden
-    setTimeout(
-      () =>
-        document
-          .querySelectorAll(".reveal")
-          .forEach((el) => el.classList.add("in")),
-      1600
-    );
+    /* failsafe: rescue anything visible that the observer missed — without
+       prematurely revealing the below-the-fold content */
+    function revealSweep() {
+      const trigger = window.innerHeight * 0.96;
+      pending.forEach((el) => {
+        const r = el.getBoundingClientRect();
+        if (r.width && r.height && r.top < trigger && r.bottom > 0) show(el);
+      });
+    }
+    window.addEventListener("load", () => setTimeout(revealSweep, 350));
+    setTimeout(revealSweep, 2400);
 
     /* ---------- FAQ accordion: display-toggle + CSS glide ---------- */
     document.querySelectorAll<HTMLElement>(".faq details").forEach((d) => {
@@ -143,7 +162,9 @@ export default function SiteScripts() {
       document.querySelectorAll("[data-parallax]")
     ) as HTMLElement[];
     const orbits = Array.prototype.slice.call(
-      document.querySelectorAll(".orbit[data-drift], .star-deco[data-drift]")
+      document.querySelectorAll(
+        ".orbit[data-drift], .star-deco[data-drift], .la-fig[data-drift]"
+      )
     ) as HTMLElement[];
 
     /* stagger: index .reveal children so CSS can cascade delays */
@@ -168,6 +189,25 @@ export default function SiteScripts() {
         track.appendChild(clone);
       });
     });
+
+    /* drifting card grids: children float at alternating speeds while the
+       grid scrolls through the viewport (translate composes with the CSS
+       hover/reveal transforms, so nothing fights) */
+    const DRIFT_AMPS = [12, -16, 8, -11];
+    const driftGrids = (
+      Array.prototype.slice.call(
+        document.querySelectorAll(
+          ".cards, .team, .gallery, .review-marquees"
+        )
+      ) as HTMLElement[]
+    )
+      .filter((g) => !g.hasAttribute("data-driftless"))
+      .map((g) => ({
+        el: g,
+        kids: Array.prototype.slice.call(g.children) as HTMLElement[],
+      }))
+      .filter((g) => g.kids.length > 1);
+    let driftOn = false;
 
     /* cache base centres for orbit drift (transform-independent) */
     interface OrbitEl extends HTMLElement {
@@ -208,9 +248,28 @@ export default function SiteScripts() {
         el.style.transform = "translate3d(0," + y.toFixed(1) + "px,0)";
       });
 
+      const wantDrift = window.innerWidth > 720;
+      if (wantDrift) {
+        driftGrids.forEach((g) => {
+          const r = g.el.getBoundingClientRect();
+          if (r.bottom < -80 || r.top > vh + 80) return; // offscreen
+          const p = (vh - r.top) / (vh + r.height) - 0.5; // -0.5 … 0.5
+          g.kids.forEach((kid, i) => {
+            const y = p * 2 * DRIFT_AMPS[i % DRIFT_AMPS.length];
+            kid.style.translate = "0 " + y.toFixed(1) + "px";
+          });
+        });
+        driftOn = true;
+      } else if (driftOn) {
+        driftGrids.forEach((g) =>
+          g.kids.forEach((kid) => (kid.style.translate = ""))
+        );
+        driftOn = false;
+      }
+
       const mid = sy + vh / 2;
       (orbits as OrbitEl[]).forEach((el) => {
-        if (el.offsetParent === null) return; // hidden (mobile)
+        if (el.offsetParent === null) return; // hidden (mobile / other design)
         const rel = mid - (el.__cy || 0);
         el.style.translate = "0 " + (rel * (el.__drift || 0)).toFixed(1) + "px";
       });
@@ -235,6 +294,15 @@ export default function SiteScripts() {
     });
     onMotionScroll();
 
+    /* the Tweaks panel reflows the whole page when the design / spacing
+       changes — re-measure drift anchors and rescue on-screen reveals */
+    window.addEventListener("yzt:tweaks", () => {
+      setTimeout(() => {
+        onMotionResize();
+        revealSweep();
+      }, 60);
+    });
+
     /* ===================== tribal-deco.js ===================== */
     const SHAPE_SEL = "path, line, polyline, polygon, circle, rect, ellipse";
 
@@ -244,6 +312,7 @@ export default function SiteScripts() {
     draws.forEach((svg) => {
       const shapes = svg.querySelectorAll(SHAPE_SEL);
       Array.prototype.forEach.call(shapes, (el: SVGGeometryElement) => {
+        if (el.hasAttribute("data-nodraw")) return; // dotted deco fades in via .drawn
         let len = 0;
         try {
           len = el.getTotalLength();
@@ -259,11 +328,12 @@ export default function SiteScripts() {
     });
 
     function fire(svg: SVGElement) {
+      svg.classList.add("drawn");
       const shapes = svg.querySelectorAll(SHAPE_SEL);
       let i = 0;
       Array.prototype.forEach.call(shapes, (el: SVGGeometryElement) => {
         if (!el.getAttribute("data-len")) return;
-        el.style.transitionDelay = i * 55 + "ms";
+        el.style.transitionDelay = Math.min(i * 50, 1300) + "ms";
         el.style.strokeDashoffset = "0";
         i++;
       });
@@ -304,7 +374,7 @@ export default function SiteScripts() {
 
     /* subtle pointer parallax on floating symbols (desktop only) */
     const floats = Array.prototype.slice.call(
-      document.querySelectorAll(".deco-float")
+      document.querySelectorAll(".deco-float, .la-float")
     ) as HTMLElement[];
     if (
       floats.length &&
