@@ -470,6 +470,16 @@ html[data-lang="en"] [data-lang-only="nl"] { display: none !important; }
 .card__go:hover { gap: 0.6em; }
 .retreats__foot { margin-top: clamp(40px, 5vw, 64px); display: flex; justify-content: center; }
 
+/* ---------- RETREAT DETAIL (what's included) ---------- */
+.rincl { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: clamp(20px, 2.6vw, 40px); }
+.rincl__col { background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius); padding: clamp(1.5rem, 2.6vw, 2.2rem); }
+.rincl__col h3 { font-size: 1.35rem; letter-spacing: -0.02em; margin-bottom: 1.1rem; }
+.rincl__list { list-style: none; display: grid; gap: 0.75rem; }
+.rincl__list li { display: flex; gap: 0.65rem; align-items: flex-start; color: var(--ink-soft); font-size: 0.98rem; line-height: 1.5; }
+.rincl__mk { flex: none; font-weight: 700; line-height: 1.5; }
+.rincl__mk--yes { color: var(--accent); }
+.rincl__mk--no { color: var(--ink-soft); opacity: 0.7; }
+
 /* ---------- TRAINING / COACHING (#aanbod) ---------- */
 .offers { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: clamp(20px, 2.4vw, 32px); }
 .offer { background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius); padding: 2rem 1.9rem; display: flex; flex-direction: column; gap: 0.6rem; transition: transform .2s, border-color .2s; }
