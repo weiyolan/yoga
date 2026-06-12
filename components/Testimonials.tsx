@@ -1,4 +1,5 @@
 import type { CSSProperties } from "react";
+import { LaFig, LaLotus } from "@/components/LineArt";
 
 function Stars() {
   return (
@@ -49,6 +50,14 @@ function Quote({
 export default function Testimonials() {
   return (
     <section className="section section--alt" data-screen-label="Testimonials">
+      <LaFig
+        className="la-fig--accent"
+        drift={0.14}
+        mobileHide
+        style={{ "--sz": "180px", "--op": ".45", top: "6%", left: "3%" } as CSSProperties}
+      >
+        <LaLotus />
+      </LaFig>
       <span
         className="star-deco s-star4 spin s-shimmer"
         data-drift="0.18"

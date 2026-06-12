@@ -1,10 +1,15 @@
 import type { CSSProperties } from "react";
+import { LaMandala } from "@/components/LineArt";
 
 export default function Cta() {
   return (
     <section className="section section--tight" id="aanmelden" data-screen-label="Newsletter / CTA">
       <div className="wrap">
         <div className="cta reveal">
+          {/* design B: a drawn mandala crowns the arched invitation */}
+          <div className="la-cta-mandala la-only" aria-hidden="true">
+            <LaMandala />
+          </div>
           <svg className="cta__rings" viewBox="0 0 240 240" fill="none" stroke="currentColor" strokeLinecap="round" aria-hidden="true">
             <circle cx="120" cy="120" r="116" strokeWidth="1.4" strokeDasharray="3 12" />
             <circle cx="120" cy="120" r="90" strokeWidth="2.4" />

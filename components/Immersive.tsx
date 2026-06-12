@@ -1,4 +1,5 @@
 import type { CSSProperties } from "react";
+import { LaFig, LaMoon } from "@/components/LineArt";
 
 export default function Immersive() {
   return (
@@ -11,6 +12,15 @@ export default function Immersive() {
         ></div>
       </div>
       <div className="immersive__scrim"></div>
+      <LaFig
+        drift={0.1}
+        mobileHide
+        style={
+          { "--sz": "170px", "--op": ".75", color: "#fff", top: "10%", right: "7%", zIndex: 1 } as CSSProperties
+        }
+      >
+        <LaMoon />
+      </LaFig>
       <div className="wrap immersive__inner">
         <div className="immersive__card reveal">
           <span className="pill">

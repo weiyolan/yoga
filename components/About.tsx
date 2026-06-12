@@ -1,8 +1,23 @@
 import type { CSSProperties } from "react";
+import { LaFig, LaSprig, LaEye } from "@/components/LineArt";
 
 export default function About() {
   return (
     <section className="section" id="over" data-screen-label="Over ons">
+      <LaFig
+        drift={0.16}
+        mobileHide
+        style={{ "--sz": "130px", "--op": ".45", top: "5%", right: "3.5%" } as CSSProperties}
+      >
+        <LaSprig />
+      </LaFig>
+      <LaFig
+        className="la-fig--accent"
+        drift={-0.1}
+        style={{ "--sz": "150px", "--op": ".4", bottom: "6%", left: "2.5%" } as CSSProperties}
+      >
+        <LaEye />
+      </LaFig>
       <span
         className="orbit m-burst spin-rev"
         data-drift="0.2"

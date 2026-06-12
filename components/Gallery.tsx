@@ -1,8 +1,16 @@
 import type { CSSProperties } from "react";
+import { LaFig, LaSun } from "@/components/LineArt";
 
 export default function Gallery() {
   return (
     <section className="section" data-screen-label="Gallery">
+      <LaFig
+        drift={-0.12}
+        mobileHide
+        style={{ "--sz": "150px", "--op": ".4", top: "6%", right: "3.5%" } as CSSProperties}
+      >
+        <LaSun />
+      </LaFig>
       <svg
         className="deco-line draw deco-line--2 deco-line--soft"
         data-mobile="hide"
