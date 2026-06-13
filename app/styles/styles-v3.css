@@ -346,6 +346,16 @@ html[data-lang="en"] [data-lang-only="nl"] { display: none !important; }
 }
 .ph--blob { border-radius: var(--radius); }
 
+/* real photo fills the placeholder: cover-fit and drop the synthetic label + texture.
+   !important beats the full-bleed `.hero__media .ph` / `.immersive__media .ph` shorthand,
+   which is more specific and would otherwise reset size/repeat and tile the photo. */
+.ph--img {
+  background-size: cover !important;
+  background-position: center !important;
+  background-repeat: no-repeat !important;
+}
+.ph--img::before, .ph--img::after { display: none; }
+
 /* darker grey for full-bleed hero imagery (white text reads) */
 .hero__media .ph, .immersive__media .ph, .detail-hero__media .ph {
   background: linear-gradient(150deg, var(--phd-1) 0%, var(--phd-2) 100%);

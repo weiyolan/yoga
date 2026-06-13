@@ -37,7 +37,12 @@ function RetreatDetail({ retreat }: { retreat: Retreat }) {
       {/* ---------- hero ---------- */}
       <section className="immersive" data-screen-label={retreat.heroTitle}>
         <div className="immersive__media" data-parallax="0.14">
-          <div className="ph" style={{ "--ph-hue": retreat.imageHue } as CSSProperties} data-label={retreat.mediaLabel}></div>
+          <div
+            className="ph ph--img"
+            style={{ "--ph-hue": retreat.imageHue, backgroundImage: `url(${retreat.heroImage})` } as CSSProperties}
+            role="img"
+            aria-label={retreat.mediaLabel}
+          ></div>
         </div>
         <div className="immersive__scrim"></div>
         <div className="wrap immersive__inner">
@@ -176,8 +181,14 @@ function RetreatDetail({ retreat }: { retreat: Retreat }) {
             </h2>
           </div>
           <div className="gallery reveal">
-            {retreat.galleryHues.map((hue, i) => (
-              <div className="ph" key={i} style={{ "--ph-hue": hue } as CSSProperties} data-label={retreat.mediaLabel}></div>
+            {retreat.galleryImages.map((src, i) => (
+              <div
+                className="ph ph--img"
+                key={i}
+                style={{ backgroundImage: `url(${src})` } as CSSProperties}
+                role="img"
+                aria-label={retreat.mediaLabel}
+              ></div>
             ))}
           </div>
         </div>

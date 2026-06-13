@@ -38,9 +38,24 @@ export default function Food() {
       </svg>
       <div className="wrap food">
         <div className="food__imgs reveal">
-          <div className="ph" style={{ "--ph-hue": 40 } as CSSProperties} data-label="vegetarisch deelgerecht · feesttafel"></div>
-          <div className="ph" style={{ "--ph-hue": 25 } as CSSProperties} data-label="Elif & Guy"></div>
-          <div className="ph" style={{ "--ph-hue": 120 } as CSSProperties} data-label="verse groenten"></div>
+          <div
+            className="ph ph--img"
+            style={{ "--ph-hue": 40, backgroundImage: "url(/images/cooking.jpg)" } as CSSProperties}
+            role="img"
+            aria-label="Vers, vegetarisch buffet om samen van te smullen"
+          ></div>
+          <div
+            className="ph ph--img"
+            style={{ "--ph-hue": 25, backgroundImage: "url(/images/campfire.jpg)" } as CSSProperties}
+            role="img"
+            aria-label="Gezellig samen rond het kampvuur"
+          ></div>
+          <div
+            className="ph ph--img"
+            style={{ "--ph-hue": 120, backgroundImage: "url(/images/learning.jpg)" } as CSSProperties}
+            role="img"
+            aria-label="Lange tafels en goed gezelschap"
+          ></div>
         </div>
         <div className="reveal" data-delay="1">
           <span className="eyebrow" data-nl="foodiejives natuurlijk" data-en="foodiejives of course">

@@ -6,9 +6,10 @@ export default function Hero() {
     <section className="hero" data-screen-label="Hero">
       <div className="hero__media" data-parallax="0.16">
         <div
-          className="ph"
-          style={{ "--ph-hue": 58 } as CSSProperties}
-          data-label="hero · groep yoga bij zonsopgang in de natuur — full-bleed"
+          className="ph ph--img"
+          style={{ "--ph-hue": 58, backgroundImage: "url(/images/yoga-outside.jpg)" } as CSSProperties}
+          role="img"
+          aria-label="Groepsmeditatie in de natuur bij zacht licht"
         ></div>
       </div>
       <div className="hero__scrim"></div>

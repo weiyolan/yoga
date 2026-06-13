@@ -41,13 +41,13 @@ export default function Gallery() {
           </h2>
         </div>
         <div className="gallery reveal">
-          <div className="ph g1" style={{ "--ph-hue": 60 } as CSSProperties} data-label="groepsfoto · zonsondergang"></div>
-          <div className="ph g2" style={{ "--ph-hue": 200 } as CSSProperties} data-label="zee"></div>
-          <div className="ph g3" style={{ "--ph-hue": 130 } as CSSProperties} data-label="hike"></div>
-          <div className="ph g4" style={{ "--ph-hue": 30 } as CSSProperties} data-label="diner"></div>
-          <div className="ph g5" style={{ "--ph-hue": 90 } as CSSProperties} data-label="yoga binnen"></div>
-          <div className="ph g6" style={{ "--ph-hue": 255 } as CSSProperties} data-label="jacuzzi"></div>
-          <div className="ph g7" style={{ "--ph-hue": 45 } as CSSProperties} data-label="lachen"></div>
+          <div className="ph g1 ph--img" style={{ "--ph-hue": 60, backgroundImage: "url(/images/team.jpg)" } as CSSProperties} role="img" aria-label="Groepsyoga in de tuin"></div>
+          <div className="ph g2 ph--img" style={{ "--ph-hue": 200, backgroundImage: "url(/images/freediving3.jpg)" } as CSSProperties} role="img" aria-label="Freedivers naar het licht"></div>
+          <div className="ph g3 ph--img" style={{ "--ph-hue": 130, backgroundImage: "url(/images/desert-bw.jpg)" } as CSSProperties} role="img" aria-label="Woestijnwandeling over de duinen"></div>
+          <div className="ph g4 ph--img" style={{ "--ph-hue": 30, backgroundImage: "url(/images/fish.jpg)" } as CSSProperties} role="img" aria-label="Koraalrif in de Rode Zee"></div>
+          <div className="ph g5 ph--img" style={{ "--ph-hue": 90, backgroundImage: "url(/images/retreat.jpg)" } as CSSProperties} role="img" aria-label="Yoga binnen in de shala"></div>
+          <div className="ph g6 ph--img" style={{ "--ph-hue": 255, backgroundImage: "url(/images/diving.jpg)" } as CSSProperties} role="img" aria-label="Lachen na het duiken"></div>
+          <div className="ph g7 ph--img" style={{ "--ph-hue": 45, backgroundImage: "url(/images/desert.jpg)" } as CSSProperties} role="img" aria-label="Woestijnavontuur naar de rotsboog"></div>
         </div>
       </div>
     </section>

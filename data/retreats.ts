@@ -31,9 +31,15 @@ export type Retreat = {
   /** Full title used in the detail hero, e.g. "Dahab — Yoga & Freediving". */
   heroTitle: string;
   tag: Lang;
-  /** Background hue for the .ph placeholder media. */
+  /** Background hue for the .ph placeholder media (fallback behind the photo). */
   imageHue: number;
   mediaLabel: string;
+  /** Photo shown on the retreat card. */
+  cardImage: string;
+  /** Full-bleed photo behind the detail-page hero. */
+  heroImage: string;
+  /** Photos for the detail-page "sfeer" gallery. */
+  galleryImages: string[];
   /** Day number + month/year badge shown on the card. */
   dateDay: string;
   dateMon: Lang;
@@ -53,7 +59,6 @@ export type Retreat = {
   itinerary: ItineraryDay[];
   included: Lang[];
   notIncluded: Lang[];
-  galleryHues: number[];
   faqs: Faq[];
 };
 
@@ -90,6 +95,16 @@ export const retreats: Retreat[] = [
     tag: { nl: "Yoga + Freediving", en: "Yoga + Freediving" },
     imageHue: 205,
     mediaLabel: "Dahab · zee & woestijn",
+    cardImage: "/images/desert-handstand.jpg",
+    heroImage: "/images/yoga.jpg",
+    galleryImages: [
+      "/images/aerial-yoga.jpg",
+      "/images/freediving.jpg",
+      "/images/freediving2.jpg",
+      "/images/desert.jpg",
+      "/images/fish.jpg",
+      "/images/hotel.jpg",
+    ],
     dateDay: "09",
     dateMon: { nl: "MEI '26", en: "MAY '26" },
     loc: { nl: "Dahab · Egypte", en: "Dahab · Egypt" },
@@ -196,7 +211,6 @@ export const retreats: Retreat[] = [
       { nl: "Lunch & persoonlijke uitgaven", en: "Lunch & personal expenses" },
       { nl: "Reis- en annuleringsverzekering", en: "Travel & cancellation insurance" },
     ],
-    galleryHues: [205, 30, 200, 45, 90, 255],
     faqs: sharedFaqs,
   },
   {
@@ -206,6 +220,16 @@ export const retreats: Retreat[] = [
     tag: { nl: "Yoga + Hike", en: "Yoga + Hike" },
     imageHue: 135,
     mediaLabel: "Eifel · bossen & hikes",
+    cardImage: "/images/hike2.jpg",
+    heroImage: "/images/team.jpg",
+    galleryImages: [
+      "/images/hike.jpg",
+      "/images/yoga-outside.jpg",
+      "/images/campfire.jpg",
+      "/images/learning.jpg",
+      "/images/cooking.jpg",
+      "/images/retreat.jpg",
+    ],
     dateDay: "26",
     dateMon: { nl: "NOV '26", en: "NOV '26" },
     loc: { nl: "Belgische Eifel", en: "Belgian Eifel" },
@@ -309,7 +333,6 @@ export const retreats: Retreat[] = [
       { nl: "Persoonlijke uitgaven", en: "Personal expenses" },
       { nl: "Reisverzekering", en: "Travel insurance" },
     ],
-    galleryHues: [135, 90, 45, 200, 30, 150],
     faqs: sharedFaqs,
   },
   {
@@ -319,6 +342,16 @@ export const retreats: Retreat[] = [
     tag: { nl: "Yoga + Spa", en: "Yoga + Spa" },
     imageHue: 50,
     mediaLabel: "Ardennen · loft & jacuzzi",
+    cardImage: "/images/campfire.jpg",
+    heroImage: "/images/swimmingpool.jpg",
+    galleryImages: [
+      "/images/swimmingpool.jpg",
+      "/images/yoga3.jpg",
+      "/images/cooking.jpg",
+      "/images/learning.jpg",
+      "/images/yoga2.jpg",
+      "/images/retreat.jpg",
+    ],
     dateDay: "27",
     dateMon: { nl: "MRT '26", en: "MAR '26" },
     loc: { nl: "Ardense bossen · Spa", en: "Ardennes forest · Spa" },
@@ -414,7 +447,6 @@ export const retreats: Retreat[] = [
       { nl: "Extra dranken", en: "Extra drinks" },
       { nl: "Reisverzekering", en: "Travel insurance" },
     ],
-    galleryHues: [50, 255, 30, 90, 200, 15],
     faqs: sharedFaqs,
   },
 ];

@@ -13,7 +13,12 @@ export default function RetreatCard({
   return (
     <article className="card reveal" {...(delay ? { "data-delay": delay } : {})}>
       <div className="card__media">
-        <div className="ph" style={{ "--ph-hue": retreat.imageHue } as CSSProperties} data-label={retreat.mediaLabel}></div>
+        <div
+          className="ph ph--img"
+          style={{ "--ph-hue": retreat.imageHue, backgroundImage: `url(${retreat.cardImage})` } as CSSProperties}
+          role="img"
+          aria-label={retreat.mediaLabel}
+        ></div>
         <Bi className="pill card__tag" t={retreat.tag} />
         <div className="card__date">
           <b>{retreat.dateDay}</b>

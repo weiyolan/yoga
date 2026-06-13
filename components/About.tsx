@@ -163,10 +163,20 @@ export default function About() {
 
         <div className="about__media reveal" data-reveal="right" data-delay="1">
           <figure className="about__shot about__shot--a" data-parallax="0.05">
-            <div className="ph" style={{ "--ph-hue": 48 } as CSSProperties} data-label="meditatie binnen · zacht ochtendlicht"></div>
+            <div
+              className="ph ph--img"
+              style={{ "--ph-hue": 48, backgroundImage: "url(/images/yoga3.jpg)" } as CSSProperties}
+              role="img"
+              aria-label="Meditatie binnen bij zacht ochtendlicht"
+            ></div>
           </figure>
           <figure className="about__shot about__shot--b" data-parallax="-0.07">
-            <div className="ph" style={{ "--ph-hue": 150 } as CSSProperties} data-label="hike in de natuur"></div>
+            <div
+              className="ph ph--img"
+              style={{ "--ph-hue": 150, backgroundImage: "url(/images/hike.jpg)" } as CSSProperties}
+              role="img"
+              aria-label="Hike door het bos langs een beek"
+            ></div>
           </figure>
           <p
             className="about__note"

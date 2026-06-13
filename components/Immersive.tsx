@@ -6,9 +6,10 @@ export default function Immersive() {
     <section className="immersive" id="dahab" data-screen-label="Dahab — featured retreat">
       <div className="immersive__media" data-parallax="0.14">
         <div
-          className="ph"
-          style={{ "--ph-hue": 208 } as CSSProperties}
-          data-label="rooftop yogashala · zeezicht Dahab — woestijn & Rode Zee, full-bleed"
+          className="ph ph--img"
+          style={{ "--ph-hue": 208, backgroundImage: "url(/images/aerial-yoga.jpg)" } as CSSProperties}
+          role="img"
+          aria-label="Aerial yoga op de rooftop yogashala in Dahab"
         ></div>
       </div>
       <div className="immersive__scrim"></div>
