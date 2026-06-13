@@ -23,6 +23,12 @@ export type Fact = { icon: IconId; text: Lang };
 export type Highlight = { icon: IconId; body: Lang };
 export type ItineraryDay = { label: Lang; title: Lang; body: Lang };
 export type Faq = { q: Lang; a: Lang };
+/** A single "good to know" / practical card on the detail page. */
+export type PracticalItem = { icon: IconId; title: Lang; body: Lang };
+/** Where you stay during the retreat. */
+export type Stay = { title: Lang; body: Lang; amenities: Lang[]; images: string[] };
+/** A guide leading this retreat — mirrors the homepage team tiles (hue placeholder). */
+export type Host = { name: string; role: Lang; hue: number };
 
 export type Retreat = {
   slug: string;
@@ -56,9 +62,19 @@ export type Retreat = {
   priceNoteLong: Lang;
   footNote: Lang;
   signupUrl: string;
+  /** Short "level & pace" chip, e.g. "Alle niveaus · actief". */
+  level: Lang;
+  /** "This is for you if…" bullet points. */
+  forWho: Lang[];
+  /** Where you stay, with amenities and a couple of photos. */
+  stay: Stay;
   itinerary: ItineraryDay[];
   included: Lang[];
   notIncluded: Lang[];
+  /** Getting there / what to bring / good to know. */
+  practical: PracticalItem[];
+  /** The guides leading this specific retreat. */
+  hosts: Host[];
   faqs: Faq[];
 };
 
@@ -155,6 +171,27 @@ export const retreats: Retreat[] = [
     priceNoteLong: { nl: "p.p. · gedeelde kamer", en: "p.p. · shared room" },
     footNote: { nl: "Single kamer €1.370 · max. 8 plekken", en: "Single room €1,370 · max. 8 spots" },
     signupUrl: "https://forms.gle/ghmT2yxcUqfVsEGz7",
+    level: { nl: "Alle niveaus · actief", en: "All levels · active" },
+    forWho: [
+      { nl: "Je wil yoga combineren met avontuur in en onder water.", en: "You want to pair yoga with adventure in and under the water." },
+      { nl: "Je houdt van zon, zee en warmte in het voorjaar.", en: "You love sun, sea and warmth in spring." },
+      { nl: "Je bent nieuwsgierig naar freediving — ervaring is niet nodig.", en: "You're curious about freediving — no experience required." },
+      { nl: "Je zoekt een week om écht te vertragen, ver van je scherm.", en: "You're after a week to truly slow down, far from your screen." },
+    ],
+    stay: {
+      title: { nl: "Nour Boutique Hotel", en: "Nour Boutique Hotel" },
+      body: {
+        nl: "Een klein, sfeervol hotel pal aan de Rode Zee, op wandelafstand van de duikstek. Rustige kamers, een schaduwrijk dakterras voor de ochtendyoga en een keuken die draait op verse, vegetarische gerechten.",
+        en: "A small, characterful hotel right on the Red Sea, within walking distance of the dive site. Quiet rooms, a shaded rooftop for morning yoga and a kitchen built around fresh, vegetarian dishes.",
+      },
+      amenities: [
+        { nl: "Kamers met zicht op zee of tuin", en: "Rooms overlooking the sea or garden" },
+        { nl: "Dakterras voor yoga & zonsopgang", en: "Rooftop for yoga & sunrise" },
+        { nl: "Op wandelafstand van de duikstek", en: "Walking distance to the dive site" },
+        { nl: "Vegetarische keuken ter plaatse", en: "Vegetarian kitchen on site" },
+      ],
+      images: ["/images/hotel.jpg", "/images/yoga.jpg"],
+    },
     itinerary: [
       {
         label: { nl: "Dag 1 · za", en: "Day 1 · Sat" },
@@ -210,6 +247,37 @@ export const retreats: Retreat[] = [
       { nl: "Luchthaventransfers (optioneel bij te boeken)", en: "Airport transfers (optional add-on)" },
       { nl: "Lunch & persoonlijke uitgaven", en: "Lunch & personal expenses" },
       { nl: "Reis- en annuleringsverzekering", en: "Travel & cancellation insurance" },
+    ],
+    practical: [
+      {
+        icon: "i-pin",
+        title: { nl: "Heenreis", en: "Getting there" },
+        body: {
+          nl: "Vlieg naar Sharm el-Sheikh; vandaar is het ongeveer 1u15 transfer naar Dahab. We helpen je graag met het kiezen van de juiste vlucht.",
+          en: "Fly into Sharm el-Sheikh; from there it's about a 1h15 transfer to Dahab. We're happy to help you pick the right flight.",
+        },
+      },
+      {
+        icon: "i-spark",
+        title: { nl: "Wat meenemen", en: "What to pack" },
+        body: {
+          nl: "Zwemkleding, lichte laagjes, zonnecrème en een herbruikbare fles. Een yogamat ligt voor je klaar.",
+          en: "Swimwear, light layers, sunscreen and a reusable bottle. A yoga mat is waiting for you.",
+        },
+      },
+      {
+        icon: "i-cal",
+        title: { nl: "Klimaat", en: "Climate" },
+        body: {
+          nl: "Begin mei is het zo'n 28–32°C overdag en het water rond de 24°C — zonnig en warm, ideaal om te duiken.",
+          en: "Early May sits around 28–32°C by day with water near 24°C — sunny and warm, perfect for diving.",
+        },
+      },
+    ],
+    hosts: [
+      { name: "Rita", role: { nl: "Oprichter · Ashtanga", en: "Founder · Ashtanga" }, hue: 35 },
+      { name: "Philippe", role: { nl: "Natuur & Freedive", en: "Nature & Freedive" }, hue: 150 },
+      { name: "Michèle", role: { nl: "Freedive-instructeur", en: "Freedive instructor" }, hue: 200 },
     ],
     faqs: sharedFaqs,
   },
@@ -287,6 +355,27 @@ export const retreats: Retreat[] = [
     priceNoteLong: { nl: "all-in · gedeelde kamer", en: "all-in · shared room" },
     footNote: { nl: "Gedeelde kamers · max. 12 plekken", en: "Shared rooms · max. 12 spots" },
     signupUrl: "https://forms.gle/ghmT2yxcUqfVsEGz7",
+    level: { nl: "Alle niveaus · actief", en: "All levels · active" },
+    forWho: [
+      { nl: "Je wil yoga afwisselen met stevige wandelingen in de natuur.", en: "You want to alternate yoga with solid walks in nature." },
+      { nl: "Je houdt van bossen, frisse lucht en het najaar.", en: "You love forests, fresh air and the autumn season." },
+      { nl: "Je geniet van een sauna en whirlpool na een dag buiten.", en: "You enjoy a sauna and whirlpool after a day outdoors." },
+      { nl: "Je zoekt een lang weekend dicht bij huis om los te komen.", en: "You're after a long weekend close to home to switch off." },
+    ],
+    stay: {
+      title: { nl: "Sfeervol groepsverblijf", en: "Characterful group lodge" },
+      body: {
+        nl: "Een ruim, warm verblijf middenin het groen, helemaal voor onze groep. Een grote leefruimte met haardvuur, een gedeelde keuken waar we samen koken, en een eigen sauna en whirlpool om op te warmen na de hike.",
+        en: "A spacious, warm lodge in the middle of the green, entirely for our group. A big living space with a fireplace, a shared kitchen where we cook together, and a private sauna and whirlpool to warm up after the hike.",
+      },
+      amenities: [
+        { nl: "Eigen sauna & whirlpool", en: "Private sauna & whirlpool" },
+        { nl: "Gezellige leefruimte met haardvuur", en: "Cosy living space with fireplace" },
+        { nl: "Gedeelde keuken om samen te koken", en: "Shared kitchen to cook together" },
+        { nl: "Omringd door bos en wandelpaden", en: "Surrounded by forest and trails" },
+      ],
+      images: ["/images/retreat.jpg", "/images/campfire.jpg"],
+    },
     itinerary: [
       {
         label: { nl: "Dag 1 · do", en: "Day 1 · Thu" },
@@ -332,6 +421,37 @@ export const retreats: Retreat[] = [
       { nl: "Vervoer naar de locatie", en: "Transport to the location" },
       { nl: "Persoonlijke uitgaven", en: "Personal expenses" },
       { nl: "Reisverzekering", en: "Travel insurance" },
+    ],
+    practical: [
+      {
+        icon: "i-pin",
+        title: { nl: "Heenreis", en: "Getting there" },
+        body: {
+          nl: "Zo'n 2 uur rijden vanuit Antwerpen of Brussel. We brengen deelnemers met elkaar in contact om samen te carpoolen.",
+          en: "About a 2-hour drive from Antwerp or Brussels. We connect participants so you can carpool together.",
+        },
+      },
+      {
+        icon: "i-boot",
+        title: { nl: "Wat meenemen", en: "What to pack" },
+        body: {
+          nl: "Stevige wandelschoenen, warme laagjes en een regenjas. Voor de sauna: zwemkleding. Een yogamat ligt klaar.",
+          en: "Sturdy hiking shoes, warm layers and a rain jacket. For the sauna: swimwear. A yoga mat is provided.",
+        },
+      },
+      {
+        icon: "i-cal",
+        title: { nl: "Klimaat", en: "Climate" },
+        body: {
+          nl: "Eind november is het fris (3–10°C) en soms nat — heerlijk om buiten te wandelen en binnen op te warmen.",
+          en: "Late November is crisp (3–10°C) and sometimes wet — lovely for walking outside and warming up indoors.",
+        },
+      },
+    ],
+    hosts: [
+      { name: "Rita", role: { nl: "Oprichter · Ashtanga", en: "Founder · Ashtanga" }, hue: 35 },
+      { name: "Elena", role: { nl: "Vinyasa & Yin", en: "Vinyasa & Yin" }, hue: 90 },
+      { name: "Sol", role: { nl: "Yin & Meditatie", en: "Yin & Meditation" }, hue: 255 },
     ],
     faqs: sharedFaqs,
   },
@@ -409,6 +529,27 @@ export const retreats: Retreat[] = [
     priceNoteLong: { nl: "all-in · gedeelde kamer", en: "all-in · shared room" },
     footNote: { nl: "Gedeelde kamers · max. 10 plekken", en: "Shared rooms · max. 10 spots" },
     signupUrl: "https://forms.gle/ghmT2yxcUqfVsEGz7",
+    level: { nl: "Alle niveaus · zacht", en: "All levels · gentle" },
+    forWho: [
+      { nl: "Je wil in een kort weekend volledig resetten.", en: "You want to fully reset over a short weekend." },
+      { nl: "Je geniet van spa, jacuzzi en een goed glas wijn.", en: "You enjoy a spa, jacuzzi and a good glass of wine." },
+      { nl: "Je verkiest zachte, herstellende yoga boven zweten.", en: "You prefer gentle, restorative yoga over breaking a sweat." },
+      { nl: "Je zoekt comfort en design midden in de natuur.", en: "You're after comfort and design in the middle of nature." },
+    ],
+    stay: {
+      title: { nl: "Imposante design-loft", en: "Striking design loft" },
+      body: {
+        nl: "Een ruime, lichte loft met grote ramen op de Ardense bossen, helemaal voor onze groep. Buiten een sauna en jacuzzi met zicht op de sterren, binnen een open keuken en zachte hoeken om in weg te zakken.",
+        en: "A spacious, bright loft with large windows onto the Ardennes forest, entirely for our group. Outside a sauna and jacuzzi under the stars, inside an open kitchen and soft corners to sink into.",
+      },
+      amenities: [
+        { nl: "Buitensauna & jacuzzi onder de sterren", en: "Outdoor sauna & jacuzzi under the stars" },
+        { nl: "Lichte loft met grote ramen", en: "Bright loft with large windows" },
+        { nl: "Open keuken voor gedeelde diners", en: "Open kitchen for shared dinners" },
+        { nl: "Volledig privé voor onze groep", en: "Entirely private to our group" },
+      ],
+      images: ["/images/swimmingpool.jpg", "/images/retreat.jpg"],
+    },
     itinerary: [
       {
         label: { nl: "Dag 1 · vr", en: "Day 1 · Fri" },
@@ -446,6 +587,37 @@ export const retreats: Retreat[] = [
       { nl: "Vervoer naar de locatie", en: "Transport to the location" },
       { nl: "Extra dranken", en: "Extra drinks" },
       { nl: "Reisverzekering", en: "Travel insurance" },
+    ],
+    practical: [
+      {
+        icon: "i-pin",
+        title: { nl: "Heenreis", en: "Getting there" },
+        body: {
+          nl: "Zo'n 1u30 rijden vanuit de regio Luik. We brengen deelnemers samen om te carpoolen naar de loft.",
+          en: "About a 1h30 drive from the Liège region. We connect participants to carpool to the loft.",
+        },
+      },
+      {
+        icon: "i-spring",
+        title: { nl: "Wat meenemen", en: "What to pack" },
+        body: {
+          nl: "Zwemkleding voor de jacuzzi en sauna, comfortabele laagjes en iets warms voor buiten. Een yogamat ligt klaar.",
+          en: "Swimwear for the jacuzzi and sauna, comfy layers and something warm for outside. A yoga mat is provided.",
+        },
+      },
+      {
+        icon: "i-wine",
+        title: { nl: "Goed om te weten", en: "Good to know" },
+        body: {
+          nl: "Het welkomstglas wijn is inbegrepen; extra dranken reken je ter plaatse af. Verder geldt: niets moet.",
+          en: "The welcome glass of wine is included; extra drinks are settled on site. Otherwise: nothing required.",
+        },
+      },
+    ],
+    hosts: [
+      { name: "Rita", role: { nl: "Oprichter · Ashtanga", en: "Founder · Ashtanga" }, hue: 35 },
+      { name: "Elena", role: { nl: "Vinyasa & Yin", en: "Vinyasa & Yin" }, hue: 90 },
+      { name: "Sol", role: { nl: "Yin & Meditatie", en: "Yin & Meditation" }, hue: 255 },
     ],
     faqs: sharedFaqs,
   },

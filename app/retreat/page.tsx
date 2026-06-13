@@ -101,8 +101,40 @@ function RetreatDetail({ retreat }: { retreat: Retreat }) {
         </div>
       </section>
 
+      {/* ---------- voor wie ---------- */}
+      <section className="section" data-screen-label="Voor wie">
+        <div className="wrap">
+          <div className="section__head reveal">
+            <span className="eyebrow" data-nl="voor wie" data-en="who it's for">
+              voor wie
+            </span>
+            <h2 className="section__title" data-nl="Is dit jouw retreat?" data-en="Is this your retreat?">
+              Is dit jouw retreat?
+            </h2>
+          </div>
+          <div className="rwho reveal">
+            <div className="rincl__col">
+              <span className="pill">
+                <svg className="ic">
+                  <use href="#i-spark" />
+                </svg>{" "}
+                <Bi t={retreat.level} />
+              </span>
+              <ul className="rincl__list">
+                {retreat.forWho.map((li, i) => (
+                  <li key={i}>
+                    <span className="rincl__mk rincl__mk--yes" aria-hidden="true">✓</span>
+                    <Bi t={li} />
+                  </li>
+                ))}
+              </ul>
+            </div>
+          </div>
+        </div>
+      </section>
+
       {/* ---------- day by day ---------- */}
-      <section className="section" data-screen-label="Programma">
+      <section className="section section--alt" data-screen-label="Programma">
         <div className="wrap">
           <div className="section__head reveal">
             <span className="eyebrow" data-nl="dag tot dag" data-en="day by day">
@@ -131,12 +163,51 @@ function RetreatDetail({ retreat }: { retreat: Retreat }) {
         </div>
       </section>
 
+      {/* ---------- accommodation ---------- */}
+      <section className="section" data-screen-label="Verblijf">
+        <div className="wrap">
+          <div className="section__head reveal">
+            <span className="eyebrow" data-nl="waar je verblijft" data-en="where you stay">
+              waar je verblijft
+            </span>
+            <h2 className="section__title" data-nl="Je thuis voor deze dagen" data-en="Your home for these days">
+              Je thuis voor deze dagen
+            </h2>
+          </div>
+          <div className="food">
+            <div className="rstay__imgs reveal" data-reveal="left">
+              {retreat.stay.images.map((src, i) => (
+                <div
+                  className="ph ph--img"
+                  key={i}
+                  style={{ backgroundImage: `url(${src})` } as CSSProperties}
+                  role="img"
+                  aria-label={retreat.stay.title.nl}
+                ></div>
+              ))}
+            </div>
+            <div className="rstay__body reveal" data-reveal="right">
+              <Bi as="h3" className="rstay__title" t={retreat.stay.title} />
+              <Bi as="p" className="section__sub" t={retreat.stay.body} />
+              <ul className="rincl__list rstay__amenities">
+                {retreat.stay.amenities.map((a, i) => (
+                  <li key={i}>
+                    <span className="rincl__mk rincl__mk--yes" aria-hidden="true">✓</span>
+                    <Bi t={a} />
+                  </li>
+                ))}
+              </ul>
+            </div>
+          </div>
+        </div>
+      </section>
+
       {/* ---------- what's included ---------- */}
       <section className="section section--alt" data-screen-label="Inbegrepen">
         <div className="wrap">
           <div className="section__head reveal">
-            <span className="eyebrow" data-nl="goed om te weten" data-en="good to know">
-              goed om te weten
+            <span className="eyebrow" data-nl="het pakket" data-en="the package">
+              het pakket
             </span>
             <h2 className="section__title" data-nl="Wat is inbegrepen" data-en="What's included">
               Wat is inbegrepen
@@ -169,6 +240,70 @@ function RetreatDetail({ retreat }: { retreat: Retreat }) {
         </div>
       </section>
 
+      {/* ---------- practical ---------- */}
+      <section className="section" data-screen-label="Praktisch">
+        <div className="wrap">
+          <div className="section__head reveal">
+            <span className="eyebrow" data-nl="praktisch" data-en="practical">
+              praktisch
+            </span>
+            <h2 className="section__title" data-nl="Goed geregeld" data-en="Sorted for you">
+              Goed geregeld
+            </h2>
+            <p
+              className="section__sub"
+              data-nl="De praktische kant, alvast op een rij — zodat jij je alleen op de rust hoeft te focussen."
+              data-en="The practical side, laid out up front — so all you have to focus on is the calm."
+            >
+              De praktische kant, alvast op een rij — zodat jij je alleen op de rust hoeft te focussen.
+            </p>
+          </div>
+          <div className="offers">
+            {retreat.practical.map((p, i) => (
+              <div className="offer reveal" key={i} {...(i ? { "data-delay": i } : {})}>
+                <span className="offer__ic">
+                  <svg className="ic">
+                    <use href={`#${p.icon}`} />
+                  </svg>
+                </span>
+                <Bi as="h3" t={p.title} />
+                <Bi as="p" t={p.body} />
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* ---------- hosts ---------- */}
+      <section className="section section--alt" data-screen-label="Begeleiding">
+        <div className="wrap">
+          <div className="section__head reveal">
+            <span className="eyebrow" data-nl="wie je begeleidt" data-en="your guides">
+              wie je begeleidt
+            </span>
+            <h2 className="section__title" data-nl="In goede handen" data-en="In good hands">
+              In goede handen
+            </h2>
+            <p
+              className="section__sub"
+              data-nl="De vaste gezichten die deze retreat dragen — van de mat tot het diner."
+              data-en="The familiar faces holding this retreat together — from the mat to dinner."
+            >
+              De vaste gezichten die deze retreat dragen — van de mat tot het diner.
+            </p>
+          </div>
+          <div className="team">
+            {retreat.hosts.map((h, i) => (
+              <div className="member reveal" key={i} {...(i ? { "data-delay": i } : {})}>
+                <div className="ph" style={{ "--ph-hue": h.hue } as CSSProperties} data-label={h.name}></div>
+                <h4>{h.name}</h4>
+                <Bi className="role" t={h.role} />
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
       {/* ---------- gallery ---------- */}
       <section className="section" data-screen-label="Sfeer">
         <div className="wrap">
@@ -180,7 +315,7 @@ function RetreatDetail({ retreat }: { retreat: Retreat }) {
               Een beeld van de plek
             </h2>
           </div>
-          <div className="gallery reveal">
+          <div className="gallery gallery--even reveal">
             {retreat.galleryImages.map((src, i) => (
               <div
                 className="ph ph--img"
