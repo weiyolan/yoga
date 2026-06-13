@@ -484,6 +484,9 @@ html[data-lang="en"] [data-lang-only="nl"] { display: none !important; }
 .card__price small { font-family: var(--font-body); color: var(--ink-soft); font-weight: 400; font-size: 0.74rem; }
 .card__go { font-weight: 600; color: var(--accent); text-decoration: none; font-size: 0.9rem; display: inline-flex; gap: 0.3em; align-items: center; transition: gap .2s; }
 .card__go:hover { gap: 0.6em; }
+/* Stretch the "details" link over the whole card so the entire card is clickable. */
+.card__go::after { content: ""; position: absolute; inset: 0; z-index: 1; border-radius: inherit; }
+.card:hover .card__go { gap: 0.6em; }
 .retreats__foot { margin-top: clamp(40px, 5vw, 64px); display: flex; justify-content: center; }
 
 /* ---------- RETREAT DETAIL (what's included) ---------- */
