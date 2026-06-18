@@ -18,8 +18,8 @@ html[data-space="cozy"] { --sp: 0.8; }
 html[data-space="airy"] { --sp: 1; }
 html[data-space="vast"] { --sp: 1.35; }
 
-.section { padding-block: calc(clamp(76px, 11vw, 168px) * var(--sp)); }
-.section--tight { padding-block: calc(clamp(56px, 8vw, 112px) * var(--sp)); }
+.section { padding-block: calc(clamp(64px, 9vw, 140px) * var(--sp)); }
+.section--tight { padding-block: calc(clamp(48px, 6.5vw, 96px) * var(--sp)); }
 .section__head { margin-bottom: calc(clamp(40px, 6vw, 76px) * var(--sp)); }
 .hero__inner { padding-block: calc(clamp(48px, 8vw, 104px) * var(--sp)); }
 
@@ -78,7 +78,7 @@ html[data-design="lines"] {
   /* extra air on top of the user's spacing choice */
   --display-tracking: -0.018em;
 }
-html[data-design="lines"] .section { padding-block: calc(clamp(88px, 12.5vw, 196px) * var(--sp)); }
+html[data-design="lines"] .section { padding-block: calc(clamp(72px, 10vw, 156px) * var(--sp)); }
 html[data-design="lines"][data-font="grotesk"] { --display-weight: 600; }
 html[data-design="lines"][data-font="space"] { --display-weight: 500; }
 html[data-design="lines"][data-font="uniform"] { --display-weight: 600; }
@@ -268,6 +268,12 @@ html[data-design="lines"] .immersive__card {
   border-radius: var(--radius-lg) var(--radius-lg) var(--radius) var(--radius);
   padding: clamp(1.8rem, 3.4vw, 3rem);
 }
+/* the card is light paper now → ink text instead of the full-bleed white */
+html[data-design="lines"] .immersive__title,
+html[data-design="lines"] .immersive__list li,
+html[data-design="lines"] .immersive__price { color: var(--ink); }
+html[data-design="lines"] .immersive__sub,
+html[data-design="lines"] .immersive__note { color: var(--ink-soft); }
 html[data-design="lines"] .immersive .pill { background: transparent; color: var(--accent); box-shadow: none; }
 html[data-design="lines"] .immersive .fact {
   color: var(--ink); background: transparent; box-shadow: none;

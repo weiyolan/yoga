@@ -4,7 +4,7 @@ export default function Nav() {
       {/* ============ NAV ============ */}
       <header className="nav" id="nav">
         <div className="wrap nav__in">
-          <a href="#top" className="brand">
+          <a href="/" className="brand">
             <svg className="mark" viewBox="0 0 48 48" fill="none" aria-hidden="true">
               <circle cx="24" cy="14" r="6" fill="currentColor" />
               <path

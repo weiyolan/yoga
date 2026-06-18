@@ -355,6 +355,16 @@ html[data-lang="en"] [data-lang-only="nl"] { display: none !important; }
 }
 .ph--img::before, .ph--img::after { display: none; }
 
+/* hover: gentle zoom + lift on real photos. Uses the scale/translate
+   properties (not transform) so it composes with the transform-based
+   parallax & drift system. Full-bleed media and the gallery (which has its
+   own full-screen backdrop preview) opt out. */
+.ph--img { transition: scale .5s cubic-bezier(.2,.8,.25,1), translate .5s cubic-bezier(.2,.8,.25,1), box-shadow .5s ease; }
+.ph--img:hover { scale: 1.04; translate: 0 -6px; box-shadow: var(--hard); z-index: 2; position: relative; }
+.hero__media .ph--img:hover,
+.immersive__media .ph--img:hover,
+.gallery .ph--img:hover { scale: 1; translate: 0; box-shadow: none; }
+
 /* darker grey for full-bleed hero imagery (white text reads) */
 .hero__media .ph, .immersive__media .ph, .detail-hero__media .ph {
   background: linear-gradient(150deg, var(--phd-1) 0%, var(--phd-2) 100%);
@@ -523,6 +533,14 @@ html[data-lang="en"] [data-lang-only="nl"] { display: none !important; }
 
 /* ---------- GALLERY ---------- */
 .gallery { display: grid; grid-template-columns: repeat(6, 1fr); gap: 16px; grid-auto-rows: 168px; }
+/* full-screen preview of the hovered "memory" photo (toggled by SiteScripts) */
+.gallery-peek {
+  position: fixed; inset: 0; z-index: 45; pointer-events: none; opacity: 0;
+  transition: opacity .4s ease;
+  background-color: oklch(0.18 0.02 60 / 0.82);
+  background-position: center; background-repeat: no-repeat; background-size: contain;
+}
+.gallery-peek.show { opacity: 1; }
 .gallery .ph { height: 100%; border-radius: var(--radius); }
 .g1 { grid-column: span 2; grid-row: span 2; }
 .g2 { grid-column: span 2; } .g3 { grid-column: span 2; } .g4 { grid-column: span 2; }
@@ -539,6 +557,25 @@ html[data-lang="en"] [data-lang-only="nl"] { display: none !important; }
 .quote__who b { display: block; font-size: 0.92rem; font-weight: 600; }
 .quote__who span { font-size: 0.8rem; color: var(--ink-soft); }
 
+/* two-direction review marquees — cards laid out in a horizontal track */
+.review-marquees { display: grid; gap: clamp(16px, 2vw, 24px); }
+.review-row {
+  overflow: hidden;
+  -webkit-mask: linear-gradient(90deg, transparent, #000 6%, #000 94%, transparent);
+          mask: linear-gradient(90deg, transparent, #000 6%, #000 94%, transparent);
+}
+.review-track { display: flex; gap: clamp(16px, 2vw, 24px); width: max-content; will-change: transform; }
+.review-row--l .review-track { animation: review-left 46s linear infinite; }
+.review-row--r .review-track { animation: review-right 52s linear infinite; }
+.review-marquees:hover .review-track { animation-play-state: paused; }
+.review-track .quote { flex: 0 0 clamp(300px, 80vw, 420px); width: clamp(300px, 80vw, 420px); }
+@keyframes review-left  { from { transform: translateX(0); } to { transform: translateX(-50%); } }
+@keyframes review-right { from { transform: translateX(-50%); } to { transform: translateX(0); } }
+@media (prefers-reduced-motion: reduce) {
+  .review-track { animation: none !important; }
+  .review-row { -webkit-mask: none; mask: none; overflow-x: auto; }
+}
+
 /* ---------- FAQ ---------- */
 .faq { max-width: 820px; margin-inline: auto; display: grid; gap: 0; border-top: 1px solid var(--line); }
 .faq details { background: transparent; border-bottom: 1px solid var(--line); overflow: hidden; }
@@ -548,8 +585,15 @@ html[data-lang="en"] [data-lang-only="nl"] { display: none !important; }
 .faq summary .plus::before, .faq summary .plus::after { content: ""; position: absolute; background: currentColor; border-radius: 2px; }
 .faq summary .plus::before { inset: 10px 3px; height: 2px; }
 .faq summary .plus::after { inset: 3px 10px; width: 2px; }
-.faq details[open] summary .plus { transform: rotate(135deg); }
+.faq details.open summary .plus { transform: rotate(135deg); }
 .faq__a { padding: 0 0.2rem 1.4rem; color: var(--ink-soft); max-width: 70ch; }
+/* JS-driven fold: SiteScripts toggles `.open`; the answer collapses via display */
+.faq__wrap { display: block; }
+.faq details:not(.open) .faq__wrap { display: none; }
+.faq__inner { overflow: hidden; }
+.faq details.open .faq__inner { animation: faqReveal .5s cubic-bezier(.22,.85,.3,1) both; }
+@keyframes faqReveal { from { opacity: 0; transform: translateY(-14px); } to { opacity: 1; transform: none; } }
+@media (prefers-reduced-motion: reduce) { .faq details.open .faq__inner { animation: none; } }
 
 /* ---------- NEWSLETTER / CTA ---------- */
 .cta {

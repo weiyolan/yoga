@@ -373,6 +373,27 @@ export default function SiteScripts() {
         { passive: true }
       );
     }
+
+    /* gallery "memory" hover → full-screen backdrop preview of the full photo */
+    if (!reduce && window.matchMedia("(pointer:fine)").matches) {
+      const tiles = Array.prototype.slice.call(
+        document.querySelectorAll<HTMLElement>(".gallery .ph--img")
+      ) as HTMLElement[];
+      if (tiles.length) {
+        const peek = document.createElement("div");
+        peek.className = "gallery-peek";
+        peek.setAttribute("aria-hidden", "true");
+        document.body.appendChild(peek);
+        tiles.forEach((tile) => {
+          tile.addEventListener("mouseenter", () => {
+            const bg = tile.style.backgroundImage;
+            if (bg) peek.style.backgroundImage = bg;
+            peek.classList.add("show");
+          });
+          tile.addEventListener("mouseleave", () => peek.classList.remove("show"));
+        });
+      }
+    }
   }, []);
 
   return null;

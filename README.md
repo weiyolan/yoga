@@ -36,10 +36,11 @@ npm run build    # production build
 - `components/LineArt.tsx` — the intricate line-art drawing library (hero arch scene, sun,
   moon, sprig, lotus, eye, mandala, moon-phase dividers), generated deterministically so the
   `.draw` stroke animation can wipe each drawing on as it scrolls into view.
-- `components/*` — static section components (server) + one client island:
+- `components/*` — static section components (server) + two client islands:
   - `SiteScripts.tsx` — i18n, sticky nav, mobile drawer, IntersectionObserver scroll reveals
     with stagger, scroll-progress, parallax, figure drift, drifting card grids, review
-    marquees, FAQ accordion, SVG line-draw.
+    marquees, FAQ accordion, SVG line-draw, and the gallery hover backdrop.
+  - `SmoothScroll.tsx` — Lenis smooth scrolling + smooth in-page anchor navigation.
 
 ## Notes
 

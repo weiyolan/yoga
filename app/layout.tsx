@@ -2,7 +2,9 @@ import type { Metadata } from "next";
 import "./styles/styles-v3.css";
 import "./styles/chalk-lineart.css";
 import "./styles/lines-v1.css";
+import "lenis/dist/lenis.css";
 import SiteScripts from "@/components/SiteScripts";
+import SmoothScroll from "@/components/SmoothScroll";
 
 export const metadata: Metadata = {
   title: "Yoga, Zen & Tonic — Beyond the mat, into the moment",
@@ -41,6 +43,7 @@ export default function RootLayout({
       </head>
       <body>
         {children}
+        <SmoothScroll />
         <SiteScripts />
       </body>
     </html>
