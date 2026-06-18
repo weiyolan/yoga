@@ -18,19 +18,6 @@ export default function About() {
       >
         <LaEye />
       </LaFig>
-      <span
-        className="orbit m-burst spin-rev"
-        data-drift="0.2"
-        data-mobile="hide"
-        style={{ "--sz": "54px", "--op": ".15", top: "7%", right: "4%" } as CSSProperties}
-        aria-hidden="true"
-      ></span>
-      <span
-        className="orbit m-spark shimmer"
-        data-drift="-0.18"
-        style={{ "--sz": "30px", "--op": ".65", bottom: "12%", left: "3%" } as CSSProperties}
-        aria-hidden="true"
-      ></span>
       <svg
         className="deco-line draw deco-line--soft"
         data-mobile="hide"

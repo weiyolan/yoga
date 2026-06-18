@@ -31,12 +31,12 @@ export default function Home() {
         <Immersive />
         <RetreatCards />
 
-        <BandSep variant="diamond" />
+        <BandSep />
 
         <Offers />
         <Team />
 
-        <BandSep variant="chevron" />
+        <BandSep />
 
         <Food />
 

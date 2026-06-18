@@ -1,10 +1,8 @@
 import type { Metadata } from "next";
 import "./styles/styles-v3.css";
-import "./styles/bold-v3.css";
 import "./styles/chalk-lineart.css";
 import "./styles/lines-v1.css";
 import SiteScripts from "@/components/SiteScripts";
-import TweaksPanel from "@/components/TweaksPanel";
 
 export const metadata: Metadata = {
   title: "Yoga, Zen & Tonic — Beyond the mat, into the moment",
@@ -21,14 +19,13 @@ export default function RootLayout({
     <html
       lang="nl"
       data-lang="nl"
-      data-design="bold"
-      data-theme="poppy"
-      data-font="grotesk"
+      data-design="lines"
+      data-theme="boheme"
+      data-font="fraunces"
       data-space="airy"
       data-ink="medium"
       data-paper="on"
       data-deco="on"
-      data-shimmer="on"
     >
       <head>
         <link rel="preconnect" href="https://fonts.googleapis.com" />
@@ -38,13 +35,12 @@ export default function RootLayout({
           crossOrigin="anonymous"
         />
         <link
-          href="https://fonts.googleapis.com/css2?family=Schibsted+Grotesk:wght@400;500;600;700;800&family=Space+Grotesk:wght@400;500;600;700&family=Hanken+Grotesque:wght@400;500;600;700;800&family=Fraunces:ital,opsz,wght@0,9..144,300..800;1,9..144,300..800&display=swap"
+          href="https://fonts.googleapis.com/css2?family=Hanken+Grotesque:wght@400;500;600;700;800&family=Fraunces:ital,opsz,wght@0,9..144,300..800;1,9..144,300..800&display=swap"
           rel="stylesheet"
         />
       </head>
       <body>
         {children}
-        <TweaksPanel />
         <SiteScripts />
       </body>
     </html>

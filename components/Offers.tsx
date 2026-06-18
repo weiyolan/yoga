@@ -33,18 +33,6 @@ export default function Offers() {
         <path d="M18 156 H38" />
         <path d="M22 164 H34" />
       </svg>
-      <span
-        className="star-deco s-star4 spin s-shimmer"
-        data-mobile="hide"
-        style={{ "--sz": "56px", "--op": ".9", top: "9%", left: "5%" } as CSSProperties}
-        aria-hidden="true"
-      ></span>
-      <span
-        className="star-deco s-flower bob"
-        data-mobile="hide"
-        style={{ "--sz": "44px", "--op": ".5", "--c": "var(--accent-2)", bottom: "10%", left: "7%" } as CSSProperties}
-        aria-hidden="true"
-      ></span>
       <div className="wrap">
         <div className="section__head reveal">
           <span className="eyebrow" data-nl="het hele jaar door" data-en="all year round">

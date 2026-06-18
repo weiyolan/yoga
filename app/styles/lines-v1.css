@@ -1,19 +1,15 @@
 /* ============================================================
-   Yoga, Zen & Tonic — DESIGN MODES + "INK & LINE" LAYER (v1)
-   Loads last. Owns the live design switch:
+   Yoga, Zen & Tonic — "INK & LINE" (BOHO LINE) DESIGN  (v1)
+   Loads last, over styles-v3.css. The site's single art
+   direction: a clean, airy bohemian design that puts intricate
+   2D SVG line drawings forward — paper canvas, hairlines, arch
+   shapes and drawn motifs that wipe themselves on as you scroll.
+   Scoped under html[data-design="lines"] (set in app/layout.tsx).
 
-     html[data-design="bold"]   → the punchy bordered shadowbox
-                                  theme (bold-v3.css, untouched)
-     html[data-design="lines"]  → a clean, airy bohemian design
-                                  that puts intricate 2D SVG line
-                                  drawings forward: paper canvas,
-                                  hairlines, arch shapes, drawn
-                                  motifs that wipe themselves on.
-
-   Also owns tokens both designs share:
+   Also owns shared layout tokens:
      html[data-space]  → breathing room scale  (--sp)
      html[data-ink]    → line-art stroke weight (--la-sw)
-     html[data-paper]  → subtle paper grain (lines design)
+     html[data-paper]  → subtle paper grain
    ============================================================ */
 
 /* ---------- BREATHING ROOM (both designs) ---------- */
@@ -103,11 +99,6 @@ html[data-design="lines"][data-paper="on"][data-theme="night"] body::before {
   mix-blend-mode: screen; opacity: 0.04;
 }
 
-/* hide the bold-mode decoration systems */
-html[data-design="lines"] .orbit,
-html[data-design="lines"] .star-deco,
-html[data-design="lines"] .band-sep .tband { display: none; }
-html[data-design="lines"] .band-sep { padding-block: 0; }
 /* the drawn deco that already exists fits the ink look — keep & lift it */
 html[data-design="lines"] .deco-line { opacity: 0.5; }
 html[data-design="lines"] .deco-watermark { opacity: 0.07; }
@@ -206,8 +197,7 @@ html[data-design="lines"] .hero {
   min-height: min(94vh, 880px); align-items: center;
 }
 html[data-design="lines"] .hero__media,
-html[data-design="lines"] .hero__scrim,
-html[data-design="lines"] .hero__sun { display: none; }
+html[data-design="lines"] .hero__scrim { display: none; }
 
 .la-hero-scene {
   position: absolute; z-index: 0; pointer-events: none;

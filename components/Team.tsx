@@ -11,19 +11,6 @@ export default function Team() {
       >
         <LaMoon />
       </LaFig>
-      <span
-        className="orbit m-spark shimmer"
-        data-drift="-0.16"
-        style={{ "--sz": "30px", "--op": ".55", top: "9%", left: "5%" } as CSSProperties}
-        aria-hidden="true"
-      ></span>
-      <span
-        className="orbit m-burst spin"
-        data-drift="0.2"
-        data-mobile="hide"
-        style={{ "--sz": "50px", "--op": ".13", bottom: "8%", right: "4%" } as CSSProperties}
-        aria-hidden="true"
-      ></span>
       <svg
         className="deco-line draw deco-line--2"
         data-mobile="hide"
