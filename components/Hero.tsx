@@ -13,10 +13,7 @@ export default function Hero() {
         ></div>
       </div>
       <div className="hero__scrim"></div>
-      <svg className="hero__sun" aria-hidden="true">
-        <use href="#m-sunburst" />
-      </svg>
-      {/* design B: the intricate drawn arch scene IS the hero artwork */}
+      {/* the intricate drawn arch scene is the hero artwork */}
       <div className="la-hero-scene la-only" data-parallax="-0.07" aria-hidden="true">
         <LaHeroScene />
       </div>
@@ -28,59 +25,6 @@ export default function Hero() {
       >
         <LaSprig />
       </LaFig>
-      <span
-        className="orbit m-spark shimmer"
-        data-drift="-0.24"
-        style={{ "--sz": "40px", "--op": ".8", top: "17%", left: "6%" } as CSSProperties}
-        aria-hidden="true"
-      ></span>
-      <span
-        className="orbit m-daisy spin"
-        data-drift="0.14"
-        data-mobile="hide"
-        style={
-          {
-            "--sz": "66px",
-            "--op": ".34",
-            bottom: "15%",
-            right: "8%",
-            backgroundColor: "oklch(0.9 0.05 60)",
-          } as CSSProperties
-        }
-        aria-hidden="true"
-      ></span>
-      <span
-        className="orbit m-burst spin-rev"
-        data-drift="0.22"
-        data-mobile="hide"
-        style={
-          {
-            "--sz": "26px",
-            "--op": ".6",
-            top: "62%",
-            left: "13%",
-            backgroundColor: "oklch(0.88 0.06 40)",
-          } as CSSProperties
-        }
-        aria-hidden="true"
-      ></span>
-      <span
-        className="star-deco s-star4 spin s-shimmer"
-        data-mobile="hide"
-        style={{ "--sz": "78px", "--op": 1, top: "13%", right: "9%" } as CSSProperties}
-        aria-hidden="true"
-      ></span>
-      <span
-        className="star-deco s-gear spin-r"
-        data-mobile="hide"
-        style={{ "--sz": "42px", "--op": ".55", "--c": "#fff", bottom: "24%", right: "17%" } as CSSProperties}
-        aria-hidden="true"
-      ></span>
-      <span
-        className="star-deco s-star4 pulse"
-        style={{ "--sz": "30px", "--op": ".9", "--c": "var(--accent-3)", top: "40%", left: "4%" } as CSSProperties}
-        aria-hidden="true"
-      ></span>
       <span className="hero__side" aria-hidden="true">
         est. Antwerpen · beyond the mat
       </span>

@@ -1,4 +1,3 @@
-import type { CSSProperties } from "react";
 import SvgSprite from "@/components/SvgSprite";
 import Nav from "@/components/Nav";
 import Footer from "@/components/Footer";
@@ -18,19 +17,6 @@ export default function RetreatsPage() {
       <Nav />
       <main id="top">
         <section className="section" data-screen-label="Alle retreats">
-          <span
-            className="orbit m-daisy spin"
-            data-drift="0.2"
-            data-mobile="hide"
-            style={{ "--sz": "72px", "--op": ".12", top: "7%", right: "3%" } as CSSProperties}
-            aria-hidden="true"
-          ></span>
-          <span
-            className="star-deco s-flower spin s-shimmer"
-            data-mobile="hide"
-            style={{ "--sz": "58px", "--op": ".85", bottom: "8%", left: "4%" } as CSSProperties}
-            aria-hidden="true"
-          ></span>
           <div className="wrap">
             <div className="section__head reveal">
               <span className="eyebrow" data-nl="alle retreats" data-en="all retreats">

@@ -5,19 +5,16 @@ import { useEffect, useRef } from "react";
 /**
  * Faithful port of the prototype's three vanilla scripts — app.js (i18n, nav,
  * drawer, reveal, FAQ, newsletter), motion-v3.js (scroll progress, parallax,
- * orbit drift, review-marquee cloning, stagger indexing) and tribal-deco.js
- * (SVG line-draw + pattern-band reveal + pointer parallax) — run once after
- * hydration. Returns null; it only orchestrates DOM the static markup renders.
+ * figure drift, review-marquee cloning, stagger indexing) and tribal-deco.js
+ * (SVG line-draw + pointer parallax) — run once after hydration. Returns null;
+ * it only orchestrates DOM the static markup renders.
  *
- * v2 additions for the live design switch:
  *  - reveals are IntersectionObserver-driven so the fade-in stagger really
- *    plays on scroll (the old 1.6s "reveal everything" failsafe only rescues
- *    elements already on screen now)
+ *    plays on scroll (the load/late failsafe only rescues elements already
+ *    on screen)
  *  - card grids drift at alternating speeds while scrolling (data-driftless
  *    opts a grid out)
- *  - line-art figures (.la-fig[data-drift]) join the orbit drift system
- *  - the "yzt:tweaks" event (fired by the Tweaks panel) re-measures motion
- *    state after a design/spacing change reflows the page
+ *  - line-art figures (.la-fig[data-drift]) drift on scroll
  */
 export default function SiteScripts() {
   const didInit = useRef(false);
@@ -162,9 +159,7 @@ export default function SiteScripts() {
       document.querySelectorAll("[data-parallax]")
     ) as HTMLElement[];
     const orbits = Array.prototype.slice.call(
-      document.querySelectorAll(
-        ".orbit[data-drift], .star-deco[data-drift], .la-fig[data-drift]"
-      )
+      document.querySelectorAll(".la-fig[data-drift]")
     ) as HTMLElement[];
 
     /* stagger: index .reveal children so CSS can cascade delays */
@@ -209,7 +204,7 @@ export default function SiteScripts() {
       .filter((g) => g.kids.length > 1);
     let driftOn = false;
 
-    /* cache base centres for orbit drift (transform-independent) */
+    /* cache base centres for figure drift (transform-independent) */
     interface OrbitEl extends HTMLElement {
       __cy?: number;
       __drift?: number;
@@ -294,15 +289,6 @@ export default function SiteScripts() {
     });
     onMotionScroll();
 
-    /* the Tweaks panel reflows the whole page when the design / spacing
-       changes — re-measure drift anchors and rescue on-screen reveals */
-    window.addEventListener("yzt:tweaks", () => {
-      setTimeout(() => {
-        onMotionResize();
-        revealSweep();
-      }, 60);
-    });
-
     /* ===================== tribal-deco.js ===================== */
     const SHAPE_SEL = "path, line, polyline, polygon, circle, rect, ellipse";
 
@@ -352,24 +338,8 @@ export default function SiteScripts() {
         { threshold: 0.25, rootMargin: "0px 0px -8% 0px" }
       );
       draws.forEach((d) => drawIO.observe(d));
-
-      const bandIO = new IntersectionObserver(
-        (entries) => {
-          entries.forEach((e) => {
-            if (e.isIntersecting) {
-              e.target.classList.add("in");
-              bandIO.unobserve(e.target);
-            }
-          });
-        },
-        { threshold: 0.18 }
-      );
-      document.querySelectorAll(".tband").forEach((b) => bandIO.observe(b));
     } else {
       draws.forEach(fire);
-      document
-        .querySelectorAll(".tband")
-        .forEach((b) => b.classList.add("in"));
     }
 
     /* subtle pointer parallax on floating symbols (desktop only) */
@@ -402,6 +372,27 @@ export default function SiteScripts() {
         },
         { passive: true }
       );
+    }
+
+    /* gallery "memory" hover → full-screen backdrop preview of the full photo */
+    if (!reduce && window.matchMedia("(pointer:fine)").matches) {
+      const tiles = Array.prototype.slice.call(
+        document.querySelectorAll<HTMLElement>(".gallery .ph--img")
+      ) as HTMLElement[];
+      if (tiles.length) {
+        const peek = document.createElement("div");
+        peek.className = "gallery-peek";
+        peek.setAttribute("aria-hidden", "true");
+        document.body.appendChild(peek);
+        tiles.forEach((tile) => {
+          tile.addEventListener("mouseenter", () => {
+            const bg = tile.style.backgroundImage;
+            if (bg) peek.style.backgroundImage = bg;
+            peek.classList.add("show");
+          });
+          tile.addEventListener("mouseleave", () => peek.classList.remove("show"));
+        });
+      }
     }
   }, []);
 

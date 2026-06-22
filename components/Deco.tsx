@@ -1,16 +1,10 @@
 import { LaPhases } from "@/components/LineArt";
 
-export function BandSep({ variant }: { variant: "diamond" | "chevron" }) {
+export function BandSep() {
   return (
-    <>
-      <div className="band-sep" aria-hidden="true">
-        <div className={`tband tband--${variant}`}></div>
-      </div>
-      {/* design B swaps the masked pattern band for drawn moon phases */}
-      <div className="la-sep la-only" aria-hidden="true">
-        <LaPhases />
-      </div>
-    </>
+    <div className="la-sep la-only" aria-hidden="true">
+      <LaPhases />
+    </div>
   );
 }
 

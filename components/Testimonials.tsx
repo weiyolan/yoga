@@ -58,19 +58,6 @@ export default function Testimonials() {
       >
         <LaLotus />
       </LaFig>
-      <span
-        className="star-deco s-star4 spin s-shimmer"
-        data-drift="0.18"
-        data-mobile="hide"
-        style={{ "--sz": "58px", "--op": ".95", top: "7%", right: "6%" } as CSSProperties}
-        aria-hidden="true"
-      ></span>
-      <span
-        className="star-deco s-flower bob"
-        data-mobile="hide"
-        style={{ "--sz": "46px", "--op": ".5", "--c": "var(--accent-2)", bottom: "9%", left: "4%" } as CSSProperties}
-        aria-hidden="true"
-      ></span>
       <div className="wrap">
         <div className="section__head center reveal" data-reveal="pop">
           <svg

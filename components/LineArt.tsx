@@ -490,7 +490,7 @@ export function LaMandala({ className = "", style }: ArtProps) {
 
 /* ============================================================
    POSITIONED FIGURE WRAPPER — absolute deco that can drift on
-   scroll (data-drift) just like the bold-mode orbit motifs.
+   scroll via the data-drift attribute.
    ============================================================ */
 export function LaFig({
   children,
