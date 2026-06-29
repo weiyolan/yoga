@@ -21,31 +21,6 @@ export default function RetreatCards() {
       >
         <LaArch />
       </LaFig>
-      <span
-        className="orbit m-daisy spin"
-        data-drift="0.22"
-        data-mobile="hide"
-        style={{ "--sz": "72px", "--op": ".12", top: "6%", left: "2%" } as CSSProperties}
-        aria-hidden="true"
-      ></span>
-      <span
-        className="orbit m-spark shimmer"
-        data-drift="-0.2"
-        style={{ "--sz": "32px", "--op": ".6", top: "18%", right: "5%" } as CSSProperties}
-        aria-hidden="true"
-      ></span>
-      <span
-        className="star-deco s-flower spin s-shimmer"
-        data-mobile="hide"
-        style={{ "--sz": "64px", "--op": ".85", bottom: "7%", right: "5%" } as CSSProperties}
-        aria-hidden="true"
-      ></span>
-      <span
-        className="star-deco s-star4 bob"
-        data-mobile="hide"
-        style={{ "--sz": "34px", "--op": ".8", "--c": "var(--accent-2)", top: "11%", left: "6%" } as CSSProperties}
-        aria-hidden="true"
-      ></span>
       <div className="wrap">
         <div className="section__head reveal" data-reveal="pop">
           <span className="eyebrow" data-nl="kom erbij" data-en="come join">

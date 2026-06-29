@@ -1,4 +1,3 @@
-import type { CSSProperties } from "react";
 import { LaMandala } from "@/components/LineArt";
 
 export default function Cta() {
@@ -6,7 +5,7 @@ export default function Cta() {
     <section className="section section--tight" id="aanmelden" data-screen-label="Newsletter / CTA">
       <div className="wrap">
         <div className="cta reveal">
-          {/* design B: a drawn mandala crowns the arched invitation */}
+          {/* a drawn mandala crowns the arched invitation */}
           <div className="la-cta-mandala la-only" aria-hidden="true">
             <LaMandala />
           </div>
@@ -44,30 +43,6 @@ export default function Cta() {
           <svg className="cta__motif">
             <use href="#m-sunburst" />
           </svg>
-          <span
-            className="star-deco s-star4 spin s-shimmer"
-            data-mobile="hide"
-            style={{ "--sz": "52px", "--op": ".95", top: "16%", right: "9%" } as CSSProperties}
-            aria-hidden="true"
-          ></span>
-          <span
-            className="star-deco s-gear spin-r"
-            data-mobile="hide"
-            style={{ "--sz": "38px", "--op": ".45", "--c": "var(--accent)", bottom: "16%", left: "9%" } as CSSProperties}
-            aria-hidden="true"
-          ></span>
-          <span
-            className="orbit m-spark shimmer"
-            data-drift="0"
-            style={{ "--sz": "26px", "--op": ".7", top: "15%", left: "11%" } as CSSProperties}
-            aria-hidden="true"
-          ></span>
-          <span
-            className="orbit m-spark shimmer"
-            data-drift="0"
-            style={{ "--sz": "19px", "--op": ".6", bottom: "19%", right: "14%" } as CSSProperties}
-            aria-hidden="true"
-          ></span>
           <span className="eyebrow" data-nl="mis niets" data-en="don't miss out">
             mis niets
           </span>

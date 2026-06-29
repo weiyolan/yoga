@@ -303,7 +303,6 @@ html[data-lang="en"] [data-lang-only="nl"] { display: none !important; }
   display: inline-flex; align-items: center; gap: 0.8em;
 }
 .hero__side::before { content: ""; width: 44px; height: 1px; background: currentColor; }
-.hero__sun { position: absolute; z-index: 0; color: oklch(1 0 0 / 0.14); pointer-events: none; width: clamp(150px, 22vw, 280px); height: clamp(150px, 22vw, 280px); top: clamp(-30px, 4vw, 64px); right: clamp(40px, 12vw, 200px); }
 @media (max-width: 720px) { .hero__side { display: none; } }
 
 /* marquee band — quiet tracked caps */
@@ -355,6 +354,16 @@ html[data-lang="en"] [data-lang-only="nl"] { display: none !important; }
   background-repeat: no-repeat !important;
 }
 .ph--img::before, .ph--img::after { display: none; }
+
+/* hover: gentle zoom + lift on real photos. Uses the scale/translate
+   properties (not transform) so it composes with the transform-based
+   parallax & drift system. Full-bleed media and the gallery (which has its
+   own full-screen backdrop preview) opt out. */
+.ph--img { transition: scale .5s cubic-bezier(.2,.8,.25,1), translate .5s cubic-bezier(.2,.8,.25,1), box-shadow .5s ease; }
+.ph--img:hover { scale: 1.04; translate: 0 -6px; box-shadow: var(--hard); z-index: 2; position: relative; }
+.hero__media .ph--img:hover,
+.immersive__media .ph--img:hover,
+.gallery .ph--img:hover { scale: 1; translate: 0; box-shadow: none; }
 
 /* darker grey for full-bleed hero imagery (white text reads) */
 .hero__media .ph, .immersive__media .ph, .detail-hero__media .ph {
@@ -540,7 +549,16 @@ html[data-lang="en"] [data-lang-only="nl"] { display: none !important; }
 @media (max-width: 900px) { .food { grid-template-columns: 1fr; } }
 
 /* ---------- GALLERY ---------- */
-.gallery { display: grid; grid-template-columns: repeat(6, 1fr); gap: clamp(12px, 1.4vw, 18px); grid-auto-rows: 168px; }
+
+.gallery { display: grid; grid-template-columns: repeat(6, 1fr); gap: 16px; grid-auto-rows: 168px; }
+/* full-screen preview of the hovered "memory" photo (toggled by SiteScripts) */
+.gallery-peek {
+  position: fixed; inset: 0; z-index: 45; pointer-events: none; opacity: 0;
+  transition: opacity .4s ease;
+  background-color: oklch(0.18 0.02 60 / 0.82);
+  background-position: center; background-repeat: no-repeat; background-size: contain;
+}
+.gallery-peek.show { opacity: 1; }
 .gallery .ph { height: 100%; border-radius: var(--radius); }
 .g1 { grid-column: span 2; grid-row: span 2; }
 .g2 { grid-column: span 2; } .g3 { grid-column: span 2; } .g4 { grid-column: span 2; }
@@ -561,6 +579,25 @@ html[data-lang="en"] [data-lang-only="nl"] { display: none !important; }
 .quote__who b { display: block; font-size: 0.92rem; font-weight: 600; }
 .quote__who span { font-size: 0.8rem; color: var(--ink-soft); }
 
+/* two-direction review marquees — cards laid out in a horizontal track */
+.review-marquees { display: grid; gap: clamp(16px, 2vw, 24px); }
+.review-row {
+  overflow: hidden;
+  -webkit-mask: linear-gradient(90deg, transparent, #000 6%, #000 94%, transparent);
+          mask: linear-gradient(90deg, transparent, #000 6%, #000 94%, transparent);
+}
+.review-track { display: flex; gap: clamp(16px, 2vw, 24px); width: max-content; will-change: transform; }
+.review-row--l .review-track { animation: review-left 46s linear infinite; }
+.review-row--r .review-track { animation: review-right 52s linear infinite; }
+.review-marquees:hover .review-track { animation-play-state: paused; }
+.review-track .quote { flex: 0 0 clamp(300px, 80vw, 420px); width: clamp(300px, 80vw, 420px); }
+@keyframes review-left  { from { transform: translateX(0); } to { transform: translateX(-50%); } }
+@keyframes review-right { from { transform: translateX(-50%); } to { transform: translateX(0); } }
+@media (prefers-reduced-motion: reduce) {
+  .review-track { animation: none !important; }
+  .review-row { -webkit-mask: none; mask: none; overflow-x: auto; }
+}
+
 /* ---------- FAQ ---------- */
 .faq { max-width: 820px; margin-inline: auto; display: grid; gap: 0; border-top: 1px solid var(--line); }
 .faq details { background: transparent; border-bottom: 1px solid var(--line); overflow: hidden; }
@@ -570,8 +607,15 @@ html[data-lang="en"] [data-lang-only="nl"] { display: none !important; }
 .faq summary .plus::before, .faq summary .plus::after { content: ""; position: absolute; background: currentColor; border-radius: 2px; }
 .faq summary .plus::before { inset: 10px 3px; height: 2px; }
 .faq summary .plus::after { inset: 3px 10px; width: 2px; }
-.faq details[open] summary .plus { transform: rotate(135deg); }
+.faq details.open summary .plus { transform: rotate(135deg); }
 .faq__a { padding: 0 0.2rem 1.4rem; color: var(--ink-soft); max-width: 70ch; }
+/* JS-driven fold: SiteScripts toggles `.open`; the answer collapses via display */
+.faq__wrap { display: block; }
+.faq details:not(.open) .faq__wrap { display: none; }
+.faq__inner { overflow: hidden; }
+.faq details.open .faq__inner { animation: faqReveal .5s cubic-bezier(.22,.85,.3,1) both; }
+@keyframes faqReveal { from { opacity: 0; transform: translateY(-14px); } to { opacity: 1; transform: none; } }
+@media (prefers-reduced-motion: reduce) { .faq details.open .faq__inner { animation: none; } }
 
 /* ---------- NEWSLETTER / CTA ---------- */
 .cta {
@@ -630,7 +674,6 @@ html[data-theme="night"] body::after { display: none; }
 
 html[data-deco="off"] .tribal-divider,
 html[data-deco="off"] .head-motif,
-html[data-deco="off"] .hero__sun,
 html[data-deco="off"] .footer__motifs,
 html[data-deco="off"] .cta__motif { display: none; }
 html[data-deco="off"] .eyebrow::before { display: none; }
@@ -665,40 +708,7 @@ html[data-deco="off"] body::after { opacity: 0; }
 @keyframes tspin     { to { transform: rotate(360deg); } }
 @keyframes tspin-rev { to { transform: rotate(-360deg); } }
 @keyframes tfloat    { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-12px); } }
-@keyframes tdrift    { to { -webkit-mask-position: var(--bw) 50%; mask-position: var(--bw) 50%; } }
 @keyframes tbreathe  { 0%, 100% { opacity: 0.5; } 50% { opacity: 0.82; } }
-
-/* ---- repeating pattern bands (recolour with the accent via mask) ---- */
-.band-sep { display: flex; justify-content: center; padding: clamp(18px, 4vw, 48px) var(--pad); }
-.tband {
-  width: 100%; max-width: var(--maxw); height: 26px;
-  background: var(--accent); opacity: 0.5;
-  -webkit-mask-repeat: repeat-x; mask-repeat: repeat-x;
-  -webkit-mask-position: 0 50%; mask-position: 0 50%;
-  clip-path: inset(0 100% 0 0);
-  transition: clip-path 1.15s cubic-bezier(.4,0,.2,1);
-}
-.tband.in { clip-path: inset(0 0 0 0); animation: tdrift 16s linear infinite; }
-.tband--chevron {
-  --bw: 54px; -webkit-mask-size: 54px 22px; mask-size: 54px 22px;
-  -webkit-mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='54' height='22' viewBox='0 0 54 22'%3E%3Cpath d='M0 16 L13.5 6 L27 16 L40.5 6 L54 16' fill='none' stroke='%23000' stroke-width='2.2' stroke-linecap='round' stroke-linejoin='round'/%3E%3Ccircle cx='13.5' cy='2.4' r='1.5'/%3E%3Ccircle cx='40.5' cy='2.4' r='1.5'/%3E%3C/svg%3E");
-          mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='54' height='22' viewBox='0 0 54 22'%3E%3Cpath d='M0 16 L13.5 6 L27 16 L40.5 6 L54 16' fill='none' stroke='%23000' stroke-width='2.2' stroke-linecap='round' stroke-linejoin='round'/%3E%3Ccircle cx='13.5' cy='2.4' r='1.5'/%3E%3Ccircle cx='40.5' cy='2.4' r='1.5'/%3E%3C/svg%3E");
-}
-.tband--diamond {
-  --bw: 48px; -webkit-mask-size: 48px 24px; mask-size: 48px 24px;
-  -webkit-mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='48' height='24' viewBox='0 0 48 24'%3E%3Cg fill='none' stroke='%23000' stroke-width='2' stroke-linejoin='round'%3E%3Cpath d='M12 12 L24 3 L36 12 L24 21 Z'/%3E%3Cpath d='M19 12 L24 8 L29 12 L24 16 Z'/%3E%3C/g%3E%3Ccircle cx='0' cy='12' r='2'/%3E%3Ccircle cx='48' cy='12' r='2'/%3E%3C/svg%3E");
-          mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='48' height='24' viewBox='0 0 48 24'%3E%3Cg fill='none' stroke='%23000' stroke-width='2' stroke-linejoin='round'%3E%3Cpath d='M12 12 L24 3 L36 12 L24 21 Z'/%3E%3Cpath d='M19 12 L24 8 L29 12 L24 16 Z'/%3E%3C/g%3E%3Ccircle cx='0' cy='12' r='2'/%3E%3Ccircle cx='48' cy='12' r='2'/%3E%3C/svg%3E");
-}
-.tband--triangle {
-  --bw: 36px; -webkit-mask-size: 36px 24px; mask-size: 36px 24px;
-  -webkit-mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='36' height='24' viewBox='0 0 36 24'%3E%3Cpath d='M0 19 L9 6 L18 19 L27 6 L36 19' fill='none' stroke='%23000' stroke-width='2.2' stroke-linecap='round' stroke-linejoin='round'/%3E%3Ccircle cx='9' cy='2.4' r='1.4'/%3E%3Ccircle cx='27' cy='2.4' r='1.4'/%3E%3C/svg%3E");
-          mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='36' height='24' viewBox='0 0 36 24'%3E%3Cpath d='M0 19 L9 6 L18 19 L27 6 L36 19' fill='none' stroke='%23000' stroke-width='2.2' stroke-linecap='round' stroke-linejoin='round'/%3E%3Ccircle cx='9' cy='2.4' r='1.4'/%3E%3Ccircle cx='27' cy='2.4' r='1.4'/%3E%3C/svg%3E");
-}
-.tband--key {
-  --bw: 32px; -webkit-mask-size: 32px 24px; mask-size: 32px 24px;
-  -webkit-mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='32' height='24' viewBox='0 0 32 24'%3E%3Cpath d='M0 19 H8 V7 H16 V19 H24 V7 H32 V19' fill='none' stroke='%23000' stroke-width='2.2' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
-          mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='32' height='24' viewBox='0 0 32 24'%3E%3Cpath d='M0 19 H8 V7 H16 V19 H24 V7 H32 V19' fill='none' stroke='%23000' stroke-width='2.2' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
-}
 
 /* ---- line-draw (stroke wipes itself on) — set up by tribal-deco.js ---- */
 .draw [fill="none"], .draw path, .draw line, .draw polyline, .draw polygon, .draw circle, .draw rect { will-change: stroke-dashoffset; }
@@ -740,9 +750,6 @@ html[data-deco="off"] body::after { opacity: 0; }
 }
 .card:hover .card__media::after, .rcard:hover .rcard__media::after { opacity: 0.92; transform: translate(0, 0); }
 
-/* ---- hero sunburst slow rotation ---- */
-.hero__sun { animation: tspin 100s linear infinite; transform-origin: 50% 50%; }
-
 /* ---- footer motif row gentle breathe ---- */
 .footer__motifs svg { animation: tbreathe 6s ease-in-out infinite; }
 .footer__motifs svg:nth-child(2) { animation-delay: .8s; }
@@ -752,14 +759,11 @@ html[data-deco="off"] body::after { opacity: 0; }
 
 /* ---- respect reduced motion ---- */
 @media (prefers-reduced-motion: reduce) {
-  .hero__sun, .cta__rings, .deco-watermark, .deco-float--breathe,
-  .tband.in, .footer__motifs svg { animation: none !important; }
-  .tband { clip-path: none; }
+  .cta__rings, .deco-watermark, .deco-float--breathe,
+  .footer__motifs svg { animation: none !important; }
 }
 
 /* ---- decoration toggle hides the new motifs too ---- */
-html[data-deco="off"] .tband,
-html[data-deco="off"] .band-sep,
 html[data-deco="off"] .deco-float,
 html[data-deco="off"] .deco-watermark,
 html[data-deco="off"] .cta__rings { display: none; }
@@ -816,27 +820,10 @@ html[data-deco="off"] .rcard__media::after { display: none; }
 }
 html[data-shimmer="off"] .shimmer { background-image: none; background-color: var(--accent); animation: none; }
 
-/* ---- decorative orbit motifs (masked shapes that drift on scroll) ---- */
+/* ---- spark glyph (used as the marquee separator) ---- */
 :root {
   --u-spark: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Cpath d='M50 2 C53 32 68 47 98 50 C68 53 53 68 50 98 C47 68 32 53 2 50 C32 47 47 32 50 2Z' fill='%23000'/%3E%3C/svg%3E");
-  --u-burst: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Cg fill='%23000'%3E%3Crect x='32' y='32' width='36' height='36' transform='rotate(0 50 50)'/%3E%3Crect x='32' y='32' width='36' height='36' transform='rotate(45 50 50)'/%3E%3C/g%3E%3C/svg%3E");
-  --u-daisy: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Cg fill='%23000'%3E%3Cg%3E%3Cellipse cx='50' cy='23' rx='10' ry='19'/%3E%3Cellipse cx='50' cy='23' rx='10' ry='19' transform='rotate(45 50 50)'/%3E%3Cellipse cx='50' cy='23' rx='10' ry='19' transform='rotate(90 50 50)'/%3E%3Cellipse cx='50' cy='23' rx='10' ry='19' transform='rotate(135 50 50)'/%3E%3Cellipse cx='50' cy='23' rx='10' ry='19' transform='rotate(180 50 50)'/%3E%3Cellipse cx='50' cy='23' rx='10' ry='19' transform='rotate(225 50 50)'/%3E%3Cellipse cx='50' cy='23' rx='10' ry='19' transform='rotate(270 50 50)'/%3E%3Cellipse cx='50' cy='23' rx='10' ry='19' transform='rotate(315 50 50)'/%3E%3C/g%3E%3Ccircle cx='50' cy='50' r='11' fill='%23fff'/%3E%3C/g%3E%3C/svg%3E");
-  --u-atom: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Cg fill='none' stroke='%23000' stroke-width='5'%3E%3Cellipse cx='50' cy='50' rx='44' ry='17'/%3E%3Cellipse cx='50' cy='50' rx='44' ry='17' transform='rotate(60 50 50)'/%3E%3Cellipse cx='50' cy='50' rx='44' ry='17' transform='rotate(120 50 50)'/%3E%3C/g%3E%3Ccircle cx='50' cy='50' r='8' fill='%23000'/%3E%3C/svg%3E");
 }
-.orbit {
-  position: absolute; z-index: 0; pointer-events: none; display: block;
-  width: var(--sz, 54px); height: var(--sz, 54px);
-  opacity: var(--op, 0.5); will-change: transform;
-  background-color: var(--accent);
-}
-.orbit.m-spark { -webkit-mask: var(--u-spark) center/contain no-repeat; mask: var(--u-spark) center/contain no-repeat; }
-.orbit.m-burst { -webkit-mask: var(--u-burst) center/contain no-repeat; mask: var(--u-burst) center/contain no-repeat; }
-.orbit.m-daisy { -webkit-mask: var(--u-daisy) center/contain no-repeat; mask: var(--u-daisy) center/contain no-repeat; }
-.orbit.m-atom  { -webkit-mask: var(--u-atom)  center/contain no-repeat; mask: var(--u-atom)  center/contain no-repeat; }
-.orbit.shimmer { background-color: transparent; }
-.orbit.spin { animation: tspin 26s linear infinite; }
-.orbit.spin-rev { animation: tspin-rev 32s linear infinite; }
-.section > .orbit, .immersive > .orbit, .hero > .orbit { z-index: 0; }
 
 /* ---- scroll progress rail (top) ---- */
 .progress {
@@ -867,7 +854,7 @@ html.js [data-stagger] > .reveal { transition-delay: calc(var(--i, 0) * .07s); }
 .hero__media[data-parallax], .immersive__media[data-parallax] {
   top: -20%; height: 140%; bottom: auto;
 }
-/* keep hero / immersive copy above the drifting orbit motifs */
+/* keep hero / immersive copy above the drifting decorations */
 .hero__inner, .immersive__inner { position: relative; z-index: 2; }
 
 /* ---- section heading accent: a small drawn rule under titles ---- */
@@ -876,17 +863,8 @@ html.js [data-stagger] > .reveal { transition-delay: calc(var(--i, 0) * .07s); }
 /* ---- marquee: swap glyph sep for accent sparkle, keep refined ---- */
 .marquee span::after { content: ""; width: 9px; height: 9px; background: var(--accent); -webkit-mask: var(--u-spark) center/contain no-repeat; mask: var(--u-spark) center/contain no-repeat; opacity: 0.85; }
 
-/* ---- hero sun: optional shimmer fill ---- */
-.hero__sun { color: oklch(1 0 0 / 0.16); }
-
 /* ---- reduced motion / deco off ---- */
 @media (prefers-reduced-motion: reduce) {
-  .shimmer, .progress, .orbit.spin, .orbit.spin-rev { animation: none !important; }
+  .shimmer, .progress { animation: none !important; }
   .ic { transition: none; }
-}
-html[data-deco="off"] .orbit { display: none; }
-
-@media (max-width: 720px) {
-  .orbit { opacity: calc(var(--op, 0.5) * 0.7); }
-  .orbit[data-mobile="hide"] { display: none; }
 }
