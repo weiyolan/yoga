@@ -493,6 +493,9 @@ html[data-lang="en"] [data-lang-only="nl"] { display: none !important; }
 .card__price small { font-family: var(--font-body); color: var(--ink-soft); font-weight: 400; font-size: 0.74rem; }
 .card__go { font-weight: 600; color: var(--accent); text-decoration: none; font-size: 0.9rem; display: inline-flex; gap: 0.3em; align-items: center; transition: gap .2s; }
 .card__go:hover { gap: 0.6em; }
+/* Stretch the "details" link over the whole card so the entire card is clickable. */
+.card__go::after { content: ""; position: absolute; inset: 0; z-index: 1; border-radius: inherit; }
+.card:hover .card__go { gap: 0.6em; }
 .retreats__foot { margin-top: clamp(40px, 5vw, 64px); display: flex; justify-content: center; }
 
 /* ---------- RETREAT DETAIL (what's included) ---------- */
@@ -505,12 +508,26 @@ html[data-lang="en"] [data-lang-only="nl"] { display: none !important; }
 .rincl__mk--yes { color: var(--accent); }
 .rincl__mk--no { color: var(--ink-soft); opacity: 0.7; }
 
+/* who-it's-for: a single centred checklist card */
+.rwho { max-width: 760px; margin-inline: auto; }
+.rwho .pill { margin-bottom: 1.3rem; }
+.rwho .rincl__list { gap: 0.95rem; }
+.rwho .rincl__list li { font-size: 1.04rem; }
+
+/* accommodation / "where you stay" — reuses the .food two-column grid */
+.rstay__imgs { display: grid; gap: 14px; align-self: start; }
+.rstay__imgs .ph { aspect-ratio: 16/11; border-radius: var(--radius); height: auto; }
+.rstay__body { align-self: center; }
+.rstay__title { font-size: clamp(1.55rem, 2.6vw, 2.1rem); letter-spacing: -0.025em; margin-bottom: 0.7rem; }
+.rstay__body .section__sub { font-size: 1.02rem; }
+.rstay__amenities { margin-top: 1.5rem; }
+
 /* ---------- TRAINING / COACHING (#aanbod) ---------- */
 .offers { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: clamp(20px, 2.4vw, 32px); }
 .offer { background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius); padding: 2rem 1.9rem; display: flex; flex-direction: column; gap: 0.6rem; transition: transform .2s, border-color .2s; }
 .offer:hover { transform: translateY(-4px); border-color: var(--ink-soft); }
 .offer__ic { width: 48px; height: 48px; border-radius: var(--radius-sm); display: grid; place-content: center; background: transparent; color: var(--accent); border: 1px solid var(--line); margin-bottom: 0.6rem; }
-.offer h3 { font-size: 1.4rem; letter-spacing: -0.02em; }
+.offer h3 { font-size: clamp(1.28rem, 1.7vw, 1.42rem); letter-spacing: -0.02em; }
 .offer p { color: var(--ink-soft); font-size: 0.96rem; }
 .offer__meta { margin-top: auto; padding-top: 1.1rem; font-size: 0.82rem; font-weight: 600; color: var(--accent); letter-spacing: 0.02em; }
 
@@ -518,7 +535,7 @@ html[data-lang="en"] [data-lang-only="nl"] { display: none !important; }
 .team { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: clamp(20px, 2.6vw, 36px); }
 .member { text-align: left; }
 .member .ph { aspect-ratio: 4/5; border-radius: var(--radius); margin-bottom: 1.1rem; }
-.member h4 { font-size: 1.25rem; letter-spacing: -0.02em; }
+.member h4 { font-size: clamp(1.16rem, 1.5vw, 1.28rem); letter-spacing: -0.02em; }
 .member .role { font-size: 0.74rem; color: var(--accent); font-weight: 600; text-transform: uppercase; letter-spacing: 0.1em; }
 .member p { font-size: 0.92rem; color: var(--ink-soft); margin-top: 0.5rem; }
 
@@ -532,6 +549,7 @@ html[data-lang="en"] [data-lang-only="nl"] { display: none !important; }
 @media (max-width: 900px) { .food { grid-template-columns: 1fr; } }
 
 /* ---------- GALLERY ---------- */
+
 .gallery { display: grid; grid-template-columns: repeat(6, 1fr); gap: 16px; grid-auto-rows: 168px; }
 /* full-screen preview of the hovered "memory" photo (toggled by SiteScripts) */
 .gallery-peek {
@@ -546,6 +564,10 @@ html[data-lang="en"] [data-lang-only="nl"] { display: none !important; }
 .g2 { grid-column: span 2; } .g3 { grid-column: span 2; } .g4 { grid-column: span 2; }
 .g5 { grid-column: span 2; grid-row: span 2; }
 .g6 { grid-column: span 2; } .g7 { grid-column: span 2; }
+/* even variant — for detail-page galleries with uniform tiles */
+.gallery--even { grid-template-columns: repeat(3, 1fr); grid-auto-rows: auto; }
+.gallery--even .ph { aspect-ratio: 4/3; height: auto; }
+@media (max-width: 720px) { .gallery--even { grid-template-columns: repeat(2, 1fr); } }
 
 /* ---------- TESTIMONIALS ---------- */
 .quotes { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: clamp(20px, 2.4vw, 32px); }
