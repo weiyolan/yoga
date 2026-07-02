@@ -533,12 +533,12 @@ html[data-lang="en"] [data-lang-only="nl"] { display: none !important; }
 
 /* ---------- GALLERY ---------- */
 .gallery { display: grid; grid-template-columns: repeat(6, 1fr); gap: 16px; grid-auto-rows: 168px; }
-/* full-screen preview of the hovered "memory" photo (toggled by SiteScripts) */
+/* full-bleed cover preview of the hovered "memory" photo (toggled by SiteScripts) */
 .gallery-peek {
   position: fixed; inset: 0; z-index: 45; pointer-events: none; opacity: 0;
   transition: opacity .4s ease;
-  background-color: oklch(0.18 0.02 60 / 0.82);
-  background-position: center; background-repeat: no-repeat; background-size: contain;
+  background-color: var(--page-bg);
+  background-position: center; background-repeat: no-repeat; background-size: cover;
 }
 .gallery-peek.show { opacity: 1; }
 .gallery .ph { height: 100%; border-radius: var(--radius); }
