@@ -174,8 +174,8 @@ def site_nav(current, solid=False):
     for i, (label, href, key, act) in enumerate(MENU, 1):
         subs = "".join(f'<a class="chip" href="{h}">{t}</a>' for t, h in SUBS.get(key, []))
         mob.append(
-            f'<li style="--i:{i}"{" class=on" if current in act else ""}>'
-            f'<a class="big" href="{href}"{" aria-current=page" if current in act else ""}>{label}<sup>{i:02d}</sup></a>'
+            f'<li style="--i:{i}"{" class=on" if current in act else ""}><span class="num">{i:02d}</span>'
+            f'<a class="big" href="{href}"{" aria-current=page" if current in act else ""}>{label}</a>'
             + (f'<span class="chips-row">{subs}</span>' if subs else "")
             + "</li>"
         )
