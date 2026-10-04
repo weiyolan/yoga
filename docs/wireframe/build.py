@@ -29,14 +29,46 @@ def ph(label, cls="r45", extra=""):
 
 
 def toolbar(current):
+    """Slim wireframe bar + floating info panel (not part of the site)."""
+    label = next((lbl for f, lbl, _ in PAGES if f == current), "")
     links = "".join(
-        f'<a href="{f}"{" class=on" if f == current else ""}>{lbl}</a>' for f, lbl, _ in PAGES
+        f'<a href="{f}"{" class=on" if f == current else ""}><span>{i:02d}</span>{lbl}</a>'
+        for i, (f, lbl, _) in enumerate(PAGES, 1)
     )
-    return (
-        '<div class="wf-bar"><b>Wireframe v2 · Yoga, Zen &amp; Tonic</b>'
-        f"<nav>{links}</nav>"
-        '<button id="wf-notes" type="button">Notities: aan</button></div>'
-    )
+    return f"""<div class="wf-bar">
+  <span class="wf-brand"><b>Wireframe</b> · Yoga, Zen &amp; Tonic</span>
+  <span class="wf-current">{label}</span>
+  <button class="wf-info-btn" type="button" aria-expanded="false" aria-controls="wf-info" aria-label="Info over deze wireframe"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 11v6"/><circle cx="12" cy="7.6" r=".9" fill="currentColor" stroke="none"/></svg><span>Info</span></button>
+</div>
+<aside class="wf-info" id="wf-info" role="dialog" aria-label="Over deze wireframe" hidden>
+  <button class="wf-close" type="button" aria-label="Sluiten">×</button>
+  <span class="label">Over deze wireframe</span>
+  <h3>Dag Philou en Tita,</h3>
+  <p>Dit is een klikbare schets van jullie nieuwe website. Het gaat vooral om de <b>structuur</b>: welke pagina's er zijn, wat er op elke pagina staat en in welke volgorde. Kleuren en lettertypes volgen het voorgestelde design; teksten, data en prijzen zijn voorbeelden.</p>
+  <p class="wf-ask"><b>Wat vragen we?</b> Klik rustig door alle pagina's, ook op je gsm. <b>Maak screenshots</b> van alles wat jullie anders zouden doen en schrijf erbij wat en waarom. Stuur alles naar Yolan. Niets is te klein: “dit mag weg”, “dit mis ik”, “dit klopt niet”.</p>
+  <span class="label">Pagina's</span>
+  <nav class="wf-pages">{links}</nav>
+  <span class="label">Weergave</span>
+  <div class="wf-switches">
+    <button class="wf-switch" id="wf-notes" type="button" role="switch" aria-checked="true"><i></i><span><b>Notities</b><small>Blauwe kaartjes die uitleggen waarom iets zo is.</small></span></button>
+    <button class="wf-switch" id="wf-photos" type="button" role="switch" aria-checked="true"><i></i><span><b>Voorbeeldfoto's</b><small>Sfeerbeelden van Sansara Resort, enkel als inspiratie, niet voor de echte site. Uit = grijze vakken.</small></span></button>
+  </div>
+</aside>"""
+
+
+IMAGES = sorted(p.stem for p in (OUT / "img").glob("*.jpg"))
+
+
+def img_map(inline=False):
+    """window.YZT_IMG: name -> src. Pages use img/ paths; the single file embeds them."""
+    import base64
+    import json
+
+    m = {}
+    for n in IMAGES:
+        path = OUT / "img" / f"{n}.jpg"
+        m[n] = "data:image/jpeg;base64," + base64.b64encode(path.read_bytes()).decode() if inline else f"img/{n}.jpg"
+    return f"<script>window.YZT_IMG = {json.dumps(m)};</script>"
 
 
 ICON = {  # 1.25px line icons (design-system style)
@@ -202,6 +234,7 @@ def page(file, title, body, solid_nav=False):
 {body}
 </main>
 {FOOTER}
+{img_map()}
 <script>
 {JS}
 </script>
@@ -665,7 +698,7 @@ sections = "\n".join(
 )
 ROUTER = """
 (function () {
-  var bar = document.querySelectorAll('.wf-bar nav a');
+  var bar = document.querySelectorAll('.wf-pages a');
   function go() {
     var h = decodeURIComponent(location.hash.slice(1)).split(':');
     var key = h[0] || 'index', sub = h[1];
@@ -674,6 +707,8 @@ ROUTER = """
     document.querySelectorAll('.wf-page').forEach(function (p) { p.hidden = p !== pg; });
     bar.forEach(function (a) { a.classList.toggle('on', a.dataset.key === key); });
     document.title = pg.dataset.title + ' · Wireframe · Yoga, Zen & Tonic';
+    document.querySelector('.wf-current').textContent = pg.dataset.title;
+    if (window.yztCloseInfo) window.yztCloseInfo();
     var t = sub && document.getElementById(sub);
     var same = key === cur; cur = key;
     if (window.yztCloseMenus) window.yztCloseMenus();
@@ -701,6 +736,7 @@ JS_SINGLE = JS
 {bar}
 {sections}
 {to_hash(FOOTER, "index")}
+{img_map(inline=True)}
 <script>
 {JS_SINGLE}
 {ROUTER}
