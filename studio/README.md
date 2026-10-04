@@ -76,7 +76,7 @@ npm install
 npx sanity login
 cp .env.example .env           # project 1pbhk0to · dataset production · SANITY_AUTH_TOKEN (write token, seed only)
 npx sanity cors add http://localhost:3000 --credentials
-npm run seed                   # wireframe content + photos from public/images
+npm run seed                   # wireframe content + photos from seed/images
 npm run dev                    # http://localhost:3333
 npm run deploy                 # yogazentonic.sanity.studio
 ```
@@ -106,8 +106,6 @@ Photos get a title, place and categories but **no alt text**. That is deliberate
 
 Placeholders in `[brackets]` are texts the client still has to write.
 
-## Later (frontend phase)
+## Frontend
 
-- Replace `data/retreats.ts` with `sanityFetch` and switch to `next-sanity` `defineLive` for live preview.
-- Handle the contact form and the "keep me posted" checkbox in a server route (e-mail + mailing list). These are not modelled in Sanity.
-- Add a revalidation webhook (tag-based, see `nextjs.md` in the skills).
+The Next.js site (repo root) uses these queries through `sanityFetch`. Pages are static and revalidate through a webhook on publish; see the root [README](../README.md#how-it-stays-static).

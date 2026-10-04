@@ -29,7 +29,7 @@ const SEO = `{ "title": ${t("title")}, "description": ${t("description")}, "shar
 /** Same rule as the Studio structure; in components use `isUpcoming()` from ./fetch. */
 const UPCOMING = `dateTime(endDate + "T23:59:59Z") >= dateTime(now())` as const;
 
-const RETREAT_CARD = `{
+const RETREAT_CARD_FIELDS = `
   _id,
   "slug": slug.current,
   "title": ${t("title")},
@@ -40,7 +40,14 @@ const RETREAT_CARD = `{
   capacity,
   priceFrom,
   participantCount,
-  "cardPhoto": cardPhoto->${MEDIA}
+  "cardPhoto": cardPhoto->${MEDIA}` as const;
+
+const RETREAT_CARD = `{${RETREAT_CARD_FIELDS}
+}` as const;
+
+/** Home feature: card + the "in a nutshell" headline as teaser. */
+const RETREAT_FEATURE = `{${RETREAT_CARD_FIELDS},
+  "teaser": ${t("nutshellTitle")}
 }` as const;
 
 const PERSON = `{
@@ -59,6 +66,32 @@ const TESTIMONIAL = `{
   "context": coalesce(${t("context")}, ${t("retreat->title")} + " " + string::split(retreat->startDate, "-")[0])
 }` as const;
 
+/** A yoga style (Lessen tiles, home tiles). */
+const STYLE = `{
+  _id,
+  name,
+  "slug": slug.current,
+  "what": ${t("what")},
+  "forWhom": ${t("forWhom")},
+  "photo": photo->${MEDIA},
+  "studios": studios[]->name
+}` as const;
+
+/** Header, mobile menu and footer: settings + the bits the menus show. */
+export const LAYOUT_QUERY = defineQuery(`*[_id == "settings"][0]{
+  siteName,
+  "tagline": ${t("tagline")},
+  defaultSignupUrl,
+  email,
+  phone,
+  instagram,
+  facebook,
+  "nextRetreat": *[_type == "retreat" && ${UPCOMING}] | order(startDate asc)[0]${RETREAT_CARD},
+  "styles": *[_type == "yogaClass"] | order(orderRank asc){ _id, name, "what": ${t("what")} },
+  "studios": *[_type == "studio"] | order(name asc).name,
+  "foundersPhoto": *[_id == "homePage"][0].aboutPhoto->${MEDIA}
+}`);
+
 export const SETTINGS_QUERY = defineQuery(`*[_id == "settings"][0]{
   siteName,
   "tagline": ${t("tagline")},
@@ -75,10 +108,14 @@ export const HOME_QUERY = defineQuery(`*[_id == "homePage"][0]{
   "introTitle": ${t("introTitle")},
   "intro": ${t("intro")},
   "featuredRetreat": coalesce(
-    featuredRetreat->${RETREAT_CARD},
-    *[_type == "retreat" && ${UPCOMING}] | order(startDate asc)[0]${RETREAT_CARD}
+    featuredRetreat->${RETREAT_FEATURE},
+    *[_type == "retreat" && ${UPCOMING}] | order(startDate asc)[0]${RETREAT_FEATURE}
   ),
-  "upcomingRetreats": *[_type == "retreat" && ${UPCOMING}] | order(startDate asc)[0...4]${RETREAT_CARD},
+  "upcomingRetreats": *[_type == "retreat" && ${UPCOMING}] | order(startDate asc)[0...3]${RETREAT_CARD},
+  "pastRetreats": *[_type == "retreat" && !(${UPCOMING})] | order(startDate desc)[0...3]${RETREAT_CARD},
+  "styles": *[_type == "yogaClass"] | order(orderRank asc)${STYLE},
+  "studios": *[_type == "studio"] | order(name asc).name,
+  "instagram": *[_type == "mediaItem" && highlight == true] | order(takenAt desc, _createdAt desc)[0...6]${MEDIA},
   "testimonials": testimonials[]->${TESTIMONIAL},
   "aboutTitle": ${t("aboutTitle")},
   "aboutText": ${t("aboutText")},
@@ -137,13 +174,7 @@ export const LESSONS_QUERY = defineQuery(`{
     },
     "seo": seo${SEO}
   },
-  "styles": *[_type == "yogaClass"] | order(orderRank asc){
-    _id, name, "slug": slug.current,
-    "what": ${t("what")},
-    "forWhom": ${t("forWhom")},
-    "photo": photo->${MEDIA},
-    "studios": studios[]->name
-  },
+  "styles": *[_type == "yogaClass"] | order(orderRank asc)${STYLE},
   "studios": *[_type == "studio"] | order(name asc){ _id, name, address, city, website, "photo": photo->${MEDIA} }
 }`);
 

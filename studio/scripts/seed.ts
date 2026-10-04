@@ -1,15 +1,16 @@
 /**
- * Seeds the dataset with the content of the wireframe (docs/wireframe) and data/retreats.ts.
+ * Seeds the dataset with the content of the wireframe (docs/wireframe), photos from studio/seed/images.
  *
  *   npm run seed                          # writes to the dataset in sanity.cli.ts
  *   npx sanity exec scripts/seed.ts -- --dry   # prints what it would write, no network
+ *   ... --dry --out=../.fixture/dataset.json  # dataset for the frontend fixture mode
  *
  * Safe to re-run: documents are matched on slug / name / image asset and replaced,
  * singletons use their fixed id. Photos get a title, place and categories, but no
  * alt text on purpose: they show up under Fotobank → "Te doen: zonder alt-tekst".
  */
 import { randomUUID } from "node:crypto";
-import { createReadStream, existsSync } from "node:fs";
+import { createReadStream, existsSync, writeFileSync } from "node:fs";
 import path from "node:path";
 import { getCliClient } from "sanity/cli";
 import { apiVersion, defaultLanguage, type Lang } from "../../sanity/site.config";
@@ -71,30 +72,30 @@ async function singleton(_id: string, doc: Doc) {
 type Photo = { file: string; title: Tr; place?: Tr; categories: string[]; takenAt?: string; retreat?: "dahab" | "eifel" | "ardennen" };
 
 const PHOTOS: Record<string, Photo> = {
-  aerial: { file: "public/images/aerial-yoga.jpg", title: { nl: "Aerial yoga", en: "Aerial yoga" }, place: "Dahab", categories: ["retreats"], retreat: "dahab" },
-  campfire: { file: "public/images/campfire.jpg", title: { nl: "Kampvuur", en: "Campfire" }, place: "Eifel", categories: ["retreats", "natuur"], retreat: "eifel" },
-  cooking: { file: "public/images/cooking.jpg", title: { nl: "Samen koken", en: "Cooking together" }, categories: ["retreats"] },
-  desertBw: { file: "public/images/desert-bw.jpg", title: { nl: "Woestijn", en: "Desert" }, place: "Sinaï", categories: ["natuur"], retreat: "dahab" },
-  handstand: { file: "public/images/desert-handstand.jpg", title: { nl: "Handstand in de woestijn", en: "Handstand in the desert" }, place: "Sinaï", categories: ["retreats", "natuur"], retreat: "dahab" },
-  desert: { file: "public/images/desert.jpg", title: { nl: "Woestijn", en: "Desert" }, place: "Sinaï", categories: ["natuur"], retreat: "dahab" },
-  diving: { file: "public/images/diving.jpg", title: { nl: "Duiken", en: "Diving" }, place: "Dahab", categories: ["retreats"], retreat: "dahab" },
-  fish: { file: "public/images/fish.jpg", title: { nl: "Rode Zee", en: "Red Sea" }, place: "Dahab", categories: ["natuur"], retreat: "dahab" },
-  freediving: { file: "public/images/freediving.jpg", title: { nl: "Freediving", en: "Freediving" }, place: "Lighthouse Bay", categories: ["retreats"], retreat: "dahab" },
-  freediving2: { file: "public/images/freediving2.jpg", title: { nl: "Freediving", en: "Freediving" }, place: "Lighthouse Bay", categories: ["retreats"], retreat: "dahab" },
-  freediving3: { file: "public/images/freediving3.jpg", title: { nl: "Freediving", en: "Freediving" }, place: "Lighthouse Bay", categories: ["retreats"], retreat: "dahab" },
-  hike: { file: "public/images/hike.jpg", title: { nl: "Hike", en: "Hike" }, place: "Eifel", categories: ["retreats", "natuur"], retreat: "eifel" },
-  hike2: { file: "public/images/hike2.jpg", title: { nl: "Hike in het bos", en: "Forest hike" }, place: "Eifel", categories: ["retreats", "natuur"], retreat: "eifel" },
-  hotel: { file: "public/images/hotel.jpg", title: { nl: "Nour Boutique Hotel", en: "Nour Boutique Hotel" }, place: "Dahab", categories: ["retreats"], retreat: "dahab" },
-  learning: { file: "public/images/learning.jpg", title: { nl: "Samen leren", en: "Learning together" }, categories: ["retreats"] },
-  retreat: { file: "public/images/retreat.jpg", title: { nl: "Retreat", en: "Retreat" }, categories: ["retreats"] },
-  pool: { file: "public/images/swimmingpool.jpg", title: { nl: "Zwembad", en: "Pool" }, categories: ["retreats"] },
-  team: { file: "public/images/team.jpg", title: { nl: "De groep", en: "The group" }, categories: ["retreats", "team"] },
-  yogaOutside: { file: "public/images/yoga-outside.jpg", title: { nl: "Yoga buiten", en: "Yoga outdoors" }, categories: ["lessen", "natuur"] },
-  yoga: { file: "public/images/yoga.jpg", title: { nl: "Yoga", en: "Yoga" }, categories: ["lessen"] },
-  yoga2: { file: "public/images/yoga2.jpg", title: { nl: "Yoga", en: "Yoga" }, categories: ["lessen"] },
-  yoga3: { file: "public/images/yoga3.jpg", title: { nl: "Yoga", en: "Yoga" }, categories: ["lessen"] },
-  founders: { file: "data/images/rita&philippe.jpg", title: { nl: "Rita & Philippe", en: "Rita & Philippe" }, categories: ["team"] },
-  founders2: { file: "data/images/philippe and rita.jpg", title: { nl: "Philippe & Rita", en: "Philippe & Rita" }, categories: ["team"] },
+  aerial: { file: "studio/seed/images/aerial-yoga.jpg", title: { nl: "Aerial yoga", en: "Aerial yoga" }, place: "Dahab", categories: ["retreats"], retreat: "dahab" },
+  campfire: { file: "studio/seed/images/campfire.jpg", title: { nl: "Kampvuur", en: "Campfire" }, place: "Eifel", categories: ["retreats", "natuur"], retreat: "eifel" },
+  cooking: { file: "studio/seed/images/cooking.jpg", title: { nl: "Samen koken", en: "Cooking together" }, categories: ["retreats"] },
+  desertBw: { file: "studio/seed/images/desert-bw.jpg", title: { nl: "Woestijn", en: "Desert" }, place: "Sinaï", categories: ["natuur"], retreat: "dahab" },
+  handstand: { file: "studio/seed/images/desert-handstand.jpg", title: { nl: "Handstand in de woestijn", en: "Handstand in the desert" }, place: "Sinaï", categories: ["retreats", "natuur"], retreat: "dahab" },
+  desert: { file: "studio/seed/images/desert.jpg", title: { nl: "Woestijn", en: "Desert" }, place: "Sinaï", categories: ["natuur"], retreat: "dahab" },
+  diving: { file: "studio/seed/images/diving.jpg", title: { nl: "Duiken", en: "Diving" }, place: "Dahab", categories: ["retreats"], retreat: "dahab" },
+  fish: { file: "studio/seed/images/fish.jpg", title: { nl: "Rode Zee", en: "Red Sea" }, place: "Dahab", categories: ["natuur"], retreat: "dahab" },
+  freediving: { file: "studio/seed/images/freediving.jpg", title: { nl: "Freediving", en: "Freediving" }, place: "Lighthouse Bay", categories: ["retreats"], retreat: "dahab" },
+  freediving2: { file: "studio/seed/images/freediving2.jpg", title: { nl: "Freediving", en: "Freediving" }, place: "Lighthouse Bay", categories: ["retreats"], retreat: "dahab" },
+  freediving3: { file: "studio/seed/images/freediving3.jpg", title: { nl: "Freediving", en: "Freediving" }, place: "Lighthouse Bay", categories: ["retreats"], retreat: "dahab" },
+  hike: { file: "studio/seed/images/hike.jpg", title: { nl: "Hike", en: "Hike" }, place: "Eifel", categories: ["retreats", "natuur"], retreat: "eifel" },
+  hike2: { file: "studio/seed/images/hike2.jpg", title: { nl: "Hike in het bos", en: "Forest hike" }, place: "Eifel", categories: ["retreats", "natuur"], retreat: "eifel" },
+  hotel: { file: "studio/seed/images/hotel.jpg", title: { nl: "Nour Boutique Hotel", en: "Nour Boutique Hotel" }, place: "Dahab", categories: ["retreats"], retreat: "dahab" },
+  learning: { file: "studio/seed/images/learning.jpg", title: { nl: "Samen leren", en: "Learning together" }, categories: ["retreats"] },
+  retreat: { file: "studio/seed/images/retreat.jpg", title: { nl: "Retreat", en: "Retreat" }, categories: ["retreats"] },
+  pool: { file: "studio/seed/images/swimmingpool.jpg", title: { nl: "Zwembad", en: "Pool" }, categories: ["retreats"] },
+  team: { file: "studio/seed/images/team.jpg", title: { nl: "De groep", en: "The group" }, categories: ["retreats", "team"] },
+  yogaOutside: { file: "studio/seed/images/yoga-outside.jpg", title: { nl: "Yoga buiten", en: "Yoga outdoors" }, categories: ["lessen", "natuur"] },
+  yoga: { file: "studio/seed/images/yoga.jpg", title: { nl: "Yoga", en: "Yoga" }, categories: ["lessen"] },
+  yoga2: { file: "studio/seed/images/yoga2.jpg", title: { nl: "Yoga", en: "Yoga" }, categories: ["lessen"] },
+  yoga3: { file: "studio/seed/images/yoga3.jpg", title: { nl: "Yoga", en: "Yoga" }, categories: ["lessen"] },
+  founders: { file: "studio/seed/images/rita&philippe.jpg", title: { nl: "Rita & Philippe", en: "Rita & Philippe" }, categories: ["team"] },
+  founders2: { file: "studio/seed/images/philippe and rita.jpg", title: { nl: "Philippe & Rita", en: "Philippe & Rita" }, categories: ["team"] },
 };
 type PhotoKey = keyof typeof PHOTOS;
 const media: Partial<Record<PhotoKey, string>> = {};
@@ -354,6 +355,13 @@ async function seed() {
     console.log("DRY RUN, nothing written.", count);
     console.log(dangling.length ? `Dangling references: ${dangling.join(", ")}` : "All references resolve.");
     if (process.argv.includes("--print")) console.log(JSON.stringify(written, null, 2));
+    // --out=<file>: dataset for the frontend's offline fixture mode (see ../scripts/fixture.mjs)
+    const out = process.argv.find((a) => a.startsWith("--out="))?.slice(6);
+    if (out) {
+      const assets = (Object.keys(PHOTOS) as PhotoKey[]).map((k) => ({ _id: `dry.asset.${k}`, file: PHOTOS[k].file }));
+      writeFileSync(path.resolve(out), JSON.stringify({ docs: written, assets }, null, 2));
+      console.log(`Wrote ${out}`);
+    }
   }
 }
 

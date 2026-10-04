@@ -31,15 +31,26 @@ export type QueryParamsOf<Q extends string> = [ParamNames<Q>] extends [never] ? 
 type FetchOptions<Q extends Query> = {
   query: Q;
   lang?: Lang;
-  /** Seconds; `false` = cache until a tag is revalidated. */
+  /** Seconds; default `false` = cache until the webhook revalidates. */
   revalidate?: number | false;
-  /** Next.js cache tags, e.g. `["retreat", "retreat:dahab-2026"]`. */
+  /** Extra Next.js cache tags (`SANITY_TAG` is always added). */
   tags?: string[];
 } & ([ParamNames<Q>] extends [never] ? { params?: Record<string, never> } : { params: QueryParamsOf<Q> });
 
-export async function sanityFetch<const Q extends Query>({ query, params, lang = defaultLanguage, revalidate = 60, tags = [] }: FetchOptions<Q>): Promise<QueryResult<Q>> {
-  const next = { revalidate: tags.length ? false : revalidate, tags };
-  return client.fetch<QueryResult<Q>>(query, { ...(params as QueryParams), lang }, { next });
+/** Cache tag on every fetch; the Sanity webhook (`app/api/revalidate`) revalidates it on publish. */
+export const SANITY_TAG = "sanity";
+
+/**
+ * Cached until the next publish: pages are prerendered at build time and
+ * re-rendered on demand when the webhook revalidates `SANITY_TAG`.
+ */
+export async function sanityFetch<const Q extends Query>({ query, params, lang = defaultLanguage, revalidate = false, tags = [] }: FetchOptions<Q>): Promise<QueryResult<Q>> {
+  const all = { ...(params as QueryParams), lang };
+  if (process.env.SANITY_FIXTURE) {
+    const { fixtureFetch } = await import("./fixture");
+    return fixtureFetch(query, all) as Promise<QueryResult<Q>>;
+  }
+  return client.fetch<QueryResult<Q>>(query, all, { next: { revalidate, tags: [SANITY_TAG, ...tags] } });
 }
 
 /** A retreat is upcoming until its last day is over (same rule as the queries). */
