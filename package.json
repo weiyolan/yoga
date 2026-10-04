@@ -10,7 +10,7 @@
     "build": "next build",
     "start": "next start",
     "typecheck": "next typegen && tsc --noEmit",
-    "typegen": "npm --prefix studio run typegen",
+    "typegen": "npm -w studio run typegen",
     "fixture": "node scripts/fixture.mjs"
   },
   "dependencies": {
@@ -20,8 +20,8 @@
     "@sanity/webhook": "^4.0.4",
     "groq": "^6.17.0",
     "next": "^16.3.8",
-    "react": "19.2",
-    "react-dom": "19.2",
+    "react": "^19.3.0",
+    "react-dom": "^19.3.0",
     "resend": "^6.32.0",
     "server-only": "^0.0.1"
   },
@@ -32,5 +32,8 @@
     "groq-js": "^2.0.0",
     "image-size": "^2.0.4",
     "typescript": "5.9"
-  }
+  },
+  "workspaces": [
+    "studio"
+  ]
 }

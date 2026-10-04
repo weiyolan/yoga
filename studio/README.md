@@ -71,14 +71,14 @@ retreat?.title;              // string | null, inferred, no generics
 ## Setup (once)
 
 ```bash
+npm install                    # from the repo root (workspace)
 cd studio
-npm install
 npx sanity login
 cp .env.example .env           # project 1pbhk0to · dataset production · SANITY_AUTH_TOKEN (write token, seed only)
 npx sanity cors add http://localhost:3000 --credentials
 npm run seed                   # wireframe content + photos from seed/images
 npm run dev                    # http://localhost:3333
-npm run deploy                 # yogazentonic.sanity.studio
+npm run deploy                 # yogazentonic.sanity.studio (optional: the site also serves it at /admin)
 ```
 
 The frontend needs `NEXT_PUBLIC_SANITY_PROJECT_ID` and `NEXT_PUBLIC_SANITY_DATASET`. `@sanity/client` v8 needs Node ≥ 22.12. Finally, invite Rita & Philippe as **Editor** under sanity.io/manage → Members.
