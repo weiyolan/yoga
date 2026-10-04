@@ -1,0 +1,419 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Client feedback v2 — Yoga Zen Tonic</title>
+<style>
+  :root { --ink:#1f1d1a; --muted:#6b655c; --line:#e3ddd2; --paper:#faf7f2; --card:#fff; --accent:#a8572f; --good:#3d6b45; --bad:#9a3b32; }
+  * { box-sizing:border-box; }
+  body { margin:0; background:var(--paper); color:var(--ink); font:16px/1.6 -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
+  main { max-width:1120px; margin:0 auto; padding:48px 24px 96px; }
+  h1, h2, h3 { font-family:Georgia, "Times New Roman", serif; font-weight:normal; line-height:1.2; }
+  h1 { font-size:2.6rem; margin:0 0 8px; }
+  h2 { font-size:1.9rem; margin:72px 0 8px; padding-top:24px; border-top:1px solid var(--line); }
+  h3 { font-size:1.3rem; margin:0 0 6px; }
+  .sub { color:var(--muted); margin:0 0 24px; }
+  a { color:var(--accent); }
+  nav.toc { display:flex; flex-wrap:wrap; gap:8px 18px; font-size:.92rem; margin:24px 0 0; }
+  ul { padding-left:1.2em; } li { margin:4px 0; }
+  q, .quote { font-style:italic; color:var(--muted); }
+  .tldr { display:grid; grid-template-columns:repeat(auto-fit, minmax(240px,1fr)); gap:14px; margin-top:20px; }
+  .tldr div { background:var(--card); border:1px solid var(--line); border-radius:10px; padding:14px 16px; }
+  .tldr b { display:block; margin-bottom:2px; }
+  .card { background:var(--card); border:1px solid var(--line); border-radius:12px; padding:20px; margin:18px 0; }
+  .card.hero { border-color:var(--accent); }
+  .badge { display:inline-block; font-size:.75rem; letter-spacing:.06em; text-transform:uppercase; padding:2px 8px; border-radius:99px; background:var(--accent); color:#fff; margin-left:8px; vertical-align:middle; }
+  .badge.fav { background:#c9a227; color:#1f1d1a; }
+  .grid { display:grid; grid-template-columns:repeat(auto-fit, minmax(320px,1fr)); gap:18px; }
+  .grid .card { margin:0; }
+  .shots { display:grid; grid-template-columns:repeat(auto-fit, minmax(240px,1fr)); gap:10px; margin-top:12px; }
+  .shots.one { grid-template-columns:1fr; }
+  figure { margin:0; }
+  figure img { width:100%; display:block; border-radius:8px; border:1px solid var(--line); background:#eee; }
+  figcaption { font-size:.82rem; color:var(--muted); margin-top:4px; }
+  .who { font-size:.8rem; font-weight:600; color:var(--accent); }
+  table { width:100%; border-collapse:collapse; background:var(--card); border:1px solid var(--line); border-radius:10px; overflow:hidden; font-size:.94rem; }
+  th, td { text-align:left; vertical-align:top; padding:10px 12px; border-bottom:1px solid var(--line); }
+  th { background:#f2ede4; font-weight:600; }
+  .good { color:var(--good); } .bad { color:var(--bad); }
+  .dislike h3::before { content:"✕ "; color:var(--bad); }
+  .tab { display:grid; grid-template-columns:200px 1fr; gap:20px; }
+  .tab > h3 { font-size:1.5rem; }
+  .goal { font-weight:600; }
+  footer { margin-top:72px; color:var(--muted); font-size:.85rem; }
+  @media (max-width:700px) { .tab { grid-template-columns:1fr; } h1 { font-size:2rem; } }
+</style>
+</head>
+<body>
+<main>
+
+<h1>Client feedback v2 — Yoga, Zen &amp; Tonic</h1>
+<p class="sub">Everything Rita &amp; Philippe sent, in one place: what they like, what they don't, and how they see each page.
+Comments by <b>PH</b>/<b>PW</b> (Philippe) and <b>RI</b> (Rita).</p>
+<nav class="toc">
+  <a href="#direction">Direction</a>
+  <a href="#winners">Winners</a>
+  <a href="#liked">Liked</a>
+  <a href="#disliked">Disliked</a>
+  <a href="#research">Research table</a>
+  <a href="#structure">Site structure</a>
+  <a href="#questions">Open questions</a>
+</nav>
+
+<!-- ─────────────────────────────────────────────── -->
+<h2 id="direction">Direction in short</h2>
+<div class="tldr">
+  <div><b>Photo-first</b>Every page opens with one big photo. Photos dominate, text stays short.</div>
+  <div><b>Less text</b>“Too much text” and “too woolly” (<i>wollig</i>) are the most frequent complaints.</div>
+  <div><b>Not cheap, not cliché</b>No pastel or coffee-coloured palettes, no cliché yoga photos, no amateur photos.</div>
+  <div><b>Not cold either</b>It must radiate emotion &amp; sympathy, not feel like “a travel agency or health insurer”.</div>
+  <div><b>Subtle motion</b>Quiet hover effects, a photo that turns out to be a slow video, a custom cursor. Nothing busy or bizarre.</div>
+  <div><b>Retreats central</b>Retreats on top of the homepage; clear structure, everything quick to find.</div>
+</div>
+
+<!-- ─────────────────────────────────────────────── -->
+<h2 id="winners">The two winners</h2>
+
+<div class="card hero">
+  <h3><a href="https://www.sansararesort.com">sansararesort.com</a><span class="badge">Winner</span></h3>
+  <p class="quote">“Wow!!” — PW</p>
+  <ul>
+    <li>Each page starts with <b>one big photo</b> → “Top”</li>
+    <li>Different cursor: <b>a circle with a dot</b>, “goed gevonden”</li>
+    <li><b>Gallery is also nice</b> (mosaic + filters All / Surf / Yoga / Adventure) → model for our Gallery tab</li>
+    <li>Minus: a bit too much text</li>
+  </ul>
+  <div class="shots">
+    <figure><a href="img/sansara-hero.jpg"><img src="img/sansara-hero.jpg" alt="Sansara resort homepage with full-width yoga photo" loading="lazy"></a><figcaption>Big photo on every page</figcaption></figure>
+    <figure><a href="img/sansara-gallery.jpg"><img src="img/sansara-gallery.jpg" alt="Sansara resort gallery mosaic with filters" loading="lazy"></a><figcaption>Gallery mosaic with filters</figcaption></figure>
+  </div>
+</div>
+
+<div class="card hero">
+  <h3><a href="https://vita-travel.webflow.io/retreat">vita-travel.webflow.io/retreat</a><span class="badge">Best practice retreat page</span></h3>
+  <p class="quote">“Zo willen we het ook :-)” — “This is how we want it too.”</p>
+  <ul>
+    <li>Nice build-up of retreat info</li>
+    <li><b>First a few mood photos</b></li>
+    <li>Then clear, distinct parts, everything covered: programme, why this retreat, photos of the teachers, food, location</li>
+    <li>Sticky side nav with price / date / guests and a “Get in touch” button</li>
+  </ul>
+  <div class="shots">
+    <figure><a href="img/vita-retreat-top.jpg"><img src="img/vita-retreat-top.jpg" alt="Vita travel retreat page header with photo grid and price" loading="lazy"></a><figcaption>Photo grid first, then about + price summary</figcaption></figure>
+    <figure><a href="img/vita-retreat-team.jpg"><img src="img/vita-retreat-team.jpg" alt="Vita travel retreat page food and team sections" loading="lazy"></a><figcaption>Food photos, team with portraits, side nav</figcaption></figure>
+  </div>
+</div>
+
+<!-- ─────────────────────────────────────────────── -->
+<h2 id="liked">Liked</h2>
+<p class="sub">Found via <a href="https://www.awwwards.com/">awwwards.com</a> and <a href="https://www.siteinspire.com/websites">siteinspire.com</a>. <span class="badge fav">Favourite</span> = highlighted in yellow by the client.</p>
+
+<div class="grid">
+
+  <div class="card">
+    <h3><a href="https://www.f0lyward.com/">f0lyward.com</a><span class="badge fav">Favourite</span></h3>
+    <ul>
+      <li>Landing page “is heel fijn”: photo in a <b>torn, organic shape</b> that <b>scrolls open</b></li>
+      <li>A thin <b>line guides you down</b>, from photo to photo</li>
+      <li><b>Torn edges</b> on the photos</li>
+      <li>About → “Principles that guide us”: visual with a video, “heel knap”</li>
+    </ul>
+    <div class="shots">
+      <figure><a href="img/flyward-landing.jpg"><img src="img/flyward-landing.jpg" alt="Flyward landing, torn photo shape" loading="lazy"></a><figcaption>1 · Landing</figcaption></figure>
+      <figure><a href="img/flyward-scroll-open.jpg"><img src="img/flyward-scroll-open.jpg" alt="Flyward photo scrolling open" loading="lazy"></a><figcaption>2 · Scrolls open</figcaption></figure>
+      <figure><a href="img/flyward-opened.jpg"><img src="img/flyward-opened.jpg" alt="Flyward opened photo" loading="lazy"></a><figcaption>3 · Opened</figcaption></figure>
+      <figure><a href="img/flyward-torn-edges.jpg"><img src="img/flyward-torn-edges.jpg" alt="Flyward torn photo edges" loading="lazy"></a><figcaption>Torn edges</figcaption></figure>
+      <figure><a href="img/flyward-principles.jpg"><img src="img/flyward-principles.jpg" alt="Flyward principles that guide us with shell visual" loading="lazy"></a><figcaption>Principles that guide us</figcaption></figure>
+    </div>
+  </div>
+
+  <div class="card">
+    <h3><a href="https://www.oldtomcapital.com/">oldtomcapital.com</a><span class="badge fav">Favourite</span></h3>
+    <ul>
+      <li><span class="who">RI</span> Hover on a title → <b>background and text colours change</b> (<a href="https://www.oldtomcapital.com/insights">/insights</a>). <span class="who">PH</span> agrees</li>
+      <li><span class="who">PH</span> <a href="https://www.oldtomcapital.com/portfolio">/portfolio</a>: all photos <b>black &amp; white, turn to colour on hover</b></li>
+      <li><b>B&amp;W photo with very heavy grain</b>: “vind ik wel knap”</li>
+    </ul>
+    <div class="shots">
+      <figure><a href="img/oldtom-insights-hover.jpg"><img src="img/oldtom-insights-hover.jpg" alt="Old Tom insights list with hover colour change" loading="lazy"></a><figcaption>Hover → colour swap</figcaption></figure>
+      <figure><a href="img/oldtom-portfolio-bw.jpg"><img src="img/oldtom-portfolio-bw.jpg" alt="Old Tom portfolio, black and white photos with one in colour" loading="lazy"></a><figcaption>B&amp;W → colour on hover</figcaption></figure>
+      <figure><a href="img/oldtom-grain.jpg"><img src="img/oldtom-grain.jpg" alt="Old Tom grainy black and white hero" loading="lazy"></a><figcaption>Heavy grain B&amp;W</figcaption></figure>
+    </div>
+  </div>
+
+  <div class="card">
+    <h3><a href="https://estudioniksen.com/">estudioniksen.com</a><span class="badge fav">Favourite</span></h3>
+    <ul>
+      <li><a href="https://estudioniksen.com/pages/about-us">About us</a>: the “photo” next to the text suddenly moves. It's a <b>video where only a few small things change</b>: surprising, subtle, not disturbing</li>
+      <li><span class="who">PH</span> Hover on the man with the cap → the man disappears, the cap stays. <b>Idea for our Team, but reversed:</b> show 2 objects, a diving mask and a yoga block; on hover Philippe's / Rita's face appears</li>
+    </ul>
+    <div class="shots">
+      <figure><a href="img/estudioniksen-about-video.jpg"><img src="img/estudioniksen-about-video.jpg" alt="Estudio Niksen about page with subtle video" loading="lazy"></a><figcaption>Photo that is actually a video</figcaption></figure>
+      <figure><a href="img/estudioniksen-caps-hover.jpg"><img src="img/estudioniksen-caps-hover.jpg" alt="Estudio Niksen caps, model disappears on hover" loading="lazy"></a><figcaption>Hover → person disappears, object stays</figcaption></figure>
+    </div>
+  </div>
+
+  <div class="card">
+    <h3><a href="https://corentinbernadou.com/">corentinbernadou.com</a><span class="badge fav">Favourite</span></h3>
+    <ul>
+      <li>Moving cube of photos: “Amai, da's wel heel knap”, but unsure if usable (you can't do anything with the cube itself)</li>
+      <li>List of links on the side; hover a link → <b>the matching photos light up</b></li>
+      <li><span class="who">PH</span> Clicking an artist → e.g. <a href="https://corentinbernadou.com/work/moving-portraits">/work/moving-portraits</a>. Nice how they play with different photos</li>
+    </ul>
+    <div class="shots one">
+      <figure><a href="img/corentin-cube.jpg"><img src="img/corentin-cube.jpg" alt="Corentin Bernadou rotating photo wheel" loading="lazy"></a></figure>
+    </div>
+  </div>
+
+  <div class="card">
+    <h3><a href="https://bureaurouge.com/projects/">bureaurouge.com/projects</a><span class="badge fav">Favourite</span></h3>
+    <ul>
+      <li>“Lots of nice things”: hover over a photo → it <b>blurs</b>; click → project page</li>
+      <li><span class="who">PH</span> “vind ik ook wel knap gedaan!”</li>
+    </ul>
+  </div>
+
+  <div class="card">
+    <h3><a href="https://www.centrephotogeneve.ch/">centrephotogeneve.ch</a><span class="badge fav">Favourite</span></h3>
+    <ul>
+      <li><span class="who">PH</span> “Heel fijne website”</li>
+      <li>Big photo + a title, scroll → next photo, and so on</li>
+      <li>Click a photo → it slides to the left, but not completely</li>
+      <li>“I like it.”</li>
+    </ul>
+  </div>
+
+  <div class="card">
+    <h3><a href="https://yogamaya.com/">yogamaya.com</a><span class="badge fav">Favourite</span></h3>
+    <ul><li>Very fun landing page (on laptop)</li></ul>
+  </div>
+
+  <div class="card">
+    <h3><a href="https://topography.webflow.io/">topography.webflow.io</a></h3>
+    <ul>
+      <li><span class="who">PW</span> Really nice that the <b>cursor is an orange line</b></li>
+      <li>If our site has sober line drawings, a line cursor would fit</li>
+      <li>“A bit like the line Yolan made on Milo's first site”</li>
+    </ul>
+    <div class="shots one">
+      <figure><a href="img/topography-line-cursor.jpg"><img src="img/topography-line-cursor.jpg" alt="Topography site with orange line cursor over mountain" loading="lazy"></a></figure>
+    </div>
+  </div>
+
+  <div class="card">
+    <h3><a href="https://alexzarour.com/">alexzarour.com</a></h3>
+    <ul>
+      <li>Photos scroll down without you doing anything</li>
+      <li>The name (Alex Zarour) stays in the centre</li>
+    </ul>
+  </div>
+
+  <div class="card">
+    <h3><a href="https://www.r-100.no/">r-100.no</a></h3>
+    <ul>
+      <li>Images move across the screen from right to left</li>
+      <li>Hover a photo → the project name appears with <b>letters cycling through the alphabet</b> until they land on the right one</li>
+      <li>Click → project page with more info</li>
+    </ul>
+  </div>
+
+  <div class="card">
+    <h3><a href="https://everest.suraj.work/">everest.suraj.work</a></h3>
+    <ul><li>“What a gorgeous website”: not usable for us, but lovely to look at</li></ul>
+  </div>
+
+</div>
+
+<!-- ─────────────────────────────────────────────── -->
+<h2 id="disliked">Disliked</h2>
+<p class="sub">yogabuzz.org and christempleyoga.com are also highlighted in yellow, as the key examples of what <i>not</i> to do.</p>
+<div class="grid">
+  <div class="card dislike">
+    <h3><a href="https://yogabuzz.org/">yogabuzz.org</a></h3>
+    <p><span class="who">PW</span> A good example of a site that is <b>not</b> nice. A yoga organisation, but it <b>radiates no emotion, no sympathy</b>. Feels like a travel agency or the health insurer (<i>ziekenkas</i>).</p>
+  </div>
+  <div class="card dislike">
+    <h3><a href="https://christempleyoga.com/">christempleyoga.com</a></h3>
+    <p><span class="who">PW</span> Same. Site of one yoga teacher; wants to be different and cooler, but is <b>not pleasant to scroll</b>.</p>
+  </div>
+  <div class="card dislike">
+    <h3><a href="https://www.collection.industries/en">collection.industries</a></h3>
+    <p><span class="who">RI</span> Bizarre: scroll → a star grows, click → zooming title. <span class="who">PH</span> <b>Too bizarre, too busy.</b></p>
+  </div>
+  <div class="card dislike">
+    <h3><a href="https://www.beatsinspace.net/">beatsinspace.net</a></h3>
+    <p>Opens with a big logo that stays as a watermark. But the <b>white background</b> is “maar niks” (and very trendy: many sites use it). <span class="who">PH</span> agrees.</p>
+  </div>
+  <div class="card dislike">
+    <h3><a href="https://samoondoh.com/">samoondoh.com</a></h3>
+    <p>Cursor turns into the company's logo. <span class="who">PH</span> Funny, but <b>not practical</b>: “nogal een dikke poes :-)”</p>
+  </div>
+</div>
+
+<!-- ─────────────────────────────────────────────── -->
+<h2 id="research">Research table</h2>
+<p class="sub">From the PDF's research section (marked “Yolan, niet doornemen”), included so all info is in one place.</p>
+<table>
+  <thead><tr><th>Site</th><th>Merit</th><th>Demerit</th></tr></thead>
+  <tbody>
+    <tr><td><a href="https://www.sparklingyogaretreats.com/">sparklingyogaretreats.com</a></td><td class="good">Simple site · nice photos · clear, lots of info per retreat · shop is good (only 25 products) · testimonials section · the person is central</td><td class="bad">Lots of text in intro and about</td></tr>
+    <tr><td><a href="https://www.mindfulboutique.com/">mindfulboutique.com</a></td><td></td><td class="bad">No good structure, chaotic · unclear what it is or what you can do</td></tr>
+    <tr><td><a href="https://boutiqueyogaretreats.es/">boutiqueyogaretreats.es</a></td><td class="good">Clear structure as such</td><td class="bad">Photos too cliché yoga · awkward scroll system for retreat info · too much text</td></tr>
+    <tr><td><a href="https://elenabrower.com/about/">elenabrower.com</a></td><td></td><td class="bad">Hard to navigate, you jump between sites · everything revolves around her</td></tr>
+    <tr><td><a href="https://www.firecreekretreat.com/hold-nothing-retreat">firecreekretreat.com</a></td><td class="good">Interesting: full programme per hour</td><td></td></tr>
+    <tr><td><a href="https://www.mindfulflowwithangie.com/about">mindfulflowwithangie.com</a></td><td class="good">Small icons are sober and nice · simple site</td><td class="bad">Look &amp; feel and colours far too pastel, far too woolly</td></tr>
+    <tr><td><a href="https://www.sukhayogaaustin.com/">sukhayogaaustin.com</a></td><td></td><td class="bad">Bad!!</td></tr>
+    <tr><td><a href="https://www.communeyoga.com/">communeyoga.com</a></td><td></td><td></td></tr>
+    <tr><td><a href="https://www.quintacamarena.com/not-so-serious/yoga">quintacamarena.com</a></td><td></td><td class="bad">Site is less exciting than the philosophy of their retreats</td></tr>
+    <tr><td><a href="https://www.studiohida.be/">studiohida.be</a></td><td></td><td class="bad">Too simple · too much text</td></tr>
+    <tr><td><a href="https://theyogaretreat.be">theyogaretreat.be</a></td><td class="good">Good structure, similar to what we want</td><td></td></tr>
+    <tr><td><a href="https://margothallemans.be">margothallemans.be</a></td><td></td><td class="bad">Very woolly · looks cheap · amateur photos</td></tr>
+    <tr><td><a href="https://www.yogapunt.be">yogapunt.be</a></td><td class="good">Offers about the same as us (retreats + classes)</td><td class="bad">Very cheap · not a clear site</td></tr>
+    <tr><td><a href="https://kjero.be/">kjero.be</a></td><td class="good">Clear site · lots of calm</td><td class="bad">Far too much about her · woolly</td></tr>
+    <tr><td><a href="https://www.karmayoga.be/">karmayoga.be</a></td><td class="good">Starts with a video, nice video · clear (but a big organisation with 10 teachers)</td><td></td></tr>
+    <tr><td><a href="https://www.nioraretreats.nl/">nioraretreats.nl</a></td><td class="good">Retreat info, scroll menu, video per destination (e.g. Malaga)</td><td class="bad">Everything in coffee colours · retreats hard to find · not very structured</td></tr>
+    <tr><td><a href="https://www.myrnavankemenade.nl/">myrnavankemenade.nl</a></td><td></td><td class="bad">Not a nice site · narcissistic · not credible</td></tr>
+    <tr><td><a href="https://www.tijntouber.com/">tijntouber.com</a></td><td class="good">Even though it's all about him, I kept reading and got intrigued: something caught my attention</td><td></td></tr>
+  </tbody>
+</table>
+
+<!-- ─────────────────────────────────────────────── -->
+<h2 id="structure">Site structure (Structuur Website v3)</h2>
+<p class="sub">Landing at <a href="https://yogazentonic.com">yogazentonic.com</a>; one page per tab. Much is taken from <a href="https://www.sparklingyogaretreats.com">sparklingyogaretreats.com</a>, which Rita likes a lot.</p>
+<figure><img src="img/sparkling-nav.jpg" alt="Sparkling Yoga Retreats navigation bar" loading="lazy"><figcaption>sparklingyogaretreats.com navigation: Home · About · Retreats · Shop · Calendar · Blog · Testimonials · Contact</figcaption></figure>
+
+<div class="card tab">
+  <h3>Home</h3>
+  <div>
+    <p class="goal">Goal: landing page with quick, easy access to all info (classes, retreats, …). Above all, <b>get the retreats in the picture → they must be on top.</b></p>
+    <ol>
+      <li>Info, background, history of Yoga, Zen &amp; Tonic: <b>1 paragraph</b></li>
+      <li>Retreats</li>
+      <li>Classes (Lessen)</li>
+      <li>A few testimonials</li>
+      <li>Who are we?</li>
+      <li>Follow us: Instagram, FB</li>
+    </ol>
+  </div>
+</div>
+
+<div class="card tab">
+  <h3>Retreats</h3>
+  <div>
+    <p class="goal">Goal: overview of planned and past retreats.</p>
+    <p>Like sparklingyogaretreats.com: a window with a nice photo, destination and date, clickable. Plus a <b>search filter at the bottom</b>.</p>
+    <ul>
+      <li><b>Coming retreats</b>: chronological, one clickable photo per retreat. Click → short, to-the-point info, not too detailed, but visually beautiful</li>
+      <li><b>Passed retreats</b>: chronological, similar info</li>
+    </ul>
+    <p class="quote">“Hoe ik het zie” — how Rita sees it:</p>
+    <div class="shots">
+      <figure><img src="img/sparkling-bali.jpg" alt="Retreat card Bali Longevity Retreat" loading="lazy"></figure>
+      <figure><img src="img/sparkling-corsica.jpg" alt="Retreat card Corsica Somatic Yoga" loading="lazy"></figure>
+      <figure><img src="img/sparkling-norway.jpg" alt="Retreat card Norway Adventure Retreat" loading="lazy"></figure>
+      <figure><img src="img/sparkling-detox.jpg" alt="Retreat card Emotional Detox Online" loading="lazy"></figure>
+    </div>
+  </div>
+</div>
+
+<div class="card tab">
+  <h3>Retreat detail</h3>
+  <div>
+    <p class="goal">Goal: per retreat a separate page with clear, to-the-point basic info.</p>
+    <p>Start with a <b>very beautiful photo</b> of the place / people / retreat, e.g.:</p>
+    <div class="shots one"><figure><img src="img/sparkling-corsica-hero.jpg" alt="Sparkling Yoga Corsica retreat hero photo" loading="lazy"></figure></div>
+    <p>Then the info, structured like the <a href="https://fb.me/e/9oGwMpqVO">Dahab retreat on FB</a>:</p>
+    <ol>
+      <li>De retreat in een notendop</li>
+      <li>De plek: Dahab</li>
+      <li>De mensen</li>
+      <li>Het programma</li>
+      <li>Praktisch</li>
+      <li>Klaar om te duiken?</li>
+    </ol>
+    <p><b>Good examples</b></p>
+    <ul>
+      <li><a href="https://vita-travel.webflow.io/retreat">vita-travel.webflow.io/retreat</a>: “Heel fijn”: photos first, then a clear overview of the info you need (screenshots under <a href="#winners">Winners</a>)</li>
+      <li><a href="https://www.nioraretreats.nl/agenda/yoga-retreat-spanje/">nioraretreats.nl, yoga-retreat-spanje</a>: <span class="good">+</span> scroll through the photos, concise info, practical info, price and what's included. <span class="bad">−</span> day programme not needed</li>
+    </ul>
+    <div class="shots one"><figure><img src="img/niora-photos.jpg" alt="Niora retreats Spain photo strip" loading="lazy"><figcaption>nioraretreats.nl photo scroll</figcaption></figure></div>
+    <p><b>Bad example</b>: <a href="https://www.yogapunt.be/yoga-hike-retreat-roc-du-paradis">yogapunt.be, yoga-hike-retreat-roc-du-paradis</a></p>
+  </div>
+</div>
+
+<div class="card tab">
+  <h3>Lessen<br><small style="font-size:.9rem;color:var(--muted)">Classes</small></h3>
+  <div>
+    <p class="goal">Goal: overview of all classes Rita gives, where and when.</p>
+    <p>Fairly structured, maybe like the retreats. Hover over (or click) the “Ashtanga” photo → short info: <i>What is it? Why do it? For whom? Where</i> (names of the studios where Rita teaches it).</p>
+    <p><b>Wat kan je volgen?</b> (What can you follow?)</p>
+    <div class="shots">
+      <figure><img src="img/class-ashtanga.jpg" alt="Ashtanga class photo" loading="lazy"><figcaption>Ashtanga</figcaption></figure>
+      <figure><img src="img/class-vinyasa.jpg" alt="Vinyasa class photo" loading="lazy"><figcaption>Vinyasa</figcaption></figure>
+      <figure><img src="img/class-pilates-mat.jpg" alt="Pilates mat class photo" loading="lazy"><figcaption>Pilates Mat</figcaption></figure>
+      <figure><img src="img/class-pilates-reformer.jpg" alt="Pilates reformer class photo" loading="lazy"><figcaption>Pilates Reformer</figcaption></figure>
+    </div>
+    <p><b>Waar kan je les volgen?</b> (Where?)</p>
+    <div class="shots">
+      <figure><a href="https://www.antwerpyoga.be/"><img src="img/studio-antwerp-yoga.jpg" alt="Antwerp Yoga Academy" loading="lazy"></a><figcaption><a href="https://www.antwerpyoga.be/">Antwerp Yoga</a></figcaption></figure>
+      <figure><a href="https://www.studiopili.be/"><img src="img/studio-pili.jpg" alt="Studio Pili" loading="lazy"></a><figcaption><a href="https://www.studiopili.be/">Studio Pili</a></figcaption></figure>
+      <figure><a href="https://magnoliastudios.be/"><img src="img/studio-magnolia.jpg" alt="Magnolia Studios" loading="lazy"></a><figcaption><a href="https://magnoliastudios.be/">Magnolia Studio</a></figcaption></figure>
+    </div>
+    <p><b>Calendar</b> (optional): a visual week planning showing Rita's whole schedule at once: where she teaches what.</p>
+  </div>
+</div>
+
+<div class="card tab">
+  <h3>Private coaching</h3>
+  <div>
+    <p class="goal">Goal: briefly explain what an individual session with Rita is: what to expect, how long, etc.</p>
+    <p>A simple tab: a few nice photos of Rita with people + a short explanation, fairly to the point, but pleasant.</p>
+  </div>
+</div>
+
+<div class="card tab">
+  <h3>Team</h3>
+  <div>
+    <p class="goal">Goal: short overview of Rita and Philippe.</p>
+    <p>A great photo with a few sentences about each person: Rita, Philippe.</p>
+    <p class="quote">See the estudioniksen.com idea: diving mask + yoga block, hover → Philippe's / Rita's face appears.</p>
+  </div>
+</div>
+
+<div class="card tab">
+  <h3>Gallery</h3>
+  <div>
+    <p class="goal">Goal: photos that make you want to go. A mix of photos, anything goes.</p>
+    <p>Like a hotel on booking.com: <b>photos in a mosaic</b>, each photo with a small caption: what you see, or place of the event + date.</p>
+    <p>Example: <a href="https://www.sansararesort.com/gallery/">sansararesort.com/gallery</a> (screenshot under <a href="#winners">Winners</a>)</p>
+  </div>
+</div>
+
+<div class="card tab">
+  <h3>Contact</h3>
+  <div>
+    <p class="goal">Goal: a place to get in touch quickly, via email or GSM.</p>
+    <ul>
+      <li>Contact form, like sparklingyogaretreats.com</li>
+      <li>Our details: email and GSM</li>
+      <li>Button to <b>get notified about the next retreat</b></li>
+    </ul>
+  </div>
+</div>
+
+<!-- ─────────────────────────────────────────────── -->
+<h2 id="questions">Open questions</h2>
+<ul>
+  <li>The structure doc says <b>“10 tabs”</b> but describes 8 (Home, Retreats, Lessen, Private coaching, Team, Gallery, Contact + a page per retreat). Which are missing?</li>
+  <li>Shop: liked on sparklingyogaretreats.com. Wanted for us?</li>
+  <li>B&amp;W / heavy-grain photos (oldtomcapital): a brand style or just a nice detail?</li>
+</ul>
+
+<footer>
+  Sources: <i>website_comments_2.pdf</i> (Sunday 26 July 2026) · <i>Structuur_Website_v3.docx</i>. Screenshots taken from those documents.
+</footer>
+
+</main>
+</body>
+</html>
