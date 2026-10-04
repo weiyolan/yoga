@@ -624,8 +624,10 @@ body.has-cursor main, body.has-cursor main a, body.has-cursor main button, body.
   if (!btn || !panel) return;
   var small = matchMedia('(max-width: 700px)'), auto;
   function anchor() { // point the caret + animation origin at the button
-    var r = btn.getBoundingClientRect(), p = panel.getBoundingClientRect();
-    var x = Math.max(18, Math.min(p.width - 18, r.left + r.width / 2 - p.left));
+    // measure the untransformed layout (the closed panel is scaled down, so its rect is misleading)
+    var r = btn.getBoundingClientRect(), w = panel.offsetWidth;
+    var left = document.documentElement.clientWidth - parseFloat(getComputedStyle(panel).right) - w;
+    var x = Math.max(18, Math.min(w - 18, r.left + r.width / 2 - left));
     panel.style.setProperty('--caret', x + 'px');
   }
   function isOpen() { return panel.classList.contains('open'); }
@@ -648,7 +650,7 @@ body.has-cursor main, body.has-cursor main a, body.has-cursor main button, body.
   panel.querySelector('.wf-close').addEventListener('click', function () { setInfo(false); });
   document.addEventListener('click', function (e) { if (isOpen() && !e.target.closest('.wf-info, .wf-info-btn')) setInfo(false); });
   document.addEventListener('keydown', function (e) { if (e.key === 'Escape' && isOpen()) setInfo(false); });
-  addEventListener('resize', function () { if (isOpen()) anchor(); });
+  addEventListener('resize', anchor); anchor();
   // open on the first load of every visit (once per browser session)
   if (!sessionStorage.getItem('yzt-wf-info')) {
     sessionStorage.setItem('yzt-wf-info', '1');
