@@ -1,0 +1,674 @@
+<!doctype html>
+<html lang="nl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Wireframe · Yoga, Zen &amp; Tonic</title>
+<style>
+/* Yoga, Zen & Tonic: wireframe v1 (low-fi, greyscale on purpose) */
+:root {
+  --bg: #F6F6F3; --bg-2: #ECECE8; --ink: #222; --ink-soft: #6A6A66; --line: #CFCFCA;
+  --ph: #DADAD5; --ph-line: #BDBDB7; --dark: #2B2B29;
+  --note: #2F6FDE; --note-bg: #EAF1FD;
+  --serif: Georgia, "Times New Roman", serif;
+  --sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  --mono: ui-monospace, "SF Mono", Menlo, monospace;
+  --maxw: 1240px; --gutter: clamp(20px, 4vw, 48px); --section: clamp(72px, 10vw, 140px);
+}
+* { box-sizing: border-box; }
+html { scroll-behavior: smooth; }
+body { margin: 0; background: var(--bg); color: var(--ink); font: 16px/1.6 var(--sans); padding-top: 44px; }
+a { color: inherit; }
+h1, h2, h3, h4, .serif { font-family: var(--serif); font-weight: 400; line-height: 1.1; margin: 0; }
+h1 { font-size: clamp(2.6rem, 6.5vw, 5.6rem); }
+h2 { font-size: clamp(2rem, 4vw, 3.2rem); }
+h3 { font-size: 1.6rem; }
+h4 { font-size: 1.3rem; }
+p { margin: 0 0 14px; max-width: 62ch; }
+.wrap { max-width: var(--maxw); margin: 0 auto; padding: 0 var(--gutter); }
+section.s { padding: var(--section) 0; border-top: 1px solid var(--line); }
+section.alt { background: var(--bg-2); }
+section.dark { background: var(--dark); color: #EEE; border-top: 0; }
+section.dark .muted { color: #AAA; }
+.muted { color: var(--ink-soft); }
+.small { font-size: .875rem; }
+.label { display: inline-block; font: 600 .72rem/1 var(--sans); letter-spacing: .16em; text-transform: uppercase; color: var(--ink-soft); margin-bottom: 14px; }
+.head { display: flex; justify-content: space-between; align-items: end; gap: 24px; margin-bottom: 40px; flex-wrap: wrap; }
+.center { text-align: center; } .center p { margin-left: auto; margin-right: auto; }
+
+/* ---------- wireframe toolbar (not part of the site) ---------- */
+.wf-bar { position: fixed; inset: 0 0 auto; height: 44px; z-index: 100; display: flex; align-items: center; gap: 18px; padding: 0 16px; background: #111; color: #DDD; font: 12px/1 var(--sans); overflow-x: auto; white-space: nowrap; }
+.wf-bar b { color: #fff; font-weight: 600; }
+.wf-bar nav { display: flex; gap: 4px; }
+.wf-bar nav a { text-decoration: none; padding: 6px 9px; border-radius: 4px; color: #BBB; }
+.wf-bar nav a:hover { background: #2A2A2A; color: #fff; }
+.wf-bar nav a.on { background: #fff; color: #111; }
+.wf-bar button { margin-left: auto; font: inherit; background: var(--note); color: #fff; border: 0; border-radius: 4px; padding: 7px 10px; cursor: pointer; }
+.wf-bar button.off { background: #333; }
+
+/* ---------- annotations ---------- */
+.note { display: block; position: relative; background: var(--note-bg); color: #163B7A; border-left: 3px solid var(--note); padding: 10px 14px 10px 40px; margin: 18px 0; font: 13.5px/1.5 var(--sans); max-width: 70ch; }
+.note::before { content: attr(data-n); position: absolute; left: 10px; top: 9px; width: 20px; height: 20px; border-radius: 50%; background: var(--note); color: #fff; font: 600 11px/20px var(--sans); text-align: center; }
+.note b { color: #0F2C5E; }
+.hero .note, .on-photo .note { position: absolute; z-index: 3; margin: 0; max-width: 360px; }
+body.notes-off .note { display: none; }
+
+/* ---------- image placeholder ---------- */
+.ph { position: relative; background: var(--ph); overflow: hidden; width: 100%; }
+.ph::before { content: ""; position: absolute; inset: 0;
+  background:
+    linear-gradient(to top right, transparent calc(50% - .6px), var(--ph-line) 50%, transparent calc(50% + .6px)),
+    linear-gradient(to top left,  transparent calc(50% - .6px), var(--ph-line) 50%, transparent calc(50% + .6px)); }
+.ph::after { content: attr(data-label); position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%); max-width: 82%; text-align: center; background: var(--ph); color: #5A5A56; font: 11.5px/1.4 var(--mono); padding: 4px 8px; }
+.ph.r45 { aspect-ratio: 4 / 5; } .ph.r34 { aspect-ratio: 3 / 4; } .ph.r1 { aspect-ratio: 1; } .ph.r32 { aspect-ratio: 3 / 2; } .ph.r21 { aspect-ratio: 2 / 1; } .ph.r169 { aspect-ratio: 16 / 9; }
+.ph.bw { background: #C9C9C4; } .ph.bw::after { background: #C9C9C4; }
+.ph.dark { background: #8F8F8A; } .ph.dark::before { background: linear-gradient(to top right, transparent calc(50% - .6px), #A3A39E 50%, transparent calc(50% + .6px)), linear-gradient(to top left, transparent calc(50% - .6px), #A3A39E 50%, transparent calc(50% + .6px)); }
+.ph.dark::after { background: #8F8F8A; color: #F2F2F2; }
+
+/* ---------- site nav ---------- */
+.nav { position: absolute; top: 44px; left: 0; right: 0; z-index: 5; display: flex; align-items: center; gap: 28px; padding: 22px var(--gutter); color: #fff; font-size: .875rem; }
+.nav.solid { position: static; color: var(--ink); border-bottom: 1px solid var(--line); background: var(--bg); }
+.nav .logo { font: 1.45rem/1 var(--serif); text-decoration: none; margin-right: auto; }
+.nav .links { display: flex; gap: 24px; }
+.nav .links a { text-decoration: none; opacity: .9; } .nav .links a.on { text-decoration: underline; text-underline-offset: 6px; }
+.nav .lang { opacity: .8; font-size: .8rem; letter-spacing: .06em; }
+.nav .burger { display: none; background: none; border: 1px solid currentColor; color: inherit; border-radius: 99px; padding: 8px 14px; font: inherit; }
+@media (max-width: 1000px) {
+  .nav .links, .nav .lang { display: none; } .nav .burger { display: inline-block; }
+  .nav.open .links { display: flex; flex-direction: column; position: absolute; top: 72px; left: var(--gutter); right: var(--gutter); background: var(--bg); color: var(--ink); padding: 20px; gap: 14px; border: 1px solid var(--line); font-size: 1.1rem; }
+}
+
+/* ---------- hero ---------- */
+.hero { position: relative; height: calc(100vh - 44px); min-height: 560px; max-height: 920px; color: #fff; }
+.hero.short { height: 66vh; min-height: 440px; }
+.hero > .ph { position: absolute; inset: 0; height: 100%; }
+.hero > .ph::after { top: 120px; transform: translateX(-50%); }
+.hero .txt { position: absolute; left: var(--gutter); right: var(--gutter); bottom: 56px; z-index: 2; }
+.hero .txt h1 { max-width: 13ch; }
+.hero .txt p { color: #fff; opacity: .92; font-size: 1.15rem; }
+.hero .meta { display: flex; gap: 22px; flex-wrap: wrap; font-size: .9rem; opacity: .95; margin: 14px 0 22px; }
+.hero::after { content: ""; position: absolute; inset: 0; background: linear-gradient(transparent 45%, rgba(0,0,0,.35)); pointer-events: none; }
+.guide { width: 0; height: 90px; border-left: 1px dashed #888; margin: 0 auto; }
+
+/* ---------- buttons ---------- */
+.btn { display: inline-flex; align-items: center; gap: 8px; font: 500 .8rem/1 var(--sans); letter-spacing: .08em; text-transform: uppercase; padding: 15px 24px; border-radius: 99px; border: 1px solid var(--ink); background: var(--ink); color: #fff; text-decoration: none; cursor: pointer; }
+.btn.ghost { background: transparent; color: var(--ink); }
+.btn.light { background: transparent; border-color: #fff; color: #fff; }
+.btn.white { background: #fff; color: var(--ink); border-color: #fff; }
+.btn.sm { padding: 10px 16px; }
+.link { font-size: .8rem; letter-spacing: .08em; text-transform: uppercase; text-underline-offset: 5px; }
+.row { display: flex; gap: 14px; flex-wrap: wrap; align-items: center; }
+
+/* ---------- layouts ---------- */
+.g2 { display: grid; grid-template-columns: 1fr 1fr; gap: 48px; align-items: center; }
+.g3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 22px; }
+.g4 { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; }
+.g6 { display: grid; grid-template-columns: repeat(6, 1fr); gap: 8px; }
+@media (max-width: 860px) { .g2, .g3 { grid-template-columns: 1fr; gap: 32px; } .g4 { grid-template-columns: 1fr 1fr; } .g6 { grid-template-columns: repeat(3, 1fr); } }
+
+/* retreat card */
+.card { display: block; text-decoration: none; }
+.card .meta { display: flex; justify-content: space-between; gap: 12px; font-size: .85rem; color: var(--ink-soft); margin-top: 12px; }
+.card h4 { margin-top: 6px; }
+.tag { font: 600 .68rem/1 var(--sans); letter-spacing: .16em; text-transform: uppercase; color: var(--ink); }
+.tag.past { color: var(--ink-soft); }
+
+/* class tile with hover reveal */
+.tile { position: relative; color: #fff; display: block; text-decoration: none; }
+.tile .name { position: absolute; left: 16px; bottom: 14px; font: 1.6rem/1 var(--serif); color: #fff; z-index: 2; text-shadow: 0 1px 8px rgba(0,0,0,.25); }
+.tile .ph { background: #A9A9A4; } .tile .ph::after { background: #A9A9A4; color: #fff; top: 30%; }
+.tile .info { position: absolute; inset: 0; z-index: 3; background: rgba(34,34,34,.93); padding: 18px; display: flex; flex-direction: column; justify-content: flex-end; opacity: 0; transition: opacity .35s ease; font-size: .88rem; line-height: 1.45; }
+.tile .info b { font: 1.5rem/1 var(--serif); margin-bottom: 8px; }
+.tile .info dt { font: 600 .65rem/1 var(--sans); letter-spacing: .16em; text-transform: uppercase; color: #BBB; margin-top: 10px; }
+.tile .info dd { margin: 3px 0 0; }
+.tile:hover .info, .tile:focus .info { opacity: 1; }
+
+/* quote */
+blockquote { margin: 0 auto; max-width: 30ch; font: clamp(1.6rem, 3vw, 2.4rem)/1.25 var(--serif); text-align: center; }
+.dots { display: flex; gap: 8px; justify-content: center; margin-top: 24px; } .dots i { width: 7px; height: 7px; border-radius: 50%; background: var(--line); } .dots i.on { background: var(--ink); }
+
+/* retreat detail */
+.mood { display: grid; grid-template-columns: 2fr 1fr; gap: 10px; }
+.mood .side { display: grid; grid-template-rows: 1fr 1fr; gap: 10px; }
+.mood .side .duo { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.mood .ph { height: 100%; min-height: 160px; }
+@media (max-width: 860px) { .mood { grid-template-columns: 1fr; } }
+.detail { display: grid; grid-template-columns: minmax(0, 1fr) 340px; gap: 64px; align-items: start; }
+@media (max-width: 960px) { .detail { grid-template-columns: 1fr; } .detail aside { order: -1; position: static !important; } }
+.detail aside { position: sticky; top: 64px; border: 1px solid var(--line); background: #fff; padding: 26px; }
+.detail aside .price { font: 2.4rem/1 var(--serif); margin: 4px 0 18px; }
+.detail aside dl { display: grid; grid-template-columns: auto 1fr; gap: 10px 18px; margin: 0 0 20px; font-size: .93rem; }
+.detail aside dt { color: var(--ink-soft); } .detail aside dd { margin: 0; }
+.detail aside ul { list-style: none; padding: 0; margin: 20px 0 0; border-top: 1px solid var(--line); font-size: .85rem; }
+.detail aside li { padding: 10px 0; border-bottom: 1px solid var(--line); color: var(--ink-soft); }
+.detail aside li a { text-decoration: none; }
+.block { padding: 56px 0; border-top: 1px solid var(--line); }
+.block:first-child { padding-top: 0; border-top: 0; }
+.block h2 { font-size: clamp(1.8rem, 3vw, 2.4rem); margin-bottom: 18px; }
+.ticks { list-style: none; padding: 0; margin: 0; } .ticks li { padding: 10px 0 10px 28px; border-bottom: 1px solid var(--line); position: relative; } .ticks li::before { content: "—"; position: absolute; left: 0; color: var(--ink-soft); }
+.inc { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; } @media (max-width: 700px) { .inc { grid-template-columns: 1fr; } }
+.inc h4 { font: 600 .72rem/1 var(--sans); letter-spacing: .16em; text-transform: uppercase; margin-bottom: 10px; }
+.people { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; } @media (max-width: 700px) { .people { grid-template-columns: 1fr 1fr; } }
+.people b { display: block; font: 1.2rem/1.2 var(--serif); margin-top: 10px; }
+
+/* team object → face */
+.person { position: relative; display: block; }
+.person .obj { position: absolute; inset: 0; z-index: 2; display: grid; place-items: center; background: var(--bg-2); transition: opacity .35s ease; }
+.person .obj svg { width: 42%; stroke: var(--ink); fill: none; stroke-width: 1.2; }
+.person:hover .obj, .person:focus .obj { opacity: 0; }
+
+/* filters, chips, inputs */
+.filters { display: flex; gap: 12px; flex-wrap: wrap; align-items: end; }
+.select { min-width: 180px; }
+.select label, .field label { display: block; font: 600 .68rem/1 var(--sans); letter-spacing: .16em; text-transform: uppercase; color: var(--ink-soft); margin-bottom: 8px; }
+.select div, .field input, .field textarea { width: 100%; border: 0; border-bottom: 1px solid var(--ink); background: transparent; padding: 8px 0; font: inherit; color: var(--ink-soft); }
+.select div::after { content: " ▾"; float: right; }
+.chips { display: flex; gap: 22px; flex-wrap: wrap; font-size: .8rem; letter-spacing: .08em; text-transform: uppercase; margin-bottom: 18px; }
+.chips span { color: var(--ink-soft); padding-bottom: 4px; } .chips span.on { color: var(--ink); border-bottom: 1px solid var(--ink); }
+.field textarea { min-height: 110px; resize: vertical; }
+.form { display: grid; grid-template-columns: 1fr 1fr; gap: 28px; } .form .full { grid-column: 1 / -1; }
+@media (max-width: 700px) { .form { grid-template-columns: 1fr; } }
+.check { display: flex; gap: 10px; align-items: center; font-size: .95rem; } .check input { width: 18px; height: 18px; accent-color: var(--ink); }
+
+/* mosaic */
+.mosaic { display: grid; grid-template-columns: repeat(4, 1fr); grid-auto-rows: 200px; gap: 8px; }
+.mosaic figure { margin: 0; position: relative; }
+.mosaic .ph { height: 100%; }
+.mosaic .w2 { grid-column: span 2; } .mosaic .h2 { grid-row: span 2; }
+.mosaic figcaption { position: absolute; left: 10px; bottom: 8px; z-index: 2; font-size: .72rem; letter-spacing: .04em; color: #444; background: rgba(255,255,255,.8); padding: 2px 6px; }
+@media (max-width: 700px) { .mosaic { grid-template-columns: 1fr 1fr; grid-auto-rows: 150px; } }
+
+/* week grid */
+.week { width: 100%; border-collapse: collapse; font-size: .85rem; table-layout: fixed; }
+.week th { font: 600 .68rem/1 var(--sans); letter-spacing: .14em; text-transform: uppercase; color: var(--ink-soft); text-align: left; padding: 10px 8px; border-bottom: 1px solid var(--ink); }
+.week td { vertical-align: top; padding: 8px; border-bottom: 1px solid var(--line); height: 70px; }
+.slot { display: block; background: #fff; border: 1px solid var(--line); padding: 6px 8px; line-height: 1.35; }
+.slot b { display: block; font-weight: 600; }
+.week-wrap { overflow-x: auto; } .week-wrap .week { min-width: 760px; }
+
+/* insta strip, footer */
+.footer { background: var(--dark); color: #CCC; padding: 72px 0 40px; font-size: .9rem; }
+.footer .cols { display: grid; grid-template-columns: 2fr 1fr 1fr 1fr; gap: 40px; }
+@media (max-width: 860px) { .footer .cols { grid-template-columns: 1fr 1fr; } }
+.footer h4 { color: #fff; font: 600 .7rem/1 var(--sans); letter-spacing: .16em; text-transform: uppercase; margin-bottom: 16px; }
+.footer a { text-decoration: none; display: block; margin: 6px 0; color: #CCC; }
+.footer .logo { font: 1.8rem/1 var(--serif); color: #fff; margin-bottom: 12px; }
+.footer .sub { display: flex; gap: 8px; margin-top: 16px; }
+.footer .sub div { flex: 1; border-bottom: 1px solid #888; padding: 10px 0; color: #999; }
+.footer .legal { border-top: 1px solid #444; margin-top: 48px; padding-top: 20px; display: flex; justify-content: space-between; color: #888; font-size: .8rem; flex-wrap: wrap; gap: 10px; }
+
+/* split (contact) */
+.split { display: grid; grid-template-columns: 1fr 1fr; min-height: calc(100vh - 44px); }
+.split > .ph { height: 100%; min-height: 360px; }
+.split .pane { padding: 72px var(--gutter); }
+@media (max-width: 860px) { .split { grid-template-columns: 1fr; } .split > .ph { min-height: 300px; } .split .pane { padding-top: 48px; } }
+
+</style>
+</head>
+<body>
+<div class="wf-bar"><b>Wireframe v1 · Yoga, Zen &amp; Tonic</b><nav><a href="#index" data-key="index">Home</a><a href="#retreats" data-key="retreats">Retreats</a><a href="#retreat-dahab" data-key="retreat-dahab">Retreat (detail)</a><a href="#lessen" data-key="lessen">Lessen</a><a href="#coaching" data-key="coaching">Private coaching</a><a href="#over-ons" data-key="over-ons">Over ons</a><a href="#gallery" data-key="gallery">Gallery</a><a href="#contact" data-key="contact">Contact</a></nav><button id="wf-notes" type="button">Notities: aan</button></div>
+<div class="wf-page" id="page-index" data-title="Home" hidden>
+<header class="nav"><a class="logo" href="#index">Yoga, Zen &amp; Tonic</a><nav class="links"><a href="#retreats">Retreats</a><a href="#lessen">Lessen</a><a href="#coaching">Private coaching</a><a href="#over-ons">Over ons</a><a href="#gallery">Gallery</a><a href="#contact">Contact</a></nav><span class="lang">NL / EN</span><a class="btn sm white" href="#retreat-dahab:inschrijven">Inschrijven</a><button class="burger" type="button">Menu</button></header>
+<main>
+<section class="hero">
+  <div class="ph dark" data-label="Foto of stille video-loop (10–15 s): zee, vuur of zand"></div>
+  <span class="note" data-n="1" style="top:100px;right:var(--gutter)"><b>Elke pagina start met één grote foto</b> (zoals Sansara). Op Home mag dit een korte, stille video zijn die eruitziet als een foto (Estudio Niksen).</span>
+  <div class="txt">
+    <h1>Beyond the mat, into the moment</h1>
+    
+    <p>Retreats, lessen en coaching. Yoga, natuur, lekker eten en warme mensen.</p>
+    <div class="row"><a class="btn white" href="#retreats">Ontdek de retreats</a><a class="btn light" href="#lessen">Lessen</a></div>
+  </div>
+</section>
+<div class="guide" aria-hidden="true"></div>
+<section class="s" style="border-top:0">
+  <div class="wrap">
+    <div class="g2">
+      <a href="#retreat-dahab" style="display:block"><div class="ph r32" data-label="Foto: sfeerbeeld volgende retreat"></div></a>
+      <div>
+        <span class="label">Volgende retreat</span>
+        <h2>Dahab: Yoga &amp; Freediving</h2>
+        <p class="muted" style="margin-top:12px">9–16 mei · Dahab, Egypte · max. 8 deelnemers · vanaf € 1.120</p>
+        <p>Yoga bij zonsopgang, turquoise water en een freedive-initiatie. Rustig blijven, diep ademen, niet forceren.</p>
+        <div class="row" style="margin-top:22px"><a class="btn" href="#retreat-dahab">Ontdek de retreat</a><a class="link" href="#retreats">Alle retreats</a></div>
+      </div>
+    </div>
+    <span class="note" data-n="2"><b>De retreats staan bovenaan</b>, zoals gevraagd in de structuur: de eerstvolgende retreat krijgt de grootste plek op de homepage.</span>
+  </div>
+</section>
+
+<section class="s alt">
+  <div class="wrap center">
+    <span class="label">Wie zijn wij</span>
+    <h2 style="max-width:20ch;margin:0 auto 20px">Geen zweverig gedoe. Wél yoga, natuur en warme mensen.</h2>
+    <p class="muted">Eén paragraaf over Yoga, Zen &amp; Tonic: hoe het begon, waar we voor staan, wat je mag verwachten. Maximaal 60 woorden.</p>
+    <a class="link" href="#over-ons">Maak kennis met Rita &amp; Philippe</a>
+    <span class="note" data-n="3" style="margin:22px auto 0;text-align:left">Achtergrond en historie in <b>1 paragraaf</b>. Kort houden: “te veel tekst” was de meest gehoorde kritiek op andere sites.</span>
+  </div>
+</section>
+
+<section class="s">
+  <div class="wrap">
+    <div class="head"><div><span class="label">Retreats</span><h2>Waar gaan we naartoe?</h2></div><a class="link" href="#retreats">Alle retreats</a></div>
+    <div class="g3"><a class="card" href="#retreat-dahab"><div class="ph r45" data-label="Foto: freediver boven koraal"></div>
+  <div class="meta"><span class="tag">Volgende retreat</span><span>vanaf € 1.120</span></div>
+  <h4>Dahab: Yoga &amp; Freediving</h4><div class="meta" style="margin-top:4px"><span>9–16 mei · Egypte · max. 8</span></div></a><a class="card" href="#retreat-dahab"><div class="ph r45" data-label="Foto: bestemming"></div>
+  <div class="meta"><span class="tag">Binnenkort</span><span>vanaf € …</span></div>
+  <h4>[Nieuwe retreat]</h4><div class="meta" style="margin-top:4px"><span>[datum] · [plaats]</span></div></a><a class="card" href="#retreat-dahab"><div class="ph r45 bw" data-label="Foto: hike in het bos (zw-wit)"></div>
+  <div class="meta"><span class="tag past">Voorbij</span><span>14 deelnemers</span></div>
+  <h4>Eifel: Yoga &amp; Hike</h4><div class="meta" style="margin-top:4px"><span>27–30 nov 2025 · België</span></div></a></div>
+    <span class="note" data-n="4">Komende retreats in kleur; <b>voorbije retreats in zwart-wit</b>, die bij hover in kleur verschijnen (Old Tom Capital).</span>
+  </div>
+</section>
+
+<section class="s alt">
+  <div class="wrap">
+    <div class="head"><div><span class="label">Lessen</span><h2>Wat kan je volgen?</h2></div><a class="link" href="#lessen">Uurrooster &amp; studio's</a></div>
+    <div class="g4"><a class="tile" href="#lessen" tabindex="0"><div class="ph r34" data-label="Foto: ashtanga"></div><span class="name">Ashtanga</span>
+  <div class="info"><b>Ashtanga</b><dl><dt>Wat</dt><dd>Dynamische, vaste reeks op de adem.</dd><dt>Voor wie</dt><dd>Wie kracht, focus en ritme zoekt.</dd><dt>Waar</dt><dd>Antwerp Yoga</dd></dl></div></a><a class="tile" href="#lessen" tabindex="0"><div class="ph r34" data-label="Foto: vinyasa"></div><span class="name">Vinyasa</span>
+  <div class="info"><b>Vinyasa</b><dl><dt>Wat</dt><dd>Vloeiende flows, elke les anders.</dd><dt>Voor wie</dt><dd>Iedereen, alle niveaus.</dd><dt>Waar</dt><dd>Antwerp Yoga · Studio Pili</dd></dl></div></a><a class="tile" href="#lessen" tabindex="0"><div class="ph r34" data-label="Foto: pilates mat"></div><span class="name">Pilates Mat</span>
+  <div class="info"><b>Pilates Mat</b><dl><dt>Wat</dt><dd>Core, houding en controle op de mat.</dd><dt>Voor wie</dt><dd>Wie sterker en soepeler wil worden.</dd><dt>Waar</dt><dd>Magnolia Studios</dd></dl></div></a><a class="tile" href="#lessen" tabindex="0"><div class="ph r34" data-label="Foto: pilates reformer"></div><span class="name">Pilates Reformer</span>
+  <div class="info"><b>Pilates Reformer</b><dl><dt>Wat</dt><dd>Pilates op toestel, met weerstand.</dd><dt>Voor wie</dt><dd>Gerichte opbouw, ook na blessure.</dd><dt>Waar</dt><dd>Studio Pili</dd></dl></div></a></div>
+    <p class="muted small" style="margin-top:18px">Antwerp Yoga · Studio Pili · Magnolia Studios</p>
+    <span class="note" data-n="5"><b>Hover over een foto</b> (of tik op gsm): je leest kort <i>wat · voor wie · waar</i>. Probeer het hierboven.</span>
+  </div>
+</section>
+
+<section class="s">
+  <div class="wrap">
+    <span class="label" style="display:block;text-align:center">Wat deelnemers zeggen</span>
+    <blockquote>“Ik kwam voor de yoga en ging naar huis met een nieuwe vriendengroep.”</blockquote>
+    <p class="muted small" style="text-align:center;margin:18px auto 0">[Naam] · Eifel 2025</p>
+    <div class="dots"><i class="on"></i><i></i><i></i></div>
+    <span class="note" data-n="6" style="margin:28px auto 0">2–3 korte testimonials, <b>één tegelijk</b>, groot. Geen automatische carrousel; de bezoeker klikt zelf.</span>
+  </div>
+</section>
+
+<section class="s alt">
+  <div class="wrap">
+    <div class="g2">
+      <div>
+        <span class="label">Wie zijn wij</span>
+        <h2>Rita &amp; Philippe</h2>
+        <p style="margin-top:14px">Rita is verliefd op yoga, Philippe op de natuur en freediven. Samen maken ze retreats die krachtig, authentiek en fun zijn.</p>
+        <a class="link" href="#over-ons">Over ons</a>
+      </div>
+      <div class="ph r32" data-label="Foto: Rita &amp; Philippe samen"></div>
+    </div>
+  </div>
+</section>
+
+<section class="s">
+  <div class="wrap">
+    <div class="head"><div><span class="label">Volg ons</span><h2>@yogazentonic</h2></div><div class="row"><a class="link" href="https://www.instagram.com/">Instagram</a><a class="link" href="https://www.facebook.com/yogazentonic">Facebook</a></div></div>
+    <div class="g6"><div class="ph r1" data-label="Insta"></div><div class="ph r1" data-label="Insta"></div><div class="ph r1" data-label="Insta"></div><div class="ph r1" data-label="Insta"></div><div class="ph r1" data-label="Insta"></div><div class="ph r1" data-label="Insta"></div></div>
+  </div>
+</section></main>
+</div>
+<div class="wf-page" id="page-retreats" data-title="Retreats" hidden>
+<header class="nav"><a class="logo" href="#index">Yoga, Zen &amp; Tonic</a><nav class="links"><a href="#retreats" class=on>Retreats</a><a href="#lessen">Lessen</a><a href="#coaching">Private coaching</a><a href="#over-ons">Over ons</a><a href="#gallery">Gallery</a><a href="#contact">Contact</a></nav><span class="lang">NL / EN</span><a class="btn sm white" href="#retreat-dahab:inschrijven">Inschrijven</a><button class="burger" type="button">Menu</button></header>
+<main>
+<section class="hero short">
+  <div class="ph dark" data-label="Foto: sfeerbeeld retreat (landschap, breed)"></div>
+  <span class="note" data-n="1" style="top:100px;right:var(--gutter)">Kortere openingsfoto op overzichtspagina's (± 2/3 van het scherm).</span>
+  <div class="txt">
+    <h1>Retreats</h1>
+    
+    <p>Kleine groepen, mooie plekken, geen druk.</p>
+    
+  </div>
+</section>
+<div class="guide" aria-hidden="true"></div>
+<section class="s" style="border-top:0">
+  <div class="wrap">
+    <div class="head"><div><span class="label">Komende retreats</span><h2>Binnenkort</h2></div></div>
+    <div class="g3"><a class="card" href="#retreat-dahab"><div class="ph r45" data-label="Foto: freediver boven koraal"></div>
+  <div class="meta"><span class="tag">Volgende retreat</span><span>vanaf € 1.120</span></div>
+  <h4>Dahab: Yoga &amp; Freediving</h4><div class="meta" style="margin-top:4px"><span>9–16 mei · Egypte · max. 8</span></div></a><a class="card" href="#retreat-dahab"><div class="ph r45" data-label="Foto: bestemming"></div>
+  <div class="meta"><span class="tag">Binnenkort</span><span>vanaf € …</span></div>
+  <h4>[Nieuwe retreat]</h4><div class="meta" style="margin-top:4px"><span>[datum] · [plaats]</span></div></a><a class="card" href="#retreat-dahab"><div class="ph r45" data-label="Foto: bestemming"></div>
+  <div class="meta"><span class="tag">Binnenkort</span><span>vanaf € …</span></div>
+  <h4>[Nieuwe retreat]</h4><div class="meta" style="margin-top:4px"><span>[datum] · [plaats]</span></div></a></div>
+    <span class="note" data-n="2">Chronologisch. Eén foto per retreat met <b>bestemming, datum en prijs</b>; klik → detailpagina (idee van Sparkling Yoga, maar met rustige titels onder de foto i.p.v. sierletters erop).</span>
+  </div>
+</section>
+
+<section class="s alt">
+  <div class="wrap">
+    <div class="head"><div><span class="label">Voorbije retreats</span><h2>Waar we al waren</h2></div></div>
+    <div class="g3">
+      <a class="card" href="#retreat-dahab"><div class="ph r45 bw" data-label="Foto: hike in het bos (zw-wit)"></div>
+  <div class="meta"><span class="tag past">Voorbij</span><span>14 deelnemers</span></div>
+  <h4>Eifel: Yoga &amp; Hike</h4><div class="meta" style="margin-top:4px"><span>27–30 nov 2025 · België</span></div></a>
+      <a class="card" href="#retreat-dahab"><div class="ph r45 bw" data-label="Foto: Dahab 2026 (zw-wit)"></div>
+  <div class="meta"><span class="tag past">Voorbij</span><span>8 deelnemers</span></div>
+  <h4>Dahab: Yoga &amp; Freediving</h4><div class="meta" style="margin-top:4px"><span>9–16 mei 2026 · Egypte</span></div></a>
+      <a class="card" href="#retreat-dahab"><div class="ph r45 bw" data-label="Foto: Eifel 2024 (zw-wit)"></div>
+  <div class="meta"><span class="tag past">Voorbij</span><span></span></div>
+  <h4>Eifel: Yoga &amp; Hike #2</h4><div class="meta" style="margin-top:4px"><span>[datum] · België</span></div></a>
+    </div>
+    <span class="note" data-n="3">Zelfde kaarten, <b>in zwart-wit</b>; bij hover komt de kleur terug.</span>
+  </div>
+</section>
+
+<section class="s">
+  <div class="wrap">
+    <span class="label">Zoek een retreat</span>
+    <div class="filters">
+      <div class="select"><label>Bestemming</label><div>Alle</div></div>
+      <div class="select"><label>Maand</label><div>Alle</div></div>
+      <div class="select"><label>Type</label><div>Yoga &amp; …</div></div>
+      <span class="btn">Toon</span>
+    </div>
+    <span class="note" data-n="4">Zoekfilter <b>onderaan</b> de pagina, zoals gevraagd in de structuur. Pas echt nuttig vanaf ± 6 retreats.</span>
+  </div>
+</section></main>
+</div>
+<div class="wf-page" id="page-retreat-dahab" data-title="Retreat Dahab" hidden>
+<header class="nav"><a class="logo" href="#index">Yoga, Zen &amp; Tonic</a><nav class="links"><a href="#retreats" class=on>Retreats</a><a href="#lessen">Lessen</a><a href="#coaching">Private coaching</a><a href="#over-ons">Over ons</a><a href="#gallery">Gallery</a><a href="#contact">Contact</a></nav><span class="lang">NL / EN</span><a class="btn sm white" href="#retreat-dahab:inschrijven">Inschrijven</a><button class="burger" type="button">Menu</button></header>
+<main>
+<section class="hero">
+  <div class="ph dark" data-label="Foto: Lighthouse Bay / freedivers in het blauw"></div>
+  <span class="note" data-n="1" style="top:100px;right:var(--gutter)">Start met een <b>heel mooie foto</b> van de plek / de mensen. Titel + de 4 kernfeiten meteen zichtbaar.</span>
+  <div class="txt">
+    <h1>Dahab: Yoga &amp; Freediving</h1>
+    <div class="meta"><span>9–16 mei</span><span>Dahab, Egypte</span><span>max. 8 deelnemers</span><span>vanaf € 1.120</span></div>
+    
+    <div class="row"><a class="btn white" href="#retreat-dahab:inschrijven">Inschrijven</a></div>
+  </div>
+</section>
+<div class="guide" aria-hidden="true"></div>
+<section class="s" style="border-top:0;padding-top:24px">
+  <div class="wrap">
+    <div class="mood">
+      <div class="ph " data-label="Foto: rooftop yogashala met zeezicht" style="min-height:420px"></div>
+      <div class="side"><div class="ph " data-label="Foto: woestijn"></div><div class="duo"><div class="ph " data-label="Foto: zwembad hotel"></div><div class="ph " data-label="Foto: samen eten"></div></div></div>
+    </div>
+    <span class="note" data-n="2">Eerst een paar <b>sfeerfoto's</b> (Vita Travel: “zo willen we het ook”). Klik → foto's op volledig scherm, doorscrollen zoals bij Niora.</span>
+  </div>
+</section>
+
+<section class="s" style="padding-top:40px">
+  <div class="wrap detail">
+    <div>
+      <div class="block" id="notendop">
+        <span class="label">De retreat in een notendop</span>
+        <h2>Yoga en freediving: rustig blijven, diep ademen en vooral niet forceren.</h2>
+        <p>Ben je een geoefende yogi, maar hield je nog nooit je adem in onder water? Tijdens deze week brengen we die twee werelden samen. Een week om te bewegen, te vertragen en jezelf helemaal op te laden.</p>
+        <ul class="ticks">
+          <li>Yoga bij zonsopgang op een rooftop yogashala met zeezicht</li>
+          <li>Turquoise water, woestijnhorizonten en een freedive-initiatie</li>
+          <li>Samen aperitieven en dineren na een dag vol avontuur</li>
+        </ul>
+        <span class="note" data-n="3">Dezelfde opbouw als het Dahab-event op Facebook: <b>notendop · de plek · de mensen · het programma · praktisch · klaar om te duiken?</b></span>
+      </div>
+      <div class="block" id="plek">
+        <span class="label">De plek</span>
+        <h2>Dahab</h2>
+        <p>Ooit een rustig bedoeïenendorp, nu dé freedive-hoofdstad van de wereld. In mei: warm weer, kalme zee en die relaxte Dahab-vibe. We trainen in Lighthouse Bay en verblijven in het Nour Boutique Hotel, met rooftop yogashala en zwembad.</p>
+        <div class="g2" style="gap:10px;margin-top:22px"><div class="ph r32" data-label="Foto: Lighthouse Bay"></div><div class="ph r32" data-label="Foto: Nour Boutique Hotel"></div></div>
+      </div>
+      <div class="block" id="mensen">
+        <span class="label">De mensen</span>
+        <h2>Wie begeleidt je?</h2>
+        <div class="people">
+          <div><div class="ph r45" data-label="Portret Rita"></div><b>Rita</b><span class="muted small">Yoga · oprichter</span></div>
+          <div><div class="ph r45" data-label="Portret Philippe"></div><b>Philippe</b><span class="muted small">Natuur &amp; freediving · oprichter</span></div>
+          <div><div class="ph r45" data-label="Portret Michèle"></div><b>Michèle</b><span class="muted small">Freedive-instructeur, CMAS &amp; AIDA</span></div>
+        </div>
+      </div>
+      <div class="block" id="programma">
+        <span class="label">Het programma</span>
+        <h2>Wat staat er op het menu?</h2>
+        <ul class="ticks">
+          <li><b>Dagelijkse yoga</b>: Ashtanga flows, Yin en workshops (aerial yoga, pranayama, chanting)</li>
+          <li><b>Freediving</b>: 4 halve dagen, theorie en praktijk, van ondiep tot diep bij de boei</li>
+          <li><b>Woestijnexcursie</b>: canyons, duinen en de stilte van de woestijn</li>
+          <li><b>Vrije dag</b>: boottocht, scubaduiken, klimmen of chillen aan het rif</li>
+        </ul>
+        <span class="note" data-n="4">Hoogtepunten, <b>geen dagprogramma per uur</b> (feedback bij Niora: “dagprogramma is niet nodig”).</span>
+      </div>
+      <div class="block" id="praktisch">
+        <span class="label">Praktisch</span>
+        <h2>Prijs &amp; wat is inbegrepen</h2>
+        <div class="inc">
+          <div><h4>Prijs</h4><ul class="ticks"><li>€ 1.120 gedeelde kamer (2 pers.)</li><li>€ 1.370 single kamer</li><li>max. 8 deelnemers</li></ul></div>
+          <div><h4>Inbegrepen</h4><ul class="ticks"><li>Verblijf, ontbijt en brunch/lunch</li><li>Yogalessen en freedive-sessies</li><li>Woestijntrip</li></ul></div>
+          <div><h4>Niet inbegrepen</h4><ul class="ticks"><li>Vluchten naar Sharm El-Sheikh</li><li>Transfers (wij helpen regelen)</li><li>Diners (€ 10–20/dag), materiaalhuur, extra activiteiten</li></ul></div>
+        </div>
+      </div>
+    </div>
+    <aside>
+      <span class="label">vanaf</span>
+      <div class="price">€ 1.120</div>
+      <dl><dt>Wanneer</dt><dd>9–16 mei</dd><dt>Waar</dt><dd>Dahab, Egypte</dd><dt>Groep</dt><dd>max. 8</dd><dt>Verblijf</dt><dd>Nour Boutique Hotel</dd></dl>
+      <a class="btn" href="#retreat-dahab:inschrijven" style="width:100%;justify-content:center">Inschrijven</a>
+      <ul><li><a href="#retreat-dahab:notendop">Notendop</a></li><li><a href="#retreat-dahab:plek">De plek</a></li><li><a href="#retreat-dahab:mensen">De mensen</a></li><li><a href="#retreat-dahab:programma">Het programma</a></li><li><a href="#retreat-dahab:praktisch">Praktisch</a></li></ul>
+      <span class="note" data-n="5">Deze kaart <b>blijft staan tijdens het scrollen</b> (Vita Travel): prijs, data en inschrijven altijd binnen handbereik.</span>
+    </aside>
+  </div>
+</section>
+
+<section class="hero short" id="inschrijven" style="height:70vh">
+  <div class="ph dark" data-label="Slotfoto: groep in het water / bij zonsondergang"></div>
+  <div class="txt center" style="left:0;right:0;bottom:auto;top:50%;transform:translateY(-50%)">
+    <h1 style="margin:0 auto;max-width:14ch">Klaar om te duiken?</h1>
+    <p style="margin:16px auto 24px">Stuur ons een bericht of schrijf je meteen in. Wij doen de rest.</p>
+    <div class="row" style="justify-content:center"><a class="btn white" href="https://forms.gle/ghmT2yxcUqfVsEGz7">Inschrijven</a><a class="btn light" href="#contact">Stel een vraag</a></div>
+  </div>
+</section></main>
+</div>
+<div class="wf-page" id="page-lessen" data-title="Lessen" hidden>
+<header class="nav"><a class="logo" href="#index">Yoga, Zen &amp; Tonic</a><nav class="links"><a href="#retreats">Retreats</a><a href="#lessen" class=on>Lessen</a><a href="#coaching">Private coaching</a><a href="#over-ons">Over ons</a><a href="#gallery">Gallery</a><a href="#contact">Contact</a></nav><span class="lang">NL / EN</span><a class="btn sm white" href="#retreat-dahab:inschrijven">Inschrijven</a><button class="burger" type="button">Menu</button></header>
+<main>
+<section class="hero short">
+  <div class="ph dark" data-label="Foto: Rita tijdens een les, natuurlijk licht"></div>
+  
+  <div class="txt">
+    <h1>Lessen</h1>
+    
+    <p>Ashtanga, Vinyasa en Pilates, in drie studio's in Antwerpen.</p>
+    
+  </div>
+</section>
+<div class="guide" aria-hidden="true"></div>
+<section class="s" style="border-top:0">
+  <div class="wrap">
+    <div class="head"><div><span class="label">Wat kan je volgen?</span><h2>Vier stijlen</h2></div></div>
+    <div class="g4"><a class="tile" href="#lessen" tabindex="0"><div class="ph r34" data-label="Foto: ashtanga"></div><span class="name">Ashtanga</span>
+  <div class="info"><b>Ashtanga</b><dl><dt>Wat</dt><dd>Dynamische, vaste reeks op de adem.</dd><dt>Voor wie</dt><dd>Wie kracht, focus en ritme zoekt.</dd><dt>Waar</dt><dd>Antwerp Yoga</dd></dl></div></a><a class="tile" href="#lessen" tabindex="0"><div class="ph r34" data-label="Foto: vinyasa"></div><span class="name">Vinyasa</span>
+  <div class="info"><b>Vinyasa</b><dl><dt>Wat</dt><dd>Vloeiende flows, elke les anders.</dd><dt>Voor wie</dt><dd>Iedereen, alle niveaus.</dd><dt>Waar</dt><dd>Antwerp Yoga · Studio Pili</dd></dl></div></a><a class="tile" href="#lessen" tabindex="0"><div class="ph r34" data-label="Foto: pilates mat"></div><span class="name">Pilates Mat</span>
+  <div class="info"><b>Pilates Mat</b><dl><dt>Wat</dt><dd>Core, houding en controle op de mat.</dd><dt>Voor wie</dt><dd>Wie sterker en soepeler wil worden.</dd><dt>Waar</dt><dd>Magnolia Studios</dd></dl></div></a><a class="tile" href="#lessen" tabindex="0"><div class="ph r34" data-label="Foto: pilates reformer"></div><span class="name">Pilates Reformer</span>
+  <div class="info"><b>Pilates Reformer</b><dl><dt>Wat</dt><dd>Pilates op toestel, met weerstand.</dd><dt>Voor wie</dt><dd>Gerichte opbouw, ook na blessure.</dd><dt>Waar</dt><dd>Studio Pili</dd></dl></div></a></div>
+    <span class="note" data-n="1">Hover of tik op een foto: <b>wat is het · voor wie · waar</b> (de studio's waar Rita die stijl geeft). Teksten volgen van Rita.</span>
+  </div>
+</section>
+
+<section class="s alt">
+  <div class="wrap">
+    <div class="head"><div><span class="label">Waar kan je les volgen?</span><h2>Drie studio's</h2></div></div>
+    <div class="g3"><div><div class="ph r32" data-label="Foto: Antwerp Yoga"></div><h4 style="margin-top:14px">Antwerp Yoga</h4><p class="muted small" style="margin:6px 0 10px">[Adres] · Antwerpen</p><a class="link" href="https://www.antwerpyoga.be/">Website studio</a></div><div><div class="ph r32" data-label="Foto: Studio Pili"></div><h4 style="margin-top:14px">Studio Pili</h4><p class="muted small" style="margin:6px 0 10px">[Adres] · Antwerpen</p><a class="link" href="https://www.studiopili.be/">Website studio</a></div><div><div class="ph r32" data-label="Foto: Magnolia Studios"></div><h4 style="margin-top:14px">Magnolia Studios</h4><p class="muted small" style="margin:6px 0 10px">[Adres] · Antwerpen</p><a class="link" href="https://magnoliastudios.be/">Website studio</a></div></div>
+  </div>
+</section>
+
+<section class="s">
+  <div class="wrap">
+    <div class="head"><div><span class="label">Weekplanning</span><h2>Wanneer geeft Rita les?</h2></div><span class="muted small">Voorbeeldrooster</span></div>
+    <div class="week-wrap"><table class="week"><thead><tr><th></th><th>Ma</th><th>Di</th><th>Wo</th><th>Do</th><th>Vr</th><th>Za</th><th>Zo</th></tr></thead><tbody><tr><td class="muted small">Ochtend</td><td><span class=slot><b>Ashtanga</b>07:00 · Antwerp Yoga</span></td><td></td><td><span class=slot><b>Vinyasa</b>12:15 · Studio Pili</span></td><td></td><td></td><td><span class=slot><b>Vinyasa</b>09:30 · Antwerp Yoga</span></td><td></td></tr><tr><td class="muted small">Avond</td><td></td><td><span class=slot><b>Pilates Mat</b>18:30 · Magnolia</span></td><td></td><td><span class=slot><b>Reformer</b>19:00 · Studio Pili</span></td><td></td><td></td><td></td></tr></tbody></table></div>
+    <span class="note" data-n="2">Visuele weekplanning: Rita's hele agenda in één oogopslag. Klik op een les → boeken via de site van de studio.</span>
+  </div>
+</section></main>
+</div>
+<div class="wf-page" id="page-coaching" data-title="Private coaching" hidden>
+<header class="nav"><a class="logo" href="#index">Yoga, Zen &amp; Tonic</a><nav class="links"><a href="#retreats">Retreats</a><a href="#lessen">Lessen</a><a href="#coaching" class=on>Private coaching</a><a href="#over-ons">Over ons</a><a href="#gallery">Gallery</a><a href="#contact">Contact</a></nav><span class="lang">NL / EN</span><a class="btn sm white" href="#retreat-dahab:inschrijven">Inschrijven</a><button class="burger" type="button">Menu</button></header>
+<main>
+<section class="hero short">
+  <div class="ph dark" data-label="Foto: Rita met één persoon, rustige ruimte"></div>
+  
+  <div class="txt">
+    <h1>Private coaching</h1>
+    
+    <p>Eén op één, op jouw tempo.</p>
+    
+  </div>
+</section>
+<div class="guide" aria-hidden="true"></div>
+<section class="s" style="border-top:0">
+  <div class="wrap">
+    <div class="g3">
+      <div><span class="label">Wat</span><h3>Een les op maat</h3><p class="muted" style="margin-top:10px">[2–3 zinnen: wat een individuele sessie is en voor wie.]</p></div>
+      <div><span class="label">Wat kan je verwachten</span><h3>Aandacht voor jou</h3><p class="muted" style="margin-top:10px">[2–3 zinnen: kennismaking, doelen, opbouw.]</p></div>
+      <div><span class="label">Duur &amp; prijs</span><h3>60 of 90 minuten</h3><p class="muted" style="margin-top:10px">[Prijs, locatie: thuis, in de studio of online.]</p></div>
+    </div>
+    <span class="note" data-n="1">Eenvoudige pagina, <b>to the point maar aangenaam</b>: 3 korte blokken, een paar mooie foto's.</span>
+  </div>
+</section>
+
+<section class="s alt">
+  <div class="wrap">
+    <div class="g2" style="gap:12px"><div class="ph r45" data-label="Foto: Rita corrigeert houding"></div><div class="ph r45" data-label="Foto: ademhalingsoefening"></div></div>
+    <div class="center" style="margin-top:48px"><h2 style="margin-bottom:20px">Zin in een gesprek?</h2><a class="btn" href="#contact">Plan een kennismaking</a></div>
+  </div>
+</section></main>
+</div>
+<div class="wf-page" id="page-over-ons" data-title="Over ons" hidden>
+<header class="nav"><a class="logo" href="#index">Yoga, Zen &amp; Tonic</a><nav class="links"><a href="#retreats">Retreats</a><a href="#lessen">Lessen</a><a href="#coaching">Private coaching</a><a href="#over-ons" class=on>Over ons</a><a href="#gallery">Gallery</a><a href="#contact">Contact</a></nav><span class="lang">NL / EN</span><a class="btn sm white" href="#retreat-dahab:inschrijven">Inschrijven</a><button class="burger" type="button">Menu</button></header>
+<main>
+<section class="hero short">
+  <div class="ph dark" data-label="Foto: Rita &amp; Philippe buiten, natuurlijk licht"></div>
+  
+  <div class="txt">
+    <h1>Over ons</h1>
+    
+    <p>Yoga, Zen &amp; Tonic: beyond the mat, into the moment.</p>
+    
+  </div>
+</section>
+<div class="guide" aria-hidden="true"></div>
+<section class="s" style="border-top:0">
+  <div class="wrap">
+    <div class="g2" style="align-items:start">
+      <div>
+        <a class="person" href="#over-ons:rita" tabindex="0"><div class="obj"><svg viewBox="0 0 100 100"><path d="M18 40 L50 26 L82 40 L82 62 L50 76 L18 62 Z"/><path d="M18 40 L50 54 L82 40"/><path d="M50 54 L50 76"/></svg></div><div class="ph r45" data-label="Portret Rita"></div></a>
+        <h3 id="rita" style="margin-top:18px">Rita</h3>
+        <p class="muted small" style="margin:4px 0 12px">Yoga- &amp; Pilatesleraar</p>
+        <p>[3–4 zinnen over Rita: hoe ze bij yoga kwam, wat ze graag geeft, wat je bij haar mag verwachten.]</p>
+      </div>
+      <div>
+        <a class="person" href="#over-ons:philippe" tabindex="0"><div class="obj"><svg viewBox="0 0 100 100"><rect x="16" y="36" width="30" height="24" rx="10"/><rect x="54" y="36" width="30" height="24" rx="10"/><path d="M46 46 Q50 42 54 46"/><path d="M16 46 Q8 46 8 38"/><path d="M84 46 Q92 46 92 38"/></svg></div><div class="ph r45" data-label="Portret Philippe"></div></a>
+        <h3 id="philippe" style="margin-top:18px">Philippe</h3>
+        <p class="muted small" style="margin:4px 0 12px">Natuurliefhebber &amp; freediver</p>
+        <p>[3–4 zinnen over Philippe: de zee, het avontuur, zijn rol tijdens de retreats.]</p>
+      </div>
+    </div>
+    <span class="note" data-n="1">Je ziet eerst <b>een yogablok en een duikbril</b>; bij hover verschijnt het gezicht van Rita / Philippe. Idee van Philippe, omgekeerd van Estudio Niksen. Probeer het hierboven.</span>
+  </div>
+</section>
+
+<section class="s alt">
+  <div class="wrap">
+    <div class="head"><div><span class="label">Wat ons drijft</span><h2>Drie principes</h2></div></div>
+    <div class="g3">
+      <div><h3>Geen druk</h3><p class="muted" style="margin-top:10px">[1–2 zinnen]</p></div>
+      <div><h3>Echte mensen</h3><p class="muted" style="margin-top:10px">[1–2 zinnen]</p></div>
+      <div><h3>Buiten zijn</h3><p class="muted" style="margin-top:10px">[1–2 zinnen]</p></div>
+    </div>
+    <div style="margin-top:36px"><div class="ph r21" data-label="Optioneel: trage video (zee / adem)"></div></div>
+    <span class="note" data-n="2"><b>Optioneel</b>, geïnspireerd op Flyward “Principles that guide us”.</span>
+  </div>
+</section></main>
+</div>
+<div class="wf-page" id="page-gallery" data-title="Gallery" hidden>
+<header class="nav solid"><a class="logo" href="#index">Yoga, Zen &amp; Tonic</a><nav class="links"><a href="#retreats">Retreats</a><a href="#lessen">Lessen</a><a href="#coaching">Private coaching</a><a href="#over-ons">Over ons</a><a href="#gallery" class=on>Gallery</a><a href="#contact">Contact</a></nav><span class="lang">NL / EN</span><a class="btn sm" href="#retreat-dahab:inschrijven">Inschrijven</a><button class="burger" type="button">Menu</button></header>
+<main>
+<section class="s" style="border-top:0;padding-top:72px">
+  <div class="wrap">
+    <div class="head"><div><span class="label">Gallery</span><h1 style="font-size:clamp(2.4rem,5vw,4.2rem)">Momenten</h1></div></div>
+    <div class="chips"><span class="on">Alles</span><span>Retreats</span><span>Lessen</span><span>Natuur</span></div>
+    <div class="mosaic"><figure class="w2 h2"><div class="ph " data-label="Foto"></div><figcaption>Woestijn · Sinaï, mei 2026</figcaption></figure><figure class=""><div class="ph " data-label="Foto"></div><figcaption>Hotel · Dahab</figcaption></figure><figure class=""><div class="ph " data-label="Foto"></div><figcaption>Samen koken · Eifel 2025</figcaption></figure><figure class="w2"><div class="ph " data-label="Foto"></div><figcaption>Buiten-yoga · Eifel 2025</figcaption></figure><figure class=""><div class="ph " data-label="Foto"></div><figcaption>Freedive-theorie · Dahab</figcaption></figure><figure class=""><div class="ph " data-label="Foto"></div><figcaption>Kampvuur · Eifel 2025</figcaption></figure><figure class="w2"><div class="ph " data-label="Foto"></div><figcaption>Lighthouse Bay · mei 2026</figcaption></figure><figure class="h2"><div class="ph " data-label="Foto"></div><figcaption>Les · Studio Pili</figcaption></figure><figure class=""><div class="ph " data-label="Foto"></div><figcaption>Hike · Eifel 2025</figcaption></figure><figure class=""><div class="ph " data-label="Foto"></div><figcaption>Rooftop · Dahab</figcaption></figure><figure class="w2"><div class="ph " data-label="Foto"></div><figcaption>Groep · Eifel 2024</figcaption></figure><figure class=""><div class="ph " data-label="Foto"></div><figcaption>Zonsopgang · Dahab</figcaption></figure></div>
+    <span class="note" data-n="1">Mozaïek zoals bij een hotel op booking.com / Sansara gallery. Op elke foto in het klein <b>wat je ziet, of plek + datum</b>. Klik → foto op volledig scherm, met pijltjes / swipe.</span>
+    <span class="note" data-n="2">Deze pagina start uitzonderlijk <b>niet met één grote foto</b>: de mozaïek zelf is het beeld.</span>
+  </div>
+</section></main>
+</div>
+<div class="wf-page" id="page-contact" data-title="Contact" hidden>
+<header class="nav solid"><a class="logo" href="#index">Yoga, Zen &amp; Tonic</a><nav class="links"><a href="#retreats">Retreats</a><a href="#lessen">Lessen</a><a href="#coaching">Private coaching</a><a href="#over-ons">Over ons</a><a href="#gallery">Gallery</a><a href="#contact" class=on>Contact</a></nav><span class="lang">NL / EN</span><a class="btn sm" href="#retreat-dahab:inschrijven">Inschrijven</a><button class="burger" type="button">Menu</button></header>
+<main>
+<section class="split">
+  <div class="ph " data-label="Foto: rustig beeld (zee of bos)"></div>
+  <div class="pane">
+    <span class="label">Contact</span>
+    <h1 style="font-size:clamp(2.4rem,5vw,4rem);margin-bottom:18px">Zeg eens hallo</h1>
+    <p class="muted">Vragen over een retreat, een les of coaching? Stuur ons een bericht, we antwoorden binnen 2 dagen.</p>
+    <form class="form" style="margin-top:32px" onsubmit="return false">
+      <div class="field"><label>Naam</label><input placeholder="Je naam"></div>
+      <div class="field"><label>E-mail</label><input placeholder="jij@voorbeeld.be"></div>
+      <div class="field full"><label>Waarover?</label><input placeholder="Retreat · Lessen · Coaching · Iets anders"></div>
+      <div class="field full"><label>Bericht</label><textarea placeholder="Je bericht"></textarea></div>
+      <label class="check full"><input type="checkbox" checked> Hou me op de hoogte van de volgende retreat</label>
+      <div class="full"><button class="btn">Verstuur</button></div>
+    </form>
+    <div class="g2" style="margin-top:48px;gap:20px;align-items:start">
+      <div><span class="label">E-mail</span><p>[e-mailadres]</p></div>
+      <div><span class="label">GSM</span><p><a href="tel:+32477744240">+32 477 74 42 40</a></p></div>
+    </div>
+    <span class="note" data-n="1">Formulier zoals Sparkling Yoga, met daarnaast <b>e-mail en gsm</b> als gewone links, en een vinkje / knop om op de hoogte te blijven van de volgende retreat.</span>
+  </div>
+</section></main>
+</div>
+
+<footer class="footer"><div class="wrap">
+  <div class="cols">
+    <div>
+      <div class="logo">Yoga, Zen &amp; Tonic</div>
+      <p class="small" style="color:#AAA">Beyond the mat, into the moment.</p>
+      <h4 style="margin-top:28px">Hou me op de hoogte</h4>
+      <div class="sub"><div>je e-mailadres</div><span class="btn sm white">Inschrijven</span></div>
+    </div>
+    <div><h4>Aanbod</h4><a href="#retreats">Retreats</a><a href="#lessen">Lessen</a><a href="#coaching">Private coaching</a></div>
+    <div><h4>Over</h4><a href="#over-ons">Over ons</a><a href="#gallery">Gallery</a><a href="#contact">Contact</a></div>
+    <div><h4>Volg ons</h4><a href="https://www.instagram.com/">Instagram</a><a href="https://www.facebook.com/yogazentonic">Facebook</a><a href="tel:+32477744240">+32 477 74 42 40</a></div>
+  </div>
+  <div class="legal"><span>© Yoga, Zen &amp; Tonic</span><span>Privacy · Algemene voorwaarden</span></div>
+</div></footer>
+<script>
+// Wireframe helpers: notes toggle (remembered), mobile menu.
+(function () {
+  var KEY = 'yzt-wf-notes';
+  var btn = document.getElementById('wf-notes');
+  function apply(on) {
+    document.body.classList.toggle('notes-off', !on);
+    if (btn) { btn.textContent = on ? 'Notities: aan' : 'Notities: uit'; btn.classList.toggle('off', !on); }
+  }
+  var on = localStorage.getItem(KEY) !== 'off';
+  apply(on);
+  if (btn) btn.addEventListener('click', function () { on = !on; localStorage.setItem(KEY, on ? 'on' : 'off'); apply(on); });
+
+  })();
+
+
+(function () {
+  var bar = document.querySelectorAll('.wf-bar nav a');
+  function go() {
+    var h = decodeURIComponent(location.hash.slice(1)).split(':');
+    var key = h[0] || 'index', sub = h[1];
+    var pg = document.getElementById('page-' + key);
+    if (!pg) { key = 'index'; pg = document.getElementById('page-index'); }
+    document.querySelectorAll('.wf-page').forEach(function (p) { p.hidden = p !== pg; });
+    bar.forEach(function (a) { a.classList.toggle('on', a.dataset.key === key); });
+    document.title = pg.dataset.title + ' · Wireframe · Yoga, Zen & Tonic';
+    var t = sub && document.getElementById(sub);
+    var same = key === cur; cur = key;
+    if (t) t.scrollIntoView({ behavior: same ? 'smooth' : 'instant' });
+    else window.scrollTo({ top: 0, behavior: 'instant' });
+  }
+  var cur = null;
+  addEventListener('hashchange', go); go();
+  document.querySelectorAll('.nav .burger').forEach(function (b) {
+    b.addEventListener('click', function () { b.closest('.nav').classList.toggle('open'); });
+  });
+})();
+
+</script>
+</body>
+</html>

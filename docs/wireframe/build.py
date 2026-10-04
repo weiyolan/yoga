@@ -74,14 +74,22 @@ FOOTER = """
 </div></footer>"""
 
 
+CSS = (OUT / "wf.css").read_text(encoding="utf-8")  # inlined so each file works on its own
+JS = (OUT / "wf.js").read_text(encoding="utf-8")
+BUILT = []  # (file, title, body, solid_nav) for the single-file version
+
+
 def page(file, title, body, solid_nav=False):
+    BUILT.append((file, title, body, solid_nav))
     html = f"""<!doctype html>
 <html lang="nl">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>{title} · Wireframe · Yoga, Zen &amp; Tonic</title>
-<link rel="stylesheet" href="wf.css">
+<style>
+{CSS}
+</style>
 </head>
 <body>
 {toolbar(file)}
@@ -90,7 +98,9 @@ def page(file, title, body, solid_nav=False):
 {body}
 </main>
 {FOOTER}
-<script src="wf.js"></script>
+<script>
+{JS}
+</script>
 </body>
 </html>
 """
@@ -527,3 +537,71 @@ contact = f"""
 page("contact.html", "Contact", contact, solid_nav=True)
 
 print("built", len(PAGES), "pages")
+
+# --------------------------------------------------------------------------- SINGLE FILE
+# All pages in one self-contained HTML (easy to send / open on a phone).
+# Links become hash routes: "lessen.html" -> "#lessen", "x.html#y" -> "#x:y", "#y" -> "#<page>:y".
+import re
+
+SINGLE = "yoga-zen-tonic-wireframe.html"
+
+
+def to_hash(html, key):
+    html = re.sub(r'href="#([\w-]+)"', lambda m: f'href="#{key}:{m.group(1)}"', html)
+    html = re.sub(r'href="([\w-]+)\.html#([\w-]+)"', r'href="#\1:\2"', html)
+    return re.sub(r'href="([\w-]+)\.html"', r'href="#\1"', html)
+
+
+bar = re.sub(r'href="([\w-]+)\.html"( class=on)?', r'href="#\1" data-key="\1"', toolbar(""))
+sections = "\n".join(
+    f'<div class="wf-page" id="page-{f[:-5]}" data-title="{t}" hidden>\n'
+    + to_hash(site_nav(f, solid) + "\n<main>" + body + "</main>", f[:-5])
+    + "\n</div>"
+    for f, t, body, solid in BUILT
+)
+ROUTER = """
+(function () {
+  var bar = document.querySelectorAll('.wf-bar nav a');
+  function go() {
+    var h = decodeURIComponent(location.hash.slice(1)).split(':');
+    var key = h[0] || 'index', sub = h[1];
+    var pg = document.getElementById('page-' + key);
+    if (!pg) { key = 'index'; pg = document.getElementById('page-index'); }
+    document.querySelectorAll('.wf-page').forEach(function (p) { p.hidden = p !== pg; });
+    bar.forEach(function (a) { a.classList.toggle('on', a.dataset.key === key); });
+    document.title = pg.dataset.title + ' · Wireframe · Yoga, Zen & Tonic';
+    var t = sub && document.getElementById(sub);
+    var same = key === cur; cur = key;
+    if (t) t.scrollIntoView({ behavior: same ? 'smooth' : 'instant' });
+    else window.scrollTo({ top: 0, behavior: 'instant' });
+  }
+  var cur = null;
+  addEventListener('hashchange', go); go();
+  document.querySelectorAll('.nav .burger').forEach(function (b) {
+    b.addEventListener('click', function () { b.closest('.nav').classList.toggle('open'); });
+  });
+})();
+"""
+JS_SINGLE = JS.split("var nav = document.querySelector")[0] + "})();\n"
+(OUT / SINGLE).write_text(f"""<!doctype html>
+<html lang="nl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Wireframe · Yoga, Zen &amp; Tonic</title>
+<style>
+{CSS}
+</style>
+</head>
+<body>
+{bar}
+{sections}
+{to_hash(FOOTER, "index")}
+<script>
+{JS_SINGLE}
+{ROUTER}
+</script>
+</body>
+</html>
+""", encoding="utf-8")
+print("built", SINGLE)
