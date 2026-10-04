@@ -48,6 +48,7 @@ ICON = {  # 1.25px line icons (design-system style)
     "people": '<circle cx="9" cy="8" r="3"/><circle cx="17" cy="9" r="2.5"/><path d="M3 19c.6-4 3-6 6-6s5.4 2 6 6M14.5 19c.3-3 1.6-4.5 3.5-4.5s3.2 1.5 3.5 4.5"/>',
     "leaf": '<path d="M12 20c-4.5-2-7-6-7-11 3.5.5 6 2.5 7 6 1-3.5 3.5-5.5 7-6 0 5-2.5 9-7 11z"/>',
     "photo": '<path d="M4 6h16v12H4z"/><path d="M4 15l4-4 4 4 3-3 5 5"/><circle cx="15.5" cy="9.5" r="1.5"/>',
+    "dot": '<circle cx="12" cy="12" r="7.5"/><circle cx="12" cy="12" r="1.6" fill="currentColor" stroke="none"/>',
     "arrow": '<path d="M5 12h14M13 6l6 6-6 6"/>',
     "chev": '<path d="M7 10l5 5 5-5"/>',
 }
@@ -78,10 +79,10 @@ PANELS = {
       </div>
     </div>""",
     "lessen": f"""<div class="panel-grid four">
-      {item("lessen.html#stijlen", "leaf", "Ashtanga", "Vaste reeks op de adem.")}
-      {item("lessen.html#stijlen", "leaf", "Vinyasa", "Vloeiende flows, alle niveaus.")}
-      {item("lessen.html#stijlen", "leaf", "Pilates Mat", "Core, houding, controle.")}
-      {item("lessen.html#stijlen", "leaf", "Pilates Reformer", "Op toestel, met weerstand.")}
+      {item("lessen.html#stijlen", "dot", "Ashtanga", "Vaste reeks op de adem.")}
+      {item("lessen.html#stijlen", "dot", "Vinyasa", "Vloeiende flows, alle niveaus.")}
+      {item("lessen.html#stijlen", "dot", "Pilates Mat", "Core, houding, controle.")}
+      {item("lessen.html#stijlen", "dot", "Pilates Reformer", "Op toestel, met weerstand.")}
     </div>
     <div class="panel-foot">
       <a href="lessen.html#studios">{icon("pin")}Antwerp Yoga · Studio Pili · Magnolia</a>

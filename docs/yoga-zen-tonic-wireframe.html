@@ -88,10 +88,9 @@ body.notes-off .note { display: none; }
 /* desktop menu */
 .menu ul { list-style: none; display: flex; gap: 2px; margin: 0; padding: 0; }
 .menu li { position: relative; }
-.trigger { display: inline-flex; align-items: center; gap: 4px; font: inherit; color: inherit; background: none; border: 0; padding: 9px 13px; border-radius: 99px; text-decoration: none; cursor: pointer; transition: background .2s var(--ease); }
-.trigger:hover, .has-panel.open .trigger { background: rgba(255, 255, 255, .14); }
-.nav.scrolled .trigger:hover, .nav.solid .trigger:hover, .nav.scrolled .has-panel.open .trigger, .nav.solid .has-panel.open .trigger { background: rgba(26, 25, 23, .06); }
-.trigger.on { box-shadow: inset 0 -1px 0 var(--ember); border-radius: 0; }
+.trigger { position: relative; display: inline-flex; align-items: center; gap: 4px; font: inherit; color: inherit; background: none; border: 0; padding: 9px 12px; text-decoration: none; cursor: pointer; }
+.trigger::after { content: ""; position: absolute; left: 12px; right: 12px; bottom: 4px; height: 1px; background: var(--ember); transform: scaleX(0); transform-origin: left; transition: transform .45s var(--ease); }
+.trigger:hover::after, .has-panel.open .trigger::after, .trigger.on::after { transform: scaleX(1); }
 .trigger .chev { width: 14px; height: 14px; fill: none; stroke: currentColor; stroke-width: 1.5; transition: transform .25s var(--ease); }
 .has-panel.open .chev { transform: rotate(180deg); }
 
@@ -99,18 +98,19 @@ body.notes-off .note { display: none; }
 .panel { position: absolute; top: 100%; left: 50%; padding-top: 12px; transform: translate(-50%, -6px) scale(.98); transform-origin: top center; opacity: 0; visibility: hidden; pointer-events: none;
   transition: opacity .2s var(--ease), transform .25s var(--ease), visibility 0s .25s; z-index: 3; }
 .has-panel.open .panel { opacity: 1; visibility: visible; pointer-events: auto; transform: translate(-50%, 0) scale(1); transition: opacity .2s var(--ease), transform .25s var(--ease), visibility 0s; }
-.panel-card { width: 600px; background: #FBFAF7; color: var(--ink); border: 1px solid var(--line); border-radius: 12px; padding: 8px;
-  box-shadow: 0 1px 2px rgba(15, 26, 29, .06), 0 18px 44px -18px rgba(15, 26, 29, .35); }
-.panel-grid { display: grid; gap: 4px; }
+.panel-card { width: 620px; background: var(--bg); color: var(--ink); border: 1px solid var(--line); border-top: 1px solid var(--ink); padding: 0; }
+.panel-grid { display: grid; gap: 0; }
 .panel-grid.two { grid-template-columns: 220px 1fr; }
 .panel-grid.four { grid-template-columns: 1fr 1fr; }
-.panel-grid .stack { display: grid; gap: 2px; }
-.mcard { display: flex; gap: 12px; align-items: flex-start; padding: 12px 14px; border-radius: 8px; text-decoration: none; transition: background .15s; }
+.panel-grid .stack { display: grid; gap: 0; }
+.panel-grid .stack .mcard + .mcard { border-top: 1px solid var(--line); }
+.panel-grid.four .mcard { border-bottom: 1px solid var(--line); } .panel-grid.four .mcard:nth-child(odd) { border-right: 1px solid var(--line); }
+.mcard { display: flex; gap: 14px; align-items: flex-start; padding: 18px 20px; text-decoration: none; transition: background .2s var(--ease); }
 .mcard:hover, .mcard:focus-visible { background: var(--bg-2); outline: none; }
-.mcard b { display: block; font: 500 .9rem/1.3 var(--sans); }
-.mcard small { display: block; color: var(--ink-soft); font-size: .8rem; line-height: 1.45; margin-top: 2px; }
-.ic { width: 18px; height: 18px; flex: none; margin-top: 2px; fill: none; stroke: var(--ember); stroke-width: 1.25; stroke-linecap: round; stroke-linejoin: round; }
-.feature { position: relative; display: block; min-height: 200px; border-radius: 8px; overflow: hidden; text-decoration: none; color: #fff; }
+.mcard b { display: block; font: 400 1.2rem/1.15 var(--serif); }
+.mcard small { display: block; color: var(--ink-soft); font-size: .82rem; line-height: 1.45; margin-top: 4px; }
+.ic { width: 18px; height: 18px; flex: none; margin-top: 2px; fill: none; color: var(--ember); stroke: var(--ember); stroke-width: 1.25; stroke-linecap: round; stroke-linejoin: round; }
+.feature { position: relative; display: block; min-height: 230px; overflow: hidden; text-decoration: none; color: #fff; }
 .feature .ph { position: absolute; inset: 0; height: 100%; transition: transform .9s var(--ease); }
 .feature .ph::after { top: 22%; }
 .feature:hover .ph { transform: scale(1.04); }
@@ -118,7 +118,7 @@ body.notes-off .note { display: none; }
 .feature-txt { position: absolute; left: 14px; right: 14px; bottom: 14px; z-index: 2; }
 .feature-txt b { display: block; font: 1.35rem/1.1 var(--serif); margin: 6px 0 4px; }
 .feature-txt small { color: rgba(255, 255, 255, .8); font-size: .78rem; }
-.panel-foot { display: flex; justify-content: space-between; gap: 12px; margin-top: 4px; padding: 12px 14px; border-top: 1px solid var(--line); font-size: .8rem; }
+.panel-foot { display: flex; justify-content: space-between; gap: 12px; padding: 14px 20px; font: 500 .72rem/1 var(--sans); letter-spacing: .1em; text-transform: uppercase; }
 .panel-foot a { display: inline-flex; align-items: center; gap: 8px; text-decoration: none; color: var(--ink-soft); }
 .panel-foot a:hover { color: var(--ink); }
 .panel-foot svg { width: 15px; height: 15px; fill: none; stroke: currentColor; stroke-width: 1.4; }
@@ -147,20 +147,19 @@ body.notes-off .note { display: none; }
 .mnav .big:focus-visible { outline: none; text-decoration: underline; text-decoration-color: var(--ember); }
 .mnav-list li.on .big { font-style: italic; }
 .mnav-list li.on .big::after { content: ""; display: inline-block; width: 8px; height: 8px; border-radius: 50%; background: var(--ember); margin-left: 12px; vertical-align: middle; }
-.chips-row { grid-column: 2; display: flex; flex-wrap: wrap; gap: 6px; margin: 8px 0 6px; }
-.chip { font-size: .78rem; text-decoration: none; padding: 6px 12px; border: 1px solid rgba(233, 230, 224, .22); border-radius: 99px; color: rgba(233, 230, 224, .85); }
-.chip:hover { border-color: var(--ember); color: #fff; }
-.mnav-card { display: grid; grid-template-columns: 64px 1fr 22px; gap: 14px; align-items: center; padding: 10px; border: 1px solid rgba(233, 230, 224, .16); border-radius: 12px; background: rgba(255, 255, 255, .03); text-decoration: none; opacity: 0; transform: translateY(18px); transition: opacity .5s var(--ease), transform .6s var(--ease), border-color .2s; }
-.mnav-card:hover { border-color: var(--ember); }
-.mnav-card .ph { border-radius: 8px; } .mnav-card .ph::after { font-size: 9px; padding: 2px 4px; }
+.chips-row { grid-column: 2; display: flex; flex-wrap: wrap; gap: 4px 20px; margin: 6px 0 8px; }
+.chip { font: 600 .7rem/1 var(--sans); letter-spacing: .16em; text-transform: uppercase; text-decoration: none; padding: 6px 0; color: #9BA3A3; border-bottom: 1px solid rgba(233, 230, 224, .2); }
+.chip:hover, .chip:focus-visible { color: var(--night-ink); border-color: var(--ember); outline: none; }
+.mnav-card { display: grid; grid-template-columns: 64px 1fr 22px; gap: 14px; align-items: center; padding: 14px 0; border-top: 1px solid rgba(233, 230, 224, .16); border-bottom: 1px solid rgba(233, 230, 224, .16); text-decoration: none; opacity: 0; transform: translateY(18px); transition: opacity .5s var(--ease), transform .6s var(--ease), border-color .2s; }
+.mnav-card:hover .go { transform: translateX(4px); }
+.mnav-card .go { transition: transform .45s var(--ease); } .mnav-card .ph::after { font-size: 9px; padding: 2px 4px; }
 .mnav-card b { display: block; font: 1.2rem/1.15 var(--serif); margin: 4px 0 2px; }
 .mnav-card small { color: #9BA3A3; font-size: .8rem; }
 .mnav-card .go { width: 20px; height: 20px; fill: none; stroke: var(--ember); stroke-width: 1.5; }
-.mnav-foot { display: flex; gap: 18px; align-items: center; flex-wrap: wrap; font-size: .85rem; color: #9BA3A3; opacity: 0; transform: translateY(18px); transition: opacity .5s var(--ease), transform .6s var(--ease); margin-top: auto; padding-top: 20px; border-top: 1px solid rgba(233, 230, 224, .12); }
+.mnav-foot { display: flex; gap: 18px; align-items: center; flex-wrap: wrap; font-size: .85rem; color: #9BA3A3; opacity: 0; transform: translateY(18px); transition: opacity .5s var(--ease), transform .6s var(--ease); margin-top: auto; padding-top: 4px; }
 .mnav-foot a { text-decoration: none; }
-.seg { display: inline-flex; border: 1px solid rgba(233, 230, 224, .25); border-radius: 99px; padding: 2px; }
-.seg b, .seg span { padding: 5px 11px; border-radius: 99px; font: 600 .72rem/1 var(--sans); letter-spacing: .08em; }
-.seg b { background: var(--night-ink); color: var(--dark); }
+.seg { display: inline-flex; gap: 10px; font: 600 .72rem/1 var(--sans); letter-spacing: .16em; }
+.seg b { color: var(--night-ink); border-bottom: 1px solid var(--ember); padding-bottom: 3px; } .seg span { color: #9BA3A3; }
 
 @media (max-width: 1000px) {
   .menu, .nav .lang { display: none; }
@@ -323,10 +322,10 @@ body.has-cursor main, body.has-cursor main a, body.has-cursor main button, body.
         <a class="mcard" href="#retreats:zoek"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="6"/><path d="M20 20l-4.5-4.5"/></svg><span><b>Zoek een retreat</b><small>Filter op bestemming, maand of type.</small></span></a>
       </div>
     </div></div></div></li><li class="has-panel"><button class="trigger" type="button" aria-expanded="false">Lessen<svg class="chev" viewBox="0 0 24 24" aria-hidden="true"><path d="M7 10l5 5 5-5"/></svg></button><div class="panel" role="region" aria-label="Lessen"><div class="panel-card"><div class="panel-grid four">
-      <a class="mcard" href="#lessen:stijlen"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 20c-4.5-2-7-6-7-11 3.5.5 6 2.5 7 6 1-3.5 3.5-5.5 7-6 0 5-2.5 9-7 11z"/></svg><span><b>Ashtanga</b><small>Vaste reeks op de adem.</small></span></a>
-      <a class="mcard" href="#lessen:stijlen"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 20c-4.5-2-7-6-7-11 3.5.5 6 2.5 7 6 1-3.5 3.5-5.5 7-6 0 5-2.5 9-7 11z"/></svg><span><b>Vinyasa</b><small>Vloeiende flows, alle niveaus.</small></span></a>
-      <a class="mcard" href="#lessen:stijlen"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 20c-4.5-2-7-6-7-11 3.5.5 6 2.5 7 6 1-3.5 3.5-5.5 7-6 0 5-2.5 9-7 11z"/></svg><span><b>Pilates Mat</b><small>Core, houding, controle.</small></span></a>
-      <a class="mcard" href="#lessen:stijlen"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 20c-4.5-2-7-6-7-11 3.5.5 6 2.5 7 6 1-3.5 3.5-5.5 7-6 0 5-2.5 9-7 11z"/></svg><span><b>Pilates Reformer</b><small>Op toestel, met weerstand.</small></span></a>
+      <a class="mcard" href="#lessen:stijlen"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="7.5"/><circle cx="12" cy="12" r="1.6" fill="currentColor" stroke="none"/></svg><span><b>Ashtanga</b><small>Vaste reeks op de adem.</small></span></a>
+      <a class="mcard" href="#lessen:stijlen"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="7.5"/><circle cx="12" cy="12" r="1.6" fill="currentColor" stroke="none"/></svg><span><b>Vinyasa</b><small>Vloeiende flows, alle niveaus.</small></span></a>
+      <a class="mcard" href="#lessen:stijlen"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="7.5"/><circle cx="12" cy="12" r="1.6" fill="currentColor" stroke="none"/></svg><span><b>Pilates Mat</b><small>Core, houding, controle.</small></span></a>
+      <a class="mcard" href="#lessen:stijlen"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="7.5"/><circle cx="12" cy="12" r="1.6" fill="currentColor" stroke="none"/></svg><span><b>Pilates Reformer</b><small>Op toestel, met weerstand.</small></span></a>
     </div>
     <div class="panel-foot">
       <a href="#lessen:studios"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 21s7-6.2 7-12a7 7 0 0 0-14 0c0 5.8 7 12 7 12z"/><circle cx="12" cy="9" r="2.5"/></svg>Antwerp Yoga · Studio Pili · Magnolia</a>
@@ -470,10 +469,10 @@ body.has-cursor main, body.has-cursor main a, body.has-cursor main button, body.
         <a class="mcard" href="#retreats:zoek"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="6"/><path d="M20 20l-4.5-4.5"/></svg><span><b>Zoek een retreat</b><small>Filter op bestemming, maand of type.</small></span></a>
       </div>
     </div></div></div></li><li class="has-panel"><button class="trigger" type="button" aria-expanded="false">Lessen<svg class="chev" viewBox="0 0 24 24" aria-hidden="true"><path d="M7 10l5 5 5-5"/></svg></button><div class="panel" role="region" aria-label="Lessen"><div class="panel-card"><div class="panel-grid four">
-      <a class="mcard" href="#lessen:stijlen"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 20c-4.5-2-7-6-7-11 3.5.5 6 2.5 7 6 1-3.5 3.5-5.5 7-6 0 5-2.5 9-7 11z"/></svg><span><b>Ashtanga</b><small>Vaste reeks op de adem.</small></span></a>
-      <a class="mcard" href="#lessen:stijlen"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 20c-4.5-2-7-6-7-11 3.5.5 6 2.5 7 6 1-3.5 3.5-5.5 7-6 0 5-2.5 9-7 11z"/></svg><span><b>Vinyasa</b><small>Vloeiende flows, alle niveaus.</small></span></a>
-      <a class="mcard" href="#lessen:stijlen"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 20c-4.5-2-7-6-7-11 3.5.5 6 2.5 7 6 1-3.5 3.5-5.5 7-6 0 5-2.5 9-7 11z"/></svg><span><b>Pilates Mat</b><small>Core, houding, controle.</small></span></a>
-      <a class="mcard" href="#lessen:stijlen"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 20c-4.5-2-7-6-7-11 3.5.5 6 2.5 7 6 1-3.5 3.5-5.5 7-6 0 5-2.5 9-7 11z"/></svg><span><b>Pilates Reformer</b><small>Op toestel, met weerstand.</small></span></a>
+      <a class="mcard" href="#lessen:stijlen"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="7.5"/><circle cx="12" cy="12" r="1.6" fill="currentColor" stroke="none"/></svg><span><b>Ashtanga</b><small>Vaste reeks op de adem.</small></span></a>
+      <a class="mcard" href="#lessen:stijlen"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="7.5"/><circle cx="12" cy="12" r="1.6" fill="currentColor" stroke="none"/></svg><span><b>Vinyasa</b><small>Vloeiende flows, alle niveaus.</small></span></a>
+      <a class="mcard" href="#lessen:stijlen"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="7.5"/><circle cx="12" cy="12" r="1.6" fill="currentColor" stroke="none"/></svg><span><b>Pilates Mat</b><small>Core, houding, controle.</small></span></a>
+      <a class="mcard" href="#lessen:stijlen"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="7.5"/><circle cx="12" cy="12" r="1.6" fill="currentColor" stroke="none"/></svg><span><b>Pilates Reformer</b><small>Op toestel, met weerstand.</small></span></a>
     </div>
     <div class="panel-foot">
       <a href="#lessen:studios"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 21s7-6.2 7-12a7 7 0 0 0-14 0c0 5.8 7 12 7 12z"/><circle cx="12" cy="9" r="2.5"/></svg>Antwerp Yoga · Studio Pili · Magnolia</a>
@@ -578,10 +577,10 @@ body.has-cursor main, body.has-cursor main a, body.has-cursor main button, body.
         <a class="mcard" href="#retreats:zoek"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="6"/><path d="M20 20l-4.5-4.5"/></svg><span><b>Zoek een retreat</b><small>Filter op bestemming, maand of type.</small></span></a>
       </div>
     </div></div></div></li><li class="has-panel"><button class="trigger" type="button" aria-expanded="false">Lessen<svg class="chev" viewBox="0 0 24 24" aria-hidden="true"><path d="M7 10l5 5 5-5"/></svg></button><div class="panel" role="region" aria-label="Lessen"><div class="panel-card"><div class="panel-grid four">
-      <a class="mcard" href="#lessen:stijlen"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 20c-4.5-2-7-6-7-11 3.5.5 6 2.5 7 6 1-3.5 3.5-5.5 7-6 0 5-2.5 9-7 11z"/></svg><span><b>Ashtanga</b><small>Vaste reeks op de adem.</small></span></a>
-      <a class="mcard" href="#lessen:stijlen"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 20c-4.5-2-7-6-7-11 3.5.5 6 2.5 7 6 1-3.5 3.5-5.5 7-6 0 5-2.5 9-7 11z"/></svg><span><b>Vinyasa</b><small>Vloeiende flows, alle niveaus.</small></span></a>
-      <a class="mcard" href="#lessen:stijlen"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 20c-4.5-2-7-6-7-11 3.5.5 6 2.5 7 6 1-3.5 3.5-5.5 7-6 0 5-2.5 9-7 11z"/></svg><span><b>Pilates Mat</b><small>Core, houding, controle.</small></span></a>
-      <a class="mcard" href="#lessen:stijlen"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 20c-4.5-2-7-6-7-11 3.5.5 6 2.5 7 6 1-3.5 3.5-5.5 7-6 0 5-2.5 9-7 11z"/></svg><span><b>Pilates Reformer</b><small>Op toestel, met weerstand.</small></span></a>
+      <a class="mcard" href="#lessen:stijlen"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="7.5"/><circle cx="12" cy="12" r="1.6" fill="currentColor" stroke="none"/></svg><span><b>Ashtanga</b><small>Vaste reeks op de adem.</small></span></a>
+      <a class="mcard" href="#lessen:stijlen"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="7.5"/><circle cx="12" cy="12" r="1.6" fill="currentColor" stroke="none"/></svg><span><b>Vinyasa</b><small>Vloeiende flows, alle niveaus.</small></span></a>
+      <a class="mcard" href="#lessen:stijlen"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="7.5"/><circle cx="12" cy="12" r="1.6" fill="currentColor" stroke="none"/></svg><span><b>Pilates Mat</b><small>Core, houding, controle.</small></span></a>
+      <a class="mcard" href="#lessen:stijlen"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="7.5"/><circle cx="12" cy="12" r="1.6" fill="currentColor" stroke="none"/></svg><span><b>Pilates Reformer</b><small>Op toestel, met weerstand.</small></span></a>
     </div>
     <div class="panel-foot">
       <a href="#lessen:studios"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 21s7-6.2 7-12a7 7 0 0 0-14 0c0 5.8 7 12 7 12z"/><circle cx="12" cy="9" r="2.5"/></svg>Antwerp Yoga · Studio Pili · Magnolia</a>
@@ -721,10 +720,10 @@ body.has-cursor main, body.has-cursor main a, body.has-cursor main button, body.
         <a class="mcard" href="#retreats:zoek"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="6"/><path d="M20 20l-4.5-4.5"/></svg><span><b>Zoek een retreat</b><small>Filter op bestemming, maand of type.</small></span></a>
       </div>
     </div></div></div></li><li class="has-panel"><button class="trigger on" type="button" aria-expanded="false">Lessen<svg class="chev" viewBox="0 0 24 24" aria-hidden="true"><path d="M7 10l5 5 5-5"/></svg></button><div class="panel" role="region" aria-label="Lessen"><div class="panel-card"><div class="panel-grid four">
-      <a class="mcard" href="#lessen:stijlen"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 20c-4.5-2-7-6-7-11 3.5.5 6 2.5 7 6 1-3.5 3.5-5.5 7-6 0 5-2.5 9-7 11z"/></svg><span><b>Ashtanga</b><small>Vaste reeks op de adem.</small></span></a>
-      <a class="mcard" href="#lessen:stijlen"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 20c-4.5-2-7-6-7-11 3.5.5 6 2.5 7 6 1-3.5 3.5-5.5 7-6 0 5-2.5 9-7 11z"/></svg><span><b>Vinyasa</b><small>Vloeiende flows, alle niveaus.</small></span></a>
-      <a class="mcard" href="#lessen:stijlen"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 20c-4.5-2-7-6-7-11 3.5.5 6 2.5 7 6 1-3.5 3.5-5.5 7-6 0 5-2.5 9-7 11z"/></svg><span><b>Pilates Mat</b><small>Core, houding, controle.</small></span></a>
-      <a class="mcard" href="#lessen:stijlen"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 20c-4.5-2-7-6-7-11 3.5.5 6 2.5 7 6 1-3.5 3.5-5.5 7-6 0 5-2.5 9-7 11z"/></svg><span><b>Pilates Reformer</b><small>Op toestel, met weerstand.</small></span></a>
+      <a class="mcard" href="#lessen:stijlen"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="7.5"/><circle cx="12" cy="12" r="1.6" fill="currentColor" stroke="none"/></svg><span><b>Ashtanga</b><small>Vaste reeks op de adem.</small></span></a>
+      <a class="mcard" href="#lessen:stijlen"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="7.5"/><circle cx="12" cy="12" r="1.6" fill="currentColor" stroke="none"/></svg><span><b>Vinyasa</b><small>Vloeiende flows, alle niveaus.</small></span></a>
+      <a class="mcard" href="#lessen:stijlen"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="7.5"/><circle cx="12" cy="12" r="1.6" fill="currentColor" stroke="none"/></svg><span><b>Pilates Mat</b><small>Core, houding, controle.</small></span></a>
+      <a class="mcard" href="#lessen:stijlen"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="7.5"/><circle cx="12" cy="12" r="1.6" fill="currentColor" stroke="none"/></svg><span><b>Pilates Reformer</b><small>Op toestel, met weerstand.</small></span></a>
     </div>
     <div class="panel-foot">
       <a href="#lessen:studios"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 21s7-6.2 7-12a7 7 0 0 0-14 0c0 5.8 7 12 7 12z"/><circle cx="12" cy="9" r="2.5"/></svg>Antwerp Yoga · Studio Pili · Magnolia</a>
@@ -811,10 +810,10 @@ body.has-cursor main, body.has-cursor main a, body.has-cursor main button, body.
         <a class="mcard" href="#retreats:zoek"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="6"/><path d="M20 20l-4.5-4.5"/></svg><span><b>Zoek een retreat</b><small>Filter op bestemming, maand of type.</small></span></a>
       </div>
     </div></div></div></li><li class="has-panel"><button class="trigger" type="button" aria-expanded="false">Lessen<svg class="chev" viewBox="0 0 24 24" aria-hidden="true"><path d="M7 10l5 5 5-5"/></svg></button><div class="panel" role="region" aria-label="Lessen"><div class="panel-card"><div class="panel-grid four">
-      <a class="mcard" href="#lessen:stijlen"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 20c-4.5-2-7-6-7-11 3.5.5 6 2.5 7 6 1-3.5 3.5-5.5 7-6 0 5-2.5 9-7 11z"/></svg><span><b>Ashtanga</b><small>Vaste reeks op de adem.</small></span></a>
-      <a class="mcard" href="#lessen:stijlen"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 20c-4.5-2-7-6-7-11 3.5.5 6 2.5 7 6 1-3.5 3.5-5.5 7-6 0 5-2.5 9-7 11z"/></svg><span><b>Vinyasa</b><small>Vloeiende flows, alle niveaus.</small></span></a>
-      <a class="mcard" href="#lessen:stijlen"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 20c-4.5-2-7-6-7-11 3.5.5 6 2.5 7 6 1-3.5 3.5-5.5 7-6 0 5-2.5 9-7 11z"/></svg><span><b>Pilates Mat</b><small>Core, houding, controle.</small></span></a>
-      <a class="mcard" href="#lessen:stijlen"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 20c-4.5-2-7-6-7-11 3.5.5 6 2.5 7 6 1-3.5 3.5-5.5 7-6 0 5-2.5 9-7 11z"/></svg><span><b>Pilates Reformer</b><small>Op toestel, met weerstand.</small></span></a>
+      <a class="mcard" href="#lessen:stijlen"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="7.5"/><circle cx="12" cy="12" r="1.6" fill="currentColor" stroke="none"/></svg><span><b>Ashtanga</b><small>Vaste reeks op de adem.</small></span></a>
+      <a class="mcard" href="#lessen:stijlen"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="7.5"/><circle cx="12" cy="12" r="1.6" fill="currentColor" stroke="none"/></svg><span><b>Vinyasa</b><small>Vloeiende flows, alle niveaus.</small></span></a>
+      <a class="mcard" href="#lessen:stijlen"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="7.5"/><circle cx="12" cy="12" r="1.6" fill="currentColor" stroke="none"/></svg><span><b>Pilates Mat</b><small>Core, houding, controle.</small></span></a>
+      <a class="mcard" href="#lessen:stijlen"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="7.5"/><circle cx="12" cy="12" r="1.6" fill="currentColor" stroke="none"/></svg><span><b>Pilates Reformer</b><small>Op toestel, met weerstand.</small></span></a>
     </div>
     <div class="panel-foot">
       <a href="#lessen:studios"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 21s7-6.2 7-12a7 7 0 0 0-14 0c0 5.8 7 12 7 12z"/><circle cx="12" cy="9" r="2.5"/></svg>Antwerp Yoga · Studio Pili · Magnolia</a>
@@ -892,10 +891,10 @@ body.has-cursor main, body.has-cursor main a, body.has-cursor main button, body.
         <a class="mcard" href="#retreats:zoek"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="6"/><path d="M20 20l-4.5-4.5"/></svg><span><b>Zoek een retreat</b><small>Filter op bestemming, maand of type.</small></span></a>
       </div>
     </div></div></div></li><li class="has-panel"><button class="trigger" type="button" aria-expanded="false">Lessen<svg class="chev" viewBox="0 0 24 24" aria-hidden="true"><path d="M7 10l5 5 5-5"/></svg></button><div class="panel" role="region" aria-label="Lessen"><div class="panel-card"><div class="panel-grid four">
-      <a class="mcard" href="#lessen:stijlen"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 20c-4.5-2-7-6-7-11 3.5.5 6 2.5 7 6 1-3.5 3.5-5.5 7-6 0 5-2.5 9-7 11z"/></svg><span><b>Ashtanga</b><small>Vaste reeks op de adem.</small></span></a>
-      <a class="mcard" href="#lessen:stijlen"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 20c-4.5-2-7-6-7-11 3.5.5 6 2.5 7 6 1-3.5 3.5-5.5 7-6 0 5-2.5 9-7 11z"/></svg><span><b>Vinyasa</b><small>Vloeiende flows, alle niveaus.</small></span></a>
-      <a class="mcard" href="#lessen:stijlen"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 20c-4.5-2-7-6-7-11 3.5.5 6 2.5 7 6 1-3.5 3.5-5.5 7-6 0 5-2.5 9-7 11z"/></svg><span><b>Pilates Mat</b><small>Core, houding, controle.</small></span></a>
-      <a class="mcard" href="#lessen:stijlen"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 20c-4.5-2-7-6-7-11 3.5.5 6 2.5 7 6 1-3.5 3.5-5.5 7-6 0 5-2.5 9-7 11z"/></svg><span><b>Pilates Reformer</b><small>Op toestel, met weerstand.</small></span></a>
+      <a class="mcard" href="#lessen:stijlen"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="7.5"/><circle cx="12" cy="12" r="1.6" fill="currentColor" stroke="none"/></svg><span><b>Ashtanga</b><small>Vaste reeks op de adem.</small></span></a>
+      <a class="mcard" href="#lessen:stijlen"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="7.5"/><circle cx="12" cy="12" r="1.6" fill="currentColor" stroke="none"/></svg><span><b>Vinyasa</b><small>Vloeiende flows, alle niveaus.</small></span></a>
+      <a class="mcard" href="#lessen:stijlen"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="7.5"/><circle cx="12" cy="12" r="1.6" fill="currentColor" stroke="none"/></svg><span><b>Pilates Mat</b><small>Core, houding, controle.</small></span></a>
+      <a class="mcard" href="#lessen:stijlen"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="7.5"/><circle cx="12" cy="12" r="1.6" fill="currentColor" stroke="none"/></svg><span><b>Pilates Reformer</b><small>Op toestel, met weerstand.</small></span></a>
     </div>
     <div class="panel-foot">
       <a href="#lessen:studios"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 21s7-6.2 7-12a7 7 0 0 0-14 0c0 5.8 7 12 7 12z"/><circle cx="12" cy="9" r="2.5"/></svg>Antwerp Yoga · Studio Pili · Magnolia</a>
@@ -988,10 +987,10 @@ body.has-cursor main, body.has-cursor main a, body.has-cursor main button, body.
         <a class="mcard" href="#retreats:zoek"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="6"/><path d="M20 20l-4.5-4.5"/></svg><span><b>Zoek een retreat</b><small>Filter op bestemming, maand of type.</small></span></a>
       </div>
     </div></div></div></li><li class="has-panel"><button class="trigger" type="button" aria-expanded="false">Lessen<svg class="chev" viewBox="0 0 24 24" aria-hidden="true"><path d="M7 10l5 5 5-5"/></svg></button><div class="panel" role="region" aria-label="Lessen"><div class="panel-card"><div class="panel-grid four">
-      <a class="mcard" href="#lessen:stijlen"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 20c-4.5-2-7-6-7-11 3.5.5 6 2.5 7 6 1-3.5 3.5-5.5 7-6 0 5-2.5 9-7 11z"/></svg><span><b>Ashtanga</b><small>Vaste reeks op de adem.</small></span></a>
-      <a class="mcard" href="#lessen:stijlen"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 20c-4.5-2-7-6-7-11 3.5.5 6 2.5 7 6 1-3.5 3.5-5.5 7-6 0 5-2.5 9-7 11z"/></svg><span><b>Vinyasa</b><small>Vloeiende flows, alle niveaus.</small></span></a>
-      <a class="mcard" href="#lessen:stijlen"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 20c-4.5-2-7-6-7-11 3.5.5 6 2.5 7 6 1-3.5 3.5-5.5 7-6 0 5-2.5 9-7 11z"/></svg><span><b>Pilates Mat</b><small>Core, houding, controle.</small></span></a>
-      <a class="mcard" href="#lessen:stijlen"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 20c-4.5-2-7-6-7-11 3.5.5 6 2.5 7 6 1-3.5 3.5-5.5 7-6 0 5-2.5 9-7 11z"/></svg><span><b>Pilates Reformer</b><small>Op toestel, met weerstand.</small></span></a>
+      <a class="mcard" href="#lessen:stijlen"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="7.5"/><circle cx="12" cy="12" r="1.6" fill="currentColor" stroke="none"/></svg><span><b>Ashtanga</b><small>Vaste reeks op de adem.</small></span></a>
+      <a class="mcard" href="#lessen:stijlen"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="7.5"/><circle cx="12" cy="12" r="1.6" fill="currentColor" stroke="none"/></svg><span><b>Vinyasa</b><small>Vloeiende flows, alle niveaus.</small></span></a>
+      <a class="mcard" href="#lessen:stijlen"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="7.5"/><circle cx="12" cy="12" r="1.6" fill="currentColor" stroke="none"/></svg><span><b>Pilates Mat</b><small>Core, houding, controle.</small></span></a>
+      <a class="mcard" href="#lessen:stijlen"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="7.5"/><circle cx="12" cy="12" r="1.6" fill="currentColor" stroke="none"/></svg><span><b>Pilates Reformer</b><small>Op toestel, met weerstand.</small></span></a>
     </div>
     <div class="panel-foot">
       <a href="#lessen:studios"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 21s7-6.2 7-12a7 7 0 0 0-14 0c0 5.8 7 12 7 12z"/><circle cx="12" cy="9" r="2.5"/></svg>Antwerp Yoga · Studio Pili · Magnolia</a>
@@ -1050,10 +1049,10 @@ body.has-cursor main, body.has-cursor main a, body.has-cursor main button, body.
         <a class="mcard" href="#retreats:zoek"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="6"/><path d="M20 20l-4.5-4.5"/></svg><span><b>Zoek een retreat</b><small>Filter op bestemming, maand of type.</small></span></a>
       </div>
     </div></div></div></li><li class="has-panel"><button class="trigger" type="button" aria-expanded="false">Lessen<svg class="chev" viewBox="0 0 24 24" aria-hidden="true"><path d="M7 10l5 5 5-5"/></svg></button><div class="panel" role="region" aria-label="Lessen"><div class="panel-card"><div class="panel-grid four">
-      <a class="mcard" href="#lessen:stijlen"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 20c-4.5-2-7-6-7-11 3.5.5 6 2.5 7 6 1-3.5 3.5-5.5 7-6 0 5-2.5 9-7 11z"/></svg><span><b>Ashtanga</b><small>Vaste reeks op de adem.</small></span></a>
-      <a class="mcard" href="#lessen:stijlen"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 20c-4.5-2-7-6-7-11 3.5.5 6 2.5 7 6 1-3.5 3.5-5.5 7-6 0 5-2.5 9-7 11z"/></svg><span><b>Vinyasa</b><small>Vloeiende flows, alle niveaus.</small></span></a>
-      <a class="mcard" href="#lessen:stijlen"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 20c-4.5-2-7-6-7-11 3.5.5 6 2.5 7 6 1-3.5 3.5-5.5 7-6 0 5-2.5 9-7 11z"/></svg><span><b>Pilates Mat</b><small>Core, houding, controle.</small></span></a>
-      <a class="mcard" href="#lessen:stijlen"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 20c-4.5-2-7-6-7-11 3.5.5 6 2.5 7 6 1-3.5 3.5-5.5 7-6 0 5-2.5 9-7 11z"/></svg><span><b>Pilates Reformer</b><small>Op toestel, met weerstand.</small></span></a>
+      <a class="mcard" href="#lessen:stijlen"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="7.5"/><circle cx="12" cy="12" r="1.6" fill="currentColor" stroke="none"/></svg><span><b>Ashtanga</b><small>Vaste reeks op de adem.</small></span></a>
+      <a class="mcard" href="#lessen:stijlen"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="7.5"/><circle cx="12" cy="12" r="1.6" fill="currentColor" stroke="none"/></svg><span><b>Vinyasa</b><small>Vloeiende flows, alle niveaus.</small></span></a>
+      <a class="mcard" href="#lessen:stijlen"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="7.5"/><circle cx="12" cy="12" r="1.6" fill="currentColor" stroke="none"/></svg><span><b>Pilates Mat</b><small>Core, houding, controle.</small></span></a>
+      <a class="mcard" href="#lessen:stijlen"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="7.5"/><circle cx="12" cy="12" r="1.6" fill="currentColor" stroke="none"/></svg><span><b>Pilates Reformer</b><small>Op toestel, met weerstand.</small></span></a>
     </div>
     <div class="panel-foot">
       <a href="#lessen:studios"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 21s7-6.2 7-12a7 7 0 0 0-14 0c0 5.8 7 12 7 12z"/><circle cx="12" cy="9" r="2.5"/></svg>Antwerp Yoga · Studio Pili · Magnolia</a>
