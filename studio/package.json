@@ -1,0 +1,30 @@
+{
+  "name": "yoga-zen-tonic-studio",
+  "private": true,
+  "version": "1.0.0",
+  "type": "module",
+  "scripts": {
+    "dev": "sanity dev",
+    "build": "sanity build",
+    "deploy": "sanity deploy",
+    "typegen": "sanity schema extract --force && sanity typegen generate",
+    "validate": "sanity schema validate",
+    "seed": "sanity exec scripts/seed.ts --with-user-token",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@sanity/icons": "^5.2.3",
+    "@sanity/locale-nl-nl": "^1.1.40",
+    "@sanity/vision": "^6.17.0",
+    "react": "^19.3.0",
+    "react-dom": "^19.3.0",
+    "sanity": "^6.17.0",
+    "sanity-plugin-internationalized-array": "^5.3.2",
+    "styled-components": "^6.5.3"
+  },
+  "devDependencies": {
+    "@types/node": "^26.6.4",
+    "@types/react": "^19.3.0",
+    "typescript": "^7.0.2"
+  }
+}
