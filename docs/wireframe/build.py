@@ -39,22 +39,125 @@ def toolbar(current):
     )
 
 
-def site_nav(current, solid=False):
-    links = "".join(
-        f'<a href="{f}"{" class=on" if f == current or (current == "retreat-dahab.html" and f == "retreats.html") else ""}>{n}</a>'
-        for f, _, n in PAGES
-        if n
-    )
-    btn = "btn sm" if solid else "btn sm white"
+ICON = {  # 1.25px line icons (design-system style)
+    "cal": '<path d="M5 7h14v12H5z"/><path d="M5 11h14M9 4v4M15 4v4"/>',
+    "past": '<circle cx="12" cy="12" r="8"/><path d="M12 8v4l3 2"/>',
+    "search": '<circle cx="11" cy="11" r="6"/><path d="M20 20l-4.5-4.5"/>',
+    "pin": '<path d="M12 21s7-6.2 7-12a7 7 0 0 0-14 0c0 5.8 7 12 7 12z"/><circle cx="12" cy="9" r="2.5"/>',
+    "grid": '<path d="M4 5h16v14H4zM4 12h16M12 5v14"/>',
+    "people": '<circle cx="9" cy="8" r="3"/><circle cx="17" cy="9" r="2.5"/><path d="M3 19c.6-4 3-6 6-6s5.4 2 6 6M14.5 19c.3-3 1.6-4.5 3.5-4.5s3.2 1.5 3.5 4.5"/>',
+    "leaf": '<path d="M12 20c-4.5-2-7-6-7-11 3.5.5 6 2.5 7 6 1-3.5 3.5-5.5 7-6 0 5-2.5 9-7 11z"/>',
+    "photo": '<path d="M4 6h16v12H4z"/><path d="M4 15l4-4 4 4 3-3 5 5"/><circle cx="15.5" cy="9.5" r="1.5"/>',
+    "arrow": '<path d="M5 12h14M13 6l6 6-6 6"/>',
+    "chev": '<path d="M7 10l5 5 5-5"/>',
+}
+
+
+def icon(name, cls="ic"):
+    return f'<svg class="{cls}" viewBox="0 0 24 24" aria-hidden="true">{ICON[name]}</svg>'
+
+
+def item(href, ic, title, desc):
     return (
-        f'<header class="nav{" solid" if solid else ""}">'
-        '<a class="logo" href="index.html">Yoga, Zen &amp; Tonic</a>'
-        f'<nav class="links">{links}</nav>'
-        '<span class="lang">NL / EN</span>'
-        f'<a class="{btn}" href="retreat-dahab.html#inschrijven">Inschrijven</a>'
-        '<button class="burger" type="button">Menu</button>'
-        "</header>"
+        f'<a class="mcard" href="{href}">{icon(ic)}'
+        f"<span><b>{title}</b><small>{desc}</small></span></a>"
     )
+
+
+# Desktop dropdown panels (shadcn NavigationMenu style)
+PANELS = {
+    "retreats": f"""<div class="panel-grid two">
+      <a class="feature" href="retreat-dahab.html">
+        <div class="ph dark" data-label="Foto: Dahab"></div>
+        <span class="feature-txt"><span class="tag">Volgende retreat</span><b>Dahab: Yoga &amp; Freediving</b><small>9–16 mei · Egypte · max. 8</small></span>
+      </a>
+      <div class="stack">
+        {item("retreats.html#komend", "cal", "Komende retreats", "Alle data en bestemmingen, chronologisch.")}
+        {item("retreats.html#voorbij", "past", "Voorbije retreats", "Waar we al waren, in beeld.")}
+        {item("retreats.html#zoek", "search", "Zoek een retreat", "Filter op bestemming, maand of type.")}
+      </div>
+    </div>""",
+    "lessen": f"""<div class="panel-grid four">
+      {item("lessen.html#stijlen", "leaf", "Ashtanga", "Vaste reeks op de adem.")}
+      {item("lessen.html#stijlen", "leaf", "Vinyasa", "Vloeiende flows, alle niveaus.")}
+      {item("lessen.html#stijlen", "leaf", "Pilates Mat", "Core, houding, controle.")}
+      {item("lessen.html#stijlen", "leaf", "Pilates Reformer", "Op toestel, met weerstand.")}
+    </div>
+    <div class="panel-foot">
+      <a href="lessen.html#studios">{icon("pin")}Antwerp Yoga · Studio Pili · Magnolia</a>
+      <a href="lessen.html#planning">Weekplanning {icon("arrow")}</a>
+    </div>""",
+    "over": f"""<div class="panel-grid two">
+      <a class="feature" href="over-ons.html#team">
+        <div class="ph dark" data-label="Foto: Rita &amp; Philippe"></div>
+        <span class="feature-txt"><span class="tag">Wie zijn wij</span><b>Rita &amp; Philippe</b><small>Yoga, natuur en freediving.</small></span>
+      </a>
+      <div class="stack">
+        {item("over-ons.html#team", "people", "Het team", "Maak kennis met Rita en Philippe.")}
+        {item("over-ons.html#principes", "leaf", "Wat ons drijft", "Geen druk, echte mensen, buiten zijn.")}
+        {item("gallery.html", "photo", "Gallery", "Momenten van onze retreats.")}
+      </div>
+    </div>""",
+}
+
+MENU = [  # (label, href, panel key, files that make it active)
+    ("Retreats", "retreats.html", "retreats", ("retreats.html", "retreat-dahab.html")),
+    ("Lessen", "lessen.html", "lessen", ("lessen.html",)),
+    ("Private coaching", "coaching.html", None, ("coaching.html",)),
+    ("Over ons", "over-ons.html", "over", ("over-ons.html",)),
+    ("Gallery", "gallery.html", None, ("gallery.html",)),
+    ("Contact", "contact.html", None, ("contact.html",)),
+]
+
+# Mobile overlay sub-links
+SUBS = {
+    "retreats": [("Komend", "retreats.html#komend"), ("Voorbij", "retreats.html#voorbij"), ("Dahab", "retreat-dahab.html")],
+    "lessen": [("Stijlen", "lessen.html#stijlen"), ("Studio's", "lessen.html#studios"), ("Weekplanning", "lessen.html#planning")],
+    "over": [("Team", "over-ons.html#team"), ("Principes", "over-ons.html#principes")],
+}
+
+
+def site_nav(current, solid=False):
+    desk = []
+    for label, href, key, act in MENU:
+        on = " on" if current in act else ""
+        if key:
+            desk.append(
+                f'<li class="has-panel"><button class="trigger{on}" type="button" aria-expanded="false">{label}{icon("chev", "chev")}</button>'
+                f'<div class="panel" role="region" aria-label="{label}"><div class="panel-card">{PANELS[key]}</div></div></li>'
+            )
+        else:
+            desk.append(f'<li><a class="trigger{on}" href="{href}">{label}</a></li>')
+    mob = []
+    for i, (label, href, key, act) in enumerate(MENU, 1):
+        subs = "".join(f'<a class="chip" href="{h}">{t}</a>' for t, h in SUBS.get(key, []))
+        mob.append(
+            f'<li style="--i:{i}"{" class=on" if current in act else ""}><span class="num">{i:02d}</span>'
+            f'<a class="big" href="{href}">{label}</a>'
+            + (f'<span class="chips-row">{subs}</span>' if subs else "")
+            + "</li>"
+        )
+    return f"""<header class="nav{" solid" if solid else ""}">
+  <a class="logo" href="index.html">Yoga, Zen &amp; Tonic</a>
+  <nav class="menu" aria-label="Hoofdmenu"><ul>{"".join(desk)}</ul></nav>
+  <span class="lang">NL / EN</span>
+  <a class="btn sm cta" href="retreat-dahab.html#inschrijven">Inschrijven</a>
+  <button class="burger" type="button" aria-expanded="false" aria-label="Menu openen"><span class="burger-lines"><i></i><i></i></span><span class="burger-label">Menu</span></button>
+</header>
+<div class="mnav" aria-hidden="true">
+  <ol class="mnav-list">{"".join(mob)}</ol>
+  <a class="mnav-card" href="retreat-dahab.html" style="--i:7">
+    <div class="ph dark r1" data-label="Foto"></div>
+    <span><span class="tag">Volgende retreat</span><b>Dahab: Yoga &amp; Freediving</b><small>9–16 mei · Egypte</small></span>
+    {icon("arrow", "go")}
+  </a>
+  <div class="mnav-foot" style="--i:8">
+    <span class="seg"><b>NL</b><span>EN</span></span>
+    <a href="tel:+32477744240">+32 477 74 42 40</a>
+    <a href="https://www.instagram.com/">Instagram</a>
+  </div>
+</div>
+{'<div class="nav-spacer" aria-hidden="true"></div>' if solid else ""}"""
 
 
 FOOTER = """
@@ -239,7 +342,7 @@ retreats = hero(
     short=True,
     notes=note(1, "Kortere openingsfoto op overzichtspagina's (± 2/3 van het scherm).", "top:100px;right:var(--gutter)"),
 ) + f"""
-<section class="s" style="border-top:0">
+<section class="s" id="komend" style="border-top:0">
   <div class="wrap">
     <div class="head"><div><span class="label">Komende retreats</span><h2>Binnenkort</h2></div></div>
     <div class="g3">{DAHAB_CARD}{SECOND_CARD}{card("retreat-dahab.html", "Foto: bestemming", "Binnenkort", "[Nieuwe retreat]", "[datum] · [plaats]", "vanaf € …")}</div>
@@ -247,7 +350,7 @@ retreats = hero(
   </div>
 </section>
 
-<section class="s alt">
+<section class="s alt" id="voorbij">
   <div class="wrap">
     <div class="head"><div><span class="label">Voorbije retreats</span><h2>Waar we al waren</h2></div></div>
     <div class="g3">
@@ -259,7 +362,7 @@ retreats = hero(
   </div>
 </section>
 
-<section class="s">
+<section class="s" id="zoek">
   <div class="wrap">
     <span class="label">Zoek een retreat</span>
     <div class="filters">
@@ -396,7 +499,7 @@ lessen = hero(
     sub="Ashtanga, Vinyasa en Pilates, in drie studio's in Antwerpen.",
     short=True,
 ) + f"""
-<section class="s" style="border-top:0">
+<section class="s" id="stijlen" style="border-top:0">
   <div class="wrap">
     <div class="head"><div><span class="label">Wat kan je volgen?</span><h2>Vier stijlen</h2></div></div>
     {tiles()}
@@ -404,14 +507,14 @@ lessen = hero(
   </div>
 </section>
 
-<section class="s alt">
+<section class="s alt" id="studios">
   <div class="wrap">
     <div class="head"><div><span class="label">Waar kan je les volgen?</span><h2>Drie studio's</h2></div></div>
     {studios}
   </div>
 </section>
 
-<section class="s">
+<section class="s" id="planning">
   <div class="wrap">
     <div class="head"><div><span class="label">Weekplanning</span><h2>Wanneer geeft Rita les?</h2></div><span class="muted small">Voorbeeldrooster</span></div>
     {week}
@@ -455,7 +558,7 @@ over = hero(
     sub="Yoga, Zen &amp; Tonic: beyond the mat, into the moment.",
     short=True,
 ) + f"""
-<section class="s" style="border-top:0">
+<section class="s" id="team" style="border-top:0">
   <div class="wrap">
     <div class="g2" style="align-items:start">
       <div>
@@ -475,7 +578,7 @@ over = hero(
   </div>
 </section>
 
-<section class="s alt">
+<section class="s alt" id="principes">
   <div class="wrap">
     <div class="head"><div><span class="label">Wat ons drijft</span><h2>Drie principes</h2></div></div>
     <div class="g3">
@@ -500,7 +603,7 @@ mosaic = '<div class="mosaic">' + "".join(
     f'<figure class="{c}">{ph("Foto", "")}<figcaption>{cap}</figcaption></figure>' for c, cap in tiles_g
 ) + "</div>"
 gallery = f"""
-<section class="s" style="border-top:0;padding-top:72px">
+<section class="s" style="border-top:0;padding-top:48px">
   <div class="wrap">
     <div class="head"><div><span class="label">Gallery</span><h1 style="font-size:clamp(2.4rem,5vw,4.2rem)">Momenten</h1></div></div>
     <div class="chips"><span class="on">Alles</span><span>Retreats</span><span>Lessen</span><span>Natuur</span></div>
@@ -572,18 +675,17 @@ ROUTER = """
     document.title = pg.dataset.title + ' · Wireframe · Yoga, Zen & Tonic';
     var t = sub && document.getElementById(sub);
     var same = key === cur; cur = key;
+    if (window.yztCloseMenus) window.yztCloseMenus();
     if (t) t.scrollIntoView({ behavior: same ? 'smooth' : 'instant' });
     else window.scrollTo({ top: 0, behavior: 'instant' });
+    dispatchEvent(new Event('scroll'));
   }
   var cur = null;
   addEventListener('hashchange', go); go();
-  document.querySelectorAll('.nav .burger').forEach(function (b) {
-    b.addEventListener('click', function () { b.closest('.nav').classList.toggle('open'); });
-  });
+  // menus close + header state refresh on every route change
 })();
 """
-NAV_JS = JS[JS.index("  var nav = document.querySelector"):JS.index("})();")]
-JS_SINGLE = JS.replace(NAV_JS, "")  # burgers are wired per page by the router
+JS_SINGLE = JS
 (OUT / SINGLE).write_text(f"""<!doctype html>
 <html lang="nl">
 <head>
