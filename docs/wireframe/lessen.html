@@ -65,6 +65,7 @@ section.dark .muted { color: #9BA3A3; }
 .wf-info p { margin: 0 0 10px; }
 .wf-ask { background: var(--note-bg); color: #163B7A; padding: 12px 14px; border-left: 3px solid var(--note); }
 .wf-ask b { color: #0F2C5E; }
+.wf-sign { font: 1.25rem/1.25 var(--serif); margin-top: 4px !important; }
 .wf-close { position: absolute; top: 10px; right: 10px; width: 30px; height: 30px; border: 0; background: none; font: 22px/1 var(--sans); color: var(--ink-soft); cursor: pointer; }
 .wf-close:hover { color: var(--ink); }
 .wf-pages { display: grid; grid-template-columns: 1fr 1fr; border-top: 1px solid var(--line); }
@@ -119,7 +120,8 @@ body.notes-off .note { display: none; }
 .nav.tucked { transform: translateY(calc(-100% - var(--bar))); }
 .nav.menu-open { background: transparent; -webkit-backdrop-filter: none; backdrop-filter: none; box-shadow: none; color: var(--night-ink); transform: none; }
 .nav-spacer { height: 70px; }
-.nav .logo { font: 1.45rem/1 var(--serif); text-decoration: none; margin-right: auto; position: relative; z-index: 2; }
+.nav .logo { font: 1.45rem/1 var(--serif); text-decoration: none; margin-right: auto; position: relative; z-index: 2; white-space: nowrap; }
+@media (max-width: 480px) { .nav .logo { font-size: 1.25rem; } .nav { gap: 12px; } }
 .nav .lang { opacity: .8; font-size: .8rem; letter-spacing: .06em; }
 .nav .cta { background: #fff; color: var(--ink); border-color: #fff; }
 .nav.scrolled .cta, .nav.solid .cta { background: var(--ink); color: #fff; border-color: var(--ink); }
@@ -358,14 +360,15 @@ body.has-cursor main, body.has-cursor main a, body.has-cursor main button, body.
   <button class="wf-close" type="button" aria-label="Sluiten">×</button>
   <span class="label">Over deze wireframe</span>
   <h3>Dag Philou en Tita,</h3>
-  <p>Dit is een klikbare schets van jullie nieuwe website. Het gaat vooral om de <b>structuur</b>: welke pagina's er zijn, wat er op elke pagina staat en in welke volgorde. Kleuren en lettertypes volgen het voorgestelde design; teksten, data en prijzen zijn voorbeelden.</p>
-  <p class="wf-ask"><b>Wat vragen we?</b> Klik rustig door alle pagina's, ook op je gsm. <b>Maak screenshots</b> van alles wat jullie anders zouden doen en schrijf erbij wat en waarom. Stuur alles naar Yolan. Niets is te klein: “dit mag weg”, “dit mis ik”, “dit klopt niet”.</p>
+  <p>Ik heb een klikbare schets gemaakt van jullie nieuwe website. Het gaat mij vooral om de <b>structuur</b>: welke pagina's er zijn, wat er op elke pagina staat en in welke volgorde. Kleuren en lettertypes volgen het design dat ik voorstel; teksten, data en prijzen zijn voorbeelden.</p>
+  <p class="wf-ask"><b>Mijn vraag aan jullie:</b> klik rustig door alle pagina's, ook op je gsm. <b>Maak screenshots</b> van alles wat jullie anders zouden doen en schrijf erbij wat en waarom. Stuur alles naar mij. Niets is te klein: “dit mag weg”, “dit mis ik”, “dit klopt niet”.</p>
+  <p class="wf-sign">Alvast bedankt!<br>Yolan</p>
   <span class="label">Pagina's</span>
   <nav class="wf-pages"><a href="index.html"><span>01</span>Home</a><a href="retreats.html"><span>02</span>Retreats</a><a href="retreat-dahab.html"><span>03</span>Retreat (detail)</a><a href="lessen.html" class=on><span>04</span>Lessen</a><a href="coaching.html"><span>05</span>Private coaching</a><a href="over-ons.html"><span>06</span>Over ons</a><a href="gallery.html"><span>07</span>Gallery</a><a href="contact.html"><span>08</span>Contact</a></nav>
   <span class="label">Weergave</span>
   <div class="wf-switches">
-    <button class="wf-switch" id="wf-notes" type="button" role="switch" aria-checked="true"><i></i><span><b>Notities</b><small>Blauwe kaartjes die uitleggen waarom iets zo is.</small></span></button>
-    <button class="wf-switch" id="wf-photos" type="button" role="switch" aria-checked="true"><i></i><span><b>Voorbeeldfoto's</b><small>Sfeerbeelden van Sansara Resort, enkel als inspiratie, niet voor de echte site. Uit = grijze vakken.</small></span></button>
+    <button class="wf-switch" id="wf-notes" type="button" role="switch" aria-checked="true"><i></i><span><b>Notities</b><small>Blauwe kaartjes waarin ik uitleg waarom iets zo is.</small></span></button>
+    <button class="wf-switch" id="wf-photos" type="button" role="switch" aria-checked="true"><i></i><span><b>Voorbeeldfoto's</b><small>Sfeerbeelden van Sansara Resort die ik verzamelde, enkel als inspiratie, niet voor de echte site. Uit = grijze vakken.</small></span></button>
   </div>
 </aside>
 <header class="nav">

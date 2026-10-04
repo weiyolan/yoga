@@ -44,14 +44,15 @@ def toolbar(current):
   <button class="wf-close" type="button" aria-label="Sluiten">×</button>
   <span class="label">Over deze wireframe</span>
   <h3>Dag Philou en Tita,</h3>
-  <p>Dit is een klikbare schets van jullie nieuwe website. Het gaat vooral om de <b>structuur</b>: welke pagina's er zijn, wat er op elke pagina staat en in welke volgorde. Kleuren en lettertypes volgen het voorgestelde design; teksten, data en prijzen zijn voorbeelden.</p>
-  <p class="wf-ask"><b>Wat vragen we?</b> Klik rustig door alle pagina's, ook op je gsm. <b>Maak screenshots</b> van alles wat jullie anders zouden doen en schrijf erbij wat en waarom. Stuur alles naar Yolan. Niets is te klein: “dit mag weg”, “dit mis ik”, “dit klopt niet”.</p>
+  <p>Ik heb een klikbare schets gemaakt van jullie nieuwe website. Het gaat mij vooral om de <b>structuur</b>: welke pagina's er zijn, wat er op elke pagina staat en in welke volgorde. Kleuren en lettertypes volgen het design dat ik voorstel; teksten, data en prijzen zijn voorbeelden.</p>
+  <p class="wf-ask"><b>Mijn vraag aan jullie:</b> klik rustig door alle pagina's, ook op je gsm. <b>Maak screenshots</b> van alles wat jullie anders zouden doen en schrijf erbij wat en waarom. Stuur alles naar mij. Niets is te klein: “dit mag weg”, “dit mis ik”, “dit klopt niet”.</p>
+  <p class="wf-sign">Alvast bedankt!<br>Yolan</p>
   <span class="label">Pagina's</span>
   <nav class="wf-pages">{links}</nav>
   <span class="label">Weergave</span>
   <div class="wf-switches">
-    <button class="wf-switch" id="wf-notes" type="button" role="switch" aria-checked="true"><i></i><span><b>Notities</b><small>Blauwe kaartjes die uitleggen waarom iets zo is.</small></span></button>
-    <button class="wf-switch" id="wf-photos" type="button" role="switch" aria-checked="true"><i></i><span><b>Voorbeeldfoto's</b><small>Sfeerbeelden van Sansara Resort, enkel als inspiratie, niet voor de echte site. Uit = grijze vakken.</small></span></button>
+    <button class="wf-switch" id="wf-notes" type="button" role="switch" aria-checked="true"><i></i><span><b>Notities</b><small>Blauwe kaartjes waarin ik uitleg waarom iets zo is.</small></span></button>
+    <button class="wf-switch" id="wf-photos" type="button" role="switch" aria-checked="true"><i></i><span><b>Voorbeeldfoto's</b><small>Sfeerbeelden van Sansara Resort die ik verzamelde, enkel als inspiratie, niet voor de echte site. Uit = grijze vakken.</small></span></button>
   </div>
 </aside>"""
 
