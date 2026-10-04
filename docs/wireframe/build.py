@@ -33,7 +33,7 @@ def toolbar(current):
         f'<a href="{f}"{" class=on" if f == current else ""}>{lbl}</a>' for f, lbl, _ in PAGES
     )
     return (
-        '<div class="wf-bar"><b>Wireframe v1 · Yoga, Zen &amp; Tonic</b>'
+        '<div class="wf-bar"><b>Wireframe v2 · Yoga, Zen &amp; Tonic</b>'
         f"<nav>{links}</nav>"
         '<button id="wf-notes" type="button">Notities: aan</button></div>'
     )
@@ -582,7 +582,8 @@ ROUTER = """
   });
 })();
 """
-JS_SINGLE = JS.split("var nav = document.querySelector")[0] + "})();\n"
+NAV_JS = JS[JS.index("  var nav = document.querySelector"):JS.index("})();")]
+JS_SINGLE = JS.replace(NAV_JS, "")  # burgers are wired per page by the router
 (OUT / SINGLE).write_text(f"""<!doctype html>
 <html lang="nl">
 <head>
