@@ -4,6 +4,7 @@ import { useActionState } from "react";
 import { sendContact, subscribe, type FormState } from "@/app/actions/forms";
 import { getDictionary } from "@/lib/dictionary";
 import type { Lang } from "@/sanity/site.config";
+import { Select } from "./Select";
 
 const idle: FormState = { status: "idle" };
 
@@ -52,15 +53,13 @@ export function ContactForm({ lang, subjects, notifyLabel }: { lang: Lang; subje
         <input id="c-email" name="email" type="email" required placeholder={t.emailPlaceholder} autoComplete="email" />
       </div>
       <div className="field full">
-        <label htmlFor="c-subject">{t.subject}</label>
         {options.length ? (
-          <select id="c-subject" name="subject" defaultValue={options[0]}>
-            {options.map((s) => (
-              <option key={s}>{s}</option>
-            ))}
-          </select>
+          <Select label={t.subject} name="subject" options={options.map((s) => ({ value: s, label: s }))} />
         ) : (
-          <input id="c-subject" name="subject" />
+          <>
+            <label htmlFor="c-subject">{t.subject}</label>
+            <input id="c-subject" name="subject" />
+          </>
         )}
       </div>
       <div className="field full">
