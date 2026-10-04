@@ -1,7 +1,7 @@
 import { createClient } from "@sanity/client";
 import { apiVersion } from "./site.config";
 
-export const projectId = process.env.NEXT_PUBLIC_SANITY_PROJECT_ID || "your-project-id";
+export const projectId = process.env.NEXT_PUBLIC_SANITY_PROJECT_ID || "1pbhk0to";
 export const dataset = process.env.NEXT_PUBLIC_SANITY_DATASET || "production";
 
 /** Read-only client for published content (CDN). */

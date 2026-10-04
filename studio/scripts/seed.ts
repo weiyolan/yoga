@@ -16,7 +16,10 @@ import { apiVersion, defaultLanguage, type Lang } from "../../sanity/site.config
 
 const DRY = process.argv.includes("--dry");
 const ROOT = path.resolve(process.cwd(), "..");
-const client = DRY ? null : getCliClient({ apiVersion });
+// SANITY_AUTH_TOKEN (write token) from studio/.env; without it, `--with-user-token` login is used
+if (existsSync(".env")) process.loadEnvFile(".env");
+const token = process.env.SANITY_AUTH_TOKEN || undefined;
+const client = DRY ? null : getCliClient({ apiVersion, ...(token ? { token } : {}) });
 
 /* ------------------------------------------------------------------ helpers */
 

@@ -74,8 +74,7 @@ retreat?.title;              // string | null, inferred, no generics
 cd studio
 npm install
 npx sanity login
-npx sanity init --env          # or create a project at sanity.io/manage
-cp .env.example .env           # SANITY_STUDIO_PROJECT_ID / SANITY_STUDIO_DATASET
+cp .env.example .env           # project 1pbhk0to · dataset production · SANITY_AUTH_TOKEN (write token, seed only)
 npx sanity cors add http://localhost:3000 --credentials
 npm run seed                   # wireframe content + photos from public/images
 npm run dev                    # http://localhost:3333
