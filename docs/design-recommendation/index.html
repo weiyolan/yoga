@@ -1,0 +1,744 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Design recommendation &amp; design system: Yoga, Zen &amp; Tonic</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Hanken+Grotesk:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+/* ============ DESIGN TOKENS (the proposed system, also used to style this doc) ============ */
+:root {
+  /* colour */
+  --paper:    #F4F1EC;  /* page background, warm bone (not stark white) */
+  --paper-2:  #EAE5DD;  /* alternate section */
+  --ink:      #1A1917;  /* text, primary buttons */
+  --ink-soft: #5E5A54;  /* secondary text */
+  --line:     #D8D2C8;  /* hairlines, borders */
+  --night:    #0F1A1D;  /* dark sections, deep-sea */
+  --night-ink:#E9E6E0;  /* text on night */
+  --ember:    #D4552B;  /* the single accent: cursor dot, guiding line, labels */
+
+  /* type */
+  --font-display: "Instrument Serif", Georgia, serif;
+  --font-body: "Hanken Grotesk", system-ui, sans-serif;
+  --fs-display: clamp(3.2rem, 8vw, 7rem);
+  --fs-h1: clamp(2.4rem, 5vw, 4.2rem);
+  --fs-h2: clamp(1.9rem, 3.4vw, 2.8rem);
+  --fs-h3: 1.5rem;
+  --fs-body: 1.0625rem;  /* 17px */
+  --fs-small: .875rem;
+  --fs-label: .75rem;
+
+  /* space (8-pt) */
+  --s-1: 4px; --s-2: 8px; --s-3: 12px; --s-4: 16px; --s-5: 24px; --s-6: 32px;
+  --s-7: 48px; --s-8: 64px; --s-9: 96px; --s-10: 144px;
+  --section: clamp(96px, 12vw, 176px);
+  --gutter: clamp(20px, 4vw, 56px);
+  --measure: 62ch;
+  --maxw: 1320px;
+
+  /* shape */
+  --radius: 0;           /* photos and cards: square */
+  --radius-pill: 999px;  /* buttons only */
+  --hair: 1px solid var(--line);
+
+  /* motion */
+  --ease: cubic-bezier(.22, 1, .36, 1);
+  --t-fast: 200ms; --t-base: 450ms; --t-slow: 900ms;
+}
+/* ========================================================================================= */
+
+* { box-sizing: border-box; }
+html { scroll-behavior: smooth; }
+body { margin: 0; background: var(--paper); color: var(--ink); font: 400 var(--fs-body)/1.65 var(--font-body); -webkit-font-smoothing: antialiased; }
+img { display: block; max-width: 100%; }
+a { color: inherit; text-decoration: underline; text-decoration-color: var(--line); text-underline-offset: 3px; transition: text-decoration-color var(--t-fast); }
+a:hover { text-decoration-color: var(--ember); }
+h1, h2, h3, .display { font-family: var(--font-display); font-weight: 400; line-height: 1.05; letter-spacing: -.01em; margin: 0; }
+h2 { font-size: var(--fs-h1); }
+h3 { font-size: var(--fs-h3); line-height: 1.2; }
+p { margin: 0 0 var(--s-4); max-width: var(--measure); }
+ul, ol { padding-left: 1.1em; max-width: var(--measure); } li { margin: 6px 0; }
+.wrap { max-width: var(--maxw); margin: 0 auto; padding: 0 var(--gutter); }
+section.s { padding: var(--section) 0; border-top: var(--hair); }
+section.alt { background: var(--paper-2); }
+section.dark { background: var(--night); color: var(--night-ink); border-top: 0; }
+section.dark .muted { color: #9BA3A3; }
+.muted { color: var(--ink-soft); }
+.label { font: 600 var(--fs-label)/1 var(--font-body); letter-spacing: .16em; text-transform: uppercase; color: var(--ember); display: inline-block; margin-bottom: var(--s-4); }
+.lead { font-size: 1.25rem; line-height: 1.55; color: var(--ink-soft); max-width: 52ch; }
+.head { display: grid; grid-template-columns: 1fr 1fr; gap: var(--s-7); align-items: end; margin-bottom: var(--s-8); }
+.head p { margin: 0; }
+@media (max-width: 860px) { .head { grid-template-columns: 1fr; gap: var(--s-5); } }
+
+/* ---------- nav + hero ---------- */
+.nav { position: absolute; inset: 0 0 auto; display: flex; justify-content: space-between; align-items: center; padding: var(--s-5) var(--gutter); color: #fff; z-index: 2; font-size: var(--fs-small); }
+.nav .logo { font-family: var(--font-display); font-size: 1.6rem; }
+.nav .links { display: flex; gap: var(--s-6); letter-spacing: .04em; }
+.nav .links a { text-decoration: none; opacity: .85; } .nav .links a:hover { opacity: 1; }
+@media (max-width: 900px) { .nav .links { display: none; } }
+.hero { position: relative; height: 100vh; min-height: 640px; max-height: 960px; color: #fff; overflow: hidden; }
+.hero img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
+.hero::after { content: ""; position: absolute; inset: 0; background: linear-gradient(180deg, rgba(0,0,0,.35) 0%, rgba(0,0,0,0) 30%, rgba(0,0,0,0) 55%, rgba(0,0,0,.55) 100%); }
+.hero .txt { position: absolute; left: var(--gutter); right: var(--gutter); bottom: var(--s-8); z-index: 1; }
+.hero .display { font-size: var(--fs-display); max-width: 14ch; }
+.hero .meta { display: flex; gap: var(--s-6); margin-top: var(--s-5); font-size: var(--fs-small); letter-spacing: .04em; opacity: .9; flex-wrap: wrap; }
+
+/* ---------- guiding line (signature) ---------- */
+.guide { width: 1px; height: 120px; background: var(--ember); margin: 0 auto; }
+
+/* ---------- generic blocks ---------- */
+.principles { display: grid; grid-template-columns: repeat(auto-fit, minmax(230px, 1fr)); gap: 0; border-top: var(--hair); border-left: var(--hair); }
+.principles div { padding: var(--s-6); border-right: var(--hair); border-bottom: var(--hair); }
+.principles .n { font-family: var(--font-display); font-size: 2.6rem; color: var(--ember); line-height: 1; display: block; margin-bottom: var(--s-4); }
+.principles h3 { margin-bottom: var(--s-3); }
+.principles p { font-size: .97rem; color: var(--ink-soft); margin: 0; }
+
+table { width: 100%; border-collapse: collapse; font-size: .97rem; }
+th, td { text-align: left; vertical-align: top; padding: var(--s-4) var(--s-4) var(--s-4) 0; border-bottom: var(--hair); }
+th { font: 600 var(--fs-label)/1 var(--font-body); letter-spacing: .16em; text-transform: uppercase; color: var(--ink-soft); padding-bottom: var(--s-3); }
+td:first-child { font-weight: 500; white-space: nowrap; padding-right: var(--s-6); }
+.keep { color: #2F6B4F; } .drop { color: var(--ember); }
+
+.cols-2 { display: grid; grid-template-columns: 1fr 1fr; gap: var(--s-8); }
+.cols-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: var(--s-6); }
+@media (max-width: 860px) { .cols-2, .cols-3 { grid-template-columns: 1fr; gap: var(--s-7); } }
+
+.sig { display: grid; grid-template-columns: 1fr 1fr; gap: var(--s-7) var(--s-8); }
+@media (max-width: 860px) { .sig { grid-template-columns: 1fr; } }
+.sig article { border-top: 1px solid var(--ink); padding-top: var(--s-5); }
+.sig h3 { margin-bottom: var(--s-3); }
+.sig .src { font-size: var(--fs-small); color: var(--ink-soft); margin-top: var(--s-3); }
+.not { columns: 2; column-gap: var(--s-8); max-width: none; } @media (max-width: 700px) { .not { columns: 1; } }
+
+/* page blueprints */
+.bp { display: grid; grid-template-columns: 220px 1fr; gap: var(--s-6); padding: var(--s-7) 0; border-top: var(--hair); }
+.bp:last-child { border-bottom: var(--hair); }
+.bp h3 { font-size: 2rem; }
+.bp .route { font-size: var(--fs-small); color: var(--ink-soft); margin-top: var(--s-2); font-family: ui-monospace, Menlo, monospace; }
+.bp ol { counter-reset: b; list-style: none; padding: 0; margin: 0; max-width: 70ch; }
+.bp ol li { counter-increment: b; position: relative; padding: var(--s-2) 0 var(--s-2) 40px; margin: 0; border-bottom: 1px dashed var(--line); }
+.bp ol li::before { content: counter(b, decimal-leading-zero); position: absolute; left: 0; top: calc(var(--s-2) + 3px); font-size: var(--fs-small); color: var(--ember); }
+.bp .why { margin-top: var(--s-4); font-size: .95rem; color: var(--ink-soft); }
+@media (max-width: 860px) { .bp { grid-template-columns: 1fr; } }
+
+/* ---------- design system specimens ---------- */
+.ds-block { margin-top: var(--s-9); }
+.ds-block > h3 { font-size: var(--fs-h2); margin-bottom: var(--s-3); }
+.ds-block > p { color: var(--ink-soft); }
+.swatches { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: var(--s-4); margin-top: var(--s-6); }
+.sw .chip { height: 120px; border: var(--hair); }
+.sw b { display: block; margin-top: var(--s-3); font-weight: 600; }
+.sw code, code { font: .82rem ui-monospace, Menlo, monospace; color: var(--ink-soft); }
+.sw small { display: block; color: var(--ink-soft); font-size: .82rem; line-height: 1.4; margin-top: 4px; }
+.ratio { display: flex; height: 18px; margin-top: var(--s-6); border: var(--hair); }
+.ratio span { display: block; }
+
+.type-row { display: grid; grid-template-columns: 160px 1fr; gap: var(--s-6); align-items: baseline; padding: var(--s-5) 0; border-bottom: var(--hair); }
+.type-row .spec { font-size: .82rem; color: var(--ink-soft); line-height: 1.5; }
+@media (max-width: 700px) { .type-row { grid-template-columns: 1fr; gap: var(--s-2); } }
+
+.space-row { display: flex; align-items: center; gap: var(--s-5); padding: 6px 0; font-size: .85rem; }
+.space-row .bar { height: 10px; background: var(--ember); }
+.space-row code { width: 70px; }
+
+.grid12 { display: grid; grid-template-columns: repeat(12, 1fr); gap: var(--s-4); margin-top: var(--s-6); }
+.grid12 span { height: 56px; background: rgba(212, 85, 43, .12); border-left: 1px solid rgba(212, 85, 43, .35); border-right: 1px solid rgba(212, 85, 43, .35); }
+
+.specimen { border: var(--hair); background: var(--paper); padding: var(--s-7); margin-top: var(--s-5); }
+.specimen.on-paper2 { background: var(--paper-2); }
+.specimen-title { font: 600 var(--fs-label)/1 var(--font-body); letter-spacing: .16em; text-transform: uppercase; color: var(--ink-soft); margin: var(--s-8) 0 0; }
+
+/* buttons + links */
+.btn { display: inline-flex; align-items: center; gap: 10px; font: 500 var(--fs-small)/1 var(--font-body); letter-spacing: .06em; text-transform: uppercase; padding: 16px 26px; border-radius: var(--radius-pill); border: 1px solid var(--ink); background: var(--ink); color: var(--paper); text-decoration: none; cursor: pointer; transition: background var(--t-fast) var(--ease), color var(--t-fast) var(--ease), border-color var(--t-fast); }
+.btn:hover { background: var(--ember); border-color: var(--ember); color: #fff; }
+.btn.ghost { background: transparent; color: var(--ink); }
+.btn.ghost:hover { background: var(--ink); color: var(--paper); border-color: var(--ink); }
+.btn.light { background: transparent; color: #fff; border-color: rgba(255,255,255,.7); }
+.btn.light:hover { background: #fff; color: var(--ink); }
+.arrow-link { font-size: var(--fs-small); letter-spacing: .06em; text-transform: uppercase; text-decoration: none; position: relative; padding-bottom: 4px; }
+.arrow-link::after { content: ""; position: absolute; left: 0; bottom: 0; width: 100%; height: 1px; background: currentColor; transform-origin: left; transition: transform var(--t-base) var(--ease); }
+.arrow-link:hover::after { transform: scaleX(.35); }
+.row { display: flex; flex-wrap: wrap; gap: var(--s-5); align-items: center; }
+
+/* retreat cards */
+.cards { display: grid; grid-template-columns: repeat(3, 1fr); gap: var(--s-5); }
+@media (max-width: 860px) { .cards { grid-template-columns: 1fr; } }
+.rcard { text-decoration: none; display: block; }
+.rcard .ph { overflow: hidden; aspect-ratio: 4 / 5; background: var(--paper-2); }
+.rcard img { width: 100%; height: 100%; object-fit: cover; transition: transform var(--t-slow) var(--ease), filter var(--t-slow) var(--ease); }
+.rcard:hover img { transform: scale(1.04); }
+.rcard .meta { display: flex; justify-content: space-between; gap: var(--s-4); margin-top: var(--s-4); font-size: var(--fs-small); color: var(--ink-soft); letter-spacing: .03em; }
+.rcard h4 { font: 400 1.75rem/1.1 var(--font-display); margin: var(--s-2) 0 0; }
+.rcard.past img { filter: grayscale(1) contrast(1.05); }
+.rcard.past:hover img { filter: grayscale(0); }
+.tag { font: 600 var(--fs-label)/1 var(--font-body); letter-spacing: .16em; text-transform: uppercase; color: var(--ember); }
+
+/* class tiles */
+.tiles { display: grid; grid-template-columns: repeat(4, 1fr); gap: var(--s-3); }
+@media (max-width: 860px) { .tiles { grid-template-columns: 1fr 1fr; } }
+.tile { position: relative; aspect-ratio: 3 / 4; overflow: hidden; color: #fff; }
+.tile img { width: 100%; height: 100%; object-fit: cover; transition: transform var(--t-slow) var(--ease); }
+.tile .name { position: absolute; left: var(--s-5); bottom: var(--s-5); font: 400 1.9rem/1 var(--font-display); z-index: 1; transition: opacity var(--t-base) var(--ease); text-shadow: 0 1px 12px rgba(0,0,0,.35); }
+.tile .info { position: absolute; inset: 0; background: rgba(15, 26, 29, .88); padding: var(--s-5); display: flex; flex-direction: column; justify-content: flex-end; opacity: 0; transition: opacity var(--t-base) var(--ease); font-size: .92rem; line-height: 1.5; }
+.tile .info b { font: 400 1.7rem/1 var(--font-display); margin-bottom: var(--s-3); }
+.tile .info dt { color: var(--ember); font: 600 .68rem/1 var(--font-body); letter-spacing: .16em; text-transform: uppercase; margin-top: var(--s-3); }
+.tile .info dd { margin: 4px 0 0; }
+.tile:hover .info, .tile:focus-within .info { opacity: 1; }
+.tile:hover .name { opacity: 0; }
+
+/* sticky fact summary */
+.facts { border: var(--hair); padding: var(--s-6); background: var(--paper); max-width: 360px; }
+.facts .price { font: 400 2.6rem/1 var(--font-display); }
+.facts dl { margin: var(--s-5) 0; display: grid; grid-template-columns: auto 1fr; gap: var(--s-3) var(--s-5); font-size: .95rem; }
+.facts dt { color: var(--ink-soft); }
+.facts dd { margin: 0; }
+.subnav { list-style: none; padding: 0; margin: var(--s-5) 0 0; border-top: var(--hair); }
+.subnav li { margin: 0; padding: var(--s-3) 0; border-bottom: var(--hair); font-size: var(--fs-small); color: var(--ink-soft); }
+.subnav li.on { color: var(--ink); } .subnav li.on::before { content: "●"; color: var(--ember); margin-right: 10px; font-size: .6rem; vertical-align: 2px; }
+
+/* team: object → face */
+.team { display: grid; grid-template-columns: 1fr 1fr; gap: var(--s-5); max-width: 760px; }
+.person { position: relative; aspect-ratio: 4 / 5; background: var(--paper-2); overflow: hidden; }
+.person .obj { position: absolute; inset: 0; display: grid; place-items: center; transition: opacity var(--t-base) var(--ease); }
+.person .obj svg { width: 46%; stroke: var(--ink); fill: none; stroke-width: 1.3; }
+.person img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; opacity: 0; transition: opacity var(--t-base) var(--ease); }
+.person:hover img { opacity: 1; } .person:hover .obj { opacity: 0; }
+.person-cap { margin-top: var(--s-3); }
+.person-cap b { font: 400 1.6rem/1.1 var(--font-display); display: block; }
+
+/* gallery mosaic */
+.mosaic { display: grid; grid-template-columns: repeat(4, 1fr); grid-auto-rows: 180px; gap: var(--s-2); }
+.mosaic figure { margin: 0; position: relative; overflow: hidden; }
+.mosaic img { width: 100%; height: 100%; object-fit: cover; }
+.mosaic .w2 { grid-column: span 2; } .mosaic .h2 { grid-row: span 2; }
+.mosaic figcaption { position: absolute; left: 0; right: 0; bottom: 0; padding: 22px 12px 10px; font-size: .75rem; letter-spacing: .04em; color: #fff; background: linear-gradient(transparent, rgba(0,0,0,.55)); }
+.filters { display: flex; gap: var(--s-5); margin-bottom: var(--s-5); font-size: var(--fs-small); letter-spacing: .06em; text-transform: uppercase; }
+.filters span { color: var(--ink-soft); padding-bottom: 4px; } .filters span.on { color: var(--ink); border-bottom: 1px solid var(--ember); }
+@media (max-width: 700px) { .mosaic { grid-template-columns: 1fr 1fr; } }
+
+/* form */
+.form { display: grid; grid-template-columns: 1fr 1fr; gap: var(--s-6); max-width: 760px; }
+.form .full { grid-column: 1 / -1; }
+.field label { display: block; font: 600 var(--fs-label)/1 var(--font-body); letter-spacing: .16em; text-transform: uppercase; color: var(--ink-soft); margin-bottom: var(--s-3); }
+.field input, .field textarea { width: 100%; font: inherit; color: var(--ink); background: transparent; border: 0; border-bottom: 1px solid var(--ink); padding: 8px 0 10px; outline: none; transition: border-color var(--t-fast); }
+.field input:focus, .field textarea:focus { border-color: var(--ember); }
+.field textarea { min-height: 90px; resize: vertical; }
+.check { display: flex; gap: 12px; align-items: center; font-size: .95rem; }
+.check input { accent-color: var(--ember); width: 18px; height: 18px; }
+
+/* icons */
+.icons { display: flex; gap: var(--s-7); flex-wrap: wrap; }
+.icons figure { margin: 0; text-align: center; font-size: .8rem; color: var(--ink-soft); }
+.icons svg { width: 40px; height: 40px; stroke: var(--ink); fill: none; stroke-width: 1.25; stroke-linecap: round; stroke-linejoin: round; display: block; margin: 0 auto var(--s-3); }
+
+/* photo do/don't */
+.dodont { display: grid; grid-template-columns: repeat(4, 1fr); gap: var(--s-3); }
+.dodont figure { margin: 0; } .dodont img { aspect-ratio: 1; object-fit: cover; width: 100%; }
+.dodont figcaption { font-size: .82rem; color: var(--ink-soft); margin-top: 6px; line-height: 1.4; }
+@media (max-width: 860px) { .dodont { grid-template-columns: 1fr 1fr; } }
+
+pre { background: var(--night); color: var(--night-ink); padding: var(--s-6); overflow: auto; font: .82rem/1.6 ui-monospace, Menlo, monospace; margin-top: var(--s-5); }
+
+/* custom cursor (signature), only on fine pointers */
+@media (pointer: fine) {
+  body.has-cursor, body.has-cursor a, body.has-cursor .btn, body.has-cursor .tile, body.has-cursor .person { cursor: none; }
+}
+.cursor { position: fixed; top: 0; left: 0; width: 34px; height: 34px; margin: -17px 0 0 -17px; border: 1px solid var(--ink); border-radius: 50%; pointer-events: none; z-index: 99; transition: width var(--t-fast) var(--ease), height var(--t-fast) var(--ease), margin var(--t-fast) var(--ease), border-color var(--t-fast); mix-blend-mode: difference; border-color: #fff; display: none; }
+.cursor::after { content: ""; position: absolute; left: 50%; top: 50%; width: 5px; height: 5px; margin: -2.5px 0 0 -2.5px; border-radius: 50%; background: var(--ember); }
+.cursor.big { width: 64px; height: 64px; margin: -32px 0 0 -32px; }
+
+@media (prefers-reduced-motion: reduce) { *, *::before, *::after { transition: none !important; animation: none !important; } }
+.reveal { opacity: 0; transform: translateY(16px); transition: opacity var(--t-slow) var(--ease), transform var(--t-slow) var(--ease); }
+.reveal.in { opacity: 1; transform: none; }
+
+footer { padding: var(--s-8) 0; font-size: var(--fs-small); color: var(--ink-soft); border-top: var(--hair); }
+.toc { display: flex; flex-wrap: wrap; gap: var(--s-2) var(--s-6); font-size: var(--fs-small); margin-top: var(--s-6); }
+</style>
+</head>
+<body class="has-cursor">
+<div class="cursor" id="cursor" aria-hidden="true"></div>
+
+<!-- ======================= HERO (itself a demo of the system) ======================= -->
+<header class="hero">
+  <nav class="nav">
+    <span class="logo">Yoga, Zen &amp; Tonic</span>
+    <span class="links"><a href="#rec">Recommendation</a><a href="#pages">Pages</a><a href="#ds">Design system</a><a href="#next">Next steps</a></span>
+  </nav>
+  <img src="img/freediving.jpg" alt="Freedivers seen from below, silhouetted against the light">
+  <div class="txt">
+    <span class="label" style="color:#fff;opacity:.85">Design recommendation · v2</span>
+    <div class="display">Quiet frame. Loud photos.</div>
+    <div class="meta"><span>Final recommendation</span><span>Design system</span><span>Page blueprints</span><span>Based on <a href="../client-feedback-v2/index.html" style="color:#fff">client feedback v2</a></span></div>
+  </div>
+</header>
+
+<div class="guide" aria-hidden="true"></div>
+
+<!-- ======================= 1. RECOMMENDATION ======================= -->
+<section class="s" id="rec" style="border-top:0;padding-top:var(--s-9)">
+  <div class="wrap">
+    <div class="head">
+      <div><span class="label">01 · Final recommendation</span><h2>An editorial, photo-led site with one warm accent.</h2></div>
+      <p class="lead">The website steps back so the photos (sea, desert, forest, people together) do the talking. A calm bone-white frame, a refined serif, very little text, and a handful of subtle, memorable interactions. Warm and human, never cheap, cliché or busy.</p>
+    </div>
+
+    <div class="principles">
+      <div><span class="n">1</span><h3>Photo first</h3><p>Every page opens with one full-screen photo (Sansara). Photos are big, square-cornered, uncluttered.</p></div>
+      <div><span class="n">2</span><h3>Say less</h3><p>Max ~60 words per block. A headline + two lines + a link. Details live on the retreat page, not the homepage.</p></div>
+      <div><span class="n">3</span><h3>One accent</h3><p>Bone, ink and deep-sea night, plus a single ember accent for the cursor dot, the guiding line and labels. No pastels, no coffee tones.</p></div>
+      <div><span class="n">4</span><h3>Subtle motion</h3><p>Slow fades, gentle zoom, B&amp;W → colour. Nothing spins, bounces or scrambles.</p></div>
+      <div><span class="n">5</span><h3>Retreats on top</h3><p>The next retreat is always one click away: hero, nav and a sticky “Inschrijven” on the retreat page.</p></div>
+    </div>
+  </div>
+</section>
+
+<!-- what changes -->
+<section class="s alt">
+  <div class="wrap">
+    <div class="head">
+      <div><span class="label">02 · From current build to v2</span><h2>What we keep, what we drop.</h2></div>
+      <p class="lead">The current site (theme “boheme”: coral/sky/yellow, 2.5px borders, hard offset shadows, marquee, tribal dividers) is exactly the “playful” the client is moving away from. The content model and pages stay; the skin changes.</p>
+    </div>
+    <table>
+      <thead><tr><th>Element</th><th>Decision</th><th>Why</th></tr></thead>
+      <tbody>
+        <tr><td>Multi-colour palette (coral, sky, sun, blush, shimmer)</td><td class="drop">Drop → 1 accent</td><td>Reads playful; client wants clean and photo-led.</td></tr>
+        <tr><td>Hard offset shadows, thick borders, big radii</td><td class="drop">Drop</td><td>Cartoon-y. Replace with hairlines and square photos.</td></tr>
+        <tr><td>Marquee, tribal / boho dividers, deco icons</td><td class="drop">Drop</td><td>Busy; competes with photos. Liked sites have none.</td></tr>
+        <tr><td>Placeholder hues behind media</td><td class="drop">Drop</td><td>Real photos everywhere; neutral <code>--paper-2</code> while loading.</td></tr>
+        <tr><td>Line art (<code>LineArt.tsx</code>)</td><td class="keep">Keep, reduce</td><td>Becomes the single thin guiding line (Flyward, Topography). One line, one colour.</td></tr>
+        <tr><td>Lenis smooth scroll</td><td class="keep">Keep</td><td>Supports the calm, scroll-through-photos feel (Centre Photo Genève).</td></tr>
+        <tr><td>Retreat data model (<code>data/retreats.ts</code>)</td><td class="keep">Keep, adjust</td><td>Map sections to the Dahab headings; drop day-by-day itinerary on the page (client: “dagprogramma niet nodig”).</td></tr>
+        <tr><td>Fraunces / Schibsted Grotesk</td><td class="drop">Replace</td><td>→ Instrument Serif (display) + Hanken Grotesk (body, already loaded).</td></tr>
+        <tr><td>FAQ, Food, Immersive blocks on home</td><td class="drop">Move</td><td>Home stays short; these belong on the retreat page.</td></tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<!-- signature elements -->
+<section class="s">
+  <div class="wrap">
+    <div class="head">
+      <div><span class="label">03 · Signature elements</span><h2>Six details people will remember.</h2></div>
+      <p class="lead">Chosen from the client's favourites, filtered on “subtle, usable, fits a yoga brand”. Together they replace all decoration.</p>
+    </div>
+    <div class="sig">
+      <article><h3>Full-screen opening photo</h3><p>Each page starts with one big photo with a short serif title over it, as at the top of this page. On Home it may be a 10–15 s silent loop that looks like a still (sea surface, flame, sand).</p><p class="src">Sansara “Top” · Estudio Niksen video-as-photo · Karmayoga</p></article>
+      <article><h3>The guiding line</h3><p>A 1px ember line runs down the page, connecting photo to photo and section to section (see between hero and section 01). It draws itself as you scroll. Our only “drawing”.</p><p class="src">Flyward line · Topography orange line · Yolan's line on Milo</p></article>
+      <article><h3>Circle-and-dot cursor</h3><p>A thin ring with an ember dot; grows over photos and links. Desktop only, hidden for touch and reduced motion. Move your mouse on this page to try it.</p><p class="src">Sansara “goed gevonden”</p></article>
+      <article><h3>Past retreats in black &amp; white</h3><p>Coming retreats in colour; passed retreats in B&amp;W that bloom into colour on hover. Instantly readable, and it gives the archive a quiet, grainy character.</p><p class="src">Old Tom portfolio + grain</p></article>
+      <article><h3>Hover reveals</h3><p>Class photos reveal “wat · voor wie · waar” on hover (tap on mobile). Section titles can swap background/text colour on hover in the retreat list.</p><p class="src">Client's own Lessen idea · Old Tom insights · Bureau Rouge</p></article>
+      <article><h3>Object → face (Team)</h3><p>A drawn yoga block and a diving mask; on hover, Rita's and Philippe's faces appear. Personal without being “all about me”.</p><p class="src">Estudio Niksen caps, reversed (PH's idea)</p></article>
+    </div>
+    <h3 style="margin-top:var(--s-9);margin-bottom:var(--s-4)">Deliberately not doing</h3>
+    <ul class="not">
+      <li>Rotating cubes / photo wheels (Corentin): impressive, not usable</li>
+      <li>Letter-scramble titles (R-100): too techy</li>
+      <li>Logo-shaped cursor (Samoondoh): impractical</li>
+      <li>Auto-scrolling photo walls (Alex Zarour): takes control from the visitor</li>
+      <li>Zooming star transitions (Collection Industries): “te druk”</li>
+      <li>Torn photo edges everywhere (Flyward): risks “boho”. At most once, as the hero → first section transition</li>
+      <li>Stark white background (Beats in Space): “maar niks”</li>
+      <li>A shop: not in scope for launch; revisit later</li>
+    </ul>
+  </div>
+</section>
+
+<!-- ======================= PAGES ======================= -->
+<section class="s alt" id="pages">
+  <div class="wrap">
+    <div class="head">
+      <div><span class="label">04 · Sitemap &amp; page blueprints</span><h2>Seven pages. Each one starts with a photo.</h2></div>
+      <p class="lead">The structure doc mentions 10 tabs but describes 8. Recommendation: 6 menu items + logo (Home), with a page per retreat. “Inschrijven” stays visible as a button in the nav.</p>
+    </div>
+    <p style="font-size:1.15rem"><b>Nav:</b> Logo · Retreats · Lessen · Private coaching · Over ons · Gallery · Contact&nbsp;&nbsp;<span class="muted">[Inschrijven]</span>&nbsp;&nbsp;<span class="muted">NL / EN</span></p>
+
+    <div style="margin-top:var(--s-7)">
+      <div class="bp"><div><h3>Home</h3><div class="route">/</div></div><div><ol>
+        <li>Full-screen photo/loop + one line: “Beyond the mat, into the moment”</li>
+        <li><b>Next retreat</b>: big card, date, place, “Ontdek” (retreats on top, as asked)</li>
+        <li>Who we are in 1 paragraph: Yoga, Zen &amp; Tonic background</li>
+        <li>Retreats: 3 cards (coming in colour, latest passed in B&amp;W)</li>
+        <li>Lessen: 4 class tiles + “where” line</li>
+        <li>2–3 short testimonials, one at a time, large serif quote</li>
+        <li>Rita &amp; Philippe: one photo, two lines, link to Over ons</li>
+        <li>Follow us: Instagram strip (6 photos) + FB link · Footer with newsletter “Hou me op de hoogte”</li>
+      </ol></div></div>
+
+      <div class="bp"><div><h3>Retreats</h3><div class="route">/retreats</div></div><div><ol>
+        <li>Opening photo + title “Retreats”</li>
+        <li><b>Coming</b>: chronological, 4:5 photo cards (destination, dates, from-price)</li>
+        <li><b>Passed</b>: chronological, same cards in B&amp;W → colour on hover</li>
+        <li>Filter row (Bestemming · Maand · Type) at the bottom, as the client asked</li>
+      </ol><p class="why">Sparkling Yoga card idea, but with clean sans/serif titles instead of script lettering on the photo.</p></div></div>
+
+      <div class="bp"><div><h3>Retreat detail</h3><div class="route">/retreat/[slug]</div></div><div><ol>
+        <li>Full-screen photo + title + dates/place line</li>
+        <li>Mood grid: 1 large + 3 small photos (Vita)</li>
+        <li>Two-column body: content left, <b>sticky summary</b> right (price, dates, group size, Inschrijven, section links)</li>
+        <li>De retreat in een notendop: 3–4 short lines</li>
+        <li>De plek: photo pair + 2 lines</li>
+        <li>De mensen: portraits of hosts + guest teacher</li>
+        <li>Het programma: 4–5 highlights, not an hour-by-hour schedule</li>
+        <li>Praktisch: included / not included, price per room type</li>
+        <li>Closing photo + CTA in the retreat's own words (“Klaar om te duiken?”)</li>
+      </ol><p class="why">Vita layout + Dahab headings + Niora “photos, concise info, price &amp; what's included”.</p></div></div>
+
+      <div class="bp"><div><h3>Lessen</h3><div class="route">/lessen</div></div><div><ol>
+        <li>Opening photo</li>
+        <li>Wat kan je volgen: 4 tiles (Ashtanga, Vinyasa, Pilates Mat, Pilates Reformer), hover → wat / voor wie / waar</li>
+        <li>Waar: 3 studios (Antwerp Yoga, Studio Pili, Magnolia), photo + address + external link</li>
+        <li>Weekplanning: simple Mon–Sun grid, one row per class</li>
+      </ol></div></div>
+
+      <div class="bp"><div><h3>Private coaching</h3><div class="route">/coaching</div></div><div><ol>
+        <li>Opening photo of Rita with a client</li>
+        <li>3 short blocks: Wat · Wat kan je verwachten · Duur &amp; prijs</li>
+        <li>2 photos side by side + “Plan een gesprek”</li>
+      </ol></div></div>
+
+      <div class="bp"><div><h3>Over ons</h3><div class="route">/over-ons</div></div><div><ol>
+        <li>Opening photo of Rita &amp; Philippe</li>
+        <li>Object → face tiles, 3–4 sentences each</li>
+        <li>Optional: “Wat ons drijft”: 3 principles with a slow video (Flyward principles)</li>
+      </ol></div></div>
+
+      <div class="bp"><div><h3>Gallery</h3><div class="route">/gallery</div></div><div><ol>
+        <li>Filters: Alles · Retreats · Lessen · Natuur (Sansara)</li>
+        <li>Mosaic with small captions: place + date (booking.com)</li>
+        <li>Click → full-screen lightbox, arrow keys / swipe</li>
+      </ol></div></div>
+
+      <div class="bp"><div><h3>Contact</h3><div class="route">/contact</div></div><div><ol>
+        <li>Split screen: photo left, form right (naam, e-mail, bericht)</li>
+        <li>E-mail + GSM as plain clickable text</li>
+        <li>“Hou me op de hoogte van de volgende retreat” checkbox / button</li>
+      </ol></div></div>
+    </div>
+  </div>
+</section>
+
+<!-- photography + copy -->
+<section class="s dark">
+  <div class="wrap">
+    <div class="head">
+      <div><span class="label">05 · Photography &amp; copy</span><h2>The photos are the design.</h2></div>
+      <p class="lead muted">A photo-first site is only as good as its photos. This is the most important input from the client.</p>
+    </div>
+    <div class="cols-2">
+      <div>
+        <h3 style="margin-bottom:var(--s-4)">⚠ Blocker: resolution</h3>
+        <p class="muted">Every photo we have now is <b style="color:var(--night-ink)">640 × 640 px</b> (Instagram exports). A full-screen hero needs <b style="color:var(--night-ink)">≥ 2400 px wide</b>, cards ≥ 1200 px. Ask for originals from phones/cameras, or plan a half-day shoot at the next retreat.</p>
+        <h3 style="margin:var(--s-7) 0 var(--s-4)">Photo rules</h3>
+        <ul class="muted">
+          <li>Real moments, real people, natural light. No stock, no “cliché yoga” poses on a beach</li>
+          <li>Landscape for heroes; 4:5 portrait for cards</li>
+          <li>One consistent grade: warm-neutral, slightly lifted blacks, no heavy filters</li>
+          <li>B&amp;W with grain only for passed retreats and archive</li>
+          <li>Leave quiet space (sky, sea, sand) where a title can sit</li>
+        </ul>
+      </div>
+      <div>
+        <h3 style="margin-bottom:var(--s-4)">Copy rules</h3>
+        <ul class="muted">
+          <li>Dutch first, English toggle. Tone: warm, direct, a wink. “Geen zweverig gedoe.”</li>
+          <li>Headline ≤ 8 words. Block ≤ 60 words. One idea per block</li>
+          <li>No emoji in body copy (fine on socials)</li>
+          <li>Labels in small caps; numbers and dates always concrete (“9–16 mei 2026”, “max. 8”)</li>
+          <li>Talk about the experience, not about us (kjero / Myrna feedback)</li>
+        </ul>
+      </div>
+    </div>
+    <div class="dodont" style="margin-top:var(--s-8)">
+      <figure><img src="img/freediving3.jpg" alt=""><figcaption style="color:#9BA3A3">✓ Hero-worthy: one subject, depth, space for a title</figcaption></figure>
+      <figure><img src="img/desert-bw.jpg" alt=""><figcaption style="color:#9BA3A3">✓ Archive B&amp;W: graphic, calm</figcaption></figure>
+      <figure><img src="img/campfire.jpg" alt=""><figcaption style="color:#9BA3A3">✓ Mood: people together, real light</figcaption></figure>
+      <figure><img src="img/retreat.jpg" alt=""><figcaption style="color:#9BA3A3">✗ Group-posing snapshot: fine for Gallery, not for a hero</figcaption></figure>
+    </div>
+  </div>
+</section>
+
+<!-- ======================= DESIGN SYSTEM ======================= -->
+<section class="s" id="ds">
+  <div class="wrap">
+    <div class="head">
+      <div><span class="label">06 · Design system</span><h2>Tokens, type and components.</h2></div>
+      <p class="lead">Everything on this page is built with these tokens, so what you see is the system. Copy the CSS block at the end straight into <code>app/styles</code>.</p>
+    </div>
+
+    <!-- colour -->
+    <div class="ds-block" style="margin-top:0">
+      <h3>Colour</h3>
+      <p>Neutral, warm and quiet, so photos carry the colour. One accent, used sparingly (≈ 2% of any screen).</p>
+      <div class="swatches">
+        <div class="sw"><div class="chip" style="background:#F4F1EC"></div><b>Paper</b><code>--paper #F4F1EC</code><small>Page background. Warm bone, not stark white.</small></div>
+        <div class="sw"><div class="chip" style="background:#EAE5DD"></div><b>Paper 2</b><code>--paper-2 #EAE5DD</code><small>Alternate sections, image placeholders.</small></div>
+        <div class="sw"><div class="chip" style="background:#1A1917"></div><b>Ink</b><code>--ink #1A1917</code><small>Text, primary buttons. 15.6:1 on paper.</small></div>
+        <div class="sw"><div class="chip" style="background:#5E5A54"></div><b>Ink soft</b><code>--ink-soft #5E5A54</code><small>Secondary text. 6.1:1 on paper (AA).</small></div>
+        <div class="sw"><div class="chip" style="background:#D8D2C8"></div><b>Line</b><code>--line #D8D2C8</code><small>Hairlines, dividers, input borders.</small></div>
+        <div class="sw"><div class="chip" style="background:#0F1A1D"></div><b>Night</b><code>--night #0F1A1D</code><small>Dark sections (deep sea). Text <code>#E9E6E0</code>.</small></div>
+        <div class="sw"><div class="chip" style="background:#D4552B"></div><b>Ember</b><code>--ember #D4552B</code><small>The accent. Cursor dot, guiding line, labels, hover. 3.6:1: large text / graphics only.</small></div>
+      </div>
+      <div class="ratio" title="Approximate colour proportion per screen"><span style="flex:62;background:#F4F1EC"></span><span style="flex:14;background:#EAE5DD"></span><span style="flex:10;background:#0F1A1D"></span><span style="flex:12;background:#1A1917"></span><span style="flex:2;background:#D4552B"></span></div>
+      <p class="muted" style="font-size:.85rem;margin-top:8px">Proportion per screen (excluding photos): paper 62 · paper-2 14 · ink 12 · night 10 · ember 2.</p>
+    </div>
+
+    <!-- type -->
+    <div class="ds-block">
+      <h3>Typography</h3>
+      <p><b>Instrument Serif</b> for display: elegant, editorial, a little warmth (close to Flyward / Sansara). <b>Hanken Grotesk</b> for everything else: clean and already loaded in the project. Both free on Google Fonts.</p>
+      <div style="margin-top:var(--s-6)">
+        <div class="type-row"><div class="spec">Display<br><code>--fs-display</code><br>clamp(3.2–7rem) / 1.05</div><div style="font:400 var(--fs-display)/1.05 var(--font-display)">Dieper ademen</div></div>
+        <div class="type-row"><div class="spec">H1<br><code>--fs-h1</code><br>clamp(2.4–4.2rem)</div><div style="font:400 var(--fs-h1)/1.05 var(--font-display)">Yoga &amp; Freediving in Dahab</div></div>
+        <div class="type-row"><div class="spec">H2<br><code>--fs-h2</code><br>clamp(1.9–2.8rem)</div><div style="font:400 var(--fs-h2)/1.1 var(--font-display)">De retreat in een notendop</div></div>
+        <div class="type-row"><div class="spec">H3<br><code>--fs-h3</code> 1.5rem</div><div style="font:400 var(--fs-h3)/1.2 var(--font-display)">De plek: Lighthouse Bay</div></div>
+        <div class="type-row"><div class="spec">Lead<br>1.25rem / 1.55 · ink-soft</div><div class="lead" style="margin:0">Een week om te bewegen, te vertragen en jezelf helemaal op te laden.</div></div>
+        <div class="type-row"><div class="spec">Body<br><code>--fs-body</code> 17px / 1.65<br>max 62ch</div><div><p style="margin:0">Ooit een rustig bedoeïenendorp, nu dé freedive-hoofdstad van de wereld. In mei is het hier perfect: warm weer, kalme zee en die relaxte Dahab-vibe.</p></div></div>
+        <div class="type-row"><div class="spec">Label<br>12px · 600 · +0.16em · caps · ember</div><div><span class="label" style="margin:0">Volgende retreat</span></div></div>
+        <div class="type-row"><div class="spec">Small / meta<br>14px · ink-soft</div><div class="muted" style="font-size:var(--fs-small)">9–16 mei 2026 · Dahab, Egypte · max. 8 deelnemers</div></div>
+      </div>
+    </div>
+
+    <!-- space + grid -->
+    <div class="ds-block">
+      <h3>Space &amp; grid</h3>
+      <p>8-point scale. Sections breathe: <code>--section</code> = 96–176px vertical padding. Photos may go full-bleed; text never exceeds 62 characters per line.</p>
+      <div class="cols-2" style="margin-top:var(--s-6)">
+        <div>
+          <div class="space-row"><code>--s-1</code><span class="bar" style="width:4px"></span>4</div>
+          <div class="space-row"><code>--s-2</code><span class="bar" style="width:8px"></span>8</div>
+          <div class="space-row"><code>--s-3</code><span class="bar" style="width:12px"></span>12</div>
+          <div class="space-row"><code>--s-4</code><span class="bar" style="width:16px"></span>16</div>
+          <div class="space-row"><code>--s-5</code><span class="bar" style="width:24px"></span>24</div>
+          <div class="space-row"><code>--s-6</code><span class="bar" style="width:32px"></span>32</div>
+          <div class="space-row"><code>--s-7</code><span class="bar" style="width:48px"></span>48</div>
+          <div class="space-row"><code>--s-8</code><span class="bar" style="width:64px"></span>64</div>
+          <div class="space-row"><code>--s-9</code><span class="bar" style="width:96px"></span>96</div>
+          <div class="space-row"><code>--s-10</code><span class="bar" style="width:144px"></span>144</div>
+        </div>
+        <div>
+          <p><b>12 columns</b>, gap 16px, max width 1320px, side gutter 20–56px.</p>
+          <div class="grid12"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></div>
+          <ul class="muted" style="margin-top:var(--s-5)">
+            <li>Retreat cards: 3 × 4 cols (desktop) → 1 col (mobile)</li>
+            <li>Retreat body: 8 cols content + 4 cols sticky summary</li>
+            <li>Class tiles: 4 × 3 cols → 2 cols</li>
+            <li>Breakpoints: 700 · 860 · 1200</li>
+          </ul>
+          <p style="margin-top:var(--s-5)"><b>Shape:</b> photos &amp; cards square (<code>radius 0</code>); only buttons are pills. No shadows; separate with 1px <code>--line</code> or whitespace.</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- components -->
+    <div class="ds-block">
+      <h3>Components</h3>
+      <p>Hover over the specimens. All interactions also work with keyboard focus and on touch (tap).</p>
+
+      <p class="specimen-title">Buttons &amp; links</p>
+      <div class="specimen">
+        <div class="row">
+          <a class="btn" href="#ds">Inschrijven →</a>
+          <a class="btn ghost" href="#ds">Ontdek de retreat</a>
+          <a class="arrow-link" href="#ds">Alle retreats →</a>
+          <span style="background:var(--night);padding:16px 20px"><a class="btn light" href="#ds">Discover</a></span>
+        </div>
+        <p class="muted" style="font-size:.85rem;margin:var(--s-5) 0 0">Primary = ink pill → ember on hover. Ghost for secondary. Light on photos. Max one primary per screen.</p>
+      </div>
+
+      <p class="specimen-title">Section header</p>
+      <div class="specimen">
+        <span class="label">Retreats</span>
+        <div style="font:400 var(--fs-h1)/1.05 var(--font-display);max-width:16ch">Waar gaan we naartoe?</div>
+        <p class="muted" style="margin-top:var(--s-4)">Label (ember) + serif title + optional one-line lead. Used to open every section.</p>
+      </div>
+
+      <p class="specimen-title">Retreat cards: coming (colour) &amp; passed (B&amp;W → colour)</p>
+      <div class="specimen">
+        <div class="cards">
+          <a class="rcard" href="#ds"><div class="ph"><img src="img/freediving2.jpg" alt="Freediver above a coral reef"></div><div class="meta"><span class="tag">Volgende</span><span>vanaf € 1.120</span></div><h4>Dahab, Yoga &amp; Freediving</h4><div class="meta" style="margin-top:4px"><span>Mei 2027 · Egypte</span><span>max. 8</span></div></a>
+          <a class="rcard" href="#ds"><div class="ph"><img src="img/desert.jpg" alt="Desert canyon"></div><div class="meta"><span class="tag">Binnenkort</span><span>vanaf € 980</span></div><h4>Sinaï, Desert &amp; Silence</h4><div class="meta" style="margin-top:4px"><span>Okt 2027 · voorbeeld</span><span>max. 10</span></div></a>
+          <a class="rcard past" href="#ds"><div class="ph"><img src="img/hike.jpg" alt="Forest hike in the Eifel"></div><div class="meta"><span class="tag" style="color:var(--ink-soft)">Voorbij</span><span>nov 2025</span></div><h4>Eifel, Yoga &amp; Hike</h4><div class="meta" style="margin-top:4px"><span>27–30 nov 2025 · België</span><span>14 deelnemers</span></div></a>
+        </div>
+        <p class="muted" style="font-size:.85rem;margin:var(--s-5) 0 0">4:5 photo · slow 1.04 zoom on hover · title in serif under the photo (not on it) · meta in small ink-soft. Second card is an illustrative example.</p>
+      </div>
+
+      <p class="specimen-title">Class tile: hover reveal</p>
+      <div class="specimen">
+        <div class="tiles">
+          <div class="tile" tabindex="0"><img src="img/class-ashtanga.jpg" alt="Ashtanga"><span class="name">Ashtanga</span><div class="info"><b>Ashtanga</b><dl><dt>Wat</dt><dd>Dynamische, vaste reeks op de adem.</dd><dt>Voor wie</dt><dd>Wie kracht en focus zoekt.</dd><dt>Waar</dt><dd>Antwerp Yoga</dd></dl></div></div>
+          <div class="tile" tabindex="0"><img src="img/yoga2.jpg" alt="Vinyasa"><span class="name">Vinyasa</span><div class="info"><b>Vinyasa</b><dl><dt>Wat</dt><dd>Vloeiende flows, elke les anders.</dd><dt>Voor wie</dt><dd>Iedereen, alle niveaus.</dd><dt>Waar</dt><dd>Studio Pili</dd></dl></div></div>
+          <div class="tile" tabindex="0"><img src="img/yoga3.jpg" alt="Pilates Mat"><span class="name">Pilates Mat</span><div class="info"><b>Pilates Mat</b><dl><dt>Wat</dt><dd>Core, houding, controle.</dd><dt>Voor wie</dt><dd>Sterker en soepeler worden.</dd><dt>Waar</dt><dd>Magnolia Studios</dd></dl></div></div>
+          <div class="tile" tabindex="0"><img src="img/class-pilates-reformer.jpg" alt="Pilates Reformer"><span class="name">Reformer</span><div class="info"><b>Pilates Reformer</b><dl><dt>Wat</dt><dd>Pilates op toestel, met weerstand.</dd><dt>Voor wie</dt><dd>Gerichte opbouw, revalidatie.</dd><dt>Waar</dt><dd>Studio Pili</dd></dl></div></div>
+        </div>
+        <p class="muted" style="font-size:.85rem;margin:var(--s-5) 0 0">Placeholder copy; final texts come from Rita.</p>
+      </div>
+
+      <p class="specimen-title">Retreat page: sticky summary</p>
+      <div class="specimen on-paper2">
+        <div class="cols-2" style="align-items:start">
+          <div>
+            <span class="label">De retreat in een notendop</span>
+            <div style="font:400 var(--fs-h2)/1.1 var(--font-display);margin-bottom:var(--s-4)">Yoga en freediving: rustig blijven, diep ademen, niet forceren.</div>
+            <p class="muted">Zonsopgang-yoga op een rooftop met zeezicht. Freedive-initiatie in Lighthouse Bay. Samen eten na een dag vol avontuur. Kleine groep, geen druk.</p>
+          </div>
+          <aside class="facts">
+            <span class="label" style="margin-bottom:var(--s-2)">vanaf</span>
+            <div class="price">€ 1.120</div>
+            <dl><dt>Wanneer</dt><dd>9–16 mei 2026</dd><dt>Waar</dt><dd>Dahab, Egypte</dd><dt>Groep</dt><dd>max. 8</dd><dt>Verblijf</dt><dd>Nour Boutique Hotel</dd></dl>
+            <a class="btn" href="#ds" style="width:100%;justify-content:center">Inschrijven</a>
+            <ul class="subnav"><li class="on">Notendop</li><li>De plek</li><li>De mensen</li><li>Programma</li><li>Praktisch</li></ul>
+          </aside>
+        </div>
+      </div>
+
+      <p class="specimen-title">Team: object → face</p>
+      <div class="specimen">
+        <div class="team">
+          <div><div class="person" tabindex="0">
+            <div class="obj"><svg viewBox="0 0 100 100"><path d="M18 40 L50 26 L82 40 L82 62 L50 76 L18 62 Z"/><path d="M18 40 L50 54 L82 40"/><path d="M50 54 L50 76"/></svg></div>
+            <img src="img/rita-philippe.jpg" alt="Rita" style="object-position:30% 30%">
+          </div><div class="person-cap"><b>Rita</b><span class="muted" style="font-size:var(--fs-small)">Yoga &amp; Pilates teacher</span></div></div>
+          <div><div class="person" tabindex="0">
+            <div class="obj"><svg viewBox="0 0 100 100"><rect x="16" y="36" width="30" height="24" rx="10"/><rect x="54" y="36" width="30" height="24" rx="10"/><path d="M46 46 Q50 42 54 46"/><path d="M16 46 Q8 46 8 38"/><path d="M84 46 Q92 46 92 38"/></svg></div>
+            <img src="img/rita-philippe.jpg" alt="Philippe" style="object-position:70% 30%">
+          </div><div class="person-cap"><b>Philippe</b><span class="muted" style="font-size:var(--fs-small)">Ocean lover &amp; freediver</span></div></div>
+        </div>
+        <p class="muted" style="font-size:.85rem;margin:var(--s-5) 0 0">Line drawings in the icon style below. Needs a separate portrait of each person (now cropped from a duo photo).</p>
+      </div>
+
+      <p class="specimen-title">Gallery mosaic</p>
+      <div class="specimen">
+        <div class="filters"><span class="on">Alles</span><span>Retreats</span><span>Lessen</span><span>Natuur</span></div>
+        <div class="mosaic">
+          <figure class="w2 h2"><img src="img/desert-handstand.jpg" alt=""><figcaption>Sinaï woestijn · mei 2026</figcaption></figure>
+          <figure><img src="img/swimmingpool.jpg" alt=""><figcaption>Nour Hotel, Dahab</figcaption></figure>
+          <figure><img src="img/cooking.jpg" alt=""><figcaption>Samen koken · Eifel 2025</figcaption></figure>
+          <figure class="w2"><img src="img/yoga-outside.jpg" alt=""><figcaption>Buiten-yoga · Eifel 2025</figcaption></figure>
+          <figure><img src="img/learning.jpg" alt=""><figcaption>Freedive-theorie · Dahab</figcaption></figure>
+          <figure><img src="img/campfire.jpg" alt=""><figcaption>Kampvuur · Eifel 2025</figcaption></figure>
+          <figure class="w2"><img src="img/freediving3.jpg" alt=""><figcaption>Lighthouse Bay · mei 2026</figcaption></figure>
+        </div>
+      </div>
+
+      <p class="specimen-title">Form</p>
+      <div class="specimen">
+        <form class="form" onsubmit="return false">
+          <div class="field"><label for="n">Naam</label><input id="n" placeholder="Je naam"></div>
+          <div class="field"><label for="e">E-mail</label><input id="e" type="email" placeholder="jij@voorbeeld.be"></div>
+          <div class="field full"><label for="m">Bericht</label><textarea id="m" placeholder="Waar kunnen we je mee helpen?"></textarea></div>
+          <label class="check full"><input type="checkbox" checked> Hou me op de hoogte van de volgende retreat</label>
+          <div class="full"><button class="btn">Verstuur</button></div>
+        </form>
+        <p class="muted" style="font-size:.85rem;margin:var(--s-5) 0 0">Underline inputs, ember on focus. Next to it: e-mail and GSM as plain text links.</p>
+      </div>
+
+      <p class="specimen-title">Icons</p>
+      <div class="specimen">
+        <div class="icons">
+          <figure><svg viewBox="0 0 40 40"><path d="M20 36s11-10 11-19a11 11 0 0 0-22 0c0 9 11 19 11 19z"/><circle cx="20" cy="17" r="4"/></svg>Plek</figure>
+          <figure><svg viewBox="0 0 40 40"><rect x="6" y="9" width="28" height="25"/><path d="M6 16h28M13 5v7M27 5v7"/></svg>Datum</figure>
+          <figure><svg viewBox="0 0 40 40"><circle cx="14" cy="14" r="5"/><circle cx="27" cy="16" r="4"/><path d="M4 33c1-7 5-10 10-10s9 3 10 10M23 33c.5-5 2.5-8 6-8s5.5 3 6 8"/></svg>Groep</figure>
+          <figure><svg viewBox="0 0 40 40"><path d="M3 24c4 0 4-3 8.5-3S16 24 20 24s4-3 8.5-3S33 24 37 24M3 31c4 0 4-3 8.5-3S16 31 20 31s4-3 8.5-3S33 31 37 31"/><circle cx="20" cy="11" r="5"/></svg>Zee</figure>
+          <figure><svg viewBox="0 0 40 40"><path d="M3 33h34M7 33c3-9 7-14 13-14s10 5 13 14"/><path d="M16 12l4-6 4 6"/></svg>Natuur</figure>
+          <figure><svg viewBox="0 0 40 40"><path d="M20 30c-6-3-10-8-10-14 4 1 8 4 10 8 2-4 6-7 10-8 0 6-4 11-10 14z"/><path d="M20 30v5"/></svg>Yoga</figure>
+        </div>
+        <p class="muted" style="font-size:.85rem;margin:var(--s-5) 0 0">1.25px line, round caps, no fill, ink colour, 24–40px. Sober like mindfulflowwithangie's pictos. Used only in fact lists, never decoratively.</p>
+      </div>
+    </div>
+
+    <!-- motion -->
+    <div class="ds-block">
+      <h3>Motion</h3>
+      <div class="cols-3" style="margin-top:var(--s-5)">
+        <div><b>Tokens</b><ul class="muted"><li><code>--t-fast</code> 200ms: colour, hover</li><li><code>--t-base</code> 450ms: reveals, overlays</li><li><code>--t-slow</code> 900ms: photo zoom, B&amp;W fade, section fade-in</li><li><code>--ease</code> cubic-bezier(.22,1,.36,1): soft out</li></ul></div>
+        <div><b>Allowed</b><ul class="muted"><li>Fade + 16px rise on scroll-in (once)</li><li>Photo scale ≤ 1.04 on hover</li><li>Grayscale → colour</li><li>Guiding line draws with scroll</li><li>Cursor ring grows on media</li></ul></div>
+        <div><b>Never</b><ul class="muted"><li>Bounce, spin, parallax over 10%</li><li>Auto-advancing carousels</li><li>Animated text per letter</li><li>Anything ignoring <code>prefers-reduced-motion</code></li></ul></div>
+      </div>
+    </div>
+
+    <!-- tokens -->
+    <div class="ds-block">
+      <h3>Tokens (copy-paste)</h3>
+      <p>Replaces the theme variables in <code>app/styles/styles-v3.css</code>. Fonts: swap the Google Fonts link in <code>app/layout.tsx</code> for <code>Instrument+Serif:ital@0;1&amp;family=Hanken+Grotesk:wght@400;500;600</code>.</p>
+<pre>:root {
+  /* colour */
+  --paper: #F4F1EC;   --paper-2: #EAE5DD;
+  --ink: #1A1917;     --ink-soft: #5E5A54;   --line: #D8D2C8;
+  --night: #0F1A1D;   --night-ink: #E9E6E0;
+  --ember: #D4552B;
+
+  /* type */
+  --font-display: "Instrument Serif", Georgia, serif;
+  --font-body: "Hanken Grotesk", system-ui, sans-serif;
+  --fs-display: clamp(3.2rem, 8vw, 7rem);
+  --fs-h1: clamp(2.4rem, 5vw, 4.2rem);
+  --fs-h2: clamp(1.9rem, 3.4vw, 2.8rem);
+  --fs-h3: 1.5rem;  --fs-body: 1.0625rem;  --fs-small: .875rem;  --fs-label: .75rem;
+
+  /* space */
+  --s-1: 4px; --s-2: 8px; --s-3: 12px; --s-4: 16px; --s-5: 24px;
+  --s-6: 32px; --s-7: 48px; --s-8: 64px; --s-9: 96px; --s-10: 144px;
+  --section: clamp(96px, 12vw, 176px);
+  --gutter: clamp(20px, 4vw, 56px);
+  --measure: 62ch;  --maxw: 1320px;
+
+  /* shape */
+  --radius: 0;  --radius-pill: 999px;  --hair: 1px solid var(--line);
+
+  /* motion */
+  --ease: cubic-bezier(.22, 1, .36, 1);
+  --t-fast: 200ms;  --t-base: 450ms;  --t-slow: 900ms;
+}</pre>
+    </div>
+  </div>
+</section>
+
+<!-- ======================= NEXT STEPS ======================= -->
+<section class="s alt" id="next">
+  <div class="wrap">
+    <div class="head">
+      <div><span class="label">07 · Next steps</span><h2>To align with the client.</h2></div>
+      <p class="lead">Five questions, then we restyle the existing pages; no new content model needed.</p>
+    </div>
+    <ol style="font-size:1.1rem;max-width:70ch">
+      <li><b>Photos:</b> can we get the high-res originals (≥ 2400 px), or plan a shoot at the next retreat?</li>
+      <li><b>Look:</b> approve this direction (palette, serif, one ember accent), or prefer a darker “night” base like Vita?</li>
+      <li><b>Nav:</b> OK with 6 menu items + Home (instead of “10 tabs”)?</li>
+      <li><b>Shop:</b> confirm not for launch.</li>
+      <li><b>Copy:</b> short texts per class (wat · voor wie · waar), coaching page and two team bios from Rita &amp; Philippe.</li>
+    </ol>
+    <p style="margin-top:var(--s-7)"><a class="btn ghost" href="../client-feedback-v2/index.html">← Back to client feedback v2</a></p>
+  </div>
+</section>
+
+<footer><div class="wrap">Design recommendation v2 · Yoga, Zen &amp; Tonic · Based on <i>website_comments_2.pdf</i> and <i>Structuur_Website_v3.docx</i>. Photos: current Yoga, Zen &amp; Tonic library (640px, for illustration only) and client-provided examples.</div></footer>
+
+<script>
+  // circle-and-dot cursor (fine pointers, no reduced motion)
+  (function () {
+    var c = document.getElementById('cursor');
+    var ok = matchMedia('(pointer: fine)').matches && !matchMedia('(prefers-reduced-motion: reduce)').matches;
+    if (!ok) { document.body.classList.remove('has-cursor'); return; }
+    c.style.display = 'block';
+    addEventListener('mousemove', function (e) { c.style.transform = 'translate(' + e.clientX + 'px,' + e.clientY + 'px)'; });
+    document.querySelectorAll('a, button, .tile, .person, .rcard, .mosaic figure').forEach(function (el) {
+      el.addEventListener('mouseenter', function () { c.classList.add('big'); });
+      el.addEventListener('mouseleave', function () { c.classList.remove('big'); });
+    });
+  })();
+  // fade + rise on scroll-in
+  (function () {
+    var els = document.querySelectorAll('.principles > div, .sig article, .bp, .specimen');
+    if (!('IntersectionObserver' in window)) return;
+    els.forEach(function (el) { el.classList.add('reveal'); });
+    var io = new IntersectionObserver(function (es) { es.forEach(function (e) { if (e.isIntersecting) { e.target.classList.add('in'); io.unobserve(e.target); } }); }, { rootMargin: '0px 0px -10% 0px' });
+    els.forEach(function (el) { io.observe(el); });
+  })();
+</script>
+</body>
+</html>
