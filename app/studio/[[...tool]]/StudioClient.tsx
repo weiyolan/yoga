@@ -3,8 +3,8 @@
 import { defineConfig, Studio } from "sanity";
 import base from "@/studio/sanity.config";
 
-// Same config as the standalone Studio (studio/), mounted under /admin.
-const config = defineConfig({ ...base, basePath: "/admin" });
+// Same config as the standalone Studio (studio/), mounted under /studio.
+const config = defineConfig({ ...base, basePath: "/studio" });
 
 export default function StudioClient() {
   return (

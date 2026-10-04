@@ -15,7 +15,7 @@ cp .env.example .env.local
 npm run dev              # http://localhost:3000
 ```
 
-The Studio lives in `studio/`, an npm workspace: the root `npm install` installs both, with one shared React. It is served by the site at **`/admin`** (same config, `app/admin/`) and can still be deployed standalone. See [studio/README.md](studio/README.md) for the content model, the seed and the Studio deploy.
+The Studio lives in `studio/`, an npm workspace: the root `npm install` installs both, with one shared React. It is served by the site at **`/studio`** (same config, `app/studio/`) and can still be deployed standalone. See [studio/README.md](studio/README.md) for the content model, the seed and the Studio deploy.
 
 | Script | |
 |---|---|
@@ -57,7 +57,7 @@ The Studio lives in `studio/`, an npm workspace: the root `npm install` installs
 
 ```
 app/[lang]/              pages (layout = header, footer, cursor)
-app/admin/                Sanity Studio (/admin, own root layout)
+app/studio/              Sanity Studio (/studio, own root layout)
 app/api/revalidate/      Sanity webhook
 app/actions/forms.ts     contact + newsletter server actions
 components/              Nav (client), Photo, sections (hero, cards, tiles),
@@ -81,7 +81,7 @@ studio/                  Sanity Studio (schemas, desk structure, seed)
 
 1. Import the repo with the root directory set to `/` and Node 22.
 2. Add the variables above.
-3. Run `cd studio && npx sanity cors add https://<domain> --credentials` (`--credentials` lets editors log in to `/admin`).
+3. Run `cd studio && npx sanity cors add https://<domain> --credentials` (`--credentials` lets editors log in to `/studio`).
 4. Create the webhook described above.
 
 ## Offline fixture (no Sanity access)
