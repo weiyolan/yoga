@@ -40,12 +40,19 @@ def toolbar(current):
   <span class="wf-current">{label}</span>
   <button class="wf-info-btn" type="button" aria-expanded="false" aria-controls="wf-info" aria-label="Info over deze wireframe"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 11v6"/><circle cx="12" cy="7.6" r=".9" fill="currentColor" stroke="none"/></svg><span>Info</span></button>
 </div>
-<aside class="wf-info" id="wf-info" role="dialog" aria-label="Over deze wireframe" hidden>
+<div class="wf-scrim" aria-hidden="true"></div>
+<aside class="wf-info" id="wf-info" role="dialog" aria-label="Over deze wireframe" aria-hidden="true">
+<div class="wf-info-body">
   <button class="wf-close" type="button" aria-label="Sluiten">×</button>
   <span class="label">Over deze wireframe</span>
   <h3>Dag Philou en Tita,</h3>
-  <p>Ik heb een klikbare schets gemaakt van jullie nieuwe website. Het gaat mij vooral om de <b>structuur</b>: welke pagina's er zijn, wat er op elke pagina staat en in welke volgorde. Kleuren en lettertypes volgen het design dat ik voorstel; teksten, data en prijzen zijn voorbeelden.</p>
-  <p class="wf-ask"><b>Mijn vraag aan jullie:</b> klik rustig door alle pagina's, ook op je gsm. <b>Maak screenshots</b> van alles wat jullie anders zouden doen en schrijf erbij wat en waarom. Stuur alles naar mij. Niets is te klein: “dit mag weg”, “dit mis ik”, “dit klopt niet”.</p>
+  <p>Ik heb een klikbare schets gemaakt van jullie nieuwe website. Ik leg jullie twee dingen voor:</p>
+  <ul class="wf-two">
+    <li><b>De structuur</b>: welke pagina's er zijn, wat er op elke pagina staat en in welke volgorde.</li>
+    <li><b>Het design</b>: kleuren, lettertypes, de sfeer van de foto's, de menu's en de kleine bewegingen.</li>
+  </ul>
+  <p>Beide zijn een voorstel, niets ligt vast. Teksten, data en prijzen zijn voorbeelden.</p>
+  <p class="wf-ask"><b>Mijn vraag aan jullie:</b> klik rustig door alle pagina's, ook op je gsm. <b>Maak screenshots</b> van alles wat jullie anders zouden doen en schrijf erbij wat en waarom. Stuur alles naar mij. Niets is te klein: “dit mag weg”, “dit mis ik”, “deze kleur is te donker”, “dit klopt niet”.</p>
   <p class="wf-sign">Alvast bedankt!<br>Yolan</p>
   <span class="label">Pagina's</span>
   <nav class="wf-pages">{links}</nav>
@@ -54,6 +61,7 @@ def toolbar(current):
     <button class="wf-switch" id="wf-notes" type="button" role="switch" aria-checked="true"><i></i><span><b>Notities</b><small>Blauwe kaartjes waarin ik uitleg waarom iets zo is.</small></span></button>
     <button class="wf-switch" id="wf-photos" type="button" role="switch" aria-checked="true"><i></i><span><b>Voorbeeldfoto's</b><small>Sfeerbeelden van Sansara Resort die ik verzamelde, enkel als inspiratie, niet voor de echte site. Uit = grijze vakken.</small></span></button>
   </div>
+</div>
 </aside>"""
 
 
@@ -166,8 +174,8 @@ def site_nav(current, solid=False):
     for i, (label, href, key, act) in enumerate(MENU, 1):
         subs = "".join(f'<a class="chip" href="{h}">{t}</a>' for t, h in SUBS.get(key, []))
         mob.append(
-            f'<li style="--i:{i}"{" class=on" if current in act else ""}><span class="num">{i:02d}</span>'
-            f'<a class="big" href="{href}">{label}</a>'
+            f'<li style="--i:{i}"{" class=on" if current in act else ""}>'
+            f'<a class="big" href="{href}"{" aria-current=page" if current in act else ""}>{label}<sup>{i:02d}</sup></a>'
             + (f'<span class="chips-row">{subs}</span>' if subs else "")
             + "</li>"
         )

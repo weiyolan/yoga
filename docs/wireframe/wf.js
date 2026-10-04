@@ -57,22 +57,42 @@
   sw('wf-notes', 'yzt-wf-notes', 'notes-off');
   sw('wf-photos', 'yzt-wf-photos', 'photos-off', function (on) { if (on) fill(); });
 
-  // ---- info panel ----
-  var btn = document.querySelector('.wf-info-btn'), panel = document.getElementById('wf-info');
+  // ---- info panel: grows out of the Info button, shrinks back into it ----
+  var btn = document.querySelector('.wf-info-btn'), panel = document.getElementById('wf-info'), scrim = document.querySelector('.wf-scrim');
   if (!btn || !panel) return;
-  var auto;
+  var small = matchMedia('(max-width: 700px)'), auto;
+  function anchor() { // point the caret + animation origin at the button
+    var r = btn.getBoundingClientRect(), p = panel.getBoundingClientRect();
+    var x = Math.max(18, Math.min(p.width - 18, r.left + r.width / 2 - p.left));
+    panel.style.setProperty('--caret', x + 'px');
+  }
+  function isOpen() { return panel.classList.contains('open'); }
   function setInfo(open) {
     clearTimeout(auto);
-    panel.hidden = !open; btn.setAttribute('aria-expanded', String(open));
     btn.classList.remove('pulse');
-    if (open) localStorage.setItem('yzt-wf-seen', '1');
+    if (open === isOpen()) return;
+    if (open) anchor();
+    panel.classList.toggle('open', open); panel.setAttribute('aria-hidden', String(!open));
+    if (scrim) scrim.classList.toggle('on', open);
+    btn.setAttribute('aria-expanded', String(open));
+    // lock page scroll on phones while the panel is open (the panel itself scrolls)
+    var menuOpen = document.querySelector('.nav.menu-open');
+    document.documentElement.style.overflow = open && small.matches ? 'hidden' : (menuOpen ? 'hidden' : '');
+    if (!open) { btn.classList.remove('catch'); void btn.offsetWidth; btn.classList.add('catch'); }
+    else setTimeout(function () { var c = panel.querySelector('.wf-info-body'); c.setAttribute('tabindex', '-1'); c.focus({ preventScroll: true }); }, 300);
   }
-  window.yztCloseInfo = function () { if (!panel.hidden) setInfo(false); };
-  btn.addEventListener('click', function (e) { e.stopPropagation(); setInfo(panel.hidden); });
+  window.yztCloseInfo = function () { if (isOpen()) setInfo(false); };
+  btn.addEventListener('click', function (e) { e.stopPropagation(); setInfo(!isOpen()); });
   panel.querySelector('.wf-close').addEventListener('click', function () { setInfo(false); });
-  document.addEventListener('click', function (e) { if (!panel.hidden && !e.target.closest('.wf-info, .wf-info-btn')) setInfo(false); });
-  document.addEventListener('keydown', function (e) { if (e.key === 'Escape' && !panel.hidden) setInfo(false); });
-  if (!localStorage.getItem('yzt-wf-seen')) { btn.classList.add('pulse'); auto = setTimeout(function () { setInfo(true); }, 600); }
+  document.addEventListener('click', function (e) { if (isOpen() && !e.target.closest('.wf-info, .wf-info-btn')) setInfo(false); });
+  document.addEventListener('keydown', function (e) { if (e.key === 'Escape' && isOpen()) setInfo(false); });
+  addEventListener('resize', function () { if (isOpen()) anchor(); });
+  // open on the first load of every visit (once per browser session)
+  if (!sessionStorage.getItem('yzt-wf-info')) {
+    sessionStorage.setItem('yzt-wf-info', '1');
+    btn.classList.add('pulse');
+    auto = setTimeout(function () { setInfo(true); }, 450);
+  }
 })();
 
 // Circle-and-dot cursor: fine pointers only, respects reduced motion.
