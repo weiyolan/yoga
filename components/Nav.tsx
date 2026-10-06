@@ -23,6 +23,10 @@ type Props = { lang: Lang; layout: Layout | null; children?: ReactNode };
 /** Pages without a hero get the solid header straight away. */
 const SOLID: Route[] = ["gallery", "contact"];
 
+/** "Yoga, Zen & Tonic" → the ampersand in italic ember. */
+const logo = (name: string) =>
+  name.split(/(&)/).map((part, i) => (part === "&" ? <em key={i}>&amp;</em> : part));
+
 function MCard({ to, icon, title, desc }: { to: string; icon: IconName; title: string; desc?: string | null }) {
   return (
     <Link className="mcard" href={to}>
@@ -218,7 +222,7 @@ export function Nav({ lang, layout, children }: Props) {
     <>
       <header className={navClass}>
         <Link className="logo" href={href(lang, "home")}>
-          {layout?.siteName ?? getDictionary(lang).siteName}
+          {logo(layout?.siteName ?? getDictionary(lang).siteName)}
         </Link>
         <nav className="menu" aria-label={t.main}>
           <ul>

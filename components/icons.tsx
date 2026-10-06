@@ -27,19 +27,26 @@ export function Icon({ name, className = "ic" }: { name: IconName; className?: s
 
 /** Over ons: the object shown before the portrait (hover reveals the face). */
 export const YogaBlock = () => (
-  <svg viewBox="0 0 100 100" aria-hidden="true">
-    <path d="M18 40 L50 26 L82 40 L82 62 L50 76 L18 62 Z" />
-    <path d="M18 40 L50 54 L82 40" />
-    <path d="M50 54 L50 76" />
+  <svg viewBox="0 0 100 100" aria-hidden="true" strokeLinejoin="round" strokeLinecap="round">
+    {/* a foam brick in three-quarter view: long, low, soft edges */}
+    <path d="M17 46 L33 33 Q34.5 32 36.5 32 L83 32 Q86 32 86 35 L86 57 Q86 60 83.5 61.5 L66 70" />
+    <path d="M65 46 L84.5 33" />
+    <rect x="14" y="46" width="54" height="24" rx="4.5" />
   </svg>
 );
 
 export const DivingMask = () => (
-  <svg viewBox="0 0 100 100" aria-hidden="true">
-    <rect x="16" y="36" width="30" height="24" rx="10" />
-    <rect x="54" y="36" width="30" height="24" rx="10" />
-    <path d="M46 46 Q50 42 54 46" />
-    <path d="M16 46 Q8 46 8 38" />
-    <path d="M84 46 Q92 46 92 38" />
+  <svg viewBox="0 0 100 100" aria-hidden="true" strokeLinejoin="round" strokeLinecap="round">
+    {/* frame with nose pocket */}
+    <path d="M16 40 Q16 30 26 30 L74 30 Q84 30 84 40 L84 54 Q84 64 74 64 L61 64 Q57 64 55.5 68 Q54 73 50 73 Q46 73 44.5 68 Q43 64 39 64 L26 64 Q16 64 16 54 Z" />
+    {/* two lenses */}
+    <rect x="22" y="35" width="24" height="23" rx="6" />
+    <rect x="54" y="35" width="24" height="23" rx="6" />
+    {/* strap */}
+    <path d="M16 44 Q6 46 8 58" />
+    {/* snorkel */}
+    <path d="M91 12 L91 70 Q91 80 81 80 L60 80" />
+    <path d="M88 12 L94 12" />
+    <path d="M84 44 L91 44" />
   </svg>
 );
