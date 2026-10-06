@@ -114,7 +114,7 @@ export const HOME_QUERY = defineQuery(`*[_id == "homePage"][0]{
   "upcomingRetreats": *[_type == "retreat" && ${UPCOMING}] | order(startDate asc)[0...3]${RETREAT_CARD},
   "pastRetreats": *[_type == "retreat" && !(${UPCOMING})] | order(startDate desc)[0...3]${RETREAT_CARD},
   "styles": *[_type == "yogaClass"] | order(orderRank asc)${STYLE},
-  "studios": *[_type == "studio"] | order(name asc).name,
+  "studios": *[_type == "studio"] | order(name asc){ _id, name, website },
   "instagram": *[_type == "mediaItem" && highlight == true] | order(takenAt desc, _createdAt desc)[0...6]${MEDIA},
   "testimonials": testimonials[]->${TESTIMONIAL},
   "aboutTitle": ${t("aboutTitle")},

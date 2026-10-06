@@ -324,7 +324,7 @@ async function seed() {
       ["Duur & prijs", "60 of 90 minuten", "[Prijs, locatie: thuis, in de studio of online.]"],
     ].map(([label, title, text]) => ({ _key: key(), _type: "coachingBlock", label: str(label), title: str(title), text: txt(text) })),
     photos: ms("yoga2", "yogaOutside"),
-    ctaTitle: str({ nl: "Zin in een gesprek?", en: "Fancy a chat?" }),
+    ctaTitle: str({ nl: "Ben je benieuwd? Of heb je vragen?", en: "Curious? Or have questions?" }),
   });
   await singleton("aboutPage", {
     _type: "aboutPage",

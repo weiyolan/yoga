@@ -1,3 +1,4 @@
+import { Fragment } from "react";
 import Link from "next/link";
 import { Photo } from "@/components/Photo";
 import { ClassTiles, Hero, RetreatCard, SectionHead } from "@/components/sections";
@@ -107,7 +108,18 @@ export default async function Home({ params }: PageProps<"/[lang]">) {
             <ClassTiles lang={lang} styles={page.styles} to={href(lang, "lessons", { hash: "stijlen" })} />
             {page.studios?.length ? (
               <p className="muted small" style={{ marginTop: 18 }}>
-                {page.studios.join(" · ")}
+                {page.studios.map((s, i) => (
+                  <Fragment key={s._id}>
+                    {i ? " · " : null}
+                    {s.website ? (
+                      <a href={s.website} target="_blank" rel="noopener">
+                        {s.name}
+                      </a>
+                    ) : (
+                      s.name
+                    )}
+                  </Fragment>
+                ))}
               </p>
             ) : null}
           </div>
@@ -144,12 +156,12 @@ export default async function Home({ params }: PageProps<"/[lang]">) {
             <SectionHead label={t.follow} title={handle ? `@${handle}` : "Instagram"}>
               <div className="row">
                 {layout?.instagram ? (
-                  <a className="link" href={layout.instagram}>
+                  <a className="link" href={layout.instagram} target="_blank" rel="noopener">
                     Instagram
                   </a>
                 ) : null}
                 {layout?.facebook ? (
-                  <a className="link" href={layout.facebook}>
+                  <a className="link" href={layout.facebook} target="_blank" rel="noopener">
                     Facebook
                   </a>
                 ) : null}
@@ -158,7 +170,7 @@ export default async function Home({ params }: PageProps<"/[lang]">) {
             <div className="g6">
               {page.instagram.map((m) =>
                 layout?.instagram ? (
-                  <a key={m._id} href={layout.instagram} aria-label={`Instagram: ${m.alt || m.title || ""}`}>
+                  <a key={m._id} href={layout.instagram} target="_blank" rel="noopener" aria-label={`Instagram: ${m.alt || m.title || ""}`}>
                     <Photo media={m} ratio="r1" sizes="(max-width: 860px) 33vw, 16vw" />
                   </a>
                 ) : (

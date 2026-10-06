@@ -4,8 +4,8 @@ const locale: Record<Lang, string> = { nl: "nl-BE", en: "en-GB" };
 const parse = (d: string) => new Date(`${d}T12:00:00Z`);
 const part = (lang: Lang, d: Date, o: Intl.DateTimeFormatOptions) => new Intl.DateTimeFormat(locale[lang], { timeZone: "UTC", ...o }).format(d).replace(".", "");
 
-/** "9–16 mei", "28 feb – 3 mrt", with `year`: "27–30 nov 2025". */
-export function dateRange(lang: Lang, start?: string | null, end?: string | null, year = false) {
+/** "9–16 mei 2027", "28 feb – 3 mrt 2027", "29 dec 2026 – 3 jan 2027"; `year: false` drops the year. */
+export function dateRange(lang: Lang, start?: string | null, end?: string | null, year = true) {
   if (!start) return "";
   const a = parse(start);
   const b = end ? parse(end) : a;

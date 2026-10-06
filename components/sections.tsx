@@ -71,7 +71,7 @@ export function RetreatCard({ lang, retreat, tag }: { lang: Lang; retreat: Retre
   const t = getDictionary(lang).card;
   const past = !isUpcoming(retreat.endDate);
   const extra = past ? (retreat.participantCount ? `${retreat.participantCount} ${t.participants}` : "") : retreat.priceFrom ? `${t.from} ${euro(lang, retreat.priceFrom)}` : "";
-  const when = [dateRange(lang, retreat.startDate, retreat.endDate, past), retreat.country, !past && retreat.capacity ? `${t.max} ${retreat.capacity}` : null].filter(Boolean).join(" · ");
+  const when = [dateRange(lang, retreat.startDate, retreat.endDate), retreat.country, !past && retreat.capacity ? `${t.max} ${retreat.capacity}` : null].filter(Boolean).join(" · ");
   return (
     <Link className="card" href={retreatHref(lang, retreat.slug)}>
       <Photo media={retreat.cardPhoto} ratio="r45" className={past ? "bw" : undefined} sizes="(max-width: 860px) 100vw, 33vw" />

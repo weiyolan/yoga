@@ -319,7 +319,7 @@ export function Nav({ lang, layout, children }: Props) {
             ))}
           </span>
           {layout?.phone ? <a href={`tel:${layout.phone.replace(/[^+\d]/g, "")}`}>{layout.phone}</a> : null}
-          {layout?.instagram ? <a href={layout.instagram}>Instagram</a> : null}
+          {layout?.instagram ? <a href={layout.instagram} target="_blank" rel="noopener">Instagram</a> : null}
         </div>
       </div>
       {solid ? <div className="nav-spacer" aria-hidden="true" /> : null}

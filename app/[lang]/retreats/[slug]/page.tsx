@@ -39,7 +39,7 @@ export default async function RetreatPage({ params }: PageProps<"/[lang]/retreat
   const d = getDictionary(lang);
   const t = d.retreat;
   const upcoming = isUpcoming(r.endDate);
-  const when = dateRange(lang, r.startDate, r.endDate, !upcoming);
+  const when = dateRange(lang, r.startDate, r.endDate);
   const where = join(r.place, r.country);
   const group = r.capacity ? `${d.card.max} ${r.capacity}` : null;
   const highlights = clean(r.highlights);
