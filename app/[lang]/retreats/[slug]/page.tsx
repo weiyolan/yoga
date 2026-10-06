@@ -32,6 +32,11 @@ export async function generateMetadata({ params }: PageProps<"/[lang]/retreats/[
 }
 
 const clean = (xs: string[] | null | undefined) => (xs ?? []).map((x) => x.trim()).filter(Boolean);
+/** "Rita, Philippe & Michèle" */
+const names = (xs: (string | null)[] | null | undefined) => {
+  const n = (xs ?? []).filter(Boolean);
+  return n.length > 1 ? `${n.slice(0, -1).join(", ")} & ${n.at(-1)}` : n[0];
+};
 
 export default async function RetreatPage({ params }: PageProps<"/[lang]/retreats/[slug]">) {
   const { lang, retreat: r } = await load(params);
@@ -46,6 +51,93 @@ export default async function RetreatPage({ params }: PageProps<"/[lang]/retreat
   const included = clean(r.included);
   const notIncluded = clean(r.notIncluded);
   const signup = upcoming ? r.signupUrl : null;
+
+  if (!upcoming) {
+    // Past retreat: a look back — photos, the nutshell and the facts; no booking box.
+    const recap = (r.recapPhotos?.length ? r.recapPhotos : [...(r.moodPhotos ?? []), ...(r.placePhotos ?? [])]) as Media[];
+    const lb: LightboxItem[] = recap.map((m) => ({ src: fullSrc(m) ?? "", alt: m.alt, caption: m.title }));
+    const price = r.priceFrom ?? Math.min(...(r.prices ?? []).map((p) => p.amount ?? Infinity));
+    const facts = [
+      [t.where, join(where, r.venue)],
+      [t.hosts, names(r.hosts?.map((p) => p.name))],
+      [t.price, Number.isFinite(price) ? `${t.from} ${euro(lang, price)}` : null],
+      [t.participants, r.participantCount ?? (r.capacity ? `${d.card.max} ${r.capacity}` : null)],
+    ].filter(([, v]) => v);
+    return (
+      <Lightbox lang={lang} items={lb}>
+        <Hero
+          hero={r.hero}
+          title={r.title}
+          subtitle={null}
+          meta={
+            <>
+              {when ? <span>{when}</span> : null}
+              {where ? <span>{where}</span> : null}
+            </>
+          }
+        />
+
+        <section className="s" style={{ borderTop: 0, paddingTop: 24 }}>
+          <div className="wrap recap">
+            <div>
+              <span className="label">{t.nutshell}</span>
+              {r.nutshellTitle ? <h2>{r.nutshellTitle}</h2> : null}
+              <Paragraphs text={r.nutshellText} />
+              {highlights.length ? (
+                <ul className="ticks">
+                  {highlights.map((h) => (
+                    <li key={h}>{h}</li>
+                  ))}
+                </ul>
+              ) : null}
+            </div>
+            {facts.length ? (
+              <dl className="facts">
+                {facts.map(([k, v]) => (
+                  <div key={String(k)}>
+                    <dt>{k}</dt>
+                    <dd>{v}</dd>
+                  </div>
+                ))}
+              </dl>
+            ) : null}
+          </div>
+        </section>
+
+        {recap.length ? (
+          <section className="s alt">
+            <div className="wrap">
+              <span className="label">{t.recap}</span>
+              <h2>{t.recapPhotos}</h2>
+              <div className="mosaic" style={{ marginTop: 28 }}>
+                {recap.map((m, i) => (
+                  <figure key={`${m._id}-${i}`} className={["w2 h2", "", "", "w2", "", "h2", "", ""][i % 8] || undefined}>
+                    <LightboxTrigger index={i} label={`${t.photos}: ${m.alt || m.title || i + 1}`}>
+                      <Photo media={m} sizes="(max-width: 700px) 50vw, 25vw" style={{ height: "100%" }} />
+                    </LightboxTrigger>
+                  </figure>
+                ))}
+              </div>
+            </div>
+          </section>
+        ) : null}
+
+        <section className="s center">
+          <div className="wrap">
+            <h2 style={{ margin: "0 auto 22px", maxWidth: "20ch" }}>{t.nextTitle}</h2>
+            <div className="row" style={{ justifyContent: "center" }}>
+              <Link className="btn" href={href(lang, "retreats", { hash: "komend" })}>
+                {t.otherRetreats}
+              </Link>
+              <Link className="btn ghost" href={href(lang, "contact")}>
+                {t.ask}
+              </Link>
+            </div>
+          </div>
+        </section>
+      </Lightbox>
+    );
+  }
 
   // One lightbox for every photo on the page (mood grid + the place).
   const mood = (r.moodPhotos ?? []).slice(0, 4);

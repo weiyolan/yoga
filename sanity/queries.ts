@@ -156,6 +156,7 @@ export const RETREAT_BY_SLUG_QUERY = defineQuery(`*[_type == "retreat" && slug.c
   "closingTitle": ${t("closingTitle")},
   "closingText": ${t("closingText")},
   "closingPhoto": closingPhoto->${MEDIA},
+  "recapPhotos": recapPhotos[]->${MEDIA},
   "seo": seo${SEO}
 }`);
 

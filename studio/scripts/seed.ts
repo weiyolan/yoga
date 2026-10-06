@@ -218,6 +218,7 @@ async function seed() {
     closingText: txt({ nl: "Stuur ons een bericht of schrijf je meteen in. Wij doen de rest.", en: "Send us a message or sign up right away. We'll do the rest." }),
     closingPhoto: m("freediving3"),
     participantCount: 8,
+    recapPhotos: ms("handstand", "freediving", "fish", "aerial", "desert", "freediving2", "cooking", "diving", "hotel", "team"),
   });
 
   const eifel = await retreat("eifel-2026", {
@@ -250,6 +251,7 @@ async function seed() {
     nutshellText: txt("Een driedaagse in een imposante design-loft middenin de Ardense bossen. Yoga, sauna en jacuzzi, een goed glas wijn en vooral: niets moeten."),
     hosts: refs([rita, philippe]),
     participantCount: 12,
+    recapPhotos: ms("pool", "campfire", "yoga3", "learning", "retreat"),
   });
 
   /* link photos to their retreat */

@@ -111,6 +111,11 @@ const nl = {
     past: "Deze retreat is voorbij.",
     otherRetreats: "Bekijk de komende retreats",
     photos: "Foto's",
+    recap: "Terugblik",
+    recapPhotos: "Zo was het",
+    hosts: "Begeleiding",
+    participants: "Deelnemers",
+    nextTitle: "Zin om de volgende keer mee te gaan?",
   },
   lessons: {
     stylesLabel: "Wat kan je volgen?",
@@ -259,6 +264,11 @@ const en: Dictionary = {
     past: "This retreat has ended.",
     otherRetreats: "See the upcoming retreats",
     photos: "Photos",
+    recap: "Looking back",
+    recapPhotos: "How it was",
+    hosts: "Led by",
+    participants: "Participants",
+    nextTitle: "Fancy joining next time?",
   },
   lessons: {
     stylesLabel: "What can you join?",
