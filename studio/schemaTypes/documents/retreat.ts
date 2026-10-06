@@ -59,7 +59,7 @@ export const retreat = defineType({
       title: "Inschrijflink",
       type: "url",
       group: "basics",
-      description: "Leeg = standaard inschrijflink uit Instellingen.",
+      description: "Optioneel: externe inschrijflink. Leeg = standaard inschrijflink uit Instellingen, en anders het formulier op de site.",
       validation: (rule) => rule.uri({ scheme: ["https"] }),
     }),
     mediaField("cardPhoto", { title: "Foto op de kaart", group: "basics", required: true }),

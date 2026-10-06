@@ -20,7 +20,7 @@ export const settings = defineType({
       title: "Standaard inschrijflink",
       type: "url",
       group: "general",
-      description: "Gebruikt als een retreat geen eigen inschrijflink heeft.",
+      description: "Optioneel: externe inschrijflink (bv. Google Form) voor elke retreat zonder eigen link. Leeg = het inschrijfformulier op de site (inschrijvingen komen in Inschrijvingen).",
       validation: (rule) => rule.uri({ scheme: ["https"] }),
     }),
     defineField({ name: "email", title: "E-mail", type: "string", group: "contact", validation: (rule) => rule.email() }),

@@ -4,6 +4,7 @@ import { CogIcon } from "@sanity/icons/Cog";
 import { DocumentsIcon } from "@sanity/icons/Documents";
 import { HomeIcon } from "@sanity/icons/Home";
 import { ImagesIcon } from "@sanity/icons/Images";
+import { UsersIcon } from "@sanity/icons/Users";
 import { WarningOutlineIcon } from "@sanity/icons/WarningOutline";
 import type { ComponentType } from "react";
 import type { StructureBuilder, StructureResolver } from "sanity/structure";
@@ -89,6 +90,37 @@ export const structure: StructureResolver = (S) =>
               filtered(S, "retreats-past", "Voorbij", "retreat", `!(${UPCOMING})`, [{ field: "startDate", direction: "desc" }]),
               S.divider(),
               S.documentTypeListItem("retreat").title("Alle retreats"),
+            ]),
+        ),
+      S.listItem()
+        .id("signups")
+        .title("Inschrijvingen")
+        .icon(UsersIcon)
+        .child(
+          S.list()
+            .title("Inschrijvingen")
+            .items([
+              filtered(S, "signups-new", "Nieuw", "signup", `status == "new"`, [{ field: "submittedAt", direction: "desc" }]),
+              S.listItem()
+                .id("signups-by-retreat")
+                .title("Per retreat")
+                .child(
+                  S.documentTypeList("retreat")
+                    .title("Per retreat")
+                    .defaultOrdering([{ field: "startDate", direction: "desc" }])
+                    .child((id) =>
+                      S.documentList()
+                        .id(`signups-${id}`)
+                        .title("Inschrijvingen")
+                        .schemaType("signup")
+                        .apiVersion(apiVersion)
+                        .filter(`_type == "signup" && retreat._ref == $id`)
+                        .params({ id })
+                        .defaultOrdering([{ field: "submittedAt", direction: "desc" }]),
+                    ),
+                ),
+              S.divider(),
+              S.documentTypeListItem("signup").title("Alle inschrijvingen"),
             ]),
         ),
       S.documentTypeListItem("person").title("Team & begeleiders"),

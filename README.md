@@ -36,7 +36,7 @@ The Studio lives in `studio/`, an npm workspace: the root `npm install` installs
   - Projection: `{_type}`
   - Secret: the same value as `SANITY_REVALIDATE_SECRET`
 - **Images come from the Sanity CDN.** `components/Photo.tsx` writes a `srcset` and respects the hotspot from the Fotobank. The Next image optimizer isn't used.
-- **The only dynamic parts are the forms.** Contact and the footer "keep me posted" form are server actions in `app/actions/forms.ts` and send mail through Resend. Without `RESEND_API_KEY` they log to the console instead.
+- **The only dynamic parts are the forms.** Contact and the footer "keep me posted" form are server actions in `app/actions/forms.ts` and send mail through Resend. Without `RESEND_API_KEY` they log to the console instead. The retreat sign-up form (`signup`) also stores each sign-up as a `signup` document in Sanity (Studio → Inschrijvingen) with a dotted `_id` (`signup.<uuid>`), so it is never readable through the public API. It needs `SANITY_WRITE_TOKEN`; without it, sign-ups are only logged. A retreat (or Instellingen) with an external sign-up link shows that link instead of the form.
 
 ## Languages & URLs
 
@@ -75,6 +75,7 @@ studio/                  Sanity Studio (schemas, desk structure, seed)
 | `NEXT_PUBLIC_SITE_URL` | canonical URLs, sitemap, OG (e.g. `https://yogazentonic.be`) |
 | `SANITY_REVALIDATE_SECRET` | webhook secret |
 | `RESEND_API_KEY`, `CONTACT_FROM` | form mail (`CONTACT_FROM` must be a domain verified in Resend) |
+| `SANITY_WRITE_TOKEN` | Editor token: stores retreat sign-ups in Sanity (server-only) |
 | `CONTACT_TO` | optional; default is the e-mail in Sanity → Instellingen |
 
 ## Deploy (Vercel)

@@ -4,10 +4,11 @@ import { defineConfig } from "sanity";
 import { structureTool } from "sanity/structure";
 import { internationalizedArray } from "sanity-plugin-internationalized-array";
 import { apiVersion, defaultLanguage, languages } from "../sanity/site.config";
-import { schemaTypes, SINGLETONS } from "./schemaTypes";
+import { FORM_TYPES, schemaTypes, SINGLETONS } from "./schemaTypes";
 import { structure } from "./structure";
 
 const singletons = new Set<string>(SINGLETONS);
+const formTypes = new Set<string>(FORM_TYPES);
 const singletonActions = new Set(["publish", "discardChanges", "restore"]);
 
 export default defineConfig({
@@ -31,12 +32,14 @@ export default defineConfig({
 
   schema: {
     types: schemaTypes,
-    // singletons can't be created from "New document"
-    templates: (prev) => prev.filter((t) => !singletons.has(t.schemaType)),
+    // singletons and form submissions can't be created from "New document"
+    templates: (prev) => prev.filter((t) => !singletons.has(t.schemaType) && !formTypes.has(t.schemaType)),
   },
 
   document: {
     // singletons can't be duplicated or deleted
-    actions: (prev, { schemaType }) => (singletons.has(schemaType) ? prev.filter(({ action }) => action && singletonActions.has(action)) : prev),
+    // form submissions can't be duplicated (a copy would get a public id)
+    actions: (prev, { schemaType }) =>
+      singletons.has(schemaType) ? prev.filter(({ action }) => action && singletonActions.has(action)) : formTypes.has(schemaType) ? prev.filter(({ action }) => action !== "duplicate") : prev,
   },
 });

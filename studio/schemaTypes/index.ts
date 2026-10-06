@@ -1,6 +1,7 @@
 import { mediaItem } from "./documents/media-item";
 import { person } from "./documents/person";
 import { retreat } from "./documents/retreat";
+import { signup } from "./documents/signup";
 import { studio } from "./documents/studio";
 import { testimonial } from "./documents/testimonial";
 import { yogaClass } from "./documents/yoga-class";
@@ -28,6 +29,9 @@ export const SINGLETONS = [
   contactPage,
 ].map((t) => t.name);
 
+/** Only the website creates these (private dotted ids): hidden from "New document". */
+export const FORM_TYPES = [signup.name];
+
 export const schemaTypes = [
   // objects
   simpleBlockContent,
@@ -40,6 +44,7 @@ export const schemaTypes = [
   yogaClass,
   studio,
   testimonial,
+  signup,
   // singletons
   settings,
   homePage,

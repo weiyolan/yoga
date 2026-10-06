@@ -134,6 +134,9 @@ export const RETREATS_QUERY = defineQuery(`{
   "past": *[_type == "retreat" && !(${UPCOMING})] | order(startDate desc)${RETREAT_CARD}
 }`);
 
+/** Sign-up form: the retreat a submission is for (server-side check + mails). */
+export const SIGNUP_RETREAT_QUERY = defineQuery(`*[_type == "retreat" && _id == $id][0]{ _id, "title": ${t("title")}, startDate, endDate }`);
+
 export const RETREAT_SLUGS_QUERY = defineQuery(`*[_type == "retreat" && defined(slug.current)].slug.current`);
 
 export const RETREAT_BY_SLUG_QUERY = defineQuery(`*[_type == "retreat" && slug.current == $slug][0]{

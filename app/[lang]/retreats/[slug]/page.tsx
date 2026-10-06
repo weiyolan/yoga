@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
+import { SignupForm } from "@/components/Forms";
 import { Lightbox, LightboxTrigger, type LightboxItem } from "@/components/Lightbox";
 import { fullSrc, Photo } from "@/components/Photo";
 import { Paragraphs } from "@/components/RichText";
@@ -50,7 +51,7 @@ export default async function RetreatPage({ params }: PageProps<"/[lang]/retreat
   const highlights = clean(r.highlights);
   const included = clean(r.included);
   const notIncluded = clean(r.notIncluded);
-  const signup = upcoming ? r.signupUrl : null;
+  const signup = r.signupUrl;
 
   if (!upcoming) {
     // Past retreat: a look back — photos, the nutshell and the facts; no booking box.
@@ -172,15 +173,13 @@ export default async function RetreatPage({ params }: PageProps<"/[lang]/retreat
             {when ? <span>{when}</span> : null}
             {where ? <span>{where}</span> : null}
             {r.capacity ? <span>{`${d.card.max} ${r.capacity} ${d.card.participants}`}</span> : null}
-            {r.priceFrom && upcoming ? <span>{`${d.card.from} ${euro(lang, r.priceFrom)}`}</span> : null}
+            {r.priceFrom ? <span>{`${d.card.from} ${euro(lang, r.priceFrom)}`}</span> : null}
           </>
         }
         actions={
-          signup ? (
-            <a className="btn white" href="#inschrijven">
-              {t.signup}
-            </a>
-          ) : null
+          <a className="btn white" href="#inschrijven">
+            {t.signup}
+          </a>
         }
       />
 
@@ -312,13 +311,12 @@ export default async function RetreatPage({ params }: PageProps<"/[lang]/retreat
           </div>
 
           <aside>
-            {r.priceFrom && upcoming ? (
+            {r.priceFrom ? (
               <>
                 <span className="label">{t.from}</span>
                 <div className="price">{euro(lang, r.priceFrom)}</div>
               </>
             ) : null}
-            {!upcoming ? <p className="muted">{t.past}</p> : null}
             <dl>
               {when ? (
                 <>
@@ -345,15 +343,9 @@ export default async function RetreatPage({ params }: PageProps<"/[lang]/retreat
                 </>
               ) : null}
             </dl>
-            {signup ? (
-              <a className="btn" href="#inschrijven" style={{ width: "100%", justifyContent: "center" }}>
-                {t.signup}
-              </a>
-            ) : (
-              <Link className="btn ghost" href={href(lang, "retreats", { hash: "komend" })} style={{ width: "100%", justifyContent: "center" }}>
-                {t.otherRetreats}
-              </Link>
-            )}
+            <a className="btn" href="#inschrijven" style={{ width: "100%", justifyContent: "center" }}>
+              {t.signup}
+            </a>
             <ul>
               {toc
                 .filter(([, , show]) => show)
@@ -367,23 +359,34 @@ export default async function RetreatPage({ params }: PageProps<"/[lang]/retreat
         </div>
       </section>
 
-      <section className="hero short" id="inschrijven" style={{ height: "70vh" }}>
-        <Photo media={r.closingPhoto} className="dark" sizes="100vw" />
-        <div className="txt center" style={{ left: 0, right: 0, bottom: "auto", top: "50%", transform: "translateY(-50%)" }}>
-          {r.closingTitle ? <h1 style={{ margin: "0 auto", maxWidth: "14ch" }}>{r.closingTitle}</h1> : null}
-          {r.closingText ? <p style={{ margin: "16px auto 24px" }}>{r.closingText}</p> : null}
-          <div className="row" style={{ justifyContent: "center" }}>
-            {signup ? (
+      {signup ? (
+        // An external sign-up link (Studio override): the closing photo with a button that opens it in a new tab.
+        <section className="hero short" id="inschrijven" style={{ height: "70vh" }}>
+          <Photo media={r.closingPhoto} className="dark" sizes="100vw" />
+          <div className="txt center" style={{ left: 0, right: 0, bottom: "auto", top: "50%", transform: "translateY(-50%)" }}>
+            {r.closingTitle ? <h1 style={{ margin: "0 auto", maxWidth: "14ch" }}>{r.closingTitle}</h1> : null}
+            {r.closingText ? <p style={{ margin: "16px auto 24px" }}>{r.closingText}</p> : null}
+            <div className="row" style={{ justifyContent: "center" }}>
               <a className="btn white" href={signup} target="_blank" rel="noopener">
                 {t.signup}
               </a>
-            ) : null}
-            <Link className="btn light" href={href(lang, "contact")}>
-              {t.ask}
-            </Link>
+              <Link className="btn light" href={href(lang, "contact")}>
+                {t.ask}
+              </Link>
+            </div>
           </div>
-        </div>
-      </section>
+        </section>
+      ) : (
+        <section className="split" id="inschrijven">
+          <Photo media={r.closingPhoto ?? r.hero?.photo} sizes="(max-width: 860px) 100vw, 50vw" />
+          <div className="pane">
+            <span className="label">{d.signup.label}</span>
+            <h2>{r.closingTitle || r.title}</h2>
+            {r.closingText ? <p className="muted">{r.closingText}</p> : null}
+            <SignupForm lang={lang} retreatId={r._id} rooms={(r.prices ?? []).map((p) => [p.label, euro(lang, p.amount)].filter(Boolean).join(" · "))} />
+          </div>
+        </section>
+      )}
     </Lightbox>
   );
 }
