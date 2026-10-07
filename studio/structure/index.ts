@@ -1,7 +1,9 @@
 import { ActivityIcon } from "@sanity/icons/Activity";
 import { CalendarIcon } from "@sanity/icons/Calendar";
 import { CogIcon } from "@sanity/icons/Cog";
-import { DocumentIcon } from "@sanity/icons/Document";
+import { EarthGlobeIcon } from "@sanity/icons/EarthGlobe";
+import { HeartIcon } from "@sanity/icons/Heart";
+import { LockIcon } from "@sanity/icons/Lock";
 import { SparklesIcon } from "@sanity/icons/Sparkles";
 import { StarIcon } from "@sanity/icons/Star";
 import { ThListIcon } from "@sanity/icons/ThList";
@@ -41,15 +43,16 @@ export const structure: StructureResolver = (S) =>
   S.list()
     .title("Website")
     .items([
-      singleton(S, "settings", "Instellingen", CogIcon),
+      S.divider().title("Pagina's"),
       singleton(S, "homePage", "Home", HomeIcon),
-      singleton(S, "retreatsPage", "Retreats (pagina)", DocumentIcon),
-      singleton(S, "lessonsPage", "Lessen (pagina)", DocumentIcon),
-      singleton(S, "coachingPage", "Private coaching", DocumentIcon),
-      singleton(S, "aboutPage", "Over ons", DocumentIcon),
-      singleton(S, "galleryPage", "Gallery", DocumentIcon),
-      singleton(S, "contactPage", "Contact", DocumentIcon),
-      singleton(S, "privacyPage", "Privacyverklaring", DocumentIcon),
+      singleton(S, "retreatsPage", "Retreats (pagina)", EarthGlobeIcon),
+      singleton(S, "lessonsPage", "Lessen (pagina)", ActivityIcon),
+      singleton(S, "coachingPage", "Private coaching", HeartIcon),
+      singleton(S, "aboutPage", "Over ons", UsersIcon),
+      singleton(S, "galleryPage", "Gallery", ImagesIcon),
+      singleton(S, "contactPage", "Contact", EnvelopeIcon),
+      singleton(S, "privacyPage", "Privacyverklaring", LockIcon),
+      singleton(S, "settings", "Instellingen", CogIcon),
       S.divider(),
 
       S.listItem()
@@ -74,8 +77,6 @@ export const structure: StructureResolver = (S) =>
               ),
             ]),
         ),
-      S.divider(),
-
       S.divider(),
 
       S.listItem()

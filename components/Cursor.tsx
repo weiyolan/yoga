@@ -33,7 +33,8 @@ export function Cursor() {
         ry = y;
         frame = 0;
       } else frame = requestAnimationFrame(tick);
-      ring.style.transform = `translate(${rx}px,${ry}px)`;
+      // `translate`, not `transform`: it applies after `scale`, so the click scale stays centred on the ring
+      ring.style.translate = `${rx}px ${ry}px`;
     };
 
     const show = (on: boolean) => {

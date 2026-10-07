@@ -27,7 +27,7 @@ type Retreat = { _id: string; title?: string; startDate?: string; capacity?: num
 
 const NL = `coalesce(title[language == "nl"][0].value, title[0].value)`;
 const QUERY = `{
-  "signups": *[_type == "signup"] | order(submittedAt desc) { _id, status, submittedAt, name, email, phone, persons, room, diet, message, lang, notes, "retreatId": retreat._ref, "retreat": retreat->${NL} },
+  "signups": *[_type == "signup"] | order(submittedAt desc) { _id, status, submittedAt, name, email, phone, persons, room, diet, message, lang, notes, "retreatId": retreat._ref, "retreat": retreat->{ "t": ${NL} }.t },
   "retreats": *[_type == "retreat" && !(_id in path("drafts.**"))] | order(startDate desc) { _id, "title": ${NL}, startDate, capacity, booked }
 }`;
 
@@ -80,13 +80,14 @@ const cell = { padding: "8px 10px", borderBottom: "1px solid var(--card-border-c
 export function SignupTable() {
   const client = useClient({ apiVersion });
   const [data, setData] = useState<{ signups: Row[]; retreats: Retreat[] } | null>(null);
+  const [error, setError] = useState("");
   const [retreat, setRetreat] = useState("");
   const [status, setStatus] = useState("");
   const [sort, setSort] = useState<{ key: keyof Row; desc: boolean }>({ key: "submittedAt", desc: true });
 
   useEffect(() => {
     let alive = true;
-    const load = () => client.fetch(QUERY, {}, { perspective: "raw" }).then((d) => alive && setData(d), console.error);
+    const load = () => client.fetch(QUERY, {}, { perspective: "raw" }).then((d) => alive && setData(d), (e: Error) => alive && setError(e.message));
     load();
     const sub = client.listen(`*[_type in ["signup", "retreat"]]`, {}, { events: ["mutation"], includeResult: false, visibility: "query" }).subscribe(() => load());
     return () => {
@@ -158,7 +159,7 @@ export function SignupTable() {
       <Card radius={2} border style={{ overflow: "auto", maxHeight: "calc(100vh - 260px)" }}>
         {data === null ? (
           <Box padding={4}>
-            <Text muted>Laden…</Text>
+            <Text muted>{error ? `Laden mislukt: ${error}` : "Laden…"}</Text>
           </Box>
         ) : rows.length ? (
           <table style={{ borderCollapse: "collapse", width: "max-content", minWidth: "100%" }}>

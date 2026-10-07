@@ -1,6 +1,6 @@
 import { nlNLLocale } from "@sanity/locale-nl-nl";
 import { visionTool } from "@sanity/vision";
-import { defineConfig } from "sanity";
+import { defineConfig, defineField } from "sanity";
 import { presentationTool } from "sanity/presentation";
 import { structureTool } from "sanity/structure";
 import { internationalizedArray } from "sanity-plugin-internationalized-array";
@@ -12,6 +12,7 @@ import { defaultDocumentNode } from "./structure/views";
 import { siteOrigin } from "./lib/site";
 import { altTextAction, translateAction } from "./actions/ai";
 import { newBadge } from "./actions/badges";
+import { LanguageNavbar } from "./components/LanguageNavbar";
 
 
 const singletons = new Set<string>(SINGLETONS);
@@ -39,13 +40,15 @@ export default defineConfig({
     internationalizedArray({
       languages: languages.map(({ id, title }) => ({ id, title })),
       defaultLanguages: [defaultLanguage],
-      fieldTypes: ["string", "text", "simpleBlockContent"],
+      fieldTypes: ["string", defineField({ name: "text", type: "text", rows: 3 }), "simpleBlockContent"],
       buttonLocations: ["field"],
       languageDisplay: "titleOnly",
     }),
     nlNLLocale(),
     visionTool({ defaultApiVersion: apiVersion }),
   ],
+
+  studio: { components: { navbar: LanguageNavbar } },
 
   schema: {
     types: schemaTypes,

@@ -349,10 +349,10 @@ select:focus-visible { outline: none; border-bottom-color: var(--ember); }
 .cursor-dot { width: 5px; height: 5px; margin: -2.5px 0 0 -2.5px; background: var(--ember); }
 .cursor.on, .cursor-dot.on { opacity: 1; }
 .cursor.big { width: 64px; height: 64px; margin: -32px 0 0 -32px; }
-/* click: the ring squeezes on press and bounces back on release (`scale` is separate from the translate) */
-.cursor.press { scale: .7; transition: opacity .2s, width .2s var(--ease), height .2s var(--ease), margin .2s var(--ease), scale .12s var(--ease); }
-.cursor.bounce { animation: cursor-bounce .6s linear; }
-@keyframes cursor-bounce { 0% { scale: .7; } 30% { scale: 1.32; } 52% { scale: .9; } 72% { scale: 1.08; } 88% { scale: .98; } 100% { scale: 1; } }
+/* click: the ring eases in a little on press and settles back on release (`scale` is separate from the translate) */
+.cursor.press { scale: .85; transition: opacity .2s, width .2s var(--ease), height .2s var(--ease), margin .2s var(--ease), scale .15s var(--ease); }
+.cursor.bounce { animation: cursor-bounce .45s var(--ease); }
+@keyframes cursor-bounce { 0% { scale: .85; } 45% { scale: 1.06; } 100% { scale: 1; } }
 body.has-cursor, body.has-cursor * { cursor: none !important; }
 body.has-cursor :is(input:not([type=checkbox]):not([type=radio]), textarea, [contenteditable]) { cursor: text !important; }
 @media (prefers-reduced-motion: reduce) { *, *::before, *::after { transition: none !important; scroll-behavior: auto !important; } }

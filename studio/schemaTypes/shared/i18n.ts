@@ -1,5 +1,6 @@
 import { defineField, type Rule } from "sanity";
 import { defaultLanguage, languages } from "../../../sanity/site.config";
+import { FoldedI18nInput } from "../../components/FoldedI18nInput";
 
 /** Shape stored by sanity-plugin-internationalized-array (v5). */
 type I18nItem = { _key: string; language?: string; value?: unknown };
@@ -48,6 +49,7 @@ function i18n(type: string) {
       name,
       type,
       ...opts,
+      components: { input: FoldedI18nInput },
       validation: (rule) => [
         ...(required ? [requireDefault(rule)] : []),
         ...(max ? [maxChars(rule, max)] : []),

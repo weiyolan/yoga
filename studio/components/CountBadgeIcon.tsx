@@ -30,8 +30,9 @@ export function countBadgeIcon(Icon: ComponentType, type: string): ComponentType
             aria-label={`${count} nieuw`}
             style={{
               position: "absolute",
-              top: "-0.55em",
-              right: "-0.75em",
+              // inside the icon box: Sanity's icon slot clips anything outside it
+              top: 0,
+              right: 0,
               minWidth: "1.45em",
               height: "1.45em",
               padding: "0 0.35em",
