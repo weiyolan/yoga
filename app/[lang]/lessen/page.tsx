@@ -68,10 +68,11 @@ export default async function Lessons({ params }: PageProps<"/[lang]/lessen">) {
         </section>
       ) : null}
 
-      {schedule.length ? (
-        <section className="s" id="planning">
-          <div className="wrap">
-            <SectionHead label={t.scheduleLabel} title={page?.scheduleTitle} />
+      {/* Always rendered: the menu and the style tiles link to #planning. */}
+      <section className="s" id="planning">
+        <div className="wrap">
+          <SectionHead label={t.scheduleLabel} title={page?.scheduleTitle} />
+          {schedule.length ? (
             <div className="week-wrap">
               <table className="week">
                 <thead>
@@ -120,9 +121,24 @@ export default async function Lessons({ params }: PageProps<"/[lang]/lessen">) {
                 </tbody>
               </table>
             </div>
-          </div>
-        </section>
-      ) : null}
+          ) : (
+            <div className="schedule-empty">
+              <p className="muted">{page?.scheduleEmpty || t.scheduleEmpty}</p>
+              <ul className="row" style={{ listStyle: "none", padding: 0 }}>
+                {studios.map((s) =>
+                  s.website ? (
+                    <li key={s._id}>
+                      <a className="btn ghost sm" href={s.website} target="_blank" rel="noopener">
+                        {s.name}
+                      </a>
+                    </li>
+                  ) : null,
+                )}
+              </ul>
+            </div>
+          )}
+        </div>
+      </section>
     </>
   );
 }

@@ -3,7 +3,7 @@
 /** One quote at a time, large; the visitor clicks the dots (no autoplay). */
 import { useState } from "react";
 
-type Item = { _id: string; quote: string | null; name: string | null; context: string | null };
+type Item = { _id: string; quote: string | null; name: string | null; context: string | null; rating?: number | null };
 
 export function Testimonials({ items, label, itemLabel }: { items: Item[]; label: string; itemLabel: string }) {
   const [i, setI] = useState(0);
@@ -15,6 +15,11 @@ export function Testimonials({ items, label, itemLabel }: { items: Item[]; label
         {label}
       </span>
       <div aria-live="polite">
+        {t.rating ? (
+          <p className="rating" style={{ textAlign: "center", margin: "0 0 12px" }} role="img" aria-label={`${t.rating}/5`}>
+            {"★".repeat(t.rating)}
+          </p>
+        ) : null}
         <blockquote key={t._id} className="fade-in">
           “{t.quote}”
         </blockquote>

@@ -39,6 +39,7 @@ const RETREAT_CARD_FIELDS = `
   "place": ${t("place")},
   "country": ${t("country")},
   capacity,
+  booked,
   priceFrom,
   participantCount,
   "cardPhoto": cardPhoto->${MEDIA}` as const;
@@ -65,6 +66,15 @@ const TESTIMONIAL = `{
   "quote": ${t("quote")},
   name,
   "context": coalesce(${t("context")}, ${t("retreat->title")} + " " + string::split(retreat->startDate, "-")[0])
+}` as const;
+
+/** An approved review (public copy, no e-mail), see studio/structure/views.tsx. */
+const REVIEW = `{
+  _id,
+  name,
+  rating,
+  text,
+  "context": ${t("retreat->title")} + " " + string::split(retreat->startDate, "-")[0]
 }` as const;
 
 /** A yoga style (Lessen tiles, home tiles). */
@@ -134,6 +144,7 @@ export const HOME_QUERY = defineQuery(`*[_id == "homePage"][0]{
   "studios": *[_type == "studio"] | order(name asc){ _id, name, website },
   "instagram": *[_type == "mediaItem" && highlight == true] | order(takenAt desc, _createdAt desc)[0...6]${MEDIA},
   "testimonials": testimonials[]->${TESTIMONIAL},
+  "reviews": *[_type == "review" && rating >= 4 && !(_id in path("drafts.**"))] | order(submittedAt desc)[0...3]${REVIEW},
   "aboutTitle": ${t("aboutTitle")},
   "aboutText": ${t("aboutText")},
   "introLink": ${t("introLink")},
@@ -157,7 +168,7 @@ export const RETREATS_QUERY = defineQuery(`{
 }`);
 
 /** Sign-up form: the retreat a submission is for (server-side check + mails). */
-export const SIGNUP_RETREAT_QUERY = defineQuery(`*[_type == "retreat" && _id == $id][0]{ _id, "title": ${t("title")}, startDate, endDate }`);
+export const SIGNUP_RETREAT_QUERY = defineQuery(`*[_type == "retreat" && _id == $id][0]{ _id, "title": ${t("title")}, startDate, endDate, capacity, booked }`);
 
 export const RETREAT_SLUGS_QUERY = defineQuery(`*[_type == "retreat" && defined(slug.current)].slug.current`);
 
@@ -182,6 +193,7 @@ export const RETREAT_BY_SLUG_QUERY = defineQuery(`*[_type == "retreat" && slug.c
   "closingText": ${t("closingText")},
   "closingPhoto": closingPhoto->${MEDIA},
   "recapPhotos": recapPhotos[]->${MEDIA},
+  "reviews": *[_type == "review" && retreat._ref == ^._id && !(_id in path("drafts.**"))] | order(submittedAt desc)${REVIEW},
   "labels": *[_id == "retreatsPage"][0]{
     "peopleTitle": ${t("peopleTitle")},
     "programmeTitle": ${t("programmeTitle")},
@@ -199,6 +211,7 @@ export const LESSONS_QUERY = defineQuery(`{
     "stylesTitle": ${t("stylesTitle")},
     "studiosTitle": ${t("studiosTitle")},
     "scheduleTitle": ${t("scheduleTitle")},
+    "scheduleEmpty": ${t("scheduleEmpty")},
     "schedule": schedule[]{
       _key, day, startTime, durationMinutes,
       "style": style->{ name, "slug": slug.current },

@@ -127,6 +127,8 @@ async function signupInner(data: FormData): Promise<FormState> {
   if (!retreat || !isUpcoming(retreat.endDate)) return { status: "invalid" };
   const title = retreat.title ?? "retreat";
   const when = dateRange(lang, retreat.startDate, retreat.endDate);
+  // Fully booked (Studio → confirmed sign-ups fill `booked`): a waiting-list request.
+  const waitlist = !!retreat.capacity && (retreat.booked ?? 0) >= retreat.capacity;
 
   const doc = {
     _id: `signup.${randomUUID()}`,
@@ -142,6 +144,7 @@ async function signupInner(data: FormData): Promise<FormState> {
     message,
     lang,
     consent,
+    waitlist,
     submittedAt: new Date().toISOString(),
   };
   try {
@@ -159,7 +162,7 @@ async function signupInner(data: FormData): Promise<FormState> {
       sendMail({
         to,
         replyTo: email,
-        subject: `Inschrijving ${title}: ${name}${persons > 1 ? ` (+${persons - 1})` : ""}`,
+        subject: `${waitlist ? "Wachtlijst" : "Inschrijving"} ${title}: ${name}${persons > 1 ? ` (+${persons - 1})` : ""}`,
         text: [
           `Retreat: ${title} (${when})`,
           `Naam: ${name}`,
@@ -176,8 +179,51 @@ async function signupInner(data: FormData): Promise<FormState> {
         ].join("\n"),
       }),
     ),
-    sendMail({ to: email, subject: t.mailSubject(title), text: body }),
+    sendMail({ to: email, subject: t.mailSubject(title), text: waitlist ? `${t.waitlistSent}\n\n${body}` : body }),
   ];
   for (const r of await Promise.allSettled(mails)) if (r.status === "rejected") console.error("signup: mail", r.reason);
   return { status: "sent" };
+}
+
+/**
+ * Review form (past retreat pages, #review): stored as a private `reviewSubmission` (Studio → Reviews)
+ * + a mail to the team. Only once the team sets it to "Gepubliceerd" does a public copy (no e-mail) go online.
+ */
+export async function sendReview(_: FormState, data: FormData): Promise<FormState> {
+  return keep(data, await sendReviewInner(data));
+}
+
+async function sendReviewInner(data: FormData): Promise<FormState> {
+  if (field(data, "website")) return { status: "sent" };
+  const lang = langOf(data);
+  const name = field(data, "name", 100);
+  const email = field(data, "email", 200);
+  const text = field(data, "text", 1200);
+  const rating = Number.parseInt(field(data, "rating", 1), 10);
+  const consent = data.get("consent") === "on";
+  if (!name || !EMAIL.test(email) || !text || !(rating >= 1 && rating <= 5) || !consent) return { status: "invalid" };
+  const retreat = await sanityFetch({ query: SIGNUP_RETREAT_QUERY, params: { id: field(data, "retreat", 100) }, lang });
+  if (!retreat) return { status: "invalid" };
+  return anyOf("review form", [
+    store({
+      _id: `reviewSubmission.${randomUUID()}`,
+      _type: "reviewSubmission",
+      status: "new",
+      retreat: { _type: "reference", _ref: retreat._id },
+      name,
+      email,
+      rating,
+      text,
+      lang,
+      submittedAt: new Date().toISOString(),
+    }),
+    recipient().then((to) =>
+      sendMail({
+        to,
+        replyTo: email,
+        subject: `Nieuwe review ${"★".repeat(rating)}: ${retreat.title ?? "retreat"} (${name})`,
+        text: [`Retreat: ${retreat.title}`, `Naam: ${name}`, `E-mail: ${email}`, `Score: ${rating}/5`, "", text, "", "Keur goed of weiger in de Studio → Reviews."].join("\n"),
+      }),
+    ),
+  ]);
 }

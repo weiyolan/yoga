@@ -4,7 +4,7 @@ import { Photo } from "@/components/Photo";
 import { ClassTiles, Hero, RetreatCard, SectionHead } from "@/components/sections";
 import { Testimonials } from "@/components/Testimonials";
 import { getDictionary } from "@/lib/dictionary";
-import { dateRange, euro, join } from "@/lib/format";
+import { dateRange, euro, join, placesLabel } from "@/lib/format";
 import { buildMetadata } from "@/lib/metadata";
 import { href, langParam, retreatHref } from "@/lib/routes";
 import { sanityFetch } from "@/sanity/fetch";
@@ -21,6 +21,8 @@ export default async function Home({ params }: PageProps<"/[lang]">) {
   const [page, layout] = await Promise.all([sanityFetch({ query: HOME_QUERY, lang }), sanityFetch({ query: LAYOUT_QUERY, lang })]);
   const d = getDictionary(lang);
   const t = d.home;
+  // Curated testimonials first, then the latest approved reviews (4★+).
+  const quotes = [...(page?.testimonials ?? []), ...(page?.reviews ?? []).map((r) => ({ _id: r._id, quote: r.text, name: r.name, context: r.context, rating: r.rating }))].slice(0, 6);
   const f = page?.featuredRetreat;
   const cards = [...(page?.upcomingRetreats ?? []), ...(page?.pastRetreats ?? [])].slice(0, 3);
   const handle = layout?.instagram?.match(/instagram\.com\/([^/?#]+)/)?.[1];
@@ -52,7 +54,7 @@ export default async function Home({ params }: PageProps<"/[lang]">) {
                 <span className="label">{d.card.next}</span>
                 <h2>{f.title}</h2>
                 <p className="muted" style={{ marginTop: 12 }}>
-                  {[dateRange(lang, f.startDate, f.endDate), join(f.place, f.country), f.capacity ? `${d.card.max} ${f.capacity} ${d.card.participants}` : null, f.priceFrom ? `${d.card.from} ${euro(lang, f.priceFrom)}` : null].filter(Boolean).join(" · ")}
+                  {[dateRange(lang, f.startDate, f.endDate), join(f.place, f.country), placesLabel(lang, f, true), f.priceFrom ? `${d.card.from} ${euro(lang, f.priceFrom)}` : null].filter(Boolean).join(" · ")}
                 </p>
                 {f.teaser ? <p>{f.teaser}</p> : null}
                 <div className="row" style={{ marginTop: 22 }}>
@@ -126,10 +128,10 @@ export default async function Home({ params }: PageProps<"/[lang]">) {
         </section>
       ) : null}
 
-      {page?.testimonials?.length ? (
+      {quotes.length ? (
         <section className="s">
           <div className="wrap">
-            <Testimonials items={page.testimonials} label={page?.testimonialsTitle || t.testimonials} itemLabel={t.testimonialN} />
+            <Testimonials items={quotes} label={page?.testimonialsTitle || t.testimonials} itemLabel={t.testimonialN} />
           </div>
         </section>
       ) : null}

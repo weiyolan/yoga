@@ -1,12 +1,12 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { SignupForm } from "@/components/Forms";
+import { ReviewForm, SignupForm } from "@/components/Forms";
 import { Lightbox, LightboxTrigger, type LightboxItem } from "@/components/Lightbox";
 import { fullSrc, Photo } from "@/components/Photo";
 import { Paragraphs } from "@/components/RichText";
-import { Hero } from "@/components/sections";
+import { Hero, ReviewList } from "@/components/sections";
 import { getDictionary } from "@/lib/dictionary";
-import { dateRange, euro, join, photoCaption } from "@/lib/format";
+import { dateRange, euro, join, photoCaption, placesLabel, spotsLeft } from "@/lib/format";
 import { buildMetadata } from "@/lib/metadata";
 import { href, langParam } from "@/lib/routes";
 import { isUpcoming, sanityFetch } from "@/sanity/fetch";
@@ -47,7 +47,7 @@ export default async function RetreatPage({ params }: PageProps<"/[lang]/retreat
   const upcoming = isUpcoming(r.endDate);
   const when = dateRange(lang, r.startDate, r.endDate);
   const where = join(r.place, r.country);
-  const group = r.capacity ? `${d.card.max} ${r.capacity}` : null;
+  const group = placesLabel(lang, r);
   const highlights = clean(r.highlights);
   const included = clean(r.included);
   const notIncluded = clean(r.notIncluded);
@@ -123,6 +123,18 @@ export default async function RetreatPage({ params }: PageProps<"/[lang]/retreat
           </section>
         ) : null}
 
+        <section className="s" id="review">
+          <div className="wrap">
+            <span className="label">{d.review.label}</span>
+            <h2>{d.review.title}</h2>
+            <ReviewList lang={lang} reviews={r.reviews ?? []} />
+            <div style={{ maxWidth: 720, marginTop: r.reviews?.length ? 56 : 0 }}>
+              <h3 className="summary-title">{d.review.formTitle}</h3>
+              <ReviewForm lang={lang} retreatId={r._id} />
+            </div>
+          </div>
+        </section>
+
         <section className="s center">
           <div className="wrap">
             <h2 style={{ margin: "0 auto 22px", maxWidth: "20ch" }}>{r.labels?.pastCtaTitle || t.nextTitle}</h2>
@@ -171,7 +183,7 @@ export default async function RetreatPage({ params }: PageProps<"/[lang]/retreat
           <>
             {when ? <span>{when}</span> : null}
             {where ? <span>{where}</span> : null}
-            {r.capacity ? <span>{`${d.card.max} ${r.capacity} ${d.card.participants}`}</span> : null}
+            {placesLabel(lang, r, true) ? <span>{placesLabel(lang, r, true)}</span> : null}
             {r.priceFrom ? <span>{`${d.card.from} ${euro(lang, r.priceFrom)}`}</span> : null}
           </>
         }
@@ -387,6 +399,7 @@ export default async function RetreatPage({ params }: PageProps<"/[lang]/retreat
               retreatId={r._id}
               rooms={(r.prices ?? []).map((p) => [p.label, euro(lang, p.amount)].filter(Boolean).join(" · "))}
               texts={{ thanks: texts?.signupThanks, consent: texts?.signupConsent }}
+              full={spotsLeft(r) === 0}
             />
           </div>
         </section>

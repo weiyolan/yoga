@@ -5,6 +5,7 @@
  * The dot follows the pointer; the ring trails behind and settles around it when the pointer rests.
  * The ring inverts what's under it (blend mode); the dot is a sibling so it stays ember.
  * Hidden until the first move and whenever the pointer leaves the window or is over a text field.
+ * Click: the ring squeezes while pressed and bounces back on release.
  */
 import { useEffect } from "react";
 
@@ -63,15 +64,32 @@ export function Cursor() {
       seen = false;
     };
     const hide = () => show(false);
+    const press = (e: PointerEvent) => {
+      if (e.pointerType !== "mouse" || e.button !== 0) return;
+      ring.classList.remove("bounce");
+      ring.classList.add("press");
+    };
+    const release = () => {
+      if (!ring.classList.contains("press")) return;
+      ring.classList.remove("press");
+      void ring.offsetWidth; // restart the animation on quick double clicks
+      ring.classList.add("bounce");
+    };
+    const settled = () => ring.classList.remove("bounce");
 
     addEventListener("mousemove", move, { passive: true });
     document.addEventListener("mouseout", out);
     addEventListener("blur", hide);
+    addEventListener("pointerdown", press, { passive: true });
+    addEventListener("pointerup", release, { passive: true });
+    ring.addEventListener("animationend", settled);
     return () => {
       cancelAnimationFrame(frame);
       removeEventListener("mousemove", move);
       document.removeEventListener("mouseout", out);
       removeEventListener("blur", hide);
+      removeEventListener("pointerdown", press);
+      removeEventListener("pointerup", release);
       document.body.classList.remove("has-cursor");
       ring.remove();
       dot.remove();

@@ -9,7 +9,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useCallback, useEffect, useRef, useState, type CSSProperties, type ReactNode } from "react";
 import { getDictionary } from "@/lib/dictionary";
-import { dateRange } from "@/lib/format";
+import { dateRange, placesLabel } from "@/lib/format";
 import { href, parsePath, retreatHref, translatePath, type Route } from "@/lib/routes";
 import { languages, type Lang } from "@/sanity/site.config";
 import { urlFor } from "@/sanity/image";
@@ -46,7 +46,7 @@ export function Nav({ lang, layout, children }: Props) {
   const solid = !!route && SOLID.includes(route);
   const next = layout?.nextRetreat;
   const nextHref = next?.slug ? retreatHref(lang, next.slug) : href(lang, "retreats");
-  const nextMeta = next ? [dateRange(lang, next.startDate, next.endDate), next.country, next.capacity ? `${getDictionary(lang).card.max} ${next.capacity}` : null].filter(Boolean).join(" · ") : "";
+  const nextMeta = next ? [dateRange(lang, next.startDate, next.endDate), next.country, placesLabel(lang, next)].filter(Boolean).join(" · ") : "";
 
   const [panel, setPanel] = useState<PanelKey | null>(null);
   const [mobile, setMobile] = useState(false);
