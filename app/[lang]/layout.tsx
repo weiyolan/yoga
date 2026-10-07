@@ -2,8 +2,8 @@ import type { Metadata, Viewport } from "next";
 import { Hanken_Grotesk, Instrument_Serif } from "next/font/google";
 import { draftMode } from "next/headers";
 import { notFound } from "next/navigation";
-import { VisualEditing } from "next-sanity/visual-editing";
 import { Cursor } from "@/components/Cursor";
+import { DraftMode } from "@/components/DraftMode";
 import { Footer } from "@/components/Footer";
 import { Nav } from "@/components/Nav";
 import { htmlLang } from "@/lib/format";
@@ -38,7 +38,7 @@ export default async function RootLayout({ children, params }: LayoutProps<"/[la
         <main>{children}</main>
         <Footer lang={lang} layout={layout} />
         <Cursor />
-        {draft ? <VisualEditing /> : null}
+        {draft ? <DraftMode lang={lang} /> : null}
       </body>
     </html>
   );

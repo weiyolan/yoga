@@ -379,3 +379,7 @@ a.slot { text-decoration: none; transition: background .2s var(--ease); } a.slot
 .prose { max-width: 760px; }
 .prose h2 { font-size: clamp(1.5rem, 2.4vw, 2rem); margin: 0 0 12px; }
 .prose .block { padding: 36px 0; }
+
+/* draft mode outside the Studio: a way out instead of edit overlays */
+.draft-bar { position: fixed; left: 50%; bottom: 18px; transform: translateX(-50%); z-index: 130; display: flex; gap: 14px; align-items: center; padding: 10px 18px; border-radius: 99px; background: var(--dark); color: var(--night-ink); font-size: .85rem; box-shadow: 0 6px 24px rgba(0,0,0,.25); }
+.draft-bar a { color: var(--ember); font-weight: 600; }
