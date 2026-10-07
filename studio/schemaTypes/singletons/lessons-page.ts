@@ -28,6 +28,7 @@ export const lessonsPage = defineType({
     i18nString("stylesTitle", { title: "Kop stijlen", group: "content" }),
     i18nString("studiosTitle", { title: "Kop studio's", group: "content" }),
     i18nString("scheduleTitle", { title: "Kop weekplanning", group: "schedule" }),
+    i18nText("scheduleEmpty", { title: "Tekst als er (nog) geen weekplanning is", group: "schedule", description: "Getoond met de links naar de studio's zolang de planning hieronder leeg is." }),
     defineField({
       name: "schedule",
       title: "Weekplanning",

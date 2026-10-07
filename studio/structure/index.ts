@@ -1,7 +1,10 @@
 import { ActivityIcon } from "@sanity/icons/Activity";
 import { CalendarIcon } from "@sanity/icons/Calendar";
 import { CogIcon } from "@sanity/icons/Cog";
-import { DocumentsIcon } from "@sanity/icons/Documents";
+import { DocumentIcon } from "@sanity/icons/Document";
+import { SparklesIcon } from "@sanity/icons/Sparkles";
+import { StarIcon } from "@sanity/icons/Star";
+import { ThListIcon } from "@sanity/icons/ThList";
 import { HomeIcon } from "@sanity/icons/Home";
 import { ImagesIcon } from "@sanity/icons/Images";
 import { BellIcon } from "@sanity/icons/Bell";
@@ -10,6 +13,9 @@ import { UsersIcon } from "@sanity/icons/Users";
 import { WarningOutlineIcon } from "@sanity/icons/WarningOutline";
 import type { ComponentType } from "react";
 import type { StructureBuilder, StructureResolver } from "sanity/structure";
+import { BulkAltText } from "../components/BulkAltText";
+import { countBadgeIcon } from "../components/CountBadgeIcon";
+import { SignupTable } from "../components/SignupTable";
 import { apiVersion, defaultLanguage } from "../../sanity/site.config";
 import { MEDIA_CATEGORIES } from "../schemaTypes/documents/media-item";
 
@@ -37,6 +43,13 @@ export const structure: StructureResolver = (S) =>
     .items([
       singleton(S, "settings", "Instellingen", CogIcon),
       singleton(S, "homePage", "Home", HomeIcon),
+      singleton(S, "retreatsPage", "Retreats (pagina)", DocumentIcon),
+      singleton(S, "lessonsPage", "Lessen (pagina)", DocumentIcon),
+      singleton(S, "coachingPage", "Private coaching", DocumentIcon),
+      singleton(S, "aboutPage", "Over ons", DocumentIcon),
+      singleton(S, "galleryPage", "Gallery", DocumentIcon),
+      singleton(S, "contactPage", "Contact", DocumentIcon),
+      singleton(S, "privacyPage", "Privacyverklaring", DocumentIcon),
       S.divider(),
 
       S.listItem()
@@ -53,6 +66,7 @@ export const structure: StructureResolver = (S) =>
                 .icon(ImagesIcon)
                 .child(S.documentTypeList("mediaItem").title("Alle foto's").defaultOrdering([{ field: "_createdAt", direction: "desc" }])),
               filtered(S, "media-todo", "Te doen: zonder alt-tekst", "mediaItem", `!defined(alt[language == "${defaultLanguage}"][0].value)`, [{ field: "_createdAt", direction: "desc" }]).icon(WarningOutlineIcon),
+              S.listItem().id("media-ai").title("✨ Alt-teksten aanvullen (AI)").icon(SparklesIcon).child(S.component(BulkAltText).id("media-ai").title("Alt-teksten aanvullen")),
               filtered(S, "media-gallery", "In de gallery", "mediaItem", "showInGallery != false", [{ field: "takenAt", direction: "desc" }]),
               S.divider(),
               ...MEDIA_CATEGORIES.map((c) =>
@@ -62,23 +76,6 @@ export const structure: StructureResolver = (S) =>
         ),
       S.divider(),
 
-      S.listItem()
-        .id("pages")
-        .title("Pagina's")
-        .icon(DocumentsIcon)
-        .child(
-          S.list()
-            .title("Pagina's")
-            .items([
-              singleton(S, "retreatsPage", "Retreats"),
-              singleton(S, "lessonsPage", "Lessen"),
-              singleton(S, "coachingPage", "Private coaching"),
-              singleton(S, "aboutPage", "Over ons"),
-              singleton(S, "galleryPage", "Gallery"),
-              singleton(S, "contactPage", "Contact"),
-              singleton(S, "privacyPage", "Privacyverklaring"),
-            ]),
-        ),
       S.divider(),
 
       S.listItem()
@@ -98,12 +95,13 @@ export const structure: StructureResolver = (S) =>
       S.listItem()
         .id("signups")
         .title("Inschrijvingen")
-        .icon(UsersIcon)
+        .icon(countBadgeIcon(UsersIcon, "signup"))
         .child(
           S.list()
             .title("Inschrijvingen")
             .items([
-              filtered(S, "signups-new", "Nieuw", "signup", `status == "new"`, [{ field: "submittedAt", direction: "desc" }]),
+              filtered(S, "signups-new", "Nieuw", "signup", `status == "new"`, [{ field: "submittedAt", direction: "desc" }]).icon(countBadgeIcon(UsersIcon, "signup")),
+              S.listItem().id("signups-table").title("Tabel").icon(ThListIcon).child(S.component(SignupTable).id("signups-table").title("Inschrijvingen: tabel")),
               S.listItem()
                 .id("signups-by-retreat")
                 .title("Per retreat")
@@ -129,7 +127,7 @@ export const structure: StructureResolver = (S) =>
       S.listItem()
         .id("messages")
         .title("Berichten")
-        .icon(EnvelopeIcon)
+        .icon(countBadgeIcon(EnvelopeIcon, "message"))
         .child(
           S.list()
             .title("Berichten")
@@ -150,6 +148,20 @@ export const structure: StructureResolver = (S) =>
             .items([
               S.documentTypeListItem("yogaClass").title("Stijlen"),
               S.documentTypeListItem("studio").title("Studio's"),
+            ]),
+        ),
+      S.listItem()
+        .id("reviews")
+        .title("Reviews")
+        .icon(countBadgeIcon(StarIcon, "reviewSubmission"))
+        .child(
+          S.list()
+            .title("Reviews")
+            .items([
+              filtered(S, "reviews-new", "Nieuw (te keuren)", "reviewSubmission", `status == "new"`, [{ field: "submittedAt", direction: "desc" }]),
+              S.documentTypeListItem("review").title("Gepubliceerd op de site"),
+              S.divider(),
+              S.documentTypeListItem("reviewSubmission").title("Alle inzendingen"),
             ]),
         ),
       S.documentTypeListItem("testimonial").title("Testimonials"),

@@ -1,6 +1,7 @@
 import { mediaItem } from "./documents/media-item";
 import { person } from "./documents/person";
 import { retreat } from "./documents/retreat";
+import { review, reviewSubmission } from "./documents/review";
 import { message } from "./documents/message";
 import { signup } from "./documents/signup";
 import { subscriber } from "./documents/subscriber";
@@ -34,7 +35,7 @@ export const SINGLETONS = [
 ].map((t) => t.name);
 
 /** Only the website creates these (private dotted ids): hidden from "New document". */
-export const FORM_TYPES = [signup.name, message.name, subscriber.name];
+export const FORM_TYPES = [signup.name, message.name, subscriber.name, reviewSubmission.name];
 
 export const schemaTypes = [
   // objects
@@ -48,6 +49,8 @@ export const schemaTypes = [
   yogaClass,
   studio,
   testimonial,
+  review,
+  reviewSubmission,
   signup,
   message,
   subscriber,

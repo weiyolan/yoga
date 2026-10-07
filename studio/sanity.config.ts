@@ -8,9 +8,11 @@ import { apiVersion, defaultLanguage, languages } from "../sanity/site.config";
 import { FORM_TYPES, schemaTypes, SINGLETONS } from "./schemaTypes";
 import { resolve } from "./presentation/resolve";
 import { structure } from "./structure";
+import { defaultDocumentNode } from "./structure/views";
+import { siteOrigin } from "./lib/site";
+import { altTextAction, translateAction } from "./actions/ai";
+import { newBadge } from "./actions/badges";
 
-/** The live website (hosted Studio → Live preview). */
-const SITE_URL = "https://yogazentonic.com";
 
 const singletons = new Set<string>(SINGLETONS);
 const formTypes = new Set<string>(FORM_TYPES);
@@ -23,13 +25,13 @@ export default defineConfig({
   dataset: process.env.SANITY_STUDIO_DATASET || "production",
 
   plugins: [
-    structureTool({ structure }),
+    structureTool({ structure, defaultDocumentNode }),
     // Live preview of the site with drafts + click-to-edit. Embedded Studio (/studio, or localhost):
     // its own origin; hosted Studio (*.sanity.studio): the live site (SANITY_STUDIO_PREVIEW_URL overrides).
     presentationTool({
       title: "Live preview",
       previewUrl: {
-        origin: typeof location !== "undefined" && !location.hostname.endsWith(".sanity.studio") ? location.origin : process.env.SANITY_STUDIO_PREVIEW_URL || SITE_URL,
+        origin: siteOrigin(),
         previewMode: { enable: "/api/draft-mode/enable" },
       },
       resolve,
@@ -54,7 +56,13 @@ export default defineConfig({
   document: {
     // singletons can't be duplicated or deleted
     // form submissions can't be duplicated (a copy would get a public id)
-    actions: (prev, { schemaType }) =>
-      singletons.has(schemaType) ? prev.filter(({ action }) => action && singletonActions.has(action)) : formTypes.has(schemaType) ? prev.filter(({ action }) => action !== "duplicate") : prev,
+    // + the AI helpers (✨, via the site's /api/ai): alt text on photos, NL → EN on everything with texts
+    actions: (prev, { schemaType }) => {
+      if (formTypes.has(schemaType) || schemaType === "review") return prev.filter(({ action }) => action !== "duplicate");
+      const base = singletons.has(schemaType) ? prev.filter(({ action }) => action && singletonActions.has(action)) : prev;
+      return [...base, ...(schemaType === "mediaItem" ? [altTextAction] : []), translateAction];
+    },
+    // "Nieuw" badge on submissions nobody has handled yet
+    badges: (prev, { schemaType }) => (formTypes.has(schemaType) ? [...prev, newBadge] : prev),
   },
 });

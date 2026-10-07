@@ -54,6 +54,14 @@ export const retreat = defineType({
     i18nString("country", { title: "Land", group: "basics", required: true }),
     defineField({ name: "venue", title: "Verblijf", type: "string", group: "basics", description: "bv. “Nour Boutique Hotel”." }),
     defineField({ name: "capacity", title: "Max. deelnemers", type: "number", group: "basics", validation: (rule) => rule.integer().min(1) }),
+    defineField({
+      name: "booked",
+      title: "Geboekt (automatisch)",
+      type: "number",
+      group: "basics",
+      readOnly: true,
+      description: "Aantal personen met een bevestigde inschrijving. Wordt automatisch bijgewerkt als je in Inschrijvingen een status wijzigt. De site toont “nog x plaatsen” / “volzet”.",
+    }),
     defineField({ name: "priceFrom", title: "Prijs vanaf (€)", type: "number", group: "basics", validation: (rule) => rule.min(0) }),
     defineField({
       name: "signupUrl",
