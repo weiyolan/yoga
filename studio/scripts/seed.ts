@@ -5,17 +5,26 @@
  *   npx sanity exec scripts/seed.ts -- --dry   # prints what it would write, no network
  *   ... --dry --out=../.fixture/dataset.json  # dataset for the frontend fixture mode
  *
- * Safe to re-run: documents are matched on slug / name / image asset and replaced,
- * singletons use their fixed id. Photos get a title, place and categories, but no
- * alt text on purpose: they show up under Fotobank → "Te doen: zonder alt-tekst".
+ *   npm run seed -- --replace             # overwrite existing documents with the seed (loses Studio edits)
+ *
+ * Safe to re-run: documents are matched on slug / name / image asset, singletons use their
+ * fixed id. By default only empty fields are filled in (setIfMissing), so edits made in the
+ * Studio are kept; --replace writes the seed over them. Photos get a title, place and
+ * categories, but no alt text on purpose: they show up under Fotobank → "Te doen: zonder
+ * alt-tekst" (or use ✨ Alt-teksten aanvullen there).
+ *
+ * The interface texts the site falls back on (lib/dictionary.ts) are seeded too, so every
+ * heading, menu description and form text is visible and editable in the Studio.
  */
 import { randomUUID } from "node:crypto";
 import { createReadStream, existsSync, writeFileSync } from "node:fs";
 import path from "node:path";
 import { getCliClient } from "sanity/cli";
+import { getDictionary, type Dictionary } from "../../lib/dictionary";
 import { apiVersion, defaultLanguage, type Lang } from "../../sanity/site.config";
 
 const DRY = process.argv.includes("--dry");
+const REPLACE = process.argv.includes("--replace");
 const ROOT = path.resolve(process.cwd(), "..");
 // SANITY_AUTH_TOKEN (write token) from studio/.env; without it, `--with-user-token` login is used
 if (existsSync(".env")) process.loadEnvFile(".env");
@@ -42,13 +51,19 @@ function blocks(nl: string, en?: string) {
   return Object.entries(en ? { nl, en } : { nl }).map(([language, v]) => ({ _key: key(), _type: "internationalizedArraySimpleBlockContentValue", language, value: pt(v) }));
 }
 
+/** A default from the site's dictionary, in both languages. */
+const dict = (pick: (d: Dictionary) => string) => ({ nl: pick(getDictionary("nl")), en: pick(getDictionary("en")) });
+
 const ref = (id: string) => ({ _type: "reference", _ref: id });
 const refs = (ids: (string | undefined)[]) => ids.filter(Boolean).map((id) => ({ _key: key(), ...ref(id!) }));
 
 type Doc = { _type: string; [k: string]: unknown };
 const written: Doc[] = [];
 
-/** Create, or replace the document matching `filter` (keeps its generated _id). */
+/** Drops undefined fields (setIfMissing would otherwise try to set them). */
+const defined = (doc: Doc) => Object.fromEntries(Object.entries(doc).filter(([, v]) => v !== undefined)) as Doc;
+
+/** Create the document matching `filter`, or fill its empty fields (--replace: overwrite it). Keeps its _id. */
 async function upsert(doc: Doc, filter: string, params: Record<string, unknown>): Promise<string> {
   if (!client) {
     const _id = `dry.${doc._type}.${written.length}`;
@@ -56,15 +71,22 @@ async function upsert(doc: Doc, filter: string, params: Record<string, unknown>)
     return _id;
   }
   const existing = await client.fetch<string | null>(`*[_type == $type && ${filter}][0]._id`, { type: doc._type, ...params });
-  const res = existing ? await client.createOrReplace({ ...doc, _id: existing }) : await client.create(doc);
-  console.log(`${existing ? "updated" : "created"} ${doc._type} ${res._id}`);
-  return res._id;
+  if (!existing) {
+    const res = await client.create(doc);
+    console.log(`created ${doc._type} ${res._id}`);
+    return res._id;
+  }
+  if (REPLACE) await client.createOrReplace({ ...doc, _id: existing });
+  else await client.patch(existing).setIfMissing(defined(doc)).commit();
+  console.log(`${REPLACE ? "replaced" : "filled in"} ${doc._type} ${existing}`);
+  return existing;
 }
 
 async function singleton(_id: string, doc: Doc) {
   if (!client) return void written.push({ _id, ...doc });
-  await client.createOrReplace({ _id, ...doc });
-  console.log(`saved ${_id}`);
+  if (REPLACE) await client.createOrReplace({ _id, ...doc });
+  else await client.transaction().createIfNotExists({ _id, _type: doc._type }).patch(_id, (p) => p.setIfMissing(defined(doc))).commit();
+  console.log(`${REPLACE ? "replaced" : "filled in"} ${_id}`);
 }
 
 /* ------------------------------------------------------------------ Fotobank */
@@ -234,8 +256,12 @@ async function seed() {
     nutshellText: txt(
       "Dagen vol yoga, stevige hikes door eindeloos groen, en avonden bij de sauna en whirlpool. Een lang weekend om je hoofd leeg te maken en op te laden in de natuur.",
     ),
+    capacity: 12,
+    placeTitle: str({ nl: "De Belgische Eifel", en: "The Belgian Eifel" }),
+    placePhotos: ms("hike", "yogaOutside"),
     hosts: refs([rita, philippe]),
     closingTitle: str({ nl: "Zin om mee te gaan?", en: "Want to join?" }),
+    closingPhoto: m("campfire"),
   });
 
   const ardennen = await retreat("ardennen-2026", {
@@ -250,6 +276,7 @@ async function seed() {
     nutshellText: txt("Een driedaagse in een imposante design-loft middenin de Ardense bossen. Yoga, sauna en jacuzzi, een goed glas wijn en vooral: niets moeten."),
     hosts: refs([rita, philippe]),
     participantCount: 12,
+    closingPhoto: m("retreat"),
     recapPhotos: ms("pool", "campfire", "yoga3", "learning", "retreat"),
   });
 
@@ -278,7 +305,23 @@ async function seed() {
     phone: "+32 477 74 42 40",
     instagram: "https://www.instagram.com/",
     facebook: "https://www.facebook.com/yogazentonic",
-    seo: seo("Yoga, Zen & Tonic", { nl: "Yoga-retreats, lessen en private coaching met Rita & Philippe.", en: "Yoga retreats, classes and private coaching with Rita & Philippe." }),
+    seo: { ...seo("Yoga, Zen & Tonic", { nl: "Yoga-retreats, lessen en private coaching met Rita & Philippe.", en: "Yoga retreats, classes and private coaching with Rita & Philippe." }), shareImage: m("handstand") },
+    // Menu
+    menuFounders: str(dict((d) => d.nav.founders)),
+    menuFoundersSub: str(dict((d) => d.nav.foundersSub)),
+    menuTeam: str(dict((d) => d.nav.team[1])),
+    menuDrive: str(dict((d) => d.nav.drive[1])),
+    menuGallery: str(dict((d) => d.nav.galleryItem[1])),
+    menuUpcoming: str(dict((d) => d.nav.upcoming[1])),
+    menuPast: str(dict((d) => d.nav.past[1])),
+    menuSearch: str(dict((d) => d.nav.search[1])),
+    // Formulieren
+    newsletterTitle: str(dict((d) => d.footer.keepPosted)),
+    newsletterThanks: str(dict((d) => d.footer.subscribed)),
+    contactThanks: str(dict((d) => d.contact.sent)),
+    signupConsent: txt(dict((d) => d.signup.consent)),
+    signupThanks: txt(dict((d) => d.signup.sent)),
+    signupMail: txt(dict((d) => d.signup.mailBody("{naam}", "{retreat}", "{datum}"))),
   });
   await singleton("homePage", {
     _type: "homePage",
@@ -292,12 +335,22 @@ async function seed() {
       en: "Rita loves yoga, Philippe loves nature and freediving. Together they create retreats that are powerful, authentic and fun.",
     }),
     aboutPhoto: m("founders"),
+    introLink: str(dict((d) => d.home.meet)),
+    retreatsTitle: str(dict((d) => d.home.retreatsTitle)),
+    lessonsTitle: str(dict((d) => d.home.lessonsTitle)),
+    testimonialsTitle: str(dict((d) => d.home.testimonials)),
   });
   await singleton("retreatsPage", {
     _type: "retreatsPage",
     hero: hero("desert", "Retreats"),
     upcomingTitle: str({ nl: "Binnenkort", en: "Coming up" }),
     pastTitle: str({ nl: "Waar we al waren", en: "Where we've been" }),
+    noneUpcoming: txt(dict((d) => d.retreats.noneUpcoming)),
+    peopleTitle: str(dict((d) => d.retreat.peopleTitle)),
+    programmeTitle: str(dict((d) => d.retreat.programmeTitle)),
+    practicalTitle: str(dict((d) => d.retreat.practicalTitle)),
+    recapTitle: str(dict((d) => d.retreat.recapPhotos)),
+    pastCtaTitle: str(dict((d) => d.retreat.nextTitle)),
   });
   await singleton("lessonsPage", {
     _type: "lessonsPage",
@@ -305,6 +358,7 @@ async function seed() {
     stylesTitle: str({ nl: "Vier stijlen", en: "Four styles" }),
     studiosTitle: str({ nl: "Drie studio's", en: "Three studios" }),
     scheduleTitle: str({ nl: "Wanneer geeft Rita les?", en: "When does Rita teach?" }),
+    scheduleEmpty: txt(dict((d) => d.lessons.scheduleEmpty)),
     schedule: (
       [
         ["mon", "07:00", styles.ashtanga, studios.antwerp],
@@ -325,12 +379,14 @@ async function seed() {
     ].map(([label, title, text]) => ({ _key: key(), _type: "coachingBlock", label: str(label), title: str(title), text: txt(text) })),
     photos: ms("yoga2", "yogaOutside"),
     ctaTitle: str({ nl: "Ben je benieuwd? Of heb je vragen?", en: "Curious? Or have questions?" }),
+    ctaButton: str(dict((d) => d.coaching.cta)),
   });
   await singleton("aboutPage", {
     _type: "aboutPage",
     hero: hero("founders2", { nl: "Over ons", en: "About us" }, "Yoga, Zen & Tonic: beyond the mat, into the moment."),
     founders: refs([rita, philippe]),
     principlesTitle: str({ nl: "Drie principes", en: "Three principles" }),
+    principlesLabel: str(dict((d) => d.about.principlesLabel)),
     principles: [
       [{ nl: "Geen druk", en: "No pressure" }, "[1–2 zinnen]"],
       [{ nl: "Echte mensen", en: "Real people" }, "[1–2 zinnen]"],
