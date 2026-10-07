@@ -35,7 +35,7 @@ The Studio lives in `studio/`, an npm workspace: the root `npm install` installs
   - Filter: none
   - Projection: `{_type}`
   - Secret: the same value as `SANITY_REVALIDATE_SECRET`
-- **Live preview.** Studio → "Live preview" (Presentation tool) loads the site in draft mode via `/api/draft-mode/enable`: draft content, fetched with `SANITY_API_READ_TOKEN`, never cached, with click-to-edit overlays (`<VisualEditing />`). URL ↔ document mapping: `studio/presentation/resolve.ts`. Strings that the code compares or uses as URLs are kept free of edit markers (`PLAIN` in `sanity/client.ts`). The hosted Studio needs `SANITY_STUDIO_PREVIEW_URL`; `/studio` uses its own origin.
+- **Live preview.** Studio → "Live preview" (Presentation tool) loads the site in draft mode via `/api/draft-mode/enable`: draft content, fetched with `SANITY_API_READ_TOKEN`, never cached, with click-to-edit overlays (`<VisualEditing />`). URL ↔ document mapping: `studio/presentation/resolve.ts`. Strings that the code compares or uses as URLs are kept free of edit markers (`PLAIN` in `sanity/client.ts`). The hosted Studio previews `https://yogazentonic.com` (`SITE_URL` in `studio/sanity.config.ts`, override with `SANITY_STUDIO_PREVIEW_URL`); `/studio` uses its own origin.
 - **Editable interface texts.** Section headings, menu descriptions and form texts live in the page singletons and in Instellingen → Menu / Formulieren. Empty = the default in `lib/dictionary.ts`, so nothing breaks when a field is left blank. The sign-up confirmation mail fills in `{naam}`, `{retreat}` and `{datum}`.
 - **Images come from the Sanity CDN.** `components/Photo.tsx` writes a `srcset` and respects the hotspot from the Fotobank. The Next image optimizer isn't used.
 - **The only dynamic parts are the forms.** Contact and the footer "keep me posted" form are server actions in `app/actions/forms.ts` and send mail through Resend. Without `RESEND_API_KEY` they log to the console instead. Every form also stores its submission in Sanity: contact → `message` (Studio → Berichten), newsletter and the contact form's "keep me posted" → `subscriber` (Studio → Nieuwsbrief, one document per address), and the retreat sign-up form (`signup`) stores each sign-up as a `signup` document (Studio → Inschrijvingen) with a dotted `_id` (`signup.<uuid>`), so it is never readable through the public API. It needs `SANITY_WRITE_TOKEN`; without it, sign-ups are only logged. A retreat (or Instellingen) with an external sign-up link shows that link instead of the form.
@@ -74,7 +74,7 @@ studio/                  Sanity Studio (schemas, desk structure, seed)
 | Variable | |
 |---|---|
 | `NEXT_PUBLIC_SANITY_PROJECT_ID`, `NEXT_PUBLIC_SANITY_DATASET` | default `1pbhk0to` / `production` |
-| `NEXT_PUBLIC_SITE_URL` | canonical URLs, sitemap, OG (e.g. `https://yogazentonic.be`) |
+| `NEXT_PUBLIC_SITE_URL` | canonical URLs, sitemap, OG (e.g. `https://yogazentonic.com`) |
 | `SANITY_REVALIDATE_SECRET` | webhook secret |
 | `RESEND_API_KEY`, `CONTACT_FROM` | form mail (`CONTACT_FROM` must be a domain verified in Resend) |
 | `SANITY_WRITE_TOKEN` | Editor token: stores retreat sign-ups in Sanity (server-only) |

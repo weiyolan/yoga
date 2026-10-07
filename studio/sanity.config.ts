@@ -9,6 +9,9 @@ import { FORM_TYPES, schemaTypes, SINGLETONS } from "./schemaTypes";
 import { resolve } from "./presentation/resolve";
 import { structure } from "./structure";
 
+/** The live website (hosted Studio → Live preview). */
+const SITE_URL = "https://yogazentonic.com";
+
 const singletons = new Set<string>(SINGLETONS);
 const formTypes = new Set<string>(FORM_TYPES);
 const singletonActions = new Set(["publish", "discardChanges", "restore"]);
@@ -21,12 +24,12 @@ export default defineConfig({
 
   plugins: [
     structureTool({ structure }),
-    // Live preview of the site with drafts + click-to-edit. Embedded Studio (/studio): same origin;
-    // hosted Studio: set SANITY_STUDIO_PREVIEW_URL to the site's URL.
+    // Live preview of the site with drafts + click-to-edit. Embedded Studio (/studio, or localhost):
+    // its own origin; hosted Studio (*.sanity.studio): the live site (SANITY_STUDIO_PREVIEW_URL overrides).
     presentationTool({
       title: "Live preview",
       previewUrl: {
-        origin: process.env.SANITY_STUDIO_PREVIEW_URL || (typeof location === "undefined" ? undefined : location.origin),
+        origin: typeof location !== "undefined" && !location.hostname.endsWith(".sanity.studio") ? location.origin : process.env.SANITY_STUDIO_PREVIEW_URL || SITE_URL,
         previewMode: { enable: "/api/draft-mode/enable" },
       },
       resolve,
