@@ -9,7 +9,8 @@
  * `$lang` is injected for every query and typed to the languages in site.config.
  */
 import type { QueryParams } from "@sanity/client";
-import { client } from "./client";
+import { draftMode } from "next/headers";
+import { client, previewClient } from "./client";
 import { defaultLanguage, type Lang } from "./site.config";
 import "./types";
 
@@ -50,7 +51,18 @@ export async function sanityFetch<const Q extends Query>({ query, params, lang =
     const { fixtureFetch } = await import("./fixture");
     return fixtureFetch(query, all) as Promise<QueryResult<Q>>;
   }
+  // Studio → Presentation: drafts with click-to-edit markers, never cached.
+  if (previewClient && (await isDraftMode())) return previewClient.fetch<QueryResult<Q>>(query, all, { cache: "no-store" });
   return client.fetch<QueryResult<Q>>(query, all, { next: { revalidate, tags: [SANITY_TAG, ...tags] } });
+}
+
+/** False outside a request (build, generateStaticParams): draftMode() is only readable per request. */
+async function isDraftMode() {
+  try {
+    return (await draftMode()).isEnabled;
+  } catch {
+    return false;
+  }
 }
 
 /** A retreat is upcoming until its last day is over (same rule as the queries). */

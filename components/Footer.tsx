@@ -20,8 +20,8 @@ export function Footer({ lang, layout }: { lang: Lang; layout: LAYOUT_QUERY_RESU
                 {layout.tagline}
               </p>
             ) : null}
-            <h4 style={{ marginTop: 28 }}>{t.keepPosted}</h4>
-            <NewsletterForm lang={lang} />
+            <h4 style={{ marginTop: 28 }}>{layout?.texts?.newsletterTitle || t.keepPosted}</h4>
+            <NewsletterForm lang={lang} thanks={layout?.texts?.newsletterThanks} />
           </div>
           <div>
             <h4>{t.offer}</h4>
@@ -37,15 +37,15 @@ export function Footer({ lang, layout }: { lang: Lang; layout: LAYOUT_QUERY_RESU
           </div>
           <div>
             <h4>{t.follow}</h4>
-            {layout?.instagram ? <a href={layout.instagram}>Instagram</a> : null}
-            {layout?.facebook ? <a href={layout.facebook}>Facebook</a> : null}
+            {layout?.instagram ? <a href={layout.instagram} target="_blank" rel="noopener">Instagram</a> : null}
+            {layout?.facebook ? <a href={layout.facebook} target="_blank" rel="noopener">Facebook</a> : null}
             {layout?.phone ? <a href={`tel:${layout.phone.replace(/[^+\d]/g, "")}`}>{layout.phone}</a> : null}
             {layout?.email ? <a href={`mailto:${layout.email}`}>{layout.email}</a> : null}
           </div>
         </div>
         <div className="legal">
           <span>© {name}</span>
-          <span>{t.legal}</span>
+          <Link href={href(lang, "privacy")}>{d.privacy.link}</Link>
         </div>
       </div>
     </footer>

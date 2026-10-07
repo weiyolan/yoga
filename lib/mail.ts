@@ -11,7 +11,7 @@ export async function sendMail({ to, subject, text, replyTo }: { to: string; sub
     console.info(`[mail:dev] to=${to} subject=${subject}\n${text}`);
     return;
   }
-  const from = process.env.CONTACT_FROM || "Yoga, Zen & Tonic <website@yogazentonic.be>";
+  const from = process.env.CONTACT_FROM || "Yoga, Zen & Tonic <website@yogazentonic.com>";
   const { error } = await new Resend(key).emails.send({ from, to, subject, text, replyTo });
   if (error) throw new Error(error.message);
 }

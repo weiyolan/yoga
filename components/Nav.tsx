@@ -9,7 +9,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useCallback, useEffect, useRef, useState, type CSSProperties, type ReactNode } from "react";
 import { getDictionary } from "@/lib/dictionary";
-import { dateRange } from "@/lib/format";
+import { dateRange, placesLabel } from "@/lib/format";
 import { href, parsePath, retreatHref, translatePath, type Route } from "@/lib/routes";
 import { languages, type Lang } from "@/sanity/site.config";
 import { urlFor } from "@/sanity/image";
@@ -21,7 +21,11 @@ type PanelKey = "retreats" | "lessons" | "about";
 type Props = { lang: Lang; layout: Layout | null; children?: ReactNode };
 
 /** Pages without a hero get the solid header straight away. */
-const SOLID: Route[] = ["gallery", "contact"];
+const SOLID: Route[] = ["gallery", "contact", "privacy"];
+
+/** "Yoga, Zen & Tonic" → the ampersand in italic ember. */
+const logo = (name: string) =>
+  name.split(/(&)/).map((part, i) => (part === "&" ? <em key={i}>&amp;</em> : part));
 
 function MCard({ to, icon, title, desc }: { to: string; icon: IconName; title: string; desc?: string | null }) {
   return (
@@ -42,7 +46,7 @@ export function Nav({ lang, layout, children }: Props) {
   const solid = !!route && SOLID.includes(route);
   const next = layout?.nextRetreat;
   const nextHref = next?.slug ? retreatHref(lang, next.slug) : href(lang, "retreats");
-  const nextMeta = next ? [dateRange(lang, next.startDate, next.endDate), next.country, next.capacity ? `${getDictionary(lang).card.max} ${next.capacity}` : null].filter(Boolean).join(" · ") : "";
+  const nextMeta = next ? [dateRange(lang, next.startDate, next.endDate), next.country, placesLabel(lang, next)].filter(Boolean).join(" · ") : "";
 
   const [panel, setPanel] = useState<PanelKey | null>(null);
   const [mobile, setMobile] = useState(false);
@@ -120,6 +124,7 @@ export function Nav({ lang, layout, children }: Props) {
     timer.current = setTimeout(() => setPanel(key), delay);
   };
 
+  const x = layout?.texts;
   const panels: Record<PanelKey, ReactNode> = {
     retreats: (
       <div className="panel-grid two">
@@ -132,9 +137,9 @@ export function Nav({ lang, layout, children }: Props) {
           </span>
         </Link>
         <div className="stack">
-          <MCard to={href(lang, "retreats", { hash: "komend" })} icon="cal" title={t.upcoming[0]} desc={t.upcoming[1]} />
-          <MCard to={href(lang, "retreats", { hash: "voorbij" })} icon="past" title={t.past[0]} desc={t.past[1]} />
-          <MCard to={href(lang, "retreats", { hash: "zoek" })} icon="search" title={t.search[0]} desc={t.search[1]} />
+          <MCard to={href(lang, "retreats", { hash: "komend" })} icon="cal" title={t.upcoming[0]} desc={x?.menuUpcoming || t.upcoming[1]} />
+          <MCard to={href(lang, "retreats", { hash: "voorbij" })} icon="past" title={t.past[0]} desc={x?.menuPast || t.past[1]} />
+          <MCard to={href(lang, "retreats", { hash: "zoek" })} icon="search" title={t.search[0]} desc={x?.menuSearch || t.search[1]} />
         </div>
       </div>
     ),
@@ -162,14 +167,14 @@ export function Nav({ lang, layout, children }: Props) {
           <FeaturePhoto media={layout?.foundersPhoto} />
           <span className="feature-txt">
             <span className="tag">{t.whoWeAre}</span>
-            <b>{t.founders}</b>
-            <small>{t.foundersSub}</small>
+            <b>{x?.menuFounders || t.founders}</b>
+            <small>{x?.menuFoundersSub || t.foundersSub}</small>
           </span>
         </Link>
         <div className="stack">
-          <MCard to={href(lang, "about", { hash: "team" })} icon="people" title={t.team[0]} desc={t.team[1]} />
-          <MCard to={href(lang, "about", { hash: "principes" })} icon="leaf" title={t.drive[0]} desc={t.drive[1]} />
-          <MCard to={href(lang, "gallery")} icon="photo" title={t.galleryItem[0]} desc={t.galleryItem[1]} />
+          <MCard to={href(lang, "about", { hash: "team" })} icon="people" title={t.team[0]} desc={x?.menuTeam || t.team[1]} />
+          <MCard to={href(lang, "about", { hash: "principes" })} icon="leaf" title={t.drive[0]} desc={x?.menuDrive || t.drive[1]} />
+          <MCard to={href(lang, "gallery")} icon="photo" title={t.galleryItem[0]} desc={x?.menuGallery || t.galleryItem[1]} />
         </div>
       </div>
     ),
@@ -218,7 +223,7 @@ export function Nav({ lang, layout, children }: Props) {
     <>
       <header className={navClass}>
         <Link className="logo" href={href(lang, "home")}>
-          {layout?.siteName ?? getDictionary(lang).siteName}
+          {logo(layout?.siteName ?? getDictionary(lang).siteName)}
         </Link>
         <nav className="menu" aria-label={t.main}>
           <ul>
@@ -319,7 +324,7 @@ export function Nav({ lang, layout, children }: Props) {
             ))}
           </span>
           {layout?.phone ? <a href={`tel:${layout.phone.replace(/[^+\d]/g, "")}`}>{layout.phone}</a> : null}
-          {layout?.instagram ? <a href={layout.instagram}>Instagram</a> : null}
+          {layout?.instagram ? <a href={layout.instagram} target="_blank" rel="noopener">Instagram</a> : null}
         </div>
       </div>
       {solid ? <div className="nav-spacer" aria-hidden="true" /> : null}

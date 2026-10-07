@@ -7,6 +7,7 @@ import { mediaArrayField, mediaField } from "../shared/media";
  * A retreat. Sections follow the detail page (and the Dahab Facebook event):
  * notendop · de plek · de mensen · het programma · praktisch · klaar om te duiken?
  * Upcoming vs. past is derived from `endDate`, never stored.
+ * Past retreats show hero, notendop, facts and recap photos only (see the group description).
  */
 export const retreat = defineType({
   name: "retreat",
@@ -21,6 +22,7 @@ export const retreat = defineType({
     { name: "programme", title: "Programma" },
     { name: "practical", title: "Praktisch" },
     { name: "closing", title: "Afsluiter" },
+    { name: "recap", title: "Achteraf" },
     { name: "seo", title: "SEO" },
   ],
   fieldsets: [{ name: "dates", title: "Wanneer", options: { columns: 2 } }],
@@ -52,13 +54,21 @@ export const retreat = defineType({
     i18nString("country", { title: "Land", group: "basics", required: true }),
     defineField({ name: "venue", title: "Verblijf", type: "string", group: "basics", description: "bv. “Nour Boutique Hotel”." }),
     defineField({ name: "capacity", title: "Max. deelnemers", type: "number", group: "basics", validation: (rule) => rule.integer().min(1) }),
+    defineField({
+      name: "booked",
+      title: "Geboekt (automatisch)",
+      type: "number",
+      group: "basics",
+      readOnly: true,
+      description: "Aantal personen met een bevestigde inschrijving. Wordt automatisch bijgewerkt als je in Inschrijvingen een status wijzigt. De site toont “nog x plaatsen” / “volzet”.",
+    }),
     defineField({ name: "priceFrom", title: "Prijs vanaf (€)", type: "number", group: "basics", validation: (rule) => rule.min(0) }),
     defineField({
       name: "signupUrl",
       title: "Inschrijflink",
       type: "url",
       group: "basics",
-      description: "Leeg = standaard inschrijflink uit Instellingen.",
+      description: "Optioneel: externe inschrijflink. Leeg = standaard inschrijflink uit Instellingen, en anders het formulier op de site.",
       validation: (rule) => rule.uri({ scheme: ["https"] }),
     }),
     mediaField("cardPhoto", { title: "Foto op de kaart", group: "basics", required: true }),
@@ -73,7 +83,7 @@ export const retreat = defineType({
     /* ---- de plek ---- */
     i18nString("placeTitle", { title: "Kop", group: "place" }),
     i18nText("placeText", { title: "Tekst", group: "place", max: 500 }),
-    mediaArrayField("placePhotos", { title: "Foto's", group: "place", max: 4 }),
+    mediaArrayField("placePhotos", { title: "Foto's", group: "place", max: 2 }),
 
     /* ---- de mensen ---- */
     defineField({
@@ -136,9 +146,14 @@ export const retreat = defineType({
       name: "participantCount",
       title: "Aantal deelnemers (na afloop)",
       type: "number",
-      group: "basics",
-      description: "Getoond op de kaart bij voorbije retreats.",
+      group: ["basics", "recap"],
+      description: "Getoond op de kaart en de pagina van voorbije retreats.",
       hidden: ({ document }) => !document?.endDate || String(document.endDate) >= new Date().toISOString().slice(0, 10),
+    }),
+    mediaArrayField("recapPhotos", {
+      title: "Foto's achteraf",
+      group: "recap",
+      description: "Na de retreat: zoveel foto's als je wil (leeg = sfeer- en plekfoto's). Na de einddatum toont de pagina enkel openingsbeeld, notendop, de feiten (plaats, begeleiding, prijs, deelnemers) en deze foto's; Programma, Praktisch en Afsluiter verschijnen alleen bij komende retreats.",
     }),
     defineField({ name: "seo", title: "SEO & delen", type: "seo", group: "seo" }),
   ],

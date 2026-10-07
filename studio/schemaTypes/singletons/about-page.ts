@@ -16,6 +16,7 @@ export const aboutPage = defineType({
       of: [defineArrayMember({ type: "reference", to: [{ type: "person" }] })],
       validation: (rule) => [rule.required(), rule.unique()],
     }),
+    i18nString("principlesLabel", { title: "Principes: label", description: "Leeg = “Wat ons drijft”." }),
     i18nString("principlesTitle", { title: "Principes: kop" }),
     defineField({
       name: "principles",

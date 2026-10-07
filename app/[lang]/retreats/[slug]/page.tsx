@@ -1,16 +1,17 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
+import { ReviewForm, SignupForm } from "@/components/Forms";
 import { Lightbox, LightboxTrigger, type LightboxItem } from "@/components/Lightbox";
 import { fullSrc, Photo } from "@/components/Photo";
 import { Paragraphs } from "@/components/RichText";
-import { Hero } from "@/components/sections";
+import { Hero, ReviewList } from "@/components/sections";
 import { getDictionary } from "@/lib/dictionary";
-import { dateRange, euro, join } from "@/lib/format";
+import { dateRange, euro, join, photoCaption, placesLabel, spotsLeft } from "@/lib/format";
 import { buildMetadata } from "@/lib/metadata";
 import { href, langParam } from "@/lib/routes";
 import { isUpcoming, sanityFetch } from "@/sanity/fetch";
 import type { Media } from "@/sanity/image";
-import { RETREAT_BY_SLUG_QUERY, RETREAT_SLUGS_QUERY } from "@/sanity/queries";
+import { LAYOUT_QUERY, RETREAT_BY_SLUG_QUERY, RETREAT_SLUGS_QUERY } from "@/sanity/queries";
 
 /** Known retreats are prerendered; a new one renders on its first visit and is cached from then on. */
 export async function generateStaticParams() {
@@ -32,6 +33,11 @@ export async function generateMetadata({ params }: PageProps<"/[lang]/retreats/[
 }
 
 const clean = (xs: string[] | null | undefined) => (xs ?? []).map((x) => x.trim()).filter(Boolean);
+/** "Rita, Philippe & Michèle" */
+const names = (xs: (string | null)[] | null | undefined) => {
+  const n = (xs ?? []).filter(Boolean);
+  return n.length > 1 ? `${n.slice(0, -1).join(", ")} & ${n.at(-1)}` : n[0];
+};
 
 export default async function RetreatPage({ params }: PageProps<"/[lang]/retreats/[slug]">) {
   const { lang, retreat: r } = await load(params);
@@ -39,19 +45,118 @@ export default async function RetreatPage({ params }: PageProps<"/[lang]/retreat
   const d = getDictionary(lang);
   const t = d.retreat;
   const upcoming = isUpcoming(r.endDate);
-  const when = dateRange(lang, r.startDate, r.endDate, !upcoming);
+  const when = dateRange(lang, r.startDate, r.endDate);
   const where = join(r.place, r.country);
-  const group = r.capacity ? `${d.card.max} ${r.capacity}` : null;
+  const group = placesLabel(lang, r);
   const highlights = clean(r.highlights);
   const included = clean(r.included);
   const notIncluded = clean(r.notIncluded);
-  const signup = upcoming ? r.signupUrl : null;
+  const signup = r.signupUrl;
+  const texts = signup ? null : (await sanityFetch({ query: LAYOUT_QUERY, lang }))?.texts;
+
+  if (!upcoming) {
+    // Past retreat: a look back — photos, the nutshell and the facts; no booking box.
+    const recap = (r.recapPhotos?.length ? r.recapPhotos : [...(r.moodPhotos ?? []), ...(r.placePhotos ?? [])]) as Media[];
+    const lb: LightboxItem[] = recap.map((m) => ({ src: fullSrc(m) ?? "", alt: m.alt, caption: photoCaption(lang, m) }));
+    const price = r.priceFrom ?? Math.min(...(r.prices ?? []).map((p) => p.amount ?? Infinity));
+    const facts = [
+      [t.where, join(where, r.venue)],
+      [t.hosts, names(r.hosts?.map((p) => p.name))],
+      [t.price, Number.isFinite(price) ? `${t.from} ${euro(lang, price)}` : null],
+      [t.participants, r.participantCount ?? (r.capacity ? `${d.card.max} ${r.capacity}` : null)],
+    ].filter(([, v]) => v);
+    return (
+      <Lightbox lang={lang} items={lb}>
+        <Hero
+          hero={r.hero}
+          title={r.hero?.title || r.title}
+          meta={
+            <>
+              {when ? <span>{when}</span> : null}
+              {where ? <span>{where}</span> : null}
+            </>
+          }
+        />
+
+        <section className="s" style={{ borderTop: 0, paddingTop: 24 }}>
+          <div className="wrap recap">
+            <div>
+              <span className="label">{t.nutshell}</span>
+              {r.nutshellTitle ? <h2>{r.nutshellTitle}</h2> : null}
+              <Paragraphs text={r.nutshellText} />
+              {highlights.length ? (
+                <ul className="ticks">
+                  {highlights.map((h) => (
+                    <li key={h}>{h}</li>
+                  ))}
+                </ul>
+              ) : null}
+            </div>
+            {facts.length ? (
+              <dl className="facts">
+                {facts.map(([k, v]) => (
+                  <div key={String(k)}>
+                    <dt>{k}</dt>
+                    <dd>{v}</dd>
+                  </div>
+                ))}
+              </dl>
+            ) : null}
+          </div>
+        </section>
+
+        {recap.length ? (
+          <section className="s alt">
+            <div className="wrap">
+              <span className="label">{t.recap}</span>
+              <h2>{r.labels?.recapTitle || t.recapPhotos}</h2>
+              <div className="mosaic" style={{ marginTop: 28 }}>
+                {recap.map((m, i) => (
+                  <figure key={`${m._id}-${i}`} className={["w2 h2", "", "", "w2", "", "h2", "", ""][i % 8] || undefined}>
+                    <LightboxTrigger index={i} label={`${t.photos}: ${m.alt || m.title || i + 1}`}>
+                      <Photo media={m} sizes="(max-width: 700px) 50vw, 25vw" style={{ height: "100%" }} />
+                    </LightboxTrigger>
+                  </figure>
+                ))}
+              </div>
+            </div>
+          </section>
+        ) : null}
+
+        <section className="s" id="review">
+          <div className="wrap">
+            <span className="label">{d.review.label}</span>
+            <h2>{d.review.title}</h2>
+            <ReviewList lang={lang} reviews={r.reviews ?? []} />
+            <div style={{ maxWidth: 720, marginTop: r.reviews?.length ? 56 : 0 }}>
+              <h3 className="summary-title">{d.review.formTitle}</h3>
+              <ReviewForm lang={lang} retreatId={r._id} />
+            </div>
+          </div>
+        </section>
+
+        <section className="s center">
+          <div className="wrap">
+            <h2 style={{ margin: "0 auto 22px", maxWidth: "20ch" }}>{r.labels?.pastCtaTitle || t.nextTitle}</h2>
+            <div className="row" style={{ justifyContent: "center" }}>
+              <Link className="btn" href={href(lang, "retreats", { hash: "komend" })}>
+                {t.otherRetreats}
+              </Link>
+              <Link className="btn ghost" href={href(lang, "contact")}>
+                {t.ask}
+              </Link>
+            </div>
+          </div>
+        </section>
+      </Lightbox>
+    );
+  }
 
   // One lightbox for every photo on the page (mood grid + the place).
   const mood = (r.moodPhotos ?? []).slice(0, 4);
   const place = (r.placePhotos ?? []).slice(0, 2);
   const all = [...mood, ...place] as Media[];
-  const items: LightboxItem[] = all.map((m) => ({ src: fullSrc(m) ?? "", alt: m.alt, caption: m.title }));
+  const items: LightboxItem[] = all.map((m) => ({ src: fullSrc(m) ?? "", alt: m.alt, caption: photoCaption(lang, m) }));
   const thumb = (m: Media | undefined, i: number, sizes: string, ratio?: "r32", style?: React.CSSProperties) =>
     m ? (
       <LightboxTrigger index={i} label={`${t.photos}: ${m.alt || m.title || i + 1}`} style={style}>
@@ -73,22 +178,19 @@ export default async function RetreatPage({ params }: PageProps<"/[lang]/retreat
     <Lightbox lang={lang} items={items}>
       <Hero
         hero={r.hero}
-        title={r.title}
-        subtitle={null}
+        title={r.hero?.title || r.title}
         meta={
           <>
             {when ? <span>{when}</span> : null}
             {where ? <span>{where}</span> : null}
-            {r.capacity ? <span>{`${d.card.max} ${r.capacity} ${d.card.participants}`}</span> : null}
-            {r.priceFrom && upcoming ? <span>{`${d.card.from} ${euro(lang, r.priceFrom)}`}</span> : null}
+            {placesLabel(lang, r, true) ? <span>{placesLabel(lang, r, true)}</span> : null}
+            {r.priceFrom ? <span>{`${d.card.from} ${euro(lang, r.priceFrom)}`}</span> : null}
           </>
         }
         actions={
-          signup ? (
-            <a className="btn white" href="#inschrijven">
-              {t.signup}
-            </a>
-          ) : null
+          <a className="btn white" href="#inschrijven">
+            {t.signup}
+          </a>
         }
       />
 
@@ -149,7 +251,7 @@ export default async function RetreatPage({ params }: PageProps<"/[lang]/retreat
             {r.hosts?.length ? (
               <div className="block" id="mensen">
                 <span className="label">{t.people}</span>
-                <h2>{t.peopleTitle}</h2>
+                <h2>{r.labels?.peopleTitle || t.peopleTitle}</h2>
                 <div className="people">
                   {r.hosts.map((p) => (
                     <div key={p._id}>
@@ -165,7 +267,7 @@ export default async function RetreatPage({ params }: PageProps<"/[lang]/retreat
             {r.programme?.length ? (
               <div className="block" id="programma">
                 <span className="label">{t.programme}</span>
-                <h2>{t.programmeTitle}</h2>
+                <h2>{r.labels?.programmeTitle || t.programmeTitle}</h2>
                 <ul className="ticks">
                   {r.programme.map((p) => (
                     <li key={p._key}>
@@ -181,7 +283,7 @@ export default async function RetreatPage({ params }: PageProps<"/[lang]/retreat
             {toc[4][2] ? (
               <div className="block" id="praktisch">
                 <span className="label">{t.practical}</span>
-                <h2>{t.practicalTitle}</h2>
+                <h2>{r.labels?.practicalTitle || t.practicalTitle}</h2>
                 <div className="inc">
                   {r.prices?.length || group ? (
                     <div>
@@ -220,13 +322,12 @@ export default async function RetreatPage({ params }: PageProps<"/[lang]/retreat
           </div>
 
           <aside>
-            {r.priceFrom && upcoming ? (
+            {r.priceFrom ? (
               <>
                 <span className="label">{t.from}</span>
                 <div className="price">{euro(lang, r.priceFrom)}</div>
               </>
             ) : null}
-            {!upcoming ? <p className="muted">{t.past}</p> : null}
             <dl>
               {when ? (
                 <>
@@ -253,15 +354,9 @@ export default async function RetreatPage({ params }: PageProps<"/[lang]/retreat
                 </>
               ) : null}
             </dl>
-            {signup ? (
-              <a className="btn" href="#inschrijven" style={{ width: "100%", justifyContent: "center" }}>
-                {t.signup}
-              </a>
-            ) : (
-              <Link className="btn ghost" href={href(lang, "retreats", { hash: "komend" })} style={{ width: "100%", justifyContent: "center" }}>
-                {t.otherRetreats}
-              </Link>
-            )}
+            <a className="btn" href="#inschrijven" style={{ width: "100%", justifyContent: "center" }}>
+              {t.signup}
+            </a>
             <ul>
               {toc
                 .filter(([, , show]) => show)
@@ -275,23 +370,40 @@ export default async function RetreatPage({ params }: PageProps<"/[lang]/retreat
         </div>
       </section>
 
-      <section className="hero short" id="inschrijven" style={{ height: "70vh" }}>
-        <Photo media={r.closingPhoto} className="dark" sizes="100vw" />
-        <div className="txt center" style={{ left: 0, right: 0, bottom: "auto", top: "50%", transform: "translateY(-50%)" }}>
-          {r.closingTitle ? <h1 style={{ margin: "0 auto", maxWidth: "14ch" }}>{r.closingTitle}</h1> : null}
-          {r.closingText ? <p style={{ margin: "16px auto 24px" }}>{r.closingText}</p> : null}
-          <div className="row" style={{ justifyContent: "center" }}>
-            {signup ? (
+      {signup ? (
+        // An external sign-up link (Studio override): the closing photo with a button that opens it in a new tab.
+        <section className="hero short" id="inschrijven" style={{ height: "70vh" }}>
+          <Photo media={r.closingPhoto} className="dark" sizes="100vw" />
+          <div className="txt center" style={{ left: 0, right: 0, bottom: "auto", top: "50%", transform: "translateY(-50%)" }}>
+            {r.closingTitle ? <h1 style={{ margin: "0 auto", maxWidth: "14ch" }}>{r.closingTitle}</h1> : null}
+            {r.closingText ? <p style={{ margin: "16px auto 24px" }}>{r.closingText}</p> : null}
+            <div className="row" style={{ justifyContent: "center" }}>
               <a className="btn white" href={signup} target="_blank" rel="noopener">
                 {t.signup}
               </a>
-            ) : null}
-            <Link className="btn light" href={href(lang, "contact")}>
-              {t.ask}
-            </Link>
+              <Link className="btn light" href={href(lang, "contact")}>
+                {t.ask}
+              </Link>
+            </div>
           </div>
-        </div>
-      </section>
+        </section>
+      ) : (
+        <section className="split" id="inschrijven">
+          <Photo media={r.closingPhoto ?? r.hero?.photo} sizes="(max-width: 860px) 100vw, 50vw" />
+          <div className="pane">
+            <span className="label">{d.signup.label}</span>
+            <h2>{r.closingTitle || r.title}</h2>
+            {r.closingText ? <p className="muted">{r.closingText}</p> : null}
+            <SignupForm
+              lang={lang}
+              retreatId={r._id}
+              rooms={(r.prices ?? []).map((p) => [p.label, euro(lang, p.amount)].filter(Boolean).join(" · "))}
+              texts={{ thanks: texts?.signupThanks, consent: texts?.signupConsent }}
+              full={spotsLeft(r) === 0}
+            />
+          </div>
+        </section>
+      )}
     </Lightbox>
   );
 }

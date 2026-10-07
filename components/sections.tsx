@@ -2,7 +2,7 @@
 import Link from "next/link";
 import type { ReactNode } from "react";
 import { getDictionary } from "@/lib/dictionary";
-import { dateRange, euro } from "@/lib/format";
+import { dateRange, euro, placesLabel } from "@/lib/format";
 import { retreatHref } from "@/lib/routes";
 import { isUpcoming } from "@/sanity/fetch";
 import type { Lang } from "@/sanity/site.config";
@@ -71,7 +71,7 @@ export function RetreatCard({ lang, retreat, tag }: { lang: Lang; retreat: Retre
   const t = getDictionary(lang).card;
   const past = !isUpcoming(retreat.endDate);
   const extra = past ? (retreat.participantCount ? `${retreat.participantCount} ${t.participants}` : "") : retreat.priceFrom ? `${t.from} ${euro(lang, retreat.priceFrom)}` : "";
-  const when = [dateRange(lang, retreat.startDate, retreat.endDate, past), retreat.country, !past && retreat.capacity ? `${t.max} ${retreat.capacity}` : null].filter(Boolean).join(" · ");
+  const when = [dateRange(lang, retreat.startDate, retreat.endDate), retreat.country, !past ? placesLabel(lang, retreat) : null].filter(Boolean).join(" · ");
   return (
     <Link className="card" href={retreatHref(lang, retreat.slug)}>
       <Photo media={retreat.cardPhoto} ratio="r45" className={past ? "bw" : undefined} sizes="(max-width: 860px) 100vw, 33vw" />
@@ -122,5 +122,36 @@ export function ClassTiles({ lang, styles, to }: { lang: Lang; styles: StyleData
         </Link>
       ))}
     </div>
+  );
+}
+
+type ReviewData = { _id: string; name: string | null; rating: number | null; text: string | null };
+const stars = (n: number) => "★".repeat(n) + "☆".repeat(5 - n);
+
+/** Approved reviews of a retreat: average score + one card per review. */
+export function ReviewList({ lang, reviews }: { lang: Lang; reviews: ReviewData[] }) {
+  const t = getDictionary(lang).review;
+  if (!reviews.length) return null;
+  const avg = reviews.reduce((n, r) => n + (r.rating ?? 0), 0) / reviews.length;
+  return (
+    <>
+      <p className="muted">
+        <span className="rating" aria-hidden="true">
+          {stars(Math.round(avg))}
+        </span>{" "}
+        {t.average(avg.toLocaleString(lang === "en" ? "en-GB" : "nl-BE", { maximumFractionDigits: 1 }), reviews.length)}
+      </p>
+      <div className="reviews">
+        {reviews.map((r) => (
+          <figure key={r._id} className="review">
+            <span className="rating" role="img" aria-label={t.stars(r.rating ?? 0)}>
+              {stars(r.rating ?? 0)}
+            </span>
+            <blockquote>{r.text}</blockquote>
+            <figcaption>{r.name}</figcaption>
+          </figure>
+        ))}
+      </div>
+    </>
   );
 }

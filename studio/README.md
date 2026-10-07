@@ -19,11 +19,14 @@ sanity/                  shared with the Next.js app
 | Instellingen | `settings` (singleton) | name, slogan, e-mail, GSM, socials, default sign-up link, default SEO |
 | Home | `homePage` (singleton) | opening image, intro (≤ 400 chars), featured retreat (empty = next one), ≤ 3 testimonials, "who are we" |
 | **Fotobank** | `mediaItem` | **every photo is stored once**: hotspot, alt text, title, description, place, date, categories, retreat, "show in gallery", "highlighted". Pages only *reference* photos. |
-| Pagina's | `retreatsPage` · `lessonsPage` · `coachingPage` · `aboutPage` · `galleryPage` · `contactPage` (singletons) | opening image + page-specific fields + SEO. The weekly schedule lives on `lessonsPage`. |
+| Retreats (pagina) … Privacyverklaring | `retreatsPage` · `lessonsPage` · `coachingPage` · `aboutPage` · `galleryPage` · `contactPage` · `privacyPage` (singletons, directly in the main menu) | opening image + page-specific fields + SEO. The weekly schedule lives on `lessonsPage`. |
 | Retreats | `retreat` | groups follow the detail page: basics · in a nutshell · the place · the people · programme · practical · closing. Komend / Voorbij is **derived from `endDate`**, never stored. |
 | Team & begeleiders | `person` | Rita, Philippe, guest guides (portrait + optional "object" photo for the hover swap) |
 | Lessen | `yogaClass`, `studio` | styles (what / for whom / where), studios |
 | Testimonials | `testimonial` | quote ≤ 200 chars, optional link to a retreat |
+| Inschrijvingen | `signup` (from the site, private) | opens as a readable card with status buttons; "Bevestigd" updates `booked` on the retreat. Also: Nieuw (with count badge), Tabel (all fields, filter, CSV), Per retreat |
+| Berichten | `message` (from the site, private) | card view with status |
+| Reviews | `reviewSubmission` (private) → `review` (public) | "Gepubliceerd" copies a submission without e-mail to a public review |
 
 Design rules (from the agent-toolkit skills `sanity-best-practices` and `content-modeling-best-practices`):
 
@@ -71,14 +74,14 @@ retreat?.title;              // string | null, inferred, no generics
 ## Setup (once)
 
 ```bash
+npm install                    # from the repo root (workspace)
 cd studio
-npm install
 npx sanity login
 cp .env.example .env           # project 1pbhk0to · dataset production · SANITY_AUTH_TOKEN (write token, seed only)
 npx sanity cors add http://localhost:3000 --credentials
 npm run seed                   # wireframe content + photos from seed/images
 npm run dev                    # http://localhost:3333
-npm run deploy                 # yogazentonic.sanity.studio
+npm run deploy                 # yogazentonic.sanity.studio (optional: the site also serves it at /studio)
 ```
 
 The frontend needs `NEXT_PUBLIC_SANITY_PROJECT_ID` and `NEXT_PUBLIC_SANITY_DATASET`. `@sanity/client` v8 needs Node ≥ 22.12. Finally, invite Rita & Philippe as **Editor** under sanity.io/manage → Members.
@@ -90,7 +93,7 @@ The frontend needs `NEXT_PUBLIC_SANITY_PROJECT_ID` and `NEXT_PUBLIC_SANITY_DATAS
 | `npm run dev` / `build` / `deploy` | Studio |
 | `npm run typegen` | extract the schema and regenerate `../sanity/types.ts` (run after changing a schema or a query) |
 | `npm run validate` | schema validation |
-| `npm run seed` | idempotent seed. `npx sanity exec scripts/seed.ts -- --dry` prints it without writing |
+| `npm run seed` | idempotent seed: fills only empty fields, so Studio edits are kept (`-- --replace` overwrites). `npx sanity exec scripts/seed.ts -- --dry` prints it without writing |
 
 ## Seed content
 

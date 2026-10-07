@@ -1,7 +1,9 @@
 import type { Metadata, Viewport } from "next";
 import { Hanken_Grotesk, Instrument_Serif } from "next/font/google";
+import { draftMode } from "next/headers";
 import { notFound } from "next/navigation";
 import { Cursor } from "@/components/Cursor";
+import { DraftMode } from "@/components/DraftMode";
 import { Footer } from "@/components/Footer";
 import { Nav } from "@/components/Nav";
 import { htmlLang } from "@/lib/format";
@@ -14,8 +16,11 @@ import "../globals.css";
 const serif = Instrument_Serif({ subsets: ["latin"], weight: "400", style: ["normal", "italic"], variable: "--font-serif", display: "swap" });
 const sans = Hanken_Grotesk({ subsets: ["latin"], weight: ["400", "500", "600"], variable: "--font-sans", display: "swap" });
 
-/** One prerendered tree per language; anything else is a 404. */
-export const dynamicParams = false;
+/**
+ * One prerendered tree per language; anything else is a 404 (the isLang check below).
+ * No `dynamicParams = false`: on Netlify, on-demand regeneration after a publish then
+ * resolved every page to a cached 404 until the next deploy.
+ */
 export const generateStaticParams = () => languageIds.map((lang) => ({ lang }));
 
 export const metadata: Metadata = { metadataBase: new URL(siteUrl) };
@@ -25,6 +30,7 @@ export default async function RootLayout({ children, params }: LayoutProps<"/[la
   const { lang } = await params;
   if (!isLang(lang)) notFound();
   const layout = await sanityFetch({ query: LAYOUT_QUERY, lang });
+  const { isEnabled: draft } = await draftMode();
   return (
     <html lang={htmlLang(lang)} className={`${serif.variable} ${sans.variable}`}>
       <body>
@@ -32,6 +38,7 @@ export default async function RootLayout({ children, params }: LayoutProps<"/[la
         <main>{children}</main>
         <Footer lang={lang} layout={layout} />
         <Cursor />
+        {draft ? <DraftMode lang={lang} /> : null}
       </body>
     </html>
   );

@@ -5,17 +5,26 @@
  *   npx sanity exec scripts/seed.ts -- --dry   # prints what it would write, no network
  *   ... --dry --out=../.fixture/dataset.json  # dataset for the frontend fixture mode
  *
- * Safe to re-run: documents are matched on slug / name / image asset and replaced,
- * singletons use their fixed id. Photos get a title, place and categories, but no
- * alt text on purpose: they show up under Fotobank → "Te doen: zonder alt-tekst".
+ *   npm run seed -- --replace             # overwrite existing documents with the seed (loses Studio edits)
+ *
+ * Safe to re-run: documents are matched on slug / name / image asset, singletons use their
+ * fixed id. By default only empty fields are filled in (setIfMissing), so edits made in the
+ * Studio are kept; --replace writes the seed over them. Photos get a title, place and
+ * categories, but no alt text on purpose: they show up under Fotobank → "Te doen: zonder
+ * alt-tekst" (or use ✨ Alt-teksten aanvullen there).
+ *
+ * The interface texts the site falls back on (lib/dictionary.ts) are seeded too, so every
+ * heading, menu description and form text is visible and editable in the Studio.
  */
 import { randomUUID } from "node:crypto";
 import { createReadStream, existsSync, writeFileSync } from "node:fs";
 import path from "node:path";
 import { getCliClient } from "sanity/cli";
+import { getDictionary, type Dictionary } from "../../lib/dictionary";
 import { apiVersion, defaultLanguage, type Lang } from "../../sanity/site.config";
 
 const DRY = process.argv.includes("--dry");
+const REPLACE = process.argv.includes("--replace");
 const ROOT = path.resolve(process.cwd(), "..");
 // SANITY_AUTH_TOKEN (write token) from studio/.env; without it, `--with-user-token` login is used
 if (existsSync(".env")) process.loadEnvFile(".env");
@@ -42,13 +51,19 @@ function blocks(nl: string, en?: string) {
   return Object.entries(en ? { nl, en } : { nl }).map(([language, v]) => ({ _key: key(), _type: "internationalizedArraySimpleBlockContentValue", language, value: pt(v) }));
 }
 
+/** A default from the site's dictionary, in both languages. */
+const dict = (pick: (d: Dictionary) => string) => ({ nl: pick(getDictionary("nl")), en: pick(getDictionary("en")) });
+
 const ref = (id: string) => ({ _type: "reference", _ref: id });
 const refs = (ids: (string | undefined)[]) => ids.filter(Boolean).map((id) => ({ _key: key(), ...ref(id!) }));
 
 type Doc = { _type: string; [k: string]: unknown };
 const written: Doc[] = [];
 
-/** Create, or replace the document matching `filter` (keeps its generated _id). */
+/** Drops undefined fields (setIfMissing would otherwise try to set them). */
+const defined = (doc: Doc) => Object.fromEntries(Object.entries(doc).filter(([, v]) => v !== undefined)) as Doc;
+
+/** Create the document matching `filter`, or fill its empty fields (--replace: overwrite it). Keeps its _id. */
 async function upsert(doc: Doc, filter: string, params: Record<string, unknown>): Promise<string> {
   if (!client) {
     const _id = `dry.${doc._type}.${written.length}`;
@@ -56,15 +71,22 @@ async function upsert(doc: Doc, filter: string, params: Record<string, unknown>)
     return _id;
   }
   const existing = await client.fetch<string | null>(`*[_type == $type && ${filter}][0]._id`, { type: doc._type, ...params });
-  const res = existing ? await client.createOrReplace({ ...doc, _id: existing }) : await client.create(doc);
-  console.log(`${existing ? "updated" : "created"} ${doc._type} ${res._id}`);
-  return res._id;
+  if (!existing) {
+    const res = await client.create(doc);
+    console.log(`created ${doc._type} ${res._id}`);
+    return res._id;
+  }
+  if (REPLACE) await client.createOrReplace({ ...doc, _id: existing });
+  else await client.patch(existing).setIfMissing(defined(doc)).commit();
+  console.log(`${REPLACE ? "replaced" : "filled in"} ${doc._type} ${existing}`);
+  return existing;
 }
 
 async function singleton(_id: string, doc: Doc) {
   if (!client) return void written.push({ _id, ...doc });
-  await client.createOrReplace({ _id, ...doc });
-  console.log(`saved ${_id}`);
+  if (REPLACE) await client.createOrReplace({ _id, ...doc });
+  else await client.transaction().createIfNotExists({ _id, _type: doc._type }).patch(_id, (p) => p.setIfMissing(defined(doc))).commit();
+  console.log(`${REPLACE ? "replaced" : "filled in"} ${_id}`);
 }
 
 /* ------------------------------------------------------------------ Fotobank */
@@ -183,7 +205,6 @@ async function seed() {
     venue: "Nour Boutique Hotel",
     capacity: 8,
     priceFrom: 1120,
-    signupUrl: "https://forms.gle/ghmT2yxcUqfVsEGz7",
     cardPhoto: m("handstand"),
     hero: hero("freediving", { nl: "Dahab: Yoga & Freediving", en: "Dahab: Yoga & Freediving" }),
     moodPhotos: ms("aerial", "desert", "hotel", "cooking"),
@@ -218,6 +239,7 @@ async function seed() {
     closingText: txt({ nl: "Stuur ons een bericht of schrijf je meteen in. Wij doen de rest.", en: "Send us a message or sign up right away. We'll do the rest." }),
     closingPhoto: m("freediving3"),
     participantCount: 8,
+    recapPhotos: ms("handstand", "freediving", "fish", "aerial", "desert", "freediving2", "cooking", "diving", "hotel", "team"),
   });
 
   const eifel = await retreat("eifel-2026", {
@@ -234,8 +256,12 @@ async function seed() {
     nutshellText: txt(
       "Dagen vol yoga, stevige hikes door eindeloos groen, en avonden bij de sauna en whirlpool. Een lang weekend om je hoofd leeg te maken en op te laden in de natuur.",
     ),
+    capacity: 12,
+    placeTitle: str({ nl: "De Belgische Eifel", en: "The Belgian Eifel" }),
+    placePhotos: ms("hike", "yogaOutside"),
     hosts: refs([rita, philippe]),
     closingTitle: str({ nl: "Zin om mee te gaan?", en: "Want to join?" }),
+    closingPhoto: m("campfire"),
   });
 
   const ardennen = await retreat("ardennen-2026", {
@@ -250,6 +276,8 @@ async function seed() {
     nutshellText: txt("Een driedaagse in een imposante design-loft middenin de Ardense bossen. Yoga, sauna en jacuzzi, een goed glas wijn en vooral: niets moeten."),
     hosts: refs([rita, philippe]),
     participantCount: 12,
+    closingPhoto: m("retreat"),
+    recapPhotos: ms("pool", "campfire", "yoga3", "learning", "retreat"),
   });
 
   /* link photos to their retreat */
@@ -274,11 +302,26 @@ async function seed() {
     _type: "settings",
     siteName: "Yoga, Zen & Tonic",
     tagline: str({ nl: "Beyond the mat, into the moment", en: "Beyond the mat, into the moment" }),
-    defaultSignupUrl: "https://forms.gle/ghmT2yxcUqfVsEGz7",
     phone: "+32 477 74 42 40",
     instagram: "https://www.instagram.com/",
     facebook: "https://www.facebook.com/yogazentonic",
-    seo: seo("Yoga, Zen & Tonic", { nl: "Yoga-retreats, lessen en private coaching met Rita & Philippe.", en: "Yoga retreats, classes and private coaching with Rita & Philippe." }),
+    seo: { ...seo("Yoga, Zen & Tonic", { nl: "Yoga-retreats, lessen en private coaching met Rita & Philippe.", en: "Yoga retreats, classes and private coaching with Rita & Philippe." }), shareImage: m("handstand") },
+    // Menu
+    menuFounders: str(dict((d) => d.nav.founders)),
+    menuFoundersSub: str(dict((d) => d.nav.foundersSub)),
+    menuTeam: str(dict((d) => d.nav.team[1])),
+    menuDrive: str(dict((d) => d.nav.drive[1])),
+    menuGallery: str(dict((d) => d.nav.galleryItem[1])),
+    menuUpcoming: str(dict((d) => d.nav.upcoming[1])),
+    menuPast: str(dict((d) => d.nav.past[1])),
+    menuSearch: str(dict((d) => d.nav.search[1])),
+    // Formulieren
+    newsletterTitle: str(dict((d) => d.footer.keepPosted)),
+    newsletterThanks: str(dict((d) => d.footer.subscribed)),
+    contactThanks: str(dict((d) => d.contact.sent)),
+    signupConsent: txt(dict((d) => d.signup.consent)),
+    signupThanks: txt(dict((d) => d.signup.sent)),
+    signupMail: txt(dict((d) => d.signup.mailBody("{naam}", "{retreat}", "{datum}"))),
   });
   await singleton("homePage", {
     _type: "homePage",
@@ -292,12 +335,22 @@ async function seed() {
       en: "Rita loves yoga, Philippe loves nature and freediving. Together they create retreats that are powerful, authentic and fun.",
     }),
     aboutPhoto: m("founders"),
+    introLink: str(dict((d) => d.home.meet)),
+    retreatsTitle: str(dict((d) => d.home.retreatsTitle)),
+    lessonsTitle: str(dict((d) => d.home.lessonsTitle)),
+    testimonialsTitle: str(dict((d) => d.home.testimonials)),
   });
   await singleton("retreatsPage", {
     _type: "retreatsPage",
     hero: hero("desert", "Retreats"),
     upcomingTitle: str({ nl: "Binnenkort", en: "Coming up" }),
     pastTitle: str({ nl: "Waar we al waren", en: "Where we've been" }),
+    noneUpcoming: txt(dict((d) => d.retreats.noneUpcoming)),
+    peopleTitle: str(dict((d) => d.retreat.peopleTitle)),
+    programmeTitle: str(dict((d) => d.retreat.programmeTitle)),
+    practicalTitle: str(dict((d) => d.retreat.practicalTitle)),
+    recapTitle: str(dict((d) => d.retreat.recapPhotos)),
+    pastCtaTitle: str(dict((d) => d.retreat.nextTitle)),
   });
   await singleton("lessonsPage", {
     _type: "lessonsPage",
@@ -305,6 +358,7 @@ async function seed() {
     stylesTitle: str({ nl: "Vier stijlen", en: "Four styles" }),
     studiosTitle: str({ nl: "Drie studio's", en: "Three studios" }),
     scheduleTitle: str({ nl: "Wanneer geeft Rita les?", en: "When does Rita teach?" }),
+    scheduleEmpty: txt(dict((d) => d.lessons.scheduleEmpty)),
     schedule: (
       [
         ["mon", "07:00", styles.ashtanga, studios.antwerp],
@@ -324,13 +378,15 @@ async function seed() {
       ["Duur & prijs", "60 of 90 minuten", "[Prijs, locatie: thuis, in de studio of online.]"],
     ].map(([label, title, text]) => ({ _key: key(), _type: "coachingBlock", label: str(label), title: str(title), text: txt(text) })),
     photos: ms("yoga2", "yogaOutside"),
-    ctaTitle: str({ nl: "Zin in een gesprek?", en: "Fancy a chat?" }),
+    ctaTitle: str({ nl: "Ben je benieuwd? Of heb je vragen?", en: "Curious? Or have questions?" }),
+    ctaButton: str(dict((d) => d.coaching.cta)),
   });
   await singleton("aboutPage", {
     _type: "aboutPage",
     hero: hero("founders2", { nl: "Over ons", en: "About us" }, "Yoga, Zen & Tonic: beyond the mat, into the moment."),
     founders: refs([rita, philippe]),
     principlesTitle: str({ nl: "Drie principes", en: "Three principles" }),
+    principlesLabel: str(dict((d) => d.about.principlesLabel)),
     principles: [
       [{ nl: "Geen druk", en: "No pressure" }, "[1–2 zinnen]"],
       [{ nl: "Echte mensen", en: "Real people" }, "[1–2 zinnen]"],
@@ -345,6 +401,49 @@ async function seed() {
     intro: txt({ nl: "Vragen over een retreat, een les of coaching? Stuur ons een bericht, we antwoorden binnen 2 dagen.", en: "Questions about a retreat, a class or coaching? Send us a message, we reply within 2 days." }),
     subjects: lines(["Retreat", "Lessen", "Coaching", "Iets anders"], ["Retreat", "Classes", "Coaching", "Something else"]),
     notifyLabel: str({ nl: "Hou me op de hoogte van de volgende retreat", en: "Let me know about the next retreat" }),
+  });
+
+  // Starting point only: have it checked before going live.
+  const section = (title: Tr, text: Tr) => ({ _key: key(), _type: "privacySection", title: str(title), text: txt(text) });
+  await singleton("privacyPage", {
+    _type: "privacyPage",
+    title: str({ nl: "Privacyverklaring", en: "Privacy statement" }),
+    intro: txt({
+      nl: "Yoga, Zen & Tonic (Rita & Philippe) gaat zorgvuldig om met je gegevens. Hier lees je welke gegevens we verzamelen via deze website, waarom, en wat je rechten zijn.",
+      en: "Yoga, Zen & Tonic (Rita & Philippe) handles your data with care. This page explains what we collect through this website, why, and what your rights are.",
+    }),
+    sections: [
+      section(
+        { nl: "Welke gegevens", en: "What we collect" },
+        {
+          nl: "Als je je inschrijft voor een retreat: naam, e-mail, GSM, aantal personen, kamerkeuze, dieetwensen en je bericht.\n\nAls je het contactformulier gebruikt: naam, e-mail, onderwerp en bericht.\n\nAls je je inschrijft voor onze updates: je e-mailadres.",
+          en: "When you sign up for a retreat: name, email, phone, number of people, room choice, dietary needs and your message.\n\nWhen you use the contact form: name, email, subject and message.\n\nWhen you sign up for updates: your email address.",
+        },
+      ),
+      section(
+        { nl: "Waarom", en: "Why" },
+        {
+          nl: "We gebruiken je gegevens alleen om je inschrijving te verwerken, je vraag te beantwoorden of je op de hoogte te houden van nieuwe retreats. We verkopen of delen ze niet met derden voor marketing.",
+          en: "We only use your data to process your sign-up, answer your question or keep you posted about new retreats. We never sell or share it with third parties for marketing.",
+        },
+      ),
+      section(
+        { nl: "Waar en hoe lang", en: "Where and for how long" },
+        {
+          nl: "Je gegevens worden bewaard in ons beheersysteem (Sanity) en verstuurd via onze maildienst (Resend). Inschrijvingen en berichten bewaren we tot maximaal 2 jaar na de retreat of na ons laatste contact. Je e-mailadres voor updates bewaren we tot je je uitschrijft.",
+          en: "Your data is stored in our content system (Sanity) and sent through our email service (Resend). Sign-ups and messages are kept for up to 2 years after the retreat or our last contact. Your email for updates is kept until you unsubscribe.",
+        },
+      ),
+      section(
+        { nl: "Je rechten", en: "Your rights" },
+        {
+          nl: "Je kan op elk moment vragen om je gegevens in te kijken, te verbeteren of te laten verwijderen, en je uitschrijven voor updates. Stuur ons gewoon een mail.",
+          en: "You can ask at any time to see, correct or delete your data, or to stop receiving updates. Just send us an email.",
+        },
+      ),
+      section({ nl: "Cookies", en: "Cookies" }, { nl: "Deze website gebruikt geen tracking- of advertentiecookies.", en: "This website uses no tracking or advertising cookies." }),
+    ],
+    updatedAt: new Date().toISOString().slice(0, 10),
   });
 
   if (DRY) {

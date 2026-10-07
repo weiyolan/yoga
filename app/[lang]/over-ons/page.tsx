@@ -71,7 +71,7 @@ export default async function About({ params }: PageProps<"/[lang]/over-ons">) {
       {page?.principles?.length ? (
         <section className="s alt" id="principes">
           <div className="wrap">
-            <SectionHead label={t.principlesLabel} title={page.principlesTitle} />
+            <SectionHead label={page.principlesLabel || t.principlesLabel} title={page.principlesTitle} />
             <div className="g3">
               {page.principles.map((p) => (
                 <div key={p._key}>

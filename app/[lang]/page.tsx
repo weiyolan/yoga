@@ -1,9 +1,10 @@
+import { Fragment } from "react";
 import Link from "next/link";
 import { Photo } from "@/components/Photo";
 import { ClassTiles, Hero, RetreatCard, SectionHead } from "@/components/sections";
 import { Testimonials } from "@/components/Testimonials";
 import { getDictionary } from "@/lib/dictionary";
-import { dateRange, euro, join } from "@/lib/format";
+import { dateRange, euro, join, placesLabel } from "@/lib/format";
 import { buildMetadata } from "@/lib/metadata";
 import { href, langParam, retreatHref } from "@/lib/routes";
 import { sanityFetch } from "@/sanity/fetch";
@@ -20,6 +21,8 @@ export default async function Home({ params }: PageProps<"/[lang]">) {
   const [page, layout] = await Promise.all([sanityFetch({ query: HOME_QUERY, lang }), sanityFetch({ query: LAYOUT_QUERY, lang })]);
   const d = getDictionary(lang);
   const t = d.home;
+  // Curated testimonials first, then the latest approved reviews (4★+).
+  const quotes = [...(page?.testimonials ?? []), ...(page?.reviews ?? []).map((r) => ({ _id: r._id, quote: r.text, name: r.name, context: r.context, rating: r.rating }))].slice(0, 6);
   const f = page?.featuredRetreat;
   const cards = [...(page?.upcomingRetreats ?? []), ...(page?.pastRetreats ?? [])].slice(0, 3);
   const handle = layout?.instagram?.match(/instagram\.com\/([^/?#]+)/)?.[1];
@@ -51,7 +54,7 @@ export default async function Home({ params }: PageProps<"/[lang]">) {
                 <span className="label">{d.card.next}</span>
                 <h2>{f.title}</h2>
                 <p className="muted" style={{ marginTop: 12 }}>
-                  {[dateRange(lang, f.startDate, f.endDate), join(f.place, f.country), f.capacity ? `${d.card.max} ${f.capacity} ${d.card.participants}` : null, f.priceFrom ? `${d.card.from} ${euro(lang, f.priceFrom)}` : null].filter(Boolean).join(" · ")}
+                  {[dateRange(lang, f.startDate, f.endDate), join(f.place, f.country), placesLabel(lang, f, true), f.priceFrom ? `${d.card.from} ${euro(lang, f.priceFrom)}` : null].filter(Boolean).join(" · ")}
                 </p>
                 {f.teaser ? <p>{f.teaser}</p> : null}
                 <div className="row" style={{ marginTop: 22 }}>
@@ -74,7 +77,7 @@ export default async function Home({ params }: PageProps<"/[lang]">) {
           {page?.introTitle ? <h2 style={{ maxWidth: "20ch", margin: "0 auto 20px" }}>{page.introTitle}</h2> : null}
           {page?.intro ? <p className="muted">{page.intro}</p> : null}
           <Link className="link" href={href(lang, "about")}>
-            {t.meet}
+            {page?.introLink || t.meet}
           </Link>
         </div>
       </section>
@@ -82,7 +85,7 @@ export default async function Home({ params }: PageProps<"/[lang]">) {
       {cards.length ? (
         <section className="s">
           <div className="wrap">
-            <SectionHead label={t.retreatsLabel} title={t.retreatsTitle}>
+            <SectionHead label={t.retreatsLabel} title={page?.retreatsTitle || t.retreatsTitle}>
               <Link className="link" href={href(lang, "retreats")}>
                 {t.allRetreats}
               </Link>
@@ -99,7 +102,7 @@ export default async function Home({ params }: PageProps<"/[lang]">) {
       {page?.styles?.length ? (
         <section className="s alt">
           <div className="wrap">
-            <SectionHead label={t.lessonsLabel} title={t.lessonsTitle}>
+            <SectionHead label={t.lessonsLabel} title={page?.lessonsTitle || t.lessonsTitle}>
               <Link className="link" href={href(lang, "lessons", { hash: "planning" })}>
                 {t.lessonsLink}
               </Link>
@@ -107,17 +110,28 @@ export default async function Home({ params }: PageProps<"/[lang]">) {
             <ClassTiles lang={lang} styles={page.styles} to={href(lang, "lessons", { hash: "stijlen" })} />
             {page.studios?.length ? (
               <p className="muted small" style={{ marginTop: 18 }}>
-                {page.studios.join(" · ")}
+                {page.studios.map((s, i) => (
+                  <Fragment key={s._id}>
+                    {i ? " · " : null}
+                    {s.website ? (
+                      <a href={s.website} target="_blank" rel="noopener">
+                        {s.name}
+                      </a>
+                    ) : (
+                      s.name
+                    )}
+                  </Fragment>
+                ))}
               </p>
             ) : null}
           </div>
         </section>
       ) : null}
 
-      {page?.testimonials?.length ? (
+      {quotes.length ? (
         <section className="s">
           <div className="wrap">
-            <Testimonials items={page.testimonials} label={t.testimonials} itemLabel={t.testimonialN} />
+            <Testimonials items={quotes} label={page?.testimonialsTitle || t.testimonials} itemLabel={t.testimonialN} />
           </div>
         </section>
       ) : null}
@@ -144,12 +158,12 @@ export default async function Home({ params }: PageProps<"/[lang]">) {
             <SectionHead label={t.follow} title={handle ? `@${handle}` : "Instagram"}>
               <div className="row">
                 {layout?.instagram ? (
-                  <a className="link" href={layout.instagram}>
+                  <a className="link" href={layout.instagram} target="_blank" rel="noopener">
                     Instagram
                   </a>
                 ) : null}
                 {layout?.facebook ? (
-                  <a className="link" href={layout.facebook}>
+                  <a className="link" href={layout.facebook} target="_blank" rel="noopener">
                     Facebook
                   </a>
                 ) : null}
@@ -158,7 +172,7 @@ export default async function Home({ params }: PageProps<"/[lang]">) {
             <div className="g6">
               {page.instagram.map((m) =>
                 layout?.instagram ? (
-                  <a key={m._id} href={layout.instagram} aria-label={`Instagram: ${m.alt || m.title || ""}`}>
+                  <a key={m._id} href={layout.instagram} target="_blank" rel="noopener" aria-label={`Instagram: ${m.alt || m.title || ""}`}>
                     <Photo media={m} ratio="r1" sizes="(max-width: 860px) 33vw, 16vw" />
                   </a>
                 ) : (
