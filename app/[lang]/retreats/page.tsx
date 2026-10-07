@@ -47,7 +47,7 @@ export default async function Retreats({ params }: PageProps<"/[lang]/retreats">
               ))}
             </div>
           ) : (
-            <p className="muted">{t.noneUpcoming}</p>
+            <p className="muted">{page?.noneUpcoming || t.noneUpcoming}</p>
           )}
         </div>
       </section>

@@ -51,7 +51,7 @@ export default async function Coaching({ params }: PageProps<"/[lang]/coaching">
           <div className="center" style={{ marginTop: page?.photos?.length ? 48 : 0 }}>
             {page?.ctaTitle ? <h2 style={{ marginBottom: 20 }}>{page.ctaTitle}</h2> : null}
             <Link className="btn" href={href(lang, "contact")}>
-              {t.cta}
+              {page?.ctaButton || t.cta}
             </Link>
           </div>
         </div>

@@ -347,6 +347,49 @@ async function seed() {
     notifyLabel: str({ nl: "Hou me op de hoogte van de volgende retreat", en: "Let me know about the next retreat" }),
   });
 
+  // Starting point only: have it checked before going live.
+  const section = (title: Tr, text: Tr) => ({ _key: key(), _type: "privacySection", title: str(title), text: txt(text) });
+  await singleton("privacyPage", {
+    _type: "privacyPage",
+    title: str({ nl: "Privacyverklaring", en: "Privacy statement" }),
+    intro: txt({
+      nl: "Yoga, Zen & Tonic (Rita & Philippe) gaat zorgvuldig om met je gegevens. Hier lees je welke gegevens we verzamelen via deze website, waarom, en wat je rechten zijn.",
+      en: "Yoga, Zen & Tonic (Rita & Philippe) handles your data with care. This page explains what we collect through this website, why, and what your rights are.",
+    }),
+    sections: [
+      section(
+        { nl: "Welke gegevens", en: "What we collect" },
+        {
+          nl: "Als je je inschrijft voor een retreat: naam, e-mail, GSM, aantal personen, kamerkeuze, dieetwensen en je bericht.\n\nAls je het contactformulier gebruikt: naam, e-mail, onderwerp en bericht.\n\nAls je je inschrijft voor onze updates: je e-mailadres.",
+          en: "When you sign up for a retreat: name, email, phone, number of people, room choice, dietary needs and your message.\n\nWhen you use the contact form: name, email, subject and message.\n\nWhen you sign up for updates: your email address.",
+        },
+      ),
+      section(
+        { nl: "Waarom", en: "Why" },
+        {
+          nl: "We gebruiken je gegevens alleen om je inschrijving te verwerken, je vraag te beantwoorden of je op de hoogte te houden van nieuwe retreats. We verkopen of delen ze niet met derden voor marketing.",
+          en: "We only use your data to process your sign-up, answer your question or keep you posted about new retreats. We never sell or share it with third parties for marketing.",
+        },
+      ),
+      section(
+        { nl: "Waar en hoe lang", en: "Where and for how long" },
+        {
+          nl: "Je gegevens worden bewaard in ons beheersysteem (Sanity) en verstuurd via onze maildienst (Resend). Inschrijvingen en berichten bewaren we tot maximaal 2 jaar na de retreat of na ons laatste contact. Je e-mailadres voor updates bewaren we tot je je uitschrijft.",
+          en: "Your data is stored in our content system (Sanity) and sent through our email service (Resend). Sign-ups and messages are kept for up to 2 years after the retreat or our last contact. Your email for updates is kept until you unsubscribe.",
+        },
+      ),
+      section(
+        { nl: "Je rechten", en: "Your rights" },
+        {
+          nl: "Je kan op elk moment vragen om je gegevens in te kijken, te verbeteren of te laten verwijderen, en je uitschrijven voor updates. Stuur ons gewoon een mail.",
+          en: "You can ask at any time to see, correct or delete your data, or to stop receiving updates. Just send us an email.",
+        },
+      ),
+      section({ nl: "Cookies", en: "Cookies" }, { nl: "Deze website gebruikt geen tracking- of advertentiecookies.", en: "This website uses no tracking or advertising cookies." }),
+    ],
+    updatedAt: new Date().toISOString().slice(0, 10),
+  });
+
   if (DRY) {
     const count: Record<string, number> = {};
     for (const d of written) count[d._type] = (count[d._type] ?? 0) + 1;

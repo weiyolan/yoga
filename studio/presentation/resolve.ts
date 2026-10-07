@@ -26,6 +26,8 @@ export const resolve: PresentationPluginOptions["resolve"] = {
     { route: "/en/gallery", filter: `_id == "galleryPage"` },
     ...page("contact", "contactPage"),
     { route: "/en/contact", filter: `_id == "contactPage"` },
+    ...page("privacy", "privacyPage"),
+    { route: "/en/privacy", filter: `_id == "privacyPage"` },
   ]),
   locations: {
     retreat: defineLocations({

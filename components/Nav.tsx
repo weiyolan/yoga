@@ -21,7 +21,7 @@ type PanelKey = "retreats" | "lessons" | "about";
 type Props = { lang: Lang; layout: Layout | null; children?: ReactNode };
 
 /** Pages without a hero get the solid header straight away. */
-const SOLID: Route[] = ["gallery", "contact"];
+const SOLID: Route[] = ["gallery", "contact", "privacy"];
 
 /** "Yoga, Zen & Tonic" → the ampersand in italic ember. */
 const logo = (name: string) =>
@@ -124,6 +124,7 @@ export function Nav({ lang, layout, children }: Props) {
     timer.current = setTimeout(() => setPanel(key), delay);
   };
 
+  const x = layout?.texts;
   const panels: Record<PanelKey, ReactNode> = {
     retreats: (
       <div className="panel-grid two">
@@ -136,9 +137,9 @@ export function Nav({ lang, layout, children }: Props) {
           </span>
         </Link>
         <div className="stack">
-          <MCard to={href(lang, "retreats", { hash: "komend" })} icon="cal" title={t.upcoming[0]} desc={t.upcoming[1]} />
-          <MCard to={href(lang, "retreats", { hash: "voorbij" })} icon="past" title={t.past[0]} desc={t.past[1]} />
-          <MCard to={href(lang, "retreats", { hash: "zoek" })} icon="search" title={t.search[0]} desc={t.search[1]} />
+          <MCard to={href(lang, "retreats", { hash: "komend" })} icon="cal" title={t.upcoming[0]} desc={x?.menuUpcoming || t.upcoming[1]} />
+          <MCard to={href(lang, "retreats", { hash: "voorbij" })} icon="past" title={t.past[0]} desc={x?.menuPast || t.past[1]} />
+          <MCard to={href(lang, "retreats", { hash: "zoek" })} icon="search" title={t.search[0]} desc={x?.menuSearch || t.search[1]} />
         </div>
       </div>
     ),
@@ -166,14 +167,14 @@ export function Nav({ lang, layout, children }: Props) {
           <FeaturePhoto media={layout?.foundersPhoto} />
           <span className="feature-txt">
             <span className="tag">{t.whoWeAre}</span>
-            <b>{t.founders}</b>
-            <small>{t.foundersSub}</small>
+            <b>{x?.menuFounders || t.founders}</b>
+            <small>{x?.menuFoundersSub || t.foundersSub}</small>
           </span>
         </Link>
         <div className="stack">
-          <MCard to={href(lang, "about", { hash: "team" })} icon="people" title={t.team[0]} desc={t.team[1]} />
-          <MCard to={href(lang, "about", { hash: "principes" })} icon="leaf" title={t.drive[0]} desc={t.drive[1]} />
-          <MCard to={href(lang, "gallery")} icon="photo" title={t.galleryItem[0]} desc={t.galleryItem[1]} />
+          <MCard to={href(lang, "about", { hash: "team" })} icon="people" title={t.team[0]} desc={x?.menuTeam || t.team[1]} />
+          <MCard to={href(lang, "about", { hash: "principes" })} icon="leaf" title={t.drive[0]} desc={x?.menuDrive || t.drive[1]} />
+          <MCard to={href(lang, "gallery")} icon="photo" title={t.galleryItem[0]} desc={x?.menuGallery || t.galleryItem[1]} />
         </div>
       </div>
     ),

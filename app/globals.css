@@ -374,3 +374,8 @@ body.has-cursor :is(input:not([type=checkbox]):not([type=radio]), textarea, [con
 a.slot { text-decoration: none; transition: background .2s var(--ease); } a.slot:hover { background: var(--bg-2); }
 .slot + .slot { margin-top: 6px; }
 .mood .side > .lb-trigger, .mood .duo > .lb-trigger, .mood > .lb-trigger { min-height: 160px; }
+
+/* privacy statement: readable measure */
+.prose { max-width: 760px; }
+.prose h2 { font-size: clamp(1.5rem, 2.4vw, 2rem); margin: 0 0 12px; }
+.prose .block { padding: 36px 0; }

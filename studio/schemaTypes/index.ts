@@ -1,7 +1,9 @@
 import { mediaItem } from "./documents/media-item";
 import { person } from "./documents/person";
 import { retreat } from "./documents/retreat";
+import { message } from "./documents/message";
 import { signup } from "./documents/signup";
+import { subscriber } from "./documents/subscriber";
 import { studio } from "./documents/studio";
 import { testimonial } from "./documents/testimonial";
 import { yogaClass } from "./documents/yoga-class";
@@ -14,6 +16,7 @@ import { contactPage } from "./singletons/contact-page";
 import { galleryPage } from "./singletons/gallery-page";
 import { homePage } from "./singletons/home-page";
 import { lessonsPage } from "./singletons/lessons-page";
+import { privacyPage } from "./singletons/privacy-page";
 import { retreatsPage } from "./singletons/retreats-page";
 import { settings } from "./singletons/settings";
 
@@ -27,10 +30,11 @@ export const SINGLETONS = [
   aboutPage,
   galleryPage,
   contactPage,
+  privacyPage,
 ].map((t) => t.name);
 
 /** Only the website creates these (private dotted ids): hidden from "New document". */
-export const FORM_TYPES = [signup.name];
+export const FORM_TYPES = [signup.name, message.name, subscriber.name];
 
 export const schemaTypes = [
   // objects
@@ -45,6 +49,8 @@ export const schemaTypes = [
   studio,
   testimonial,
   signup,
+  message,
+  subscriber,
   // singletons
   settings,
   homePage,
@@ -54,4 +60,5 @@ export const schemaTypes = [
   aboutPage,
   galleryPage,
   contactPage,
+  privacyPage,
 ];

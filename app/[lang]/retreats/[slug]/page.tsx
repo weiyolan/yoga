@@ -11,7 +11,7 @@ import { buildMetadata } from "@/lib/metadata";
 import { href, langParam } from "@/lib/routes";
 import { isUpcoming, sanityFetch } from "@/sanity/fetch";
 import type { Media } from "@/sanity/image";
-import { RETREAT_BY_SLUG_QUERY, RETREAT_SLUGS_QUERY } from "@/sanity/queries";
+import { LAYOUT_QUERY, RETREAT_BY_SLUG_QUERY, RETREAT_SLUGS_QUERY } from "@/sanity/queries";
 
 /** Known retreats are prerendered; a new one renders on its first visit and is cached from then on. */
 export async function generateStaticParams() {
@@ -52,6 +52,7 @@ export default async function RetreatPage({ params }: PageProps<"/[lang]/retreat
   const included = clean(r.included);
   const notIncluded = clean(r.notIncluded);
   const signup = r.signupUrl;
+  const texts = signup ? null : (await sanityFetch({ query: LAYOUT_QUERY, lang }))?.texts;
 
   if (!upcoming) {
     // Past retreat: a look back — photos, the nutshell and the facts; no booking box.
@@ -108,7 +109,7 @@ export default async function RetreatPage({ params }: PageProps<"/[lang]/retreat
           <section className="s alt">
             <div className="wrap">
               <span className="label">{t.recap}</span>
-              <h2>{t.recapPhotos}</h2>
+              <h2>{r.labels?.recapTitle || t.recapPhotos}</h2>
               <div className="mosaic" style={{ marginTop: 28 }}>
                 {recap.map((m, i) => (
                   <figure key={`${m._id}-${i}`} className={["w2 h2", "", "", "w2", "", "h2", "", ""][i % 8] || undefined}>
@@ -124,7 +125,7 @@ export default async function RetreatPage({ params }: PageProps<"/[lang]/retreat
 
         <section className="s center">
           <div className="wrap">
-            <h2 style={{ margin: "0 auto 22px", maxWidth: "20ch" }}>{t.nextTitle}</h2>
+            <h2 style={{ margin: "0 auto 22px", maxWidth: "20ch" }}>{r.labels?.pastCtaTitle || t.nextTitle}</h2>
             <div className="row" style={{ justifyContent: "center" }}>
               <Link className="btn" href={href(lang, "retreats", { hash: "komend" })}>
                 {t.otherRetreats}
@@ -238,7 +239,7 @@ export default async function RetreatPage({ params }: PageProps<"/[lang]/retreat
             {r.hosts?.length ? (
               <div className="block" id="mensen">
                 <span className="label">{t.people}</span>
-                <h2>{t.peopleTitle}</h2>
+                <h2>{r.labels?.peopleTitle || t.peopleTitle}</h2>
                 <div className="people">
                   {r.hosts.map((p) => (
                     <div key={p._id}>
@@ -254,7 +255,7 @@ export default async function RetreatPage({ params }: PageProps<"/[lang]/retreat
             {r.programme?.length ? (
               <div className="block" id="programma">
                 <span className="label">{t.programme}</span>
-                <h2>{t.programmeTitle}</h2>
+                <h2>{r.labels?.programmeTitle || t.programmeTitle}</h2>
                 <ul className="ticks">
                   {r.programme.map((p) => (
                     <li key={p._key}>
@@ -270,7 +271,7 @@ export default async function RetreatPage({ params }: PageProps<"/[lang]/retreat
             {toc[4][2] ? (
               <div className="block" id="praktisch">
                 <span className="label">{t.practical}</span>
-                <h2>{t.practicalTitle}</h2>
+                <h2>{r.labels?.practicalTitle || t.practicalTitle}</h2>
                 <div className="inc">
                   {r.prices?.length || group ? (
                     <div>
@@ -381,7 +382,12 @@ export default async function RetreatPage({ params }: PageProps<"/[lang]/retreat
             <span className="label">{d.signup.label}</span>
             <h2>{r.closingTitle || r.title}</h2>
             {r.closingText ? <p className="muted">{r.closingText}</p> : null}
-            <SignupForm lang={lang} retreatId={r._id} rooms={(r.prices ?? []).map((p) => [p.label, euro(lang, p.amount)].filter(Boolean).join(" · "))} />
+            <SignupForm
+              lang={lang}
+              retreatId={r._id}
+              rooms={(r.prices ?? []).map((p) => [p.label, euro(lang, p.amount)].filter(Boolean).join(" · "))}
+              texts={{ thanks: texts?.signupThanks, consent: texts?.signupConsent }}
+            />
           </div>
         </section>
       )}

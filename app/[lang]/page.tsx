@@ -75,7 +75,7 @@ export default async function Home({ params }: PageProps<"/[lang]">) {
           {page?.introTitle ? <h2 style={{ maxWidth: "20ch", margin: "0 auto 20px" }}>{page.introTitle}</h2> : null}
           {page?.intro ? <p className="muted">{page.intro}</p> : null}
           <Link className="link" href={href(lang, "about")}>
-            {t.meet}
+            {page?.introLink || t.meet}
           </Link>
         </div>
       </section>
@@ -83,7 +83,7 @@ export default async function Home({ params }: PageProps<"/[lang]">) {
       {cards.length ? (
         <section className="s">
           <div className="wrap">
-            <SectionHead label={t.retreatsLabel} title={t.retreatsTitle}>
+            <SectionHead label={t.retreatsLabel} title={page?.retreatsTitle || t.retreatsTitle}>
               <Link className="link" href={href(lang, "retreats")}>
                 {t.allRetreats}
               </Link>
@@ -100,7 +100,7 @@ export default async function Home({ params }: PageProps<"/[lang]">) {
       {page?.styles?.length ? (
         <section className="s alt">
           <div className="wrap">
-            <SectionHead label={t.lessonsLabel} title={t.lessonsTitle}>
+            <SectionHead label={t.lessonsLabel} title={page?.lessonsTitle || t.lessonsTitle}>
               <Link className="link" href={href(lang, "lessons", { hash: "planning" })}>
                 {t.lessonsLink}
               </Link>
@@ -129,7 +129,7 @@ export default async function Home({ params }: PageProps<"/[lang]">) {
       {page?.testimonials?.length ? (
         <section className="s">
           <div className="wrap">
-            <Testimonials items={page.testimonials} label={t.testimonials} itemLabel={t.testimonialN} />
+            <Testimonials items={page.testimonials} label={page?.testimonialsTitle || t.testimonials} itemLabel={t.testimonialN} />
           </div>
         </section>
       ) : null}

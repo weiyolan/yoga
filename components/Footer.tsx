@@ -20,8 +20,8 @@ export function Footer({ lang, layout }: { lang: Lang; layout: LAYOUT_QUERY_RESU
                 {layout.tagline}
               </p>
             ) : null}
-            <h4 style={{ marginTop: 28 }}>{t.keepPosted}</h4>
-            <NewsletterForm lang={lang} />
+            <h4 style={{ marginTop: 28 }}>{layout?.texts?.newsletterTitle || t.keepPosted}</h4>
+            <NewsletterForm lang={lang} thanks={layout?.texts?.newsletterThanks} />
           </div>
           <div>
             <h4>{t.offer}</h4>
@@ -45,7 +45,7 @@ export function Footer({ lang, layout }: { lang: Lang; layout: LAYOUT_QUERY_RESU
         </div>
         <div className="legal">
           <span>© {name}</span>
-          <span>{t.legal}</span>
+          <Link href={href(lang, "privacy")}>{d.privacy.link}</Link>
         </div>
       </div>
     </footer>

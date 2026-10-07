@@ -49,7 +49,6 @@ const nl = {
     offer: "Aanbod",
     about: "Over",
     follow: "Volg ons",
-    legal: "Privacy · Algemene voorwaarden",
   },
   card: {
     next: "Volgende retreat",
@@ -171,6 +170,7 @@ const nl = {
     mailBody: (name: string, retreat: string, when: string) =>
       `Dag ${name},\n\nBedankt voor je inschrijving voor ${retreat}${when ? ` (${when})` : ""}! We hebben ze goed ontvangen en nemen binnenkort contact met je op met de praktische info en de betaling.\n\nTot snel,\nRita & Philippe\nYoga, Zen & Tonic`,
   },
+  privacy: { label: "Privacy", title: "Privacyverklaring", updated: "Laatst bijgewerkt:", link: "Privacyverklaring" },
   notFound: { title: "Deze pagina bestaat niet (meer)", back: "Terug naar home" },
 };
 
@@ -221,7 +221,6 @@ const en: Dictionary = {
     offer: "What we do",
     about: "About",
     follow: "Follow us",
-    legal: "Privacy · Terms",
   },
   card: {
     next: "Next retreat",
@@ -343,6 +342,7 @@ const en: Dictionary = {
     mailBody: (name: string, retreat: string, when: string) =>
       `Hi ${name},\n\nThank you for signing up for ${retreat}${when ? ` (${when})` : ""}! We've received it and will be in touch soon with the practical details and payment.\n\nSee you soon,\nRita & Philippe\nYoga, Zen & Tonic`,
   },
+  privacy: { label: "Privacy", title: "Privacy statement", updated: "Last updated:", link: "Privacy statement" },
   notFound: { title: "This page doesn't exist (anymore)", back: "Back to home" },
 };
 

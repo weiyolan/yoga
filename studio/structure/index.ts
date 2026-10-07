@@ -4,6 +4,8 @@ import { CogIcon } from "@sanity/icons/Cog";
 import { DocumentsIcon } from "@sanity/icons/Documents";
 import { HomeIcon } from "@sanity/icons/Home";
 import { ImagesIcon } from "@sanity/icons/Images";
+import { BellIcon } from "@sanity/icons/Bell";
+import { EnvelopeIcon } from "@sanity/icons/Envelope";
 import { UsersIcon } from "@sanity/icons/Users";
 import { WarningOutlineIcon } from "@sanity/icons/WarningOutline";
 import type { ComponentType } from "react";
@@ -74,6 +76,7 @@ export const structure: StructureResolver = (S) =>
               singleton(S, "aboutPage", "Over ons"),
               singleton(S, "galleryPage", "Gallery"),
               singleton(S, "contactPage", "Contact"),
+              singleton(S, "privacyPage", "Privacyverklaring"),
             ]),
         ),
       S.divider(),
@@ -123,6 +126,19 @@ export const structure: StructureResolver = (S) =>
               S.documentTypeListItem("signup").title("Alle inschrijvingen"),
             ]),
         ),
+      S.listItem()
+        .id("messages")
+        .title("Berichten")
+        .icon(EnvelopeIcon)
+        .child(
+          S.list()
+            .title("Berichten")
+            .items([
+              filtered(S, "messages-new", "Nieuw", "message", `status == "new"`, [{ field: "submittedAt", direction: "desc" }]),
+              S.documentTypeListItem("message").title("Alle berichten"),
+            ]),
+        ),
+      filtered(S, "subscribers", "Nieuwsbrief", "subscriber", "unsubscribed != true", [{ field: "subscribedAt", direction: "desc" }]).icon(BellIcon),
       S.documentTypeListItem("person").title("Team & begeleiders"),
       S.listItem()
         .id("lessons")

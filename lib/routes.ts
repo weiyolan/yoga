@@ -13,6 +13,7 @@ export const routes = {
   about: { nl: "over-ons", en: "about" },
   gallery: { nl: "gallery", en: "gallery" },
   contact: { nl: "contact", en: "contact" },
+  privacy: { nl: "privacy", en: "privacy" },
 } as const satisfies Record<string, Record<Lang, string>>;
 
 export type Route = keyof typeof routes;
