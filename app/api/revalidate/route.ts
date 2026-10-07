@@ -3,7 +3,7 @@
  * references cross documents). Setup: README → "Publish → live".
  */
 import { isValidSignature, SIGNATURE_HEADER_NAME } from "@sanity/webhook";
-import { revalidateTag } from "next/cache";
+import { revalidatePath, revalidateTag } from "next/cache";
 import { NextResponse, type NextRequest } from "next/server";
 import { SANITY_TAG } from "@/sanity/fetch";
 
@@ -21,5 +21,7 @@ export async function POST(request: NextRequest) {
   }
   // expire: 0 → the next visitor gets the new content (not a stale copy first)
   revalidateTag(SANITY_TAG, { expire: 0 });
+  // …and every page path explicitly, so hosts that cache per path (Netlify) refresh them too.
+  revalidatePath("/[lang]", "layout");
   return NextResponse.json({ revalidated: true, tag: SANITY_TAG, type, now: Date.now() });
 }

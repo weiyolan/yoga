@@ -14,8 +14,11 @@ import "../globals.css";
 const serif = Instrument_Serif({ subsets: ["latin"], weight: "400", style: ["normal", "italic"], variable: "--font-serif", display: "swap" });
 const sans = Hanken_Grotesk({ subsets: ["latin"], weight: ["400", "500", "600"], variable: "--font-sans", display: "swap" });
 
-/** One prerendered tree per language; anything else is a 404. */
-export const dynamicParams = false;
+/**
+ * One prerendered tree per language; anything else is a 404 (the isLang check below).
+ * No `dynamicParams = false`: on Netlify, on-demand regeneration after a publish then
+ * resolved every page to a cached 404 until the next deploy.
+ */
 export const generateStaticParams = () => languageIds.map((lang) => ({ lang }));
 
 export const metadata: Metadata = { metadataBase: new URL(siteUrl) };
