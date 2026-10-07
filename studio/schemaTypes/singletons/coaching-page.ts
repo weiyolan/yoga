@@ -30,7 +30,7 @@ export const coachingPage = defineType({
       ],
       validation: (rule) => rule.max(3).warning("Max. 3 blokken"),
     }),
-    mediaArrayField("photos", { title: "Foto's", max: 4 }),
+    mediaArrayField("photos", { title: "Foto's", max: 2 }),
     i18nString("ctaTitle", { title: "Afsluiter: kop", description: "bv. “Zin in een gesprek?”." }),
     defineField({ name: "seo", title: "SEO & delen", type: "seo" }),
   ],

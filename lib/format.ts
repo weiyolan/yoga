@@ -29,3 +29,7 @@ export const euro = (lang: Lang, n?: number | null) =>
 export const join = (...xs: (string | null | undefined | false)[]) => xs.filter(Boolean).join(", ");
 
 export const htmlLang = (lang: Lang) => locale[lang];
+
+/** Lightbox / gallery caption: "Kampvuur · Eifel, nov 2025 · Foto: Jane Doe". */
+export const photoCaption = (lang: Lang, m: { title?: string | null; credit?: string | null }, ...extra: (string | null | undefined)[]) =>
+  [m.title, ...extra, m.credit ? `${lang === "en" ? "Photo" : "Foto"}: ${m.credit}` : null].filter(Boolean).join(" · ");

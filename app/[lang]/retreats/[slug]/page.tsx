@@ -6,7 +6,7 @@ import { fullSrc, Photo } from "@/components/Photo";
 import { Paragraphs } from "@/components/RichText";
 import { Hero } from "@/components/sections";
 import { getDictionary } from "@/lib/dictionary";
-import { dateRange, euro, join } from "@/lib/format";
+import { dateRange, euro, join, photoCaption } from "@/lib/format";
 import { buildMetadata } from "@/lib/metadata";
 import { href, langParam } from "@/lib/routes";
 import { isUpcoming, sanityFetch } from "@/sanity/fetch";
@@ -56,7 +56,7 @@ export default async function RetreatPage({ params }: PageProps<"/[lang]/retreat
   if (!upcoming) {
     // Past retreat: a look back — photos, the nutshell and the facts; no booking box.
     const recap = (r.recapPhotos?.length ? r.recapPhotos : [...(r.moodPhotos ?? []), ...(r.placePhotos ?? [])]) as Media[];
-    const lb: LightboxItem[] = recap.map((m) => ({ src: fullSrc(m) ?? "", alt: m.alt, caption: m.title }));
+    const lb: LightboxItem[] = recap.map((m) => ({ src: fullSrc(m) ?? "", alt: m.alt, caption: photoCaption(lang, m) }));
     const price = r.priceFrom ?? Math.min(...(r.prices ?? []).map((p) => p.amount ?? Infinity));
     const facts = [
       [t.where, join(where, r.venue)],
@@ -68,8 +68,7 @@ export default async function RetreatPage({ params }: PageProps<"/[lang]/retreat
       <Lightbox lang={lang} items={lb}>
         <Hero
           hero={r.hero}
-          title={r.title}
-          subtitle={null}
+          title={r.hero?.title || r.title}
           meta={
             <>
               {when ? <span>{when}</span> : null}
@@ -144,7 +143,7 @@ export default async function RetreatPage({ params }: PageProps<"/[lang]/retreat
   const mood = (r.moodPhotos ?? []).slice(0, 4);
   const place = (r.placePhotos ?? []).slice(0, 2);
   const all = [...mood, ...place] as Media[];
-  const items: LightboxItem[] = all.map((m) => ({ src: fullSrc(m) ?? "", alt: m.alt, caption: m.title }));
+  const items: LightboxItem[] = all.map((m) => ({ src: fullSrc(m) ?? "", alt: m.alt, caption: photoCaption(lang, m) }));
   const thumb = (m: Media | undefined, i: number, sizes: string, ratio?: "r32", style?: React.CSSProperties) =>
     m ? (
       <LightboxTrigger index={i} label={`${t.photos}: ${m.alt || m.title || i + 1}`} style={style}>
@@ -166,8 +165,7 @@ export default async function RetreatPage({ params }: PageProps<"/[lang]/retreat
     <Lightbox lang={lang} items={items}>
       <Hero
         hero={r.hero}
-        title={r.title}
-        subtitle={null}
+        title={r.hero?.title || r.title}
         meta={
           <>
             {when ? <span>{when}</span> : null}

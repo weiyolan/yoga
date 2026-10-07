@@ -100,7 +100,7 @@ export default async function Lessons({ params }: PageProps<"/[lang]/lessen">) {
                               const body = (
                                 <>
                                   <b>{s.style?.name}</b>
-                                  {[s.startTime, s.studio?.name].filter(Boolean).join(" · ")}
+                                  {[s.startTime, s.durationMinutes ? `${s.durationMinutes} min` : null, s.studio?.name].filter(Boolean).join(" · ")}
                                 </>
                               );
                               return s.bookingUrl ? (

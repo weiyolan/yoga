@@ -7,6 +7,7 @@ import { mediaArrayField, mediaField } from "../shared/media";
  * A retreat. Sections follow the detail page (and the Dahab Facebook event):
  * notendop · de plek · de mensen · het programma · praktisch · klaar om te duiken?
  * Upcoming vs. past is derived from `endDate`, never stored.
+ * Past retreats show hero, notendop, facts and recap photos only (see the group description).
  */
 export const retreat = defineType({
   name: "retreat",
@@ -74,7 +75,7 @@ export const retreat = defineType({
     /* ---- de plek ---- */
     i18nString("placeTitle", { title: "Kop", group: "place" }),
     i18nText("placeText", { title: "Tekst", group: "place", max: 500 }),
-    mediaArrayField("placePhotos", { title: "Foto's", group: "place", max: 4 }),
+    mediaArrayField("placePhotos", { title: "Foto's", group: "place", max: 2 }),
 
     /* ---- de mensen ---- */
     defineField({
@@ -144,7 +145,7 @@ export const retreat = defineType({
     mediaArrayField("recapPhotos", {
       title: "Foto's achteraf",
       group: "recap",
-      description: "Na de retreat: zoveel foto's als je wil. Vormen de mozaïek op de pagina van een voorbije retreat (leeg = sfeer- en plekfoto's).",
+      description: "Na de retreat: zoveel foto's als je wil (leeg = sfeer- en plekfoto's). Na de einddatum toont de pagina enkel openingsbeeld, notendop, de feiten (plaats, begeleiding, prijs, deelnemers) en deze foto's; Programma, Praktisch en Afsluiter verschijnen alleen bij komende retreats.",
     }),
     defineField({ name: "seo", title: "SEO & delen", type: "seo", group: "seo" }),
   ],

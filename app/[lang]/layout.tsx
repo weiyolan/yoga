@@ -1,6 +1,8 @@
 import type { Metadata, Viewport } from "next";
 import { Hanken_Grotesk, Instrument_Serif } from "next/font/google";
+import { draftMode } from "next/headers";
 import { notFound } from "next/navigation";
+import { VisualEditing } from "next-sanity/visual-editing";
 import { Cursor } from "@/components/Cursor";
 import { Footer } from "@/components/Footer";
 import { Nav } from "@/components/Nav";
@@ -28,6 +30,7 @@ export default async function RootLayout({ children, params }: LayoutProps<"/[la
   const { lang } = await params;
   if (!isLang(lang)) notFound();
   const layout = await sanityFetch({ query: LAYOUT_QUERY, lang });
+  const { isEnabled: draft } = await draftMode();
   return (
     <html lang={htmlLang(lang)} className={`${serif.variable} ${sans.variable}`}>
       <body>
@@ -35,6 +38,7 @@ export default async function RootLayout({ children, params }: LayoutProps<"/[la
         <main>{children}</main>
         <Footer lang={lang} layout={layout} />
         <Cursor />
+        {draft ? <VisualEditing /> : null}
       </body>
     </html>
   );

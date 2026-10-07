@@ -1,10 +1,12 @@
 import { nlNLLocale } from "@sanity/locale-nl-nl";
 import { visionTool } from "@sanity/vision";
 import { defineConfig } from "sanity";
+import { presentationTool } from "sanity/presentation";
 import { structureTool } from "sanity/structure";
 import { internationalizedArray } from "sanity-plugin-internationalized-array";
 import { apiVersion, defaultLanguage, languages } from "../sanity/site.config";
 import { FORM_TYPES, schemaTypes, SINGLETONS } from "./schemaTypes";
+import { resolve } from "./presentation/resolve";
 import { structure } from "./structure";
 
 const singletons = new Set<string>(SINGLETONS);
@@ -19,6 +21,16 @@ export default defineConfig({
 
   plugins: [
     structureTool({ structure }),
+    // Live preview of the site with drafts + click-to-edit. Embedded Studio (/studio): same origin;
+    // hosted Studio: set SANITY_STUDIO_PREVIEW_URL to the site's URL.
+    presentationTool({
+      title: "Live preview",
+      previewUrl: {
+        origin: process.env.SANITY_STUDIO_PREVIEW_URL || (typeof location === "undefined" ? undefined : location.origin),
+        previewMode: { enable: "/api/draft-mode/enable" },
+      },
+      resolve,
+    }),
     internationalizedArray({
       languages: languages.map(({ id, title }) => ({ id, title })),
       defaultLanguages: [defaultLanguage],
