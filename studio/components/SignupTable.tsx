@@ -14,6 +14,7 @@ type Row = {
   name?: string;
   email?: string;
   phone?: string;
+  persons?: number;
   room?: string;
   answers?: { question?: string; answer?: string }[];
   diet?: string;
@@ -27,7 +28,7 @@ type Retreat = { _id: string; title?: string; startDate?: string; capacity?: num
 
 const NL = `coalesce(title[language == "nl"][0].value, title[0].value)`;
 const QUERY = `{
-  "signups": *[_type == "signup"] | order(submittedAt desc) { _id, status, submittedAt, name, email, phone, room, answers, diet, message, lang, notes, "retreatId": retreat._ref, "retreat": retreat->{ "t": ${NL} }.t },
+  "signups": *[_type == "signup"] | order(submittedAt desc) { _id, status, submittedAt, name, email, phone, persons, room, answers, diet, message, lang, notes, "retreatId": retreat._ref, "retreat": retreat->{ "t": ${NL} }.t },
   "retreats": *[_type == "retreat" && !(_id in path("drafts.**"))] | order(startDate desc) { _id, "title": ${NL}, startDate, capacity, booked }
 }`;
 
@@ -110,9 +111,10 @@ export function SignupTable() {
   }, [data, retreat, status, sort]);
 
   const chosen = data?.retreats.find((r) => r._id === retreat);
-  // one sign-up = one person
-  const confirmed = rows.filter((r) => r.status === "confirmed").length;
-  const total = rows.length;
+  // new sign-ups are one person; old ones can have `persons`
+  const people = (r: Row) => r.persons ?? 1;
+  const confirmed = rows.filter((r) => r.status === "confirmed").reduce((n, r) => n + people(r), 0);
+  const total = rows.reduce((n, r) => n + people(r), 0);
 
   const download = () => {
     const blob = new Blob(["﻿" + csv(rows)], { type: "text/csv;charset=utf-8" });

@@ -93,13 +93,14 @@ async function run() {
 
   /* people: bios, new collaborators */
   const people = await client.fetch<{ _id: string; name: string }[]>(`*[_type == "person" && !(_id in path("drafts.**"))]{ _id, name }`);
+  const allNames = await client.fetch<string[]>(`*[_type == "person"].name`, {}, { perspective: "raw" }); // incl. draft-only people
   for (const [name, bio] of Object.entries(v2.bios)) {
     const p = people.find((x) => x.name === name);
     if (p) await draft(p._id, { bio: blocks(bio), kind: "founder" });
     else log.push(`⚠ person ${name}: not found`);
   }
   for (const c of v2.collaborators)
-    if (!people.some((x) => x.name === c.name)) create({ _id: `drafts.${randomUUID()}`, _type: "person", name: c.name, kind: "collaborator", role: str(c.role) }, `person ${c.name} (bio, links and photo still to ask)`);
+    if (!allNames.some((n) => n?.trim().toLowerCase() === c.name.toLowerCase())) create({ _id: `drafts.${randomUUID()}`, _type: "person", name: c.name, kind: "collaborator", role: str(c.role) }, `person ${c.name} (bio, links and photo still to ask)`);
 
   /* lesson styles: texts + where */
   const studios = await client.fetch<{ _id: string; name: string }[]>(`*[_type == "studio" && !(_id in path("drafts.**"))]{ _id, name }`);

@@ -12,7 +12,7 @@
  *  - S1  Personen: kind = founder for Over ons → founders, collaborator for everyone else (if not set).
  *  - S4  privacyPage → legalPage `legal-privacy` (same content), then deletes privacyPage.
  *  - S10/W15 Instellingen: drops menuSearch and menuGallery.
- *  - S6  Retreats: booked = number of confirmed sign-ups (one person each).
+ *  - S6  Retreats: booked = people on confirmed sign-ups (old sign-ups keep their `persons`, new ones count 1).
  */
 import { randomUUID } from "node:crypto";
 import { existsSync } from "node:fs";
@@ -110,7 +110,7 @@ async function run() {
 
   /* S6: booked = confirmed sign-ups */
   const retreats = await client.fetch<{ _id: string; booked?: number; count: number }[]>(
-    `*[_type == "retreat"]{ _id, booked, "count": count(*[_type == "signup" && retreat._ref == string::split(^._id, "drafts.")[-1] && status == "confirmed"]) }`,
+    `*[_type == "retreat"]{ _id, booked, "count": coalesce(math::sum(*[_type == "signup" && retreat._ref == string::split(^._id, "drafts.")[-1] && status == "confirmed"]{ "p": coalesce(persons, 1) }.p), 0) }`,
     {},
     { perspective: "raw" },
   );
