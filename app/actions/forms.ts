@@ -5,12 +5,19 @@ import { getDictionary } from "@/lib/dictionary";
 import { confirmation } from "@/lib/confirmation";
 import { dateRange } from "@/lib/format";
 import { mailConfigured, sendMail } from "@/lib/mail";
+import { mailText, type MailContent } from "@/lib/mail-template";
 import { isUpcoming, sanityFetch } from "@/sanity/fetch";
 import { LAYOUT_QUERY, SIGNUP_RETREAT_QUERY } from "@/sanity/queries";
 import { writeClient } from "@/sanity/write";
 
-/** `values`: what was typed, so a failed submit refills the form (React resets it after every action). */
-export type FormState = { status: "idle" | "sent" | "invalid" | "error"; values?: Record<string, string> };
+/** A team notification for Netlify Forms (form “melding”, public/__forms.html): the browser posts it. */
+export type Notify = { soort: string; subject: string; naam: string; email: string; bericht: string };
+
+/**
+ * `values`: what was typed, so a failed submit refills the form (React resets it after every action).
+ * `notify`: set when the team is notified through Netlify Forms (see toTeam).
+ */
+export type FormState = { status: "idle" | "sent" | "invalid" | "error"; values?: Record<string, string>; notify?: Notify };
 
 const keep = (data: FormData, state: FormState): FormState =>
   state.status === "sent" ? state : { ...state, values: Object.fromEntries([...data].filter(([k, v]) => typeof v === "string" && k !== "website" && !k.startsWith("$")) as [string, string][]) };
@@ -49,11 +56,23 @@ const subscriberDoc = (email: string, lang: string, source: "footer" | "contact"
   unsubscribed: false,
 });
 
-/** Runs each step; the form succeeds if at least one of them did (stored or mailed). */
-async function anyOf(label: string, steps: Promise<unknown>[]): Promise<FormState> {
+/**
+ * Team notification (“Inschrijving”, “Bericht”, …). With a mail transport (lib/mail.ts): mailed to
+ * Instellingen → “Meldingen naar”. Deployed on Netlify without one: handed back to the browser,
+ * which posts it to Netlify Forms (components/Forms.tsx); Netlify mails it to the addresses under
+ * Forms → Form notifications. Else (local dev): logged.
+ */
+function toTeam({ soort, name, email, subject, ...content }: { soort: string; name?: string; email: string; subject: string } & MailContent): { step: Promise<unknown>; notify?: Notify } {
+  if (!mailConfigured() && process.env.NETLIFY_FORMS === "1")
+    return { step: Promise.resolve(), notify: { soort, subject, naam: name ?? "", email, bericht: mailText(content) } };
+  return { step: recipient().then((to) => sendMail({ to, replyTo: email, subject, ...content })) };
+}
+
+/** Runs each step; the form succeeds if at least one of them did (stored or the team notified). */
+async function anyOf(label: string, steps: Promise<unknown>[], notify?: Notify): Promise<FormState> {
   const results = await Promise.allSettled(steps);
   for (const r of results) if (r.status === "rejected") console.error(label, r.reason);
-  return { status: results.some((r) => r.status === "fulfilled") ? "sent" : "error" };
+  return results.some((r) => r.status === "fulfilled") ? { status: "sent", notify } : { status: "error" };
 }
 
 const langOf = (data: FormData) => (data.get("lang") === "en" ? "en" : "nl");
@@ -73,18 +92,22 @@ async function sendContactInner(data: FormData): Promise<FormState> {
   const notify = data.get("notify") === "on";
   if (!name || !EMAIL.test(email) || !message) return { status: "invalid" };
   const submittedAt = new Date().toISOString();
-  return anyOf("contact form", [
-    store({ _id: `message.${randomUUID()}`, _type: "message", status: "new", name, email, subject, message, notify, lang, submittedAt }),
-    ...(notify ? [store(subscriberDoc(email, lang, "contact", name), { once: true })] : []),
-    recipient().then((to) =>
-      sendMail({
-        to,
-        replyTo: email,
-        subject: `Website: ${subject || "bericht"} (${name})`,
-        text: [`Naam: ${name}`, `E-mail: ${email}`, `Onderwerp: ${subject || "-"}`, `Op de hoogte houden: ${notify ? "ja" : "nee"}`, "", message].join("\n"),
-      }),
-    ),
-  ]);
+  const team = toTeam({
+    soort: "Bericht",
+    name,
+    email,
+    subject: `Website: ${subject || "bericht"} (${name})`,
+    text: [`Naam: ${name}`, `E-mail: ${email}`, `Onderwerp: ${subject || "-"}`, `Op de hoogte houden: ${notify ? "ja" : "nee"}`, "", message].join("\n"),
+  });
+  return anyOf(
+    "contact form",
+    [
+      store({ _id: `message.${randomUUID()}`, _type: "message", status: "new", name, email, subject, message, notify, lang, submittedAt }),
+      ...(notify ? [store(subscriberDoc(email, lang, "contact", name), { once: true })] : []),
+      team.step,
+    ],
+    team.notify,
+  );
 }
 
 /** Footer "Hou me op de hoogte": stored as a subscriber (Studio → Nieuwsbrief) + a mail to the team. */
@@ -96,10 +119,8 @@ async function subscribeInner(data: FormData): Promise<FormState> {
   if (field(data, "website")) return { status: "sent" };
   const email = field(data, "email", 200);
   if (!EMAIL.test(email)) return { status: "invalid" };
-  return anyOf("subscribe", [
-    store(subscriberDoc(email, langOf(data), "footer"), { once: true }),
-    recipient().then((to) => sendMail({ to, replyTo: email, subject: "Website: nieuwe inschrijving nieuwsbrief", text: `Graag op de hoogte houden: ${email}` })),
-  ]);
+  const team = toTeam({ soort: "Nieuwsbrief", email, subject: "Website: nieuwe inschrijving nieuwsbrief", text: `Graag op de hoogte houden: ${email}` });
+  return anyOf("subscribe", [store(subscriberDoc(email, langOf(data), "footer"), { once: true }), team.step], team.notify);
 }
 
 /**
@@ -192,29 +213,29 @@ async function signupInner(data: FormData): Promise<FormState> {
     [t.diet, diet],
     [t.message, message],
   ].filter(([, v]) => v) as [string, string][];
+  const team = toTeam({
+    soort: waitlist ? "Wachtlijst" : "Inschrijving",
+    name,
+    email,
+    subject: `${waitlist ? "Wachtlijst" : "Inschrijving"} ${retreatNl.title ?? title}: ${name}`,
+    heading: `${waitlist ? "Wachtlijst" : "Nieuwe inschrijving"}: ${name}`,
+    text: `${retreatNl.title ?? title} (${dateRange("nl", retreat.startDate, retreat.endDate)})${waitlist ? "\n\nDe retreat is volzet: dit is een aanvraag voor de wachtlijst." : ""}`,
+    rows: [
+      ["Naam", name],
+      ["E-mail", email],
+      ["GSM", phone],
+      ["Kamer", room],
+      ...answers.map((a) => [a.labelNl, a.answerNl] as [string, string]),
+      ["Dieet", diet],
+      ["Bericht", message],
+      ["Taal", lang],
+    ],
+    footnote: autoConfirm
+      ? "Bekijk en beheer in de Studio → Inschrijvingen. De bevestigingsmail is automatisch verstuurd."
+      : "Bekijk en beheer in de Studio → Inschrijvingen. Bevestigingsmail versturen: open de inschrijving → “Bevestigingsmail”.",
+  });
   const mails = [
-    recipient().then((to) =>
-      sendMail({
-        to,
-        replyTo: email,
-        subject: `${waitlist ? "Wachtlijst" : "Inschrijving"} ${retreatNl.title ?? title}: ${name}`,
-        heading: `${waitlist ? "Wachtlijst" : "Nieuwe inschrijving"}: ${name}`,
-        text: `${retreatNl.title ?? title} (${dateRange("nl", retreat.startDate, retreat.endDate)})${waitlist ? "\n\nDe retreat is volzet: dit is een aanvraag voor de wachtlijst." : ""}`,
-        rows: [
-          ["Naam", name],
-          ["E-mail", email],
-          ["GSM", phone],
-          ["Kamer", room],
-          ...answers.map((a) => [a.labelNl, a.answerNl] as [string, string]),
-          ["Dieet", diet],
-          ["Bericht", message],
-          ["Taal", lang],
-        ],
-        footnote: autoConfirm
-          ? "Bekijk en beheer in de Studio → Inschrijvingen. De bevestigingsmail is automatisch verstuurd."
-          : "Bekijk en beheer in de Studio → Inschrijvingen. Bevestigingsmail versturen: open de inschrijving → “Bevestigingsmail”.",
-      }),
-    ),
+    team.step,
     ...(autoConfirm
       ? [
           sendMail({ to: email, subject: mail.subject, heading: title, photo: retreat.photo, text: mail.text, rows: yours.length ? yours : undefined }).then(() =>
@@ -224,7 +245,7 @@ async function signupInner(data: FormData): Promise<FormState> {
       : []),
   ];
   for (const r of await Promise.allSettled(mails)) if (r.status === "rejected") console.error("signup: mail", r.reason);
-  return { status: "sent" };
+  return { status: "sent", notify: team.notify };
 }
 
 /**
@@ -246,26 +267,30 @@ async function sendReviewInner(data: FormData): Promise<FormState> {
   if (!name || !EMAIL.test(email) || !text || !(rating >= 1 && rating <= 5) || !consent) return { status: "invalid" };
   const retreat = await sanityFetch({ query: SIGNUP_RETREAT_QUERY, params: { id: field(data, "retreat", 100) }, lang });
   if (!retreat) return { status: "invalid" };
-  return anyOf("review form", [
-    store({
-      _id: `reviewSubmission.${randomUUID()}`,
-      _type: "reviewSubmission",
-      status: "new",
-      retreat: { _type: "reference", _ref: retreat._id },
-      name,
-      email,
-      rating,
-      text,
-      lang,
-      submittedAt: new Date().toISOString(),
-    }),
-    recipient().then((to) =>
-      sendMail({
-        to,
-        replyTo: email,
-        subject: `Nieuwe review ${"★".repeat(rating)}: ${retreat.title ?? "retreat"} (${name})`,
-        text: [`Retreat: ${retreat.title}`, `Naam: ${name}`, `E-mail: ${email}`, `Score: ${rating}/5`, "", text, "", "Keur goed of weiger in de Studio → Reviews."].join("\n"),
+  const team = toTeam({
+    soort: "Review",
+    name,
+    email,
+    subject: `Nieuwe review ${"★".repeat(rating)}: ${retreat.title ?? "retreat"} (${name})`,
+    text: [`Retreat: ${retreat.title}`, `Naam: ${name}`, `E-mail: ${email}`, `Score: ${rating}/5`, "", text, "", "Keur goed of weiger in de Studio → Reviews."].join("\n"),
+  });
+  return anyOf(
+    "review form",
+    [
+      store({
+        _id: `reviewSubmission.${randomUUID()}`,
+        _type: "reviewSubmission",
+        status: "new",
+        retreat: { _type: "reference", _ref: retreat._id },
+        name,
+        email,
+        rating,
+        text,
+        lang,
+        submittedAt: new Date().toISOString(),
       }),
-    ),
-  ]);
+      team.step,
+    ],
+    team.notify,
+  );
 }

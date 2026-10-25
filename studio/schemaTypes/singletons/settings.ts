@@ -56,14 +56,14 @@ export const settings = defineType({
       group: "forms",
       initialValue: false,
       description:
-        "Aan = elke deelnemer krijgt meteen de bevestigingsmail van de retreat (Bevestigingsmails). Werkt pas als het verzenden naar deelnemers ingesteld is (zie README: Mail). Uit = je verstuurt ze zelf: open de inschrijving → “Bevestigingsmail”.",
+        "Aan = elke deelnemer krijgt meteen de bevestigingsmail van de retreat (Bevestigingsmails). Werkt pas als het verzenden naar deelnemers ingesteld is (SMTP_URL, zie README). Uit = je verstuurt ze zelf: open de inschrijving → “Bevestigingsmail”.",
     }),
     defineField({
       name: "notifyEmail",
       title: "Meldingen naar",
       type: "string",
       group: "forms",
-      description: "Wie krijgt een melding bij een nieuwe inschrijving, bericht of review? Meerdere adressen: scheiden met een komma. Leeg = het e-mailadres bij Contact & social.",
+      description: "Wie krijgt een melding bij een nieuwe inschrijving, bericht of review? Meerdere adressen: scheiden met een komma. Leeg = het e-mailadres bij Contact & social. Via Netlify Forms (standaard): de adressen stel je in bij Netlify → Notifications.",
       validation: (rule) =>
         rule.custom((v?: string) => (!v || v.split(",").every((a) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(a.trim())) ? true : "Geen geldig e-mailadres (meerdere: scheiden met een komma)")),
     }),

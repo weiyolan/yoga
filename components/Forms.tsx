@@ -19,12 +19,32 @@ const Honeypot = () => (
   </div>
 );
 
+/**
+ * On Netlify without a mail provider, the server hands back the team notification and the browser
+ * posts it to Netlify Forms (form “melding” in public/__forms.html), which mails it to Rita & Philippe.
+ * Once per submission; a failure here never shows: the submission itself is already stored.
+ */
+function useNotify(state: FormState) {
+  const posted = useRef<FormState["notify"]>(undefined);
+  useEffect(() => {
+    const n = state.notify;
+    if (!n || posted.current === n) return;
+    posted.current = n;
+    fetch("/__forms.html", {
+      method: "POST",
+      headers: { "Content-Type": "application/x-www-form-urlencoded" },
+      body: new URLSearchParams({ "form-name": "melding", ...n }).toString(),
+    }).catch(() => {});
+  }, [state.notify]);
+}
+
 /** Editable texts from Studio → Instellingen → Formulieren (empty = the dictionary default). */
 type Texts = { thanks?: string | null; consent?: string | null };
 
 export function NewsletterForm({ lang, thanks }: { lang: Lang; thanks?: string | null }) {
   const t = getDictionary(lang).footer;
   const [state, action, pending] = useActionState(subscribe, idle);
+  useNotify(state);
   if (state.status === "sent") return <p className="sub-done" role="status">{thanks || t.subscribed}</p>;
   return (
     <form className="sub" action={action}>
@@ -41,6 +61,7 @@ export function NewsletterForm({ lang, thanks }: { lang: Lang; thanks?: string |
 export function ContactForm({ lang, subjects, notifyLabel, thanks }: { lang: Lang; subjects: string[]; notifyLabel: string | null; thanks?: string | null }) {
   const t = getDictionary(lang).contact;
   const [state, action, pending] = useActionState(sendContact, idle);
+  useNotify(state);
   if (state.status === "sent")
     return (
       <p className="form-done" role="status">
@@ -113,6 +134,7 @@ type StepKey = "about" | "retreat" | "wishes" | "confirm";
 export function SignupForm({ lang, retreatId, rooms, form, texts, full = false }: { lang: Lang; retreatId: string; rooms: string[]; form: SignupFormDef; texts?: Texts & { terms?: string | null }; full?: boolean }) {
   const t = getDictionary(lang).signup;
   const [state, action, pending] = useActionState(signup, idle);
+  useNotify(state);
   const [step, setStep] = useState(0);
   const [dir, setDir] = useState<"fwd" | "back">("fwd");
   const [summary, setSummary] = useState<[string, string][]>([]);
@@ -368,6 +390,7 @@ export function SignupForm({ lang, retreatId, rooms, form, texts, full = false }
 export function ReviewForm({ lang, retreatId }: { lang: Lang; retreatId: string }) {
   const t = getDictionary(lang).review;
   const [state, action, pending] = useActionState(sendReview, idle);
+  useNotify(state);
   if (state.status === "sent")
     return (
       <p className="form-done" role="status">

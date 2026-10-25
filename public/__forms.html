@@ -1,0 +1,20 @@
+<!doctype html>
+<!--
+  Netlify Forms: Netlify finds the form "melding" in this static file at deploy time. The website
+  posts every team notification here (components/Forms.tsx useNotify; app/actions/forms.ts toTeam),
+  and Netlify mails it to the addresses under Site configuration → Notifications → Emails and
+  webhooks → Form submission notifications. Field names must match the Notify type.
+-->
+<html lang="nl">
+  <body>
+    <form name="melding" data-netlify="true" netlify-honeypot="bot-field" hidden>
+      <input type="hidden" name="form-name" value="melding" />
+      <input type="hidden" name="subject" data-remove-prefix />
+      <input name="bot-field" />
+      <input name="soort" />
+      <input name="naam" />
+      <input name="email" type="email" />
+      <textarea name="bericht"></textarea>
+    </form>
+  </body>
+</html>
