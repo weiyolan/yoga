@@ -20,9 +20,9 @@ import { randomUUID } from "node:crypto";
 import { createReadStream, existsSync, writeFileSync } from "node:fs";
 import path from "node:path";
 import { getCliClient } from "sanity/cli";
-import { getDictionary, type Dictionary } from "../../lib/dictionary";
-import { apiVersion, defaultLanguage, type Lang } from "../../sanity/site.config";
-import * as v2 from "./v2-content";
+import { getDictionary, type Dictionary } from "../../lib/dictionary.ts";
+import { apiVersion, defaultLanguage, type Lang } from "../../sanity/site.config.ts";
+import * as v2 from "./v2-content.ts";
 
 const DRY = process.argv.includes("--dry");
 const REPLACE = process.argv.includes("--replace");

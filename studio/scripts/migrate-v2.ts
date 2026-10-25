@@ -17,7 +17,7 @@
 import { randomUUID } from "node:crypto";
 import { existsSync } from "node:fs";
 import { getCliClient } from "sanity/cli";
-import { apiVersion } from "../../sanity/site.config";
+import { apiVersion } from "../../sanity/site.config.ts";
 
 const DRY = process.argv.includes("--dry");
 if (existsSync(".env")) process.loadEnvFile(".env");

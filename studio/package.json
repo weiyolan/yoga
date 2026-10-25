@@ -10,8 +10,8 @@
     "typegen": "sanity schema extract --force && sanity typegen generate",
     "validate": "sanity schema validate",
     "seed": "sanity exec scripts/seed.ts --with-user-token",
-    "migrate:v2": "sanity exec scripts/migrate-v2.ts --with-user-token",
-    "content:v2": "sanity exec scripts/content-v2.ts --with-user-token",
+    "migrate:v2": "sanity exec scripts/migrate-v2.ts --with-user-token --",
+    "content:v2": "sanity exec scripts/content-v2.ts --with-user-token --",
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {

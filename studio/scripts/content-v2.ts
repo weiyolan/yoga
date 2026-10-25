@@ -9,9 +9,9 @@
 import { randomUUID } from "node:crypto";
 import { existsSync } from "node:fs";
 import { getCliClient } from "sanity/cli";
-import { getDictionary } from "../../lib/dictionary";
-import { apiVersion } from "../../sanity/site.config";
-import * as v2 from "./v2-content";
+import { getDictionary } from "../../lib/dictionary.ts";
+import { apiVersion } from "../../sanity/site.config.ts";
+import * as v2 from "./v2-content.ts";
 
 const DRY = process.argv.includes("--dry");
 if (existsSync(".env")) process.loadEnvFile(".env");
