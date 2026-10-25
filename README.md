@@ -47,7 +47,7 @@ The Studio lives in `studio/`, an npm workspace: the root `npm install` installs
   - Neither (local dev): logged. Submissions are always stored in Sanity as well.
 - **Confirmation mails.** The text a participant gets lives in Studio → Bevestigingsmails (`confirmationMail`, reusable like the sign-up forms: a retreat picks one, empty = the one marked "Standaard"). It fills in `{naam}`, `{retreat}`, `{datum}` and `{voorschot}`, has a payment block (only for retreats with a deposit) and a waiting-list version (`lib/confirmation.ts`). It is sent automatically only when Instellingen → Formulieren → "Bevestigingsmail automatisch versturen" is on (needs `SMTP_URL`, or Resend with a verified domain; Netlify Forms only notifies the team). Otherwise "Bevestigingsmail" on a sign-up (`studio/actions/confirmation-mail.tsx`) opens it, filled in and in the participant's language, in your own mail app (and copies the text). Both mark the sign-up "Bevestigingsmail verstuurd op".
 - **Sign-ups in the Studio.** Inschrijvingen shows a red count of new sign-ups (also on Berichten and Reviews). A sign-up opens as a readable card (`studio/components/SignupView.tsx`) with status buttons; "Bevestigd" counts towards `booked` on the retreat (`studio/lib/booked.ts`). With a capacity set, the site always shows "nog x plaatsen" / "volzet"; a full retreat's button becomes "Zet me op de wachtlijst" and its form a waiting-list request (`waitlist: true`). Inschrijvingen → Tabel lists every sign-up with a column per form field, filterable per retreat and status, with CSV export. The form on the site asks a few questions at a time with a progress bar (`SignupForm` in `components/Forms.tsx`).
-- **Reviews.** Past retreat pages have a review form (`#review`). A review is stored privately (`reviewSubmission.<uuid>`, with e-mail) under Studio → Reviews; "Gepubliceerd" copies it without e-mail to a public `review`, shown on that retreat page and, from 4★, on Home after the curated testimonials. "Geweigerd" takes it offline again.
+- **Reviews.** Each past retreat has a review page, `/retreats/<slug>/review` (not linked on the site, `noindex`; old `#review` links forward to it). Rita & Philippe send its link to participants (Studio → retreat → "Kopieer reviewlink"). A review is stored privately (`reviewSubmission.<uuid>`, with e-mail) under Studio → Reviews; "Gepubliceerd" copies it without e-mail to a public `review`, shown on that retreat page and, from 4★, on Home after the curated testimonials. "Geweigerd" takes it offline again.
 - **AI (✨).** Studio actions "Alt-tekst genereren" (on a photo), "Vertaal NL → EN" (any document; fills empty English fields) and Fotobank → "Alt-teksten aanvullen" call `/api/ai`, which uses Gemini (`GEMINI_API_KEY`). The Studio proves the caller can edit the dataset by creating a one-off private `aiTicket` document that the route checks and deletes. Results land in the draft (bulk alt texts are published directly), so check them before publishing.
 
 ## Languages & URLs
@@ -55,6 +55,8 @@ The Studio lives in `studio/`, an npm workspace: the root `npm install` installs
 | NL (root) | EN |
 |---|---|
 | `/`, `/retreats`, `/retreats/<slug>` | `/en`, `/en/retreats`, `/en/retreats/<slug>` |
+| `/faq` | `/en/faq` |
+| `/retreats/<slug>/review` (noindex, not linked) | `/en/retreats/<slug>/review` |
 | `/lessen`, `/over-ons` | `/en/lessons`, `/en/about` |
 | `/retreats/<slug>/inschrijven` | `/en/retreats/<slug>/sign-up` |
 | `/gallery`, `/contact` | `/en/gallery`, `/en/contact` |

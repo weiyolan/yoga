@@ -21,7 +21,7 @@ type PanelKey = "retreats" | "lessons" | "about";
 type Props = { lang: Lang; layout: Layout | null; children?: ReactNode };
 
 /** Pages without a hero get the solid header straight away. */
-const SOLID: Route[] = ["gallery", "contact", "privacy", "terms", "cancellation", "cookies"];
+const SOLID: Route[] = ["gallery", "contact", "faq", "privacy", "terms", "cancellation", "cookies"];
 
 /** "Yoga, Zen & Tonic" → the ampersand in italic ember. */
 const logo = (name: string) =>
@@ -212,8 +212,15 @@ export function Nav({ lang, layout, children }: Props) {
         [t.chips.collaborators, href(lang, "about", { hash: "samenwerkingen" })],
       ],
     },
-    { route: "gallery", label: t.gallery },
-    { route: "contact", label: t.contact },
+    {
+      route: "gallery",
+      label: t.gallery,
+      // Mobile: the gallery categories that have photos (the chips on the page, via #natuur etc.)
+      subs: Object.entries(getDictionary(lang).gallery.categories)
+        .filter(([c]) => layout?.galleryCategories?.includes(c))
+        .map(([c, label]) => [label, href(lang, "gallery", { hash: c })] as [string, string]),
+    },
+    { route: "contact", label: t.contact, subs: [[t.faq, href(lang, "faq")]] },
   ];
 
   const navClass = ["nav", solid && "solid", scrolled && "scrolled", tucked && !mobile && !panel && "tucked", mobile && "menu-open", panel && "panel-open"].filter(Boolean).join(" ");

@@ -254,9 +254,6 @@ export function SignupForm({ lang, retreatId, rooms, form, texts, full = false }
             <input id="s-phone" name="phone" type="tel" defaultValue={v.phone} autoComplete="tel" />
           </div>
         ) : null}
-        <p className="muted small full" style={{ margin: 0 }}>
-          {t.group}
-        </p>
       </fieldset>
 
       {stepOf("retreat") >= 0 ? (
@@ -386,7 +383,7 @@ export function SignupForm({ lang, retreatId, rooms, form, texts, full = false }
   );
 }
 
-/** Review of a past retreat (#review): moderated in Studio → Reviews before it shows on the site. */
+/** Review of a past retreat (/retreats/<slug>/review): moderated in Studio → Reviews before it shows on the site. */
 export function ReviewForm({ lang, retreatId }: { lang: Lang; retreatId: string }) {
   const t = getDictionary(lang).review;
   const [state, action, pending] = useActionState(sendReview, idle);

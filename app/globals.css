@@ -215,6 +215,20 @@ blockquote { margin: 0 auto; max-width: 30ch; font: clamp(1.6rem, 3vw, 2.4rem)/1
 @media (max-width: 860px) { .mood { grid-template-columns: 1fr; } }
 .detail { display: grid; grid-template-columns: minmax(0, 1fr) 340px; gap: 64px; align-items: start; }
 /* past retreat: nutshell + facts, no booking box */
+/* Veelgestelde vragen */
+.faq { max-width: 860px; }
+.faq-intro { margin: -16px 0 36px; }
+.faq-group + .faq-group { margin-top: 48px; }
+.faq-group h2 { font-size: clamp(1.5rem, 3vw, 2rem); margin-bottom: 12px; }
+.faq details { border-bottom: 1px solid var(--line); }
+.faq details:first-of-type { border-top: 1px solid var(--line); }
+.faq summary { list-style: none; cursor: pointer; display: flex; justify-content: space-between; gap: 24px; padding: 20px 0; font: 500 1.05rem/1.4 var(--sans); }
+.faq summary::-webkit-details-marker { display: none; }
+.faq summary::after { content: "+"; color: var(--ember); font-size: 1.4rem; line-height: 1; transition: transform .2s; }
+.faq details[open] summary::after { transform: rotate(45deg); }
+.faq-a { padding: 0 0 20px; color: var(--ink-soft); max-width: 68ch; }
+.faq-a p { margin: 0 0 12px; }
+.faq-more { margin-top: 40px; }
 .recap { display: grid; grid-template-columns: minmax(0, 1.4fr) minmax(0, 1fr); gap: 64px; align-items: start; }
 .facts { display: grid; grid-template-columns: 1fr 1fr; gap: 26px 32px; margin: 0; padding: 26px 0 0; border-top: 1px solid var(--ember); }
 .facts dt { font: 600 .65rem/1 var(--sans); letter-spacing: .16em; text-transform: uppercase; color: var(--ember); margin-bottom: 8px; }
@@ -341,7 +355,7 @@ select:focus-visible { outline: none; border-bottom-color: var(--ember); }
 .footer a { text-decoration: none; display: block; margin: 6px 0; color: #B9BFBE; } .footer a:hover { color: #fff; }
 .footer .logo { font: 1.8rem/1 var(--serif); color: #fff; margin-bottom: 12px; }
 .footer .sub { display: flex; gap: 8px; margin-top: 16px; }
-.footer .sub input { flex: 1; min-width: 0; border: 0; border-bottom: 1px solid #888; padding: 10px 0; background: transparent; color: #fff; font: inherit; } .footer .sub input::placeholder { color: #999; } .footer .sub input:focus { outline: none; border-color: var(--ember); }
+.footer .sub input { flex: 1 1 180px; min-width: 0; border: 0; border-bottom: 1px solid #888; padding: 10px 0; background: transparent; color: #fff; font: inherit; } .footer .sub input::placeholder { color: #999; } .footer .sub input:focus { outline: none; border-color: var(--ember); }
 .footer .legal { border-top: 1px solid #444; margin-top: 48px; padding-top: 20px; display: flex; justify-content: space-between; color: #888; font-size: .8rem; flex-wrap: wrap; gap: 10px; }
 
 /* split (contact) */

@@ -13,6 +13,7 @@
     "migrate:v2": "sanity exec scripts/migrate-v2.ts --with-user-token --",
     "content:v2": "sanity exec scripts/content-v2.ts --with-user-token --",
     "migrate:mails": "sanity exec scripts/migrate-mails.ts --with-user-token --",
+    "content:v3": "sanity exec scripts/content-v3.ts --with-user-token --",
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {

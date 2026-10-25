@@ -129,6 +129,7 @@ export const LAYOUT_QUERY = defineQuery(`*[_id == "settings"][0]{
   "nextRetreat": *[_type == "retreat" && ${UPCOMING}] | order(startDate asc)[0]${RETREAT_CARD},
   "styles": *[_type == "yogaClass"] | order(orderRank asc){ _id, name, "slug": slug.current, "what": ${t("what")} },
   "studios": *[_type == "studio"] | order(name asc).name,
+  "galleryCategories": array::unique(*[_type == "mediaItem" && showInGallery != false].categories[]),
   "foundersPhoto": *[_id == "homePage"][0].aboutPhoto->${MEDIA},
   "texts": {
     "menuFounders": ${t("menuFounders")},
@@ -289,6 +290,14 @@ export const ABOUT_QUERY = defineQuery(`*[_id == "aboutPage"][0]{
   "collaboratorsIntro": ${t("collaboratorsIntro")},
   // everyone except Rita & Philippe, automatically
   "collaborators": *[_type == "person" && coalesce(kind, "collaborator") != "founder" && !(_id in ^.founders[]._ref) && hidden != true] | order(coalesce(orderRank, 1000) asc, name asc)${PERSON},
+  "seo": seo${SEO}
+}`);
+
+/** Veelgestelde vragen (/faq). */
+export const FAQ_QUERY = defineQuery(`*[_id == "faqPage"][0]{
+  "title": ${t("title")},
+  "intro": ${t("intro")},
+  "groups": groups[]{ _key, "title": ${t("title")}, "items": items[]{ _key, "question": ${t("question")}, "answer": ${t("answer")} } },
   "seo": seo${SEO}
 }`);
 

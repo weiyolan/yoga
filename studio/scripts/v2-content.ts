@@ -171,3 +171,91 @@ export const legal = {
     sections: [],
   },
 };
+
+/**
+ * Veelgestelde vragen (/faq), a first version from what's on the site and in the talks. Text in
+ * [brackets] is for Rita & Philippe to fill in or check.
+ */
+const qa = (q: { nl: string; en: string }, a: { nl: string; en: string }) => ({ q, a });
+export const faq = {
+  title: { nl: "Veelgestelde vragen", en: "Frequently asked questions" },
+  intro: { nl: "Alles wat je wil weten voor je je inschrijft. Staat je vraag er niet bij? Stuur ons gerust een bericht.", en: "Everything you'd like to know before signing up. Question not here? Just send us a message." },
+  groups: [
+    {
+      title: { nl: "Retreats", en: "Retreats" },
+      items: [
+        qa(
+          { nl: "Moet ik ervaring hebben met yoga?", en: "Do I need yoga experience?" },
+          { nl: "Nee. Beginners en doorgewinterde yogi's zijn allebei welkom: in elke les tonen we varianten, zodat iedereen op zijn eigen tempo meedoet.", en: "No. Beginners and experienced yogis are both welcome: every class shows variations, so everyone joins at their own pace." },
+        ),
+        qa(
+          { nl: "Kan ik alleen komen?", en: "Can I come on my own?" },
+          { nl: "Zeker. Veel deelnemers komen alleen. De groepen zijn klein en de sfeer is warm, dus je bent snel onder vrienden. Met je lief of vrienden komen kan natuurlijk ook.", en: "Absolutely. Many participants come on their own. Groups are small and the atmosphere is warm, so you'll soon feel among friends. Coming with your partner or friends is fine too." },
+        ),
+        qa(
+          { nl: "Wat is inbegrepen?", en: "What's included?" },
+          { nl: "Dat verschilt per retreat: je vindt het onder Praktisch op de pagina van de retreat. Je reis naar de locatie regel je zelf.", en: "That depends on the retreat: you'll find it under Practical on the retreat's page. You arrange your own travel to the venue." },
+        ),
+        qa(
+          { nl: "Wat eten we?", en: "What do we eat?" },
+          { nl: "Gezonde, vegetarische maaltijden. Allergieën of dieetwensen geef je door bij het inschrijven; we houden er rekening mee.", en: "Healthy, vegetarian meals. Let us know about allergies or dietary needs when you sign up; we'll take them into account." },
+        ),
+        qa(
+          { nl: "Wat neem ik mee?", en: "What should I bring?" },
+          { nl: "Comfortabele kleding, goede wandelschoenen en een badpak. [Yogamatten voorzien of zelf meebrengen?] Een paar dagen voor de retreat krijg je een lijstje met de praktische info.", en: "Comfortable clothes, good walking shoes and swimwear. [Yoga mats provided or bring your own?] A few days before the retreat you'll get a list with the practical info." },
+        ),
+      ],
+    },
+    {
+      title: { nl: "Inschrijven & betalen", en: "Signing up & payment" },
+      items: [
+        qa(
+          { nl: "Hoe schrijf ik me in?", en: "How do I sign up?" },
+          { nl: "Via de knop Inschrijven op de pagina van de retreat, per persoon. Je krijgt daarna een bevestiging per mail.", en: "With the Sign up button on the retreat's page, per person. You'll then get a confirmation by email." },
+        ),
+        qa(
+          { nl: "Wanneer is mijn plaats zeker?", en: "When is my spot confirmed?" },
+          { nl: "Zodra we je voorschot ontvangen hebben. Hoe je dat betaalt, staat in de bevestigingsmail.", en: "As soon as we've received your deposit. How to pay is in the confirmation email." },
+        ),
+        qa(
+          { nl: "De retreat is volzet. Wat nu?", en: "The retreat is full. What now?" },
+          { nl: "Zet je op de wachtlijst via dezelfde knop. Komt er een plaats vrij, dan laten we het je meteen weten.", en: "Join the waiting list with the same button. If a spot opens up, we'll let you know straight away." },
+        ),
+        qa(
+          { nl: "En als ik moet annuleren?", en: "What if I have to cancel?" },
+          { nl: "Dat staat in de annulatievoorwaarden. We raden een eigen reis- en annulatieverzekering aan.", en: "See the cancellation policy. We recommend your own travel and cancellation insurance." },
+        ),
+      ],
+    },
+    {
+      title: { nl: "Lessen", en: "Classes" },
+      items: [
+        qa(
+          { nl: "Waar en wanneer zijn de lessen?", en: "Where and when are the classes?" },
+          { nl: "Alle lessen, studio's en uren vind je op de pagina Lessen, bovenaan in de planning.", en: "All classes, studios and times are on the Classes page, in the schedule at the top." },
+        ),
+        qa(
+          { nl: "Kan ik een privéles boeken?", en: "Can I book a private class?" },
+          { nl: "Ja, alleen of met een kleine groep. Stuur ons een bericht met wat je zoekt, dan plannen we samen een moment.", en: "Yes, on your own or with a small group. Send us a message with what you're looking for and we'll plan a moment together." },
+        ),
+      ],
+    },
+  ],
+};
+
+/** Eifel: the practical info from eiffel.txt (the 2025 edition; check prices and dates for 2026). */
+export const eifel = {
+  prices: [{ label: { nl: "All-in, per persoon", en: "All-in, per person" }, amount: 530 }],
+  included: {
+    nl: ["Alle yogalessen", "Workshops: meditatie, pranayama, …", "Dagelijkse hikes", "Vegetarische maaltijden, snacks, thee, koffie en water", "Sauna en whirlpool"],
+    en: ["All yoga classes", "Workshops: meditation, pranayama, …", "Daily hikes", "Vegetarian meals, snacks, tea, coffee and water", "Sauna and hot tub"],
+  },
+  notIncluded: { nl: ["Je reis", "Massages (optioneel, ter plaatse te boeken)"], en: ["Your travel", "Massages (optional, book on site)"] },
+  programme: [
+    { title: { nl: "Yoga voor iedereen", en: "Yoga for everyone" }, text: { nl: "Ashtanga, Vinyasa en Yin met Rita & Elena.", en: "Ashtanga, Vinyasa and Yin with Rita & Elena." } },
+    { title: { nl: "Workshops", en: "Workshops" }, text: { nl: "Meditatie, pranayama en meer.", en: "Meditation, pranayama and more." } },
+    { title: { nl: "Hikes", en: "Hikes" }, text: { nl: "Elke dag een wandeling door de natuur.", en: "A walk through nature every day." } },
+    { title: { nl: "Lekker eten", en: "Good food" }, text: { nl: "Vegetarisch, door Elif & Guy van Foodie Jive.", en: "Vegetarian, by Elif & Guy of Foodie Jive." } },
+    { title: { nl: "Verwennerij", en: "Pampering" }, text: { nl: "Sauna, whirlpool en optioneel een massage.", en: "Sauna, hot tub and an optional massage." } },
+  ],
+};

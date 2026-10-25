@@ -16,6 +16,7 @@ sanity/                  shared with the Next.js app
 
 | Studio | Type | Notes |
 |---|---|---|
+| Veelgestelde vragen | `faqPage` (singleton) | `/faq`: title, intro, groups of question + answer (fold-out, FAQPage data for Google). Linked from the footer, Contact and the mobile menu. |
 | Instellingen | `settings` (singleton) | name, slogan, e-mail, GSM, socials, default sign-up link, default SEO |
 | Home | `homePage` (singleton) | opening image, intro (≤ 400 chars), featured retreat (empty = next one), ≤ 3 testimonials, "who are we" |
 | **Fotobank** | `mediaItem` | **every photo is stored once**: hotspot, alt text (SEO), categories, "show in gallery", "highlighted". No title or place (the gallery shows none). Pages only *reference* photos. |
@@ -100,6 +101,7 @@ The frontend needs `NEXT_PUBLIC_SANITY_PROJECT_ID` and `NEXT_PUBLIC_SANITY_DATAS
 | `npm run migrate:v2` | one-off v2 migration on the live dataset (Fotobank fields, Coaching → Lessen, principles → values, person kind, privacy → legal page, booked). `-- --dry` first |
 | `npm run content:v2` | one-off v2 texts (docs/plan.html Part 1, `scripts/v2-content.ts`) as **drafts**, for R&P to review and publish. Run after `migrate:v2`. `-- --dry` first |
 | `npm run migrate:mails` | one-off: the confirmation mail texts in Instellingen → a "Standaard" Bevestigingsmail (published), then unsets them from Instellingen. `-- --dry` first |
+| `npm run content:v3` | one-off drafts: Veelgestelde vragen (first version) + Eifel prices / inbegrepen / programma (from `eiffel.txt`, only where empty). `-- --dry` first |
 
 ## Seed content
 

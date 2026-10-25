@@ -19,6 +19,7 @@ export const resolve: PresentationPluginOptions["resolve"] = {
     { route: "/retreats/:slug", filter: `_type == "retreat" && slug.current == $slug` },
     { route: "/en/retreats/:slug", filter: `_type == "retreat" && slug.current == $slug` },
     { route: "/retreats/:slug/inschrijven", filter: `_type == "retreat" && slug.current == $slug` },
+    { route: "/retreats/:slug/review", filter: `_type == "retreat" && slug.current == $slug` },
     { route: "/en/retreats/:slug/sign-up", filter: `_type == "retreat" && slug.current == $slug` },
     ...page("lessen", "lessonsPage"),
     { route: "/en/lessons", filter: `_id == "lessonsPage"` },
@@ -26,6 +27,8 @@ export const resolve: PresentationPluginOptions["resolve"] = {
     { route: "/en/about", filter: `_id == "aboutPage"` },
     ...page("gallery", "galleryPage"),
     { route: "/en/gallery", filter: `_id == "galleryPage"` },
+    ...page("faq", "faqPage"),
+    { route: "/en/faq", filter: `_id == "faqPage"` },
     ...page("contact", "contactPage"),
     { route: "/en/contact", filter: `_id == "contactPage"` },
     ...LEGAL_PAGES.flatMap((p) => [

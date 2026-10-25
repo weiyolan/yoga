@@ -33,6 +33,7 @@ export function Footer({ lang, layout }: { lang: Lang; layout: LAYOUT_QUERY_RESU
             <Link href={href(lang, "about")}>{d.nav.about}</Link>
             <Link href={href(lang, "gallery")}>{d.nav.gallery}</Link>
             <Link href={href(lang, "contact")}>{d.nav.contact}</Link>
+            <Link href={href(lang, "faq")}>{d.nav.faq}</Link>
           </div>
           <div>
             <h4>{t.follow}</h4>

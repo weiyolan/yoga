@@ -299,6 +299,10 @@ async function seed() {
     placeTitle: str({ nl: "De Belgische Eifel", en: "The Belgian Eifel" }),
     placePhotos: ms("hike", "yogaOutside"),
     hosts: refs([rita, philippe]),
+    prices: v2.eifel.prices.map((p) => ({ _key: key(), _type: "price", label: str(p.label), amount: p.amount })),
+    included: lines(v2.eifel.included.nl, v2.eifel.included.en),
+    notIncluded: lines(v2.eifel.notIncluded.nl, v2.eifel.notIncluded.en),
+    programme: v2.eifel.programme.map((p) => ({ _key: key(), _type: "programmeItem", title: str(p.title), text: txt(p.text) })),
     closingTitle: str({ nl: "Zin om mee te gaan?", en: "Want to join?" }),
     closingPhoto: m("campfire"),
   });
@@ -413,6 +417,17 @@ async function seed() {
     values: v2.about.values.map((v) => ({ _key: key(), _type: "value", title: str(v.title), text: txt(v.text) })),
     collaboratorsTitle: str(v2.about.collaboratorsTitle),
     collaboratorsIntro: txt(v2.about.collaboratorsIntro),
+  });
+  await singleton("faqPage", {
+    _type: "faqPage",
+    title: str(v2.faq.title),
+    intro: txt(v2.faq.intro),
+    groups: v2.faq.groups.map((g) => ({
+      _key: key(),
+      _type: "faqGroup",
+      title: str(g.title),
+      items: g.items.map((i) => ({ _key: key(), _type: "faqItem", question: str(i.q), answer: txt(i.a) })),
+    })),
   });
   await singleton("galleryPage", { _type: "galleryPage", title: str({ nl: "Momenten", en: "Moments" }) });
   await singleton("contactPage", {

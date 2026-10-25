@@ -1,6 +1,5 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { ReviewForm } from "@/components/Forms";
 import { HashRedirect } from "@/components/HashRedirect";
 import { Lightbox, LightboxTrigger, type LightboxItem } from "@/components/Lightbox";
 import { fullSrc, Photo } from "@/components/Photo";
@@ -9,7 +8,7 @@ import { Hero, ReviewList } from "@/components/sections";
 import { getDictionary } from "@/lib/dictionary";
 import { dateRange, euro, join, placesLabel, spotsLeft } from "@/lib/format";
 import { buildMetadata } from "@/lib/metadata";
-import { href, langParam, signupHref } from "@/lib/routes";
+import { href, langParam, reviewHref, signupHref } from "@/lib/routes";
 import { isUpcoming, sanityFetch } from "@/sanity/fetch";
 import type { Media } from "@/sanity/image";
 import { RETREAT_BY_SLUG_QUERY, RETREAT_SLUGS_QUERY } from "@/sanity/queries";
@@ -137,17 +136,15 @@ export default async function RetreatPage({ params }: PageProps<"/[lang]/retreat
           </section>
         ) : null}
 
-        <section className="s" id="review">
-          <div className="wrap">
-            <span className="label">{d.review.label}</span>
-            <h2>{d.review.title}</h2>
-            <ReviewList lang={lang} reviews={r.reviews ?? []} />
-            <div style={{ maxWidth: 720, marginTop: r.reviews?.length ? 56 : 0 }}>
-              <h3 className="summary-title">{d.review.formTitle}</h3>
-              <ReviewForm lang={lang} retreatId={r._id} />
+        {r.reviews?.length ? (
+          <section className="s" id="reviews">
+            <div className="wrap">
+              <span className="label">{d.review.label}</span>
+              <h2>{d.review.title}</h2>
+              <ReviewList lang={lang} reviews={r.reviews} />
             </div>
-          </div>
-        </section>
+          </section>
+        ) : null}
 
         <section className="s center">
           <div className="wrap">
@@ -162,6 +159,8 @@ export default async function RetreatPage({ params }: PageProps<"/[lang]/retreat
             </div>
           </div>
         </section>
+        {/* Old review links (…#review) → the review page. */}
+        <HashRedirect hash="review" to={reviewHref(lang, r.slug)} />
       </Lightbox>
     );
   }
@@ -361,6 +360,12 @@ export default async function RetreatPage({ params }: PageProps<"/[lang]/retreat
                 <>
                   <dt>{t.stay}</dt>
                   <dd>{r.venue}</dd>
+                </>
+              ) : null}
+              {r.hosts?.length ? (
+                <>
+                  <dt>{t.hosts}</dt>
+                  <dd>{names(r.hosts.map((p) => p.name))}</dd>
                 </>
               ) : null}
             </dl>

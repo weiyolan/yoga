@@ -192,6 +192,7 @@ export const structure: StructureResolver = (S) =>
       singleton(S, "lessonsPage", "Lessen (pagina)", ActivityIcon),
       singleton(S, "aboutPage", "Over ons", UsersIcon),
       singleton(S, "galleryPage", "Gallery", ImagesIcon),
+      singleton(S, "faqPage", "Veelgestelde vragen", HelpCircleIcon),
       singleton(S, "contactPage", "Contact", EnvelopeIcon),
 
       /* ---- 4. legal ---- */

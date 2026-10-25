@@ -249,7 +249,7 @@ async function signupInner(data: FormData): Promise<FormState> {
 }
 
 /**
- * Review form (past retreat pages, #review): stored as a private `reviewSubmission` (Studio → Reviews)
+ * Review form (/retreats/<slug>/review): stored as a private `reviewSubmission` (Studio → Reviews)
  * + a mail to the team. Only once the team sets it to "Gepubliceerd" does a public copy (no e-mail) go online.
  */
 export async function sendReview(_: FormState, data: FormData): Promise<FormState> {
