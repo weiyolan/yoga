@@ -89,12 +89,12 @@
 <tr><td>Three words</td><td>“Kracht, rust &amp; een goed glas.”<br>“Sterk, zen en een beetje tonic.”</td><td>“Strength, calm &amp; a good glass.”<br>“Strong, zen and a little tonic.”</td></tr>
 <tr><td>Nature / retreats</td><td>“Yoga, natuur en warme mensen.”<br>“Even weg. Helemaal terug.”<br>“Ademen in de natuur.”</td><td>“Yoga, nature and warm people.”<br>“Get away. Come back whole.”<br>“Breathe in the wild.”</td></tr>
 </table>
-<p><b>Recommendation</b>: “Yoga, zen &amp; een scheutje tonic.” as the title (it explains the name and the wink) + “Geen zweverig gedoe. Wél yoga, natuur en warme mensen.” as the subtitle (already the intro title, so move it up or pick a new intro title).</p></div>
+<p><b>Chosen (to confirm with R&amp;P)</b>: NL “Yoga, zen &amp; een scheutje tonic.” · EN “Yoga, zen and a splash of tonic.” It explains the name and the gin &amp; tonic wink in one line. Subtitle on Home: “Geen zweverig gedoe. Wél yoga, natuur en warme mensen.” (moves up from the intro title; the intro gets a new title, e.g. “Hoe het begon”). “Beyond the mat, into the moment” is <b>removed everywhere</b>.</p></div>
 
 <h3 id="home-c">Home (<code>homePage</code>)</h3>
 <table>
 <tr><th>Field</th><th>Content</th><th>Src</th></tr>
-<tr><td><code>hero.title</code> <span class="tag upd">update</span></td><td>The new tagline (see above).</td><td class="src">#1</td></tr>
+<tr><td><code>hero.title</code> <span class="tag upd">update</span></td><td>NL “Yoga, zen &amp; een scheutje tonic.” · EN “Yoga, zen and a splash of tonic.”; <code>hero.subtitle</code>: “Geen zweverig gedoe. Wél yoga, natuur en warme mensen.” / “No woolly stuff. Just yoga, nature and warm people.”; <code>introTitle</code> → “Hoe het begon” / “How it started”.</td><td class="src">#1</td></tr>
 <tr><td><code>introTitle</code></td><td>Keep: “Geen zweverig gedoe. Wél yoga, natuur en warme mensen.” (read out, not questioned).</td><td class="src">#2 01:56</td></tr>
 <tr><td><code>intro</code> <span class="tag new">new</span></td><td>Replaces the placeholder “[1 paragraaf: achtergrond en historie]”. The story: Rita came back from her first retreat (as a participant). It was nice, but she missed a lot of things. Philippe: “Why don't you organise it yourself?” → that's the spirit: what you missed, we do.</td><td class="src">#2 00:45–01:22</td></tr>
 <tr><td><code>aboutText</code> <span class="tag upd">update</span></td><td>Short summary of the two, complementary (see the bios).</td><td class="src">#3 09:29–11:21</td></tr>
@@ -235,7 +235,7 @@
 <tr><td>W8</td><td>Retreat detail</td><td>When an upcoming retreat is <b>full</b>: the button stays and becomes “Zet me op de wachtlijst” → the same sign-up page (W22) in waitlist mode (name, e-mail, phone, retreat questions, message); stored as a sign-up with status “Wachtlijst”, with its own confirmation mail. The <code>waitlist</code> flag already exists; check it end to end (the counter rises only on “Bevestigd”).</td><td><code>components/Forms.tsx</code>, <code>app/actions/forms.ts</code></td><td>P1</td><td class="src">#7 01:34–02:22, Yolan</td></tr>
 <tr><td>W9</td><td>Sign-up form</td><td><b>One person at a time</b>: remove the persons picker; note: “Komen jullie met meer? Laat iedereen zich apart inschrijven.” Render the <b>per-retreat questions</b> (S5). Add a consent checkbox for the T&amp;Cs + cancellation terms + the line “eigen reisverzekering”.</td><td><code>Forms.tsx</code>, <code>forms.ts</code></td><td>P1</td><td class="src">#7 02:36–04:04, #6 00:00, #9 04:37</td></tr>
 <tr><td>W10</td><td>Mails</td><td><b>HTML mails in the YZT style</b> (logo, colours, photo) instead of plain text: confirmation, waitlist, notification to R&amp;P. Resend supports <code>html</code>.</td><td><code>lib/mail.ts</code>, new <code>lib/mail-template.ts</code></td><td>P1</td><td class="src">#7 00:19–00:27</td></tr>
-<tr><td>W11</td><td>Lessen / nav</td><td>Nav sub-items per lesson all point to the same spot → <b>keep the sub-items, with an anchor per style</b>: <code>#ashtanga</code>, <code>#vinyasa</code>, <code>#pilates-mat</code>, <code>#pilates-reformer</code> (from <code>yogaClass.slug</code>) on each style tile, plus scroll margin under the fixed nav. Same for the mobile menu chips.</td><td><code>Nav.tsx</code>, <code>lessen/page.tsx</code>, <code>components/sections.tsx</code></td><td>P1</td><td class="src">#3 06:52–07:14, Yolan</td></tr>
+<tr><td>W11</td><td>Lessen / nav</td><td>Nav sub-items per lesson all point to the same spot → <b>keep the sub-items, with an anchor per style</b>: <code>#ashtanga</code>, <code>#vinyasa</code>, <code>#pilates-mat</code>, <code>#pilates-reformer</code> (from <code>yogaClass.slug</code>) on each style tile, plus scroll margin under the fixed nav. Same for the mobile menu chips. <b>Schedule at the top of Lessen</b> (decided): order = hero → weekly schedule (with level, W20) → styles → studios → Privéles.</td><td><code>Nav.tsx</code>, <code>lessen/page.tsx</code>, <code>components/sections.tsx</code></td><td>P1</td><td class="src">#3 06:52–07:14, Yolan</td></tr>
 <tr><td>W12</td><td>Lessen</td><td>New compact “Privéles” section at the bottom (<code>#prive</code>, S3): photo + title, short text, practical line, button → contact (one row, like the Home “who are we” block).</td><td><code>lessen/page.tsx</code></td><td>P1</td><td class="src">#4 03:37–04:08</td></tr>
 <tr><td>W13</td><td>Coaching</td><td><b>Remove the page</b> + its nav item; <code>/coaching</code> → 308 redirect to <code>/lessen#prive</code>. Drop it from the sitemap, routes and dictionary.</td><td><code>app/[lang]/coaching/</code>, <code>lib/routes.ts</code>, <code>next.config.ts</code>, <code>sitemap.ts</code></td><td>P1</td><td class="src">#4 03:18</td></tr>
 <tr><td>W14</td><td>Over ons</td><td>Order: <b>Rita &amp; Philippe</b> (big) → <b>Wat ons drijft</b> (summary + values, any number) → <b>Onze fijne samenwerkingen</b>: each collaborator <b>with a photo</b> (round portrait, from <code>person.portrait</code>) + name, role, paragraph, links.</td><td><code>over-ons/page.tsx</code></td><td>P1</td><td class="src">#4 04:08–08:34, Yolan</td></tr>
@@ -243,7 +243,7 @@
 <tr><td>W16</td><td>Contact</td><td>Show the <b>e-mail address</b> next to the mobile number; subject “Coaching” → “Privéles”.</td><td><code>contact/page.tsx</code></td><td>P1</td><td class="src">#4 10:01–10:15</td></tr>
 <tr><td>W17</td><td>Footer</td><td>Links: Privacy · Algemene voorwaarden · <b>Annulatievoorwaarden (its own page, decided)</b> · Cookies (S4). New route <code>/[lang]/[legal]</code>. The sign-up consent links to the T&amp;Cs and the cancellation terms.</td><td><code>Footer.tsx</code>, <code>app/[lang]/privacy</code> → generic</td><td>P1</td><td class="src">#6 01:29–02:04, Yolan</td></tr>
 <tr><td>W18</td><td>Footer</td><td>Newsletter: keep collecting only, no sending. Rename the button from “Inschrijven” (confusing) to “Hou me op de hoogte”. Subscribers already go to <code>subscriber</code> ✓.</td><td><code>Footer.tsx</code>, <code>dictionary.ts</code></td><td>P2</td><td class="src">#8 00:10–00:41</td></tr>
-<tr><td>W19</td><td>All</td><td>Tagline change wherever it is hard-coded (dictionary, metadata, About hero subtitle).</td><td><code>lib/dictionary.ts</code>, <code>seed.ts</code></td><td>P1</td><td class="src">#1</td></tr>
+<tr><td>W19</td><td>All</td><td><b>Remove “Beyond the mat, into the moment”</b> everywhere and use the new localized tagline. Code: <code>seed.ts</code> (<code>settings.tagline</code>, Home hero, About hero subtitle). Dataset (content script): <code>settings.tagline</code>, <code>homePage.hero.title</code>/<code>subtitle</code>, <code>homePage.introTitle</code>, <code>aboutPage.hero.subtitle</code> → “Rita &amp; Philippe: yoga, zen &amp; een scheutje tonic.” Check the SEO description and the share image text too.</td><td><code>studio/scripts/seed.ts</code>, <code>content-v2.ts</code></td><td>P1</td><td class="src">#1</td></tr>
 <tr><td>W20</td><td>Lessen</td><td>Schedule shows the <b>level</b> per class (“Alle niveaus” / Beginner / Gevorderd …) as a small label (S17). Optionally a level filter later.</td><td><code>lessen/page.tsx</code></td><td>P1</td><td class="src">Yolan</td></tr>
 \1
 <tr><td>W22</td><td>Retreat sign-up</td><td><b>Dedicated sign-up page</b> instead of the form at the bottom of the retreat page: <code>/[lang]/retreats/[slug]/inschrijven</code> (EN <code>/en/retreats/[slug]/sign-up</code>). Short retreat summary at the top (photo, dates, place, price, “nog X plaatsen”), then the form (S5 questions), consent, thanks state. All “Inschrijven” buttons (retreat hero, closing block, nav CTA) link here; the old <code>#inschrijven</code> anchor redirects. Waitlist mode when full (W8). <code>noindex</code>.</td><td>new <code>app/[lang]/retreats/[slug]/inschrijven/page.tsx</code>, <code>retreats/[slug]/page.tsx</code>, <code>lib/routes.ts</code>, <code>Nav.tsx</code></td><td>P1</td><td class="src">Yolan</td></tr>
@@ -263,7 +263,7 @@
 
 <h3 id="todo">To-dos for Rita &amp; Philippe</h3>
 <ul>
-<li>Pick or approve the tagline, the Home intro, the bios and the “Wat ons drijft” values (drafts above).</li>
+<li>Confirm the tagline (or pick an alternative), the Home intro, the bios and the “Wat ons drijft” values (drafts above).</li>
 <li>Ask the collaborators (Elena, Michèle, Foodie Jive, …) for a 3–4 sentence bio + links + a photo. <span class="src">#4 06:28–07:03, #9 05:22</span></li>
 <li>Rita: set the level per class in her schedule (after S17); texts for Privéles (price, duration, location).</li>
 <li>Photo of a rolled-up yoga mat (replaces the yoga block).</li>
@@ -276,7 +276,8 @@
 
 <h3 id="questions">Decisions</h3>
 <ul>
-<li><b>Tagline</b>: localized, NL + EN.</li>
+<li><b>Tagline</b>: localized, NL + EN; “Beyond the mat, into the moment” is dropped. Chosen: “Yoga, zen &amp; een scheutje tonic.” / “Yoga, zen and a splash of tonic.” (to confirm with R&amp;P; alternatives in the table above).</li>
+<li><b>Lessen</b>: schedule at the top (W11).</li>
 <li><b>Lessen nav</b>: keep the sub-items, an anchor per style; the “Lessen” label itself is clickable (W11, W23). Logo → Home.</li>
 <li><b>Places</b>: always “nog X plaatsen”; full → waitlist button (W7, W8).</li>
 <li><b>Sign-up</b>: its own page (W22), always 1 person (S6).</li>
@@ -285,10 +286,7 @@
 <li><b>Occupancy in the Studio</b>: stays as is (S7).</li>
 </ul>
 <h3>Open questions</h3>
-<ol>
-<li><b>Tagline</b>: which option (table above)? Keep “Beyond the mat, into the moment” anywhere, or drop it?</li>
-<li><b>Lessen</b>: put the schedule at the top of the page? (Recommendation: yes; the styles follow.)</li>
-</ol>
+<p>None for now. Remaining input from R&amp;P is in the <a href="#todo">to-do list</a>.</p>
 
 <footer>Generated from the transcripts of 9 recordings (auto-transcribed, Dutch; some passages were unclear). Branch <code>v2</code>.</footer>
 </main>
