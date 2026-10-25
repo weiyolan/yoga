@@ -2,7 +2,8 @@ import { ActivityIcon } from "@sanity/icons/Activity";
 import { CalendarIcon } from "@sanity/icons/Calendar";
 import { CogIcon } from "@sanity/icons/Cog";
 import { EarthGlobeIcon } from "@sanity/icons/EarthGlobe";
-import { HeartIcon } from "@sanity/icons/Heart";
+import { ClipboardIcon } from "@sanity/icons/Clipboard";
+import { HelpCircleIcon } from "@sanity/icons/HelpCircle";
 import { LockIcon } from "@sanity/icons/Lock";
 import { SparklesIcon } from "@sanity/icons/Sparkles";
 import { StarIcon } from "@sanity/icons/Star";
@@ -11,15 +12,18 @@ import { HomeIcon } from "@sanity/icons/Home";
 import { ImagesIcon } from "@sanity/icons/Images";
 import { BellIcon } from "@sanity/icons/Bell";
 import { EnvelopeIcon } from "@sanity/icons/Envelope";
+import { UserIcon } from "@sanity/icons/User";
 import { UsersIcon } from "@sanity/icons/Users";
 import { WarningOutlineIcon } from "@sanity/icons/WarningOutline";
 import type { ComponentType } from "react";
 import type { StructureBuilder, StructureResolver } from "sanity/structure";
 import { BulkAltText } from "../components/BulkAltText";
+import { Help } from "../components/Help";
 import { countBadgeIcon } from "../components/CountBadgeIcon";
 import { SignupTable } from "../components/SignupTable";
 import { apiVersion, defaultLanguage } from "../../sanity/site.config";
 import { MEDIA_CATEGORIES } from "../schemaTypes/documents/media-item";
+import { LEGAL_PAGES } from "../schemaTypes/singletons/legal-page";
 
 /** Same rule as the frontend queries: a retreat is upcoming until its last day is over. */
 const UPCOMING = `dateTime(endDate + "T23:59:59Z") >= dateTime(now())`;
@@ -39,60 +43,18 @@ function filtered(S: StructureBuilder, id: string, title: string, type: string, 
     .child(S.documentList().id(id).title(title).schemaType(type).apiVersion(apiVersion).filter(`_type == $type && ${filter}`).params({ type, ...params }).defaultOrdering(ordering));
 }
 
+/**
+ * Main menu, in the order of daily work: what comes in → the main documents → the pages →
+ * legal → settings (last). Every menu item has a stable id (Presentation & deep links).
+ */
 export const structure: StructureResolver = (S) =>
   S.list()
     .title("Website")
     .items([
-      S.divider().title("Pagina's"),
-      singleton(S, "homePage", "Home", HomeIcon),
-      singleton(S, "retreatsPage", "Retreats (pagina)", EarthGlobeIcon),
-      singleton(S, "lessonsPage", "Lessen (pagina)", ActivityIcon),
-      singleton(S, "coachingPage", "Private coaching", HeartIcon),
-      singleton(S, "aboutPage", "Over ons", UsersIcon),
-      singleton(S, "galleryPage", "Gallery", ImagesIcon),
-      singleton(S, "contactPage", "Contact", EnvelopeIcon),
-      singleton(S, "privacyPage", "Privacyverklaring", LockIcon),
-      singleton(S, "settings", "Instellingen", CogIcon),
-      S.divider(),
+      S.listItem().id("help").title("Zo werkt het").icon(HelpCircleIcon).child(S.component(Help).id("help").title("Zo werkt het")),
 
-      S.listItem()
-        .id("media")
-        .title("Fotobank")
-        .icon(ImagesIcon)
-        .child(
-          S.list()
-            .title("Fotobank")
-            .items([
-              S.listItem()
-                .id("media-all")
-                .title("Alle foto's")
-                .icon(ImagesIcon)
-                .child(S.documentTypeList("mediaItem").title("Alle foto's").defaultOrdering([{ field: "_createdAt", direction: "desc" }])),
-              filtered(S, "media-todo", "Te doen: zonder alt-tekst", "mediaItem", `!defined(alt[language == "${defaultLanguage}"][0].value)`, [{ field: "_createdAt", direction: "desc" }]).icon(WarningOutlineIcon),
-              S.listItem().id("media-ai").title("✨ Alt-teksten aanvullen (AI)").icon(SparklesIcon).child(S.component(BulkAltText).id("media-ai").title("Alt-teksten aanvullen")),
-              filtered(S, "media-gallery", "In de gallery", "mediaItem", "showInGallery != false", [{ field: "takenAt", direction: "desc" }]),
-              S.divider(),
-              ...MEDIA_CATEGORIES.map((c) =>
-                filtered(S, `media-${c.value}`, c.title, "mediaItem", "$category in categories", [{ field: "takenAt", direction: "desc" }], { category: c.value }),
-              ),
-            ]),
-        ),
-      S.divider(),
-
-      S.listItem()
-        .id("retreats")
-        .title("Retreats")
-        .icon(CalendarIcon)
-        .child(
-          S.list()
-            .title("Retreats")
-            .items([
-              filtered(S, "retreats-upcoming", "Komend", "retreat", UPCOMING, [{ field: "startDate", direction: "asc" }]),
-              filtered(S, "retreats-past", "Voorbij", "retreat", `!(${UPCOMING})`, [{ field: "startDate", direction: "desc" }]),
-              S.divider(),
-              S.documentTypeListItem("retreat").title("Alle retreats"),
-            ]),
-        ),
+      /* ---- 1. inbox: what comes in ---- */
+      S.divider().title("Binnengekomen"),
       S.listItem()
         .id("signups")
         .title("Inschrijvingen")
@@ -102,6 +64,7 @@ export const structure: StructureResolver = (S) =>
             .title("Inschrijvingen")
             .items([
               filtered(S, "signups-new", "Nieuw", "signup", `status == "new"`, [{ field: "submittedAt", direction: "desc" }]).icon(countBadgeIcon(UsersIcon, "signup")),
+              filtered(S, "signups-waitlist", "Wachtlijst", "signup", `status == "waitlist" || (status == "new" && waitlist == true)`, [{ field: "submittedAt", direction: "asc" }]),
               S.listItem().id("signups-table").title("Tabel").icon(ThListIcon).child(S.component(SignupTable).id("signups-table").title("Inschrijvingen: tabel")),
               S.listItem()
                 .id("signups-by-retreat")
@@ -137,20 +100,6 @@ export const structure: StructureResolver = (S) =>
               S.documentTypeListItem("message").title("Alle berichten"),
             ]),
         ),
-      filtered(S, "subscribers", "Nieuwsbrief", "subscriber", "unsubscribed != true", [{ field: "subscribedAt", direction: "desc" }]).icon(BellIcon),
-      S.documentTypeListItem("person").title("Team & begeleiders"),
-      S.listItem()
-        .id("lessons")
-        .title("Lessen")
-        .icon(ActivityIcon)
-        .child(
-          S.list()
-            .title("Lessen")
-            .items([
-              S.documentTypeListItem("yogaClass").title("Stijlen"),
-              S.documentTypeListItem("studio").title("Studio's"),
-            ]),
-        ),
       S.listItem()
         .id("reviews")
         .title("Reviews")
@@ -165,5 +114,96 @@ export const structure: StructureResolver = (S) =>
               S.documentTypeListItem("reviewSubmission").title("Alle inzendingen"),
             ]),
         ),
+      filtered(S, "subscribers", "Nieuwsbrief", "subscriber", "unsubscribed != true", [{ field: "subscribedAt", direction: "desc" }]).icon(BellIcon),
+
+      /* ---- 2. main documents ---- */
+      S.divider().title("Inhoud"),
+      S.listItem()
+        .id("retreats")
+        .title("Retreats")
+        .icon(CalendarIcon)
+        .child(
+          S.list()
+            .title("Retreats")
+            .items([
+              filtered(S, "retreats-upcoming", "Komend", "retreat", UPCOMING, [{ field: "startDate", direction: "asc" }]),
+              filtered(S, "retreats-past", "Voorbij", "retreat", `!(${UPCOMING})`, [{ field: "startDate", direction: "desc" }]),
+              S.divider(),
+              S.documentTypeListItem("retreat").title("Alle retreats"),
+            ]),
+        ),
+      S.documentTypeListItem("signupForm").title("Inschrijfformulieren").icon(ClipboardIcon),
+      S.listItem()
+        .id("lessons")
+        .title("Lessen")
+        .icon(ActivityIcon)
+        .child(
+          S.list()
+            .title("Lessen")
+            .items([
+              S.documentTypeListItem("yogaClass").title("Stijlen"),
+              S.documentTypeListItem("studio").title("Studio's"),
+            ]),
+        ),
+      S.listItem()
+        .id("people")
+        .title("Personen")
+        .icon(UsersIcon)
+        .child(
+          S.list()
+            .title("Personen")
+            .items([
+              filtered(S, "people-founders", "Rita & Philippe", "person", `kind == "founder"`, [{ field: "name", direction: "asc" }]).icon(UserIcon),
+              filtered(S, "people-collaborators", "Samenwerkingen", "person", `coalesce(kind, "collaborator") != "founder"`, [{ field: "name", direction: "asc" }]).icon(UsersIcon),
+              S.divider(),
+              S.documentTypeListItem("person").title("Alle personen"),
+            ]),
+        ),
       S.documentTypeListItem("testimonial").title("Testimonials"),
+      S.listItem()
+        .id("media")
+        .title("Fotobank")
+        .icon(ImagesIcon)
+        .child(
+          S.list()
+            .title("Fotobank")
+            .items([
+              S.listItem()
+                .id("media-all")
+                .title("Alle foto's")
+                .icon(ImagesIcon)
+                .child(S.documentTypeList("mediaItem").title("Alle foto's").defaultOrdering([{ field: "_createdAt", direction: "desc" }])),
+              filtered(S, "media-todo", "Te doen: zonder alt-tekst", "mediaItem", `!defined(alt[language == "${defaultLanguage}"][0].value)`, [{ field: "_createdAt", direction: "desc" }]).icon(WarningOutlineIcon),
+              S.listItem().id("media-ai").title("✨ Alt-teksten aanvullen (AI)").icon(SparklesIcon).child(S.component(BulkAltText).id("media-ai").title("Alt-teksten aanvullen")),
+              filtered(S, "media-gallery", "In de gallery", "mediaItem", "showInGallery != false", [{ field: "_createdAt", direction: "desc" }]),
+              S.divider(),
+              ...MEDIA_CATEGORIES.map((c) =>
+                filtered(S, `media-${c.value}`, c.title, "mediaItem", "$category in categories", [{ field: "_createdAt", direction: "desc" }], { category: c.value }),
+              ),
+            ]),
+        ),
+
+      /* ---- 3. pages ---- */
+      S.divider().title("Pagina's"),
+      singleton(S, "homePage", "Home", HomeIcon),
+      singleton(S, "retreatsPage", "Retreats (pagina)", EarthGlobeIcon),
+      singleton(S, "lessonsPage", "Lessen (pagina)", ActivityIcon),
+      singleton(S, "aboutPage", "Over ons", UsersIcon),
+      singleton(S, "galleryPage", "Gallery", ImagesIcon),
+      singleton(S, "contactPage", "Contact", EnvelopeIcon),
+
+      /* ---- 4. legal ---- */
+      S.listItem()
+        .id("legal")
+        .title("Juridisch")
+        .icon(LockIcon)
+        .child(
+          S.list()
+            .title("Juridisch")
+            .items(LEGAL_PAGES.map((p) => S.listItem().id(p.id).title(p.title).icon(LockIcon).child(S.document().schemaType("legalPage").documentId(p.id).title(p.title)))),
+        ),
+
+      /* ---- 5. settings, last ---- */
+      S.divider(),
+      singleton(S, "settings", "Instellingen", CogIcon),
     ]);

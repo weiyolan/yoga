@@ -10,7 +10,6 @@ export type GalleryTile = {
   id: string;
   categories: string[];
   highlight: boolean;
-  caption: string;
   img: ImgHTMLAttributes<HTMLImageElement> | null;
   full: string | null;
   alt: string;
@@ -24,7 +23,7 @@ export function GalleryGrid({ lang, tiles }: { lang: Lang; tiles: GalleryTile[] 
   const [cat, setCat] = useState<string | null>(null);
   const cats = useMemo(() => Object.keys(t.categories).filter((c) => tiles.some((p) => p.categories.includes(c))), [t.categories, tiles]);
   const shown = cat ? tiles.filter((p) => p.categories.includes(cat)) : tiles;
-  const items = shown.filter((p) => p.full).map((p) => ({ src: p.full!, alt: p.alt, caption: p.caption }));
+  const items = shown.filter((p) => p.full).map((p) => ({ src: p.full!, alt: p.alt }));
   let n = -1;
 
   return (
@@ -44,13 +43,12 @@ export function GalleryGrid({ lang, tiles }: { lang: Lang; tiles: GalleryTile[] 
             return (
               <figure key={p.id} className={cls || undefined}>
                 {p.full ? (
-                  <LightboxTrigger index={n} label={`${t.open}: ${p.caption || p.alt}`}>
+                  <LightboxTrigger index={n} label={`${t.open}: ${p.alt}`}>
                     <div className="ph">{p.img ? <img {...p.img} /> : null}</div>
                   </LightboxTrigger>
                 ) : (
                   <div className="ph">{p.img ? <img {...p.img} /> : null}</div>
                 )}
-                {p.caption ? <figcaption>{p.caption}</figcaption> : null}
               </figure>
             );
           })}

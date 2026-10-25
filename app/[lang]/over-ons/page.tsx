@@ -68,27 +68,74 @@ export default async function About({ params }: PageProps<"/[lang]/over-ons">) {
         </section>
       ) : null}
 
-      {page?.principles?.length ? (
-        <section className="s alt" id="principes">
+      {page?.driveText || page?.values?.length ? (
+        <section className="s alt" id="drijft">
           <div className="wrap">
-            <SectionHead label={page.principlesLabel || t.principlesLabel} title={page.principlesTitle} />
-            <div className="g3">
-              {page.principles.map((p) => (
-                <div key={p._key}>
-                  {p.title ? <h3>{p.title}</h3> : null}
-                  {p.text ? (
-                    <p className="muted" style={{ marginTop: 10 }}>
-                      {p.text}
-                    </p>
-                  ) : null}
-                </div>
-              ))}
-            </div>
+            <SectionHead label={t.driveLabel} title={page.driveTitle || t.driveLabel} />
+            {page.driveText ? (
+              <p style={{ font: "1.5rem/1.4 var(--serif)", marginTop: -12, marginBottom: 36, maxWidth: "40ch" }}>
+                {page.driveText}
+              </p>
+            ) : null}
+            {page.values?.length ? (
+              <div className="g3">
+                {page.values.map((v) => (
+                  <div key={v._key}>
+                    {v.title ? <h3>{v.title}</h3> : null}
+                    {v.text ? (
+                      <p className="muted" style={{ marginTop: 10 }}>
+                        {v.text}
+                      </p>
+                    ) : null}
+                  </div>
+                ))}
+              </div>
+            ) : null}
             {page.principlesVideoUrl ? (
               <div className="ph r21" style={{ marginTop: 36 }}>
                 <Video url={page.principlesVideoUrl} />
               </div>
             ) : null}
+          </div>
+        </section>
+      ) : null}
+
+      {page?.collaborators?.length ? (
+        // Everyone in Studio → Personen except Rita & Philippe, automatically.
+        <section className="s" id="samenwerkingen">
+          <div className="wrap">
+            <SectionHead label={t.collaboratorsLabel} title={page.collaboratorsTitle || t.collaboratorsTitle} />
+            {page.collaboratorsIntro ? (
+              <p className="muted" style={{ marginTop: -16, marginBottom: 32, maxWidth: "60ch" }}>
+                {page.collaboratorsIntro}
+              </p>
+            ) : null}
+            <ul className="collabs">
+              {page.collaborators.map((p) => {
+                const links = [...(p.website ? [{ _key: "web", label: t.website, url: p.website }] : []), ...(p.links ?? [])];
+                return (
+                  <li key={p._id} id={anchor(p.name)}>
+                    <Photo media={p.portrait} ratio="r1" className="round" sizes="96px" />
+                    <div>
+                      <h3>{p.name}</h3>
+                      {p.role ? <p className="muted small">{p.role}</p> : null}
+                      <RichText value={p.bio} />
+                      {links.length ? (
+                        <p className="row small" style={{ gap: 16, marginTop: 8 }}>
+                          {links.map((l) =>
+                            l.url ? (
+                              <a key={l._key} className="link" href={l.url} target="_blank" rel="noopener">
+                                {l.label}
+                              </a>
+                            ) : null,
+                          )}
+                        </p>
+                      ) : null}
+                    </div>
+                  </li>
+                );
+              })}
+            </ul>
           </div>
         </section>
       ) : null}

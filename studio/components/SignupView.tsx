@@ -22,6 +22,9 @@ type Signup = {
   message?: string;
   lang?: string;
   consent?: boolean;
+  terms?: boolean;
+  answers?: { _key: string; question?: string; answer?: string }[];
+  form?: string;
   waitlist?: boolean;
   submittedAt?: string;
 };
@@ -81,6 +84,7 @@ export const SignupView: UserViewComponent = ({ document }) => {
     client.patch(doc._id).set({ notes }).commit().catch((err) => toast.push({ status: "error", title: "Notitie niet opgeslagen", description: String(err) }));
   };
 
+  // Always one person per sign-up; `persons` only exists on old sign-ups.
   const persons = doc.persons ?? 1;
   const left = retreat?.capacity ? retreat.capacity - (retreat.booked ?? 0) : null;
 
@@ -139,9 +143,9 @@ export const SignupView: UserViewComponent = ({ document }) => {
               />
             ))}
           </Flex>
-          {doc.status !== "confirmed" && persons && retreat?.capacity && left !== null && left < persons ? (
+          {doc.status !== "confirmed" && retreat?.capacity && left !== null && left < 1 ? (
             <Text size={1} muted>
-              ⚠ Er zijn nog {Math.max(left, 0)} plaatsen vrij voor {persons} personen.
+              ⚠ De retreat is volzet: zet deze inschrijving op Wachtlijst, of verhoog Max. deelnemers.
             </Text>
           ) : null}
         </Stack>
@@ -150,15 +154,21 @@ export const SignupView: UserViewComponent = ({ document }) => {
           <Grid gridTemplateColumns={[1, 2]} gap={5}>
             <Row label="E-mail">{doc.email ? <a href={`mailto:${doc.email}`}>{doc.email}</a> : null}</Row>
             <Row label="GSM">{doc.phone ? <a href={`tel:${doc.phone.replace(/\s/g, "")}`}>{doc.phone}</a> : null}</Row>
-            <Row label="Aantal personen">{persons}</Row>
+            {persons > 1 ? <Row label="Aantal personen (oude inschrijving)">{persons}</Row> : null}
             <Row label="Kamer / prijs">{doc.room}</Row>
           </Grid>
           <Stack gap={5} marginTop={5}>
+            {(doc.answers ?? []).map((a) => (
+              <Row key={a._key} label={a.question ?? "Vraag"}>
+                <span style={{ whiteSpace: "pre-wrap" }}>{a.answer}</span>
+              </Row>
+            ))}
             <Row label="Dieetwensen of allergieën">{doc.diet}</Row>
             <Row label="Vragen of opmerkingen">
               <span style={{ whiteSpace: "pre-wrap" }}>{doc.message}</span>
             </Row>
-            <Row label="Akkoord gegevens">{doc.consent ? "Ja" : "Nee"}</Row>
+            <Row label="Akkoord gegevens · voorwaarden">{`${doc.consent ? "Ja" : "Nee"} · ${doc.terms ? "Ja" : doc.terms === false ? "Nee" : "-"}`}</Row>
+            {doc.form ? <Row label="Formulier">{doc.form}</Row> : null}
           </Stack>
         </Card>
 

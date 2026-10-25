@@ -17,7 +17,7 @@ export const homePage = defineType({
       title: "Uitgelichte retreat",
       type: "reference",
       to: [{ type: "retreat" }],
-      description: "Leeg = automatisch de eerstvolgende retreat.",
+      description: "Leeg = automatisch de eerstvolgende retreat die niet volzet is.",
     }),
     defineField({
       name: "testimonials",
@@ -31,7 +31,8 @@ export const homePage = defineType({
     mediaField("aboutPhoto", { title: "Wie zijn wij: foto" }),
     i18nString("introLink", { title: "Intro: link naar Over ons", description: "Leeg = “Maak kennis met Rita & Philippe”." }),
     i18nString("retreatsTitle", { title: "Kop retreats", description: "Leeg = “Waar gaan we naartoe?”." }),
-    i18nString("lessonsTitle", { title: "Kop lessen", description: "Leeg = “Wat kan je volgen?”." }),
+    i18nString("lessonsTitle", { title: "Lessen: kop", description: "Leeg = “Rita geeft ook les”." }),
+    i18nText("lessonsText", { title: "Lessen: tekst", max: 250, description: "1–2 zinnen: buiten de retreats geeft Rita les in een paar Antwerpse studio's." }),
     i18nString("testimonialsTitle", { title: "Kop testimonials", description: "Leeg = “Wat deelnemers zeggen”." }),
     defineField({ name: "seo", title: "SEO & delen", type: "seo" }),
   ],

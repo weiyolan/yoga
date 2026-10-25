@@ -19,9 +19,6 @@ export function dateRange(lang: Lang, start?: string | null, end?: string | null
   return `${day(a)} ${mon(a)}${ay} – ${day(b)} ${mon(b)}${y}`;
 }
 
-/** "mei 2026" (filter options). */
-export const monthYear = (lang: Lang, d: string) => part(lang, parse(d), { month: "long", year: "numeric" });
-
 /** "€ 1.120" */
 export const euro = (lang: Lang, n?: number | null) =>
   n == null ? "" : new Intl.NumberFormat(locale[lang], { style: "currency", currency: "EUR", maximumFractionDigits: 0 }).format(n);
@@ -31,18 +28,13 @@ export const join = (...xs: (string | null | undefined | false)[]) => xs.filter(
 
 export const htmlLang = (lang: Lang) => locale[lang];
 
-/** Lightbox / gallery caption: "Kampvuur · Eifel, nov 2025 · Foto: Jane Doe". */
-export const photoCaption = (lang: Lang, m: { title?: string | null; credit?: string | null }, ...extra: (string | null | undefined)[]) =>
-  [m.title, ...extra, m.credit ? `${lang === "en" ? "Photo" : "Foto"}: ${m.credit}` : null].filter(Boolean).join(" · ");
-
 /** Free places on a retreat (`capacity - booked`), or null when there's no capacity set. */
 export const spotsLeft = (r: { capacity?: number | null; booked?: number | null }) => (r.capacity ? Math.max(r.capacity - (r.booked ?? 0), 0) : null);
 
-/** "max. 12 (deelnemers)" until the first confirmed sign-up, then "nog 3 plaatsen" / "volzet". */
-export function placesLabel(lang: Lang, r: { capacity?: number | null; booked?: number | null }, withWord = false) {
+/** Always "nog 10 plaatsen" / "nog 1 plaats" / "volzet" (never "max." or "0 van 10"); null without a capacity. */
+export function placesLabel(lang: Lang, r: { capacity?: number | null; booked?: number | null }) {
   const t = getDictionary(lang).card;
   const left = spotsLeft(r);
   if (left === null) return null;
-  if (r.booked) return left ? t.spotsLeft(left) : t.full;
-  return withWord ? `${t.max} ${r.capacity} ${t.participants}` : `${t.max} ${r.capacity}`;
+  return left ? t.spotsLeft(left) : t.full;
 }

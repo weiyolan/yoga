@@ -6,7 +6,7 @@ type SanityClient = ReturnType<typeof useClient>;
 export const BOOKED_STATUSES = ["confirmed"];
 
 /**
- * Recomputes `retreat.booked` = persons on confirmed sign-ups, on the published retreat and its draft
+ * Recomputes `retreat.booked` = confirmed sign-ups (always one person each), on the published retreat and its draft
  * (whichever exist). Called whenever a sign-up's status changes in the Studio.
  */
 export async function recomputeBooked(client: SanityClient, retreatId?: string) {
@@ -14,7 +14,7 @@ export async function recomputeBooked(client: SanityClient, retreatId?: string) 
   const id = retreatId.replace(/^drafts\./, "");
   const { booked, ids } = await client.fetch<{ booked: number | null; ids: string[] }>(
     `{
-      "booked": math::sum(*[_type == "signup" && retreat._ref == $id && status in $statuses]{ "p": coalesce(persons, 1) }.p),
+      "booked": count(*[_type == "signup" && retreat._ref == $id && status in $statuses]),
       "ids": *[_id in [$id, "drafts." + $id]]._id
     }`,
     { id, statuses: BOOKED_STATUSES },

@@ -27,7 +27,6 @@ export function Footer({ lang, layout }: { lang: Lang; layout: LAYOUT_QUERY_RESU
             <h4>{t.offer}</h4>
             <Link href={href(lang, "retreats")}>{d.nav.retreats}</Link>
             <Link href={href(lang, "lessons")}>{d.nav.lessons}</Link>
-            <Link href={href(lang, "coaching")}>{d.nav.coaching}</Link>
           </div>
           <div>
             <h4>{t.about}</h4>
@@ -45,7 +44,11 @@ export function Footer({ lang, layout }: { lang: Lang; layout: LAYOUT_QUERY_RESU
         </div>
         <div className="legal">
           <span>© {name}</span>
-          <Link href={href(lang, "privacy")}>{d.privacy.link}</Link>
+          {(["privacy", "terms", "cancellation", "cookies"] as const).map((r) => (
+            <Link key={r} href={href(lang, r)}>
+              {d.legal.titles[r]}
+            </Link>
+          ))}
         </div>
       </div>
     </footer>

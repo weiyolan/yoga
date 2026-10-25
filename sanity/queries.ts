@@ -18,8 +18,6 @@ const lines = <F extends string>(field: F) => `string::split(coalesce(${field}[l
 const MEDIA = `{
   _id,
   "alt": coalesce(alt[language == $lang][0].value, alt[language == "${defaultLanguage}"][0].value, ""),
-  credit,
-  "title": coalesce(title[language == $lang][0].value, title[language == "${defaultLanguage}"][0].value),
   image { asset->{ _id, url, metadata { lqip, dimensions { width, height, aspectRatio } } }, hotspot, crop }
 }` as const;
 
@@ -29,6 +27,9 @@ const SEO = `{ "title": ${t("title")}, "description": ${t("description")}, "shar
 
 /** Same rule as the Studio structure; in components use `isUpcoming()` from ./fetch. */
 const UPCOMING = `dateTime(endDate + "T23:59:59Z") >= dateTime(now())` as const;
+
+/** Every place taken (confirmed sign-ups fill `booked`). */
+const FULL = `coalesce(capacity > 0 && coalesce(booked, 0) >= capacity, false)` as const;
 
 const RETREAT_CARD_FIELDS = `
   _id,
@@ -58,8 +59,24 @@ const PERSON = `{
   "role": ${t("role")},
   "bio": ${t("bio")},
   "portrait": portrait->${MEDIA},
-  "object": object->${MEDIA}
+  "object": object->${MEDIA},
+  website,
+  "links": links[]{ _key, label, url }
 }` as const;
+
+/** A sign-up form (Studio → Inschrijfformulieren): which standard fields to show + the extra questions. */
+const FORM = `{
+  _id,
+  name,
+  "phone": coalesce(standard.phone, true),
+  "room": coalesce(standard.room, true),
+  "diet": coalesce(standard.diet, true),
+  "message": coalesce(message, true),
+  "questions": questions[]{ _key, "label": ${t("label")}, "help": ${t("help")}, type, "options": ${lines("options")}, required }
+}` as const;
+
+/** The retreat's own form, else the one marked “Standaard” (null = only the built-in fields). */
+const RETREAT_FORM = `coalesce(signupForm->${FORM}, *[_type == "signupForm" && isDefault == true && !(_id in path("drafts.**"))][0]${FORM})` as const;
 
 const TESTIMONIAL = `{
   _id,
@@ -98,7 +115,7 @@ export const LAYOUT_QUERY = defineQuery(`*[_id == "settings"][0]{
   instagram,
   facebook,
   "nextRetreat": *[_type == "retreat" && ${UPCOMING}] | order(startDate asc)[0]${RETREAT_CARD},
-  "styles": *[_type == "yogaClass"] | order(orderRank asc){ _id, name, "what": ${t("what")} },
+  "styles": *[_type == "yogaClass"] | order(orderRank asc){ _id, name, "slug": slug.current, "what": ${t("what")} },
   "studios": *[_type == "studio"] | order(name asc).name,
   "foundersPhoto": *[_id == "homePage"][0].aboutPhoto->${MEDIA},
   "texts": {
@@ -106,17 +123,20 @@ export const LAYOUT_QUERY = defineQuery(`*[_id == "settings"][0]{
     "menuFoundersSub": ${t("menuFoundersSub")},
     "menuTeam": ${t("menuTeam")},
     "menuDrive": ${t("menuDrive")},
-    "menuGallery": ${t("menuGallery")},
+    "menuCollaborators": ${t("menuCollaborators")},
     "menuUpcoming": ${t("menuUpcoming")},
     "menuPast": ${t("menuPast")},
-    "menuSearch": ${t("menuSearch")},
     "newsletterTitle": ${t("newsletterTitle")},
     "newsletterThanks": ${t("newsletterThanks")},
     "contactThanks": ${t("contactThanks")},
     "signupConsent": ${t("signupConsent")},
+    "signupTerms": ${t("signupTerms")},
     "signupThanks": ${t("signupThanks")},
-    "signupMail": ${t("signupMail")}
-  }
+    "signupMail": ${t("signupMail")},
+    "paymentMail": ${t("paymentMail")},
+    "waitlistMail": ${t("waitlistMail")}
+  },
+  notifyEmail
 }`);
 
 export const SETTINGS_QUERY = defineQuery(`*[_id == "settings"][0]{
@@ -136,13 +156,13 @@ export const HOME_QUERY = defineQuery(`*[_id == "homePage"][0]{
   "intro": ${t("intro")},
   "featuredRetreat": coalesce(
     featuredRetreat->${RETREAT_FEATURE},
+    *[_type == "retreat" && ${UPCOMING} && !${FULL}] | order(startDate asc)[0]${RETREAT_FEATURE},
     *[_type == "retreat" && ${UPCOMING}] | order(startDate asc)[0]${RETREAT_FEATURE}
   ),
   "upcomingRetreats": *[_type == "retreat" && ${UPCOMING}] | order(startDate asc)[0...3]${RETREAT_CARD},
-  "pastRetreats": *[_type == "retreat" && !(${UPCOMING})] | order(startDate desc)[0...3]${RETREAT_CARD},
   "styles": *[_type == "yogaClass"] | order(orderRank asc)${STYLE},
   "studios": *[_type == "studio"] | order(name asc){ _id, name, website },
-  "instagram": *[_type == "mediaItem" && highlight == true] | order(takenAt desc, _createdAt desc)[0...6]${MEDIA},
+  "instagram": *[_type == "mediaItem" && highlight == true] | order(_createdAt desc)[0...6]${MEDIA},
   "testimonials": testimonials[]->${TESTIMONIAL},
   "reviews": *[_type == "review" && rating >= 4 && !(_id in path("drafts.**"))] | order(submittedAt desc)[0...3]${REVIEW},
   "aboutTitle": ${t("aboutTitle")},
@@ -150,6 +170,7 @@ export const HOME_QUERY = defineQuery(`*[_id == "homePage"][0]{
   "introLink": ${t("introLink")},
   "retreatsTitle": ${t("retreatsTitle")},
   "lessonsTitle": ${t("lessonsTitle")},
+  "lessonsText": ${t("lessonsText")},
   "testimonialsTitle": ${t("testimonialsTitle")},
   "aboutPhoto": aboutPhoto->${MEDIA},
   "seo": seo${SEO}
@@ -167,8 +188,29 @@ export const RETREATS_QUERY = defineQuery(`{
   "past": *[_type == "retreat" && !(${UPCOMING})] | order(startDate desc)${RETREAT_CARD}
 }`);
 
-/** Sign-up form: the retreat a submission is for (server-side check + mails). */
-export const SIGNUP_RETREAT_QUERY = defineQuery(`*[_type == "retreat" && _id == $id][0]{ _id, "title": ${t("title")}, startDate, endDate, capacity, booked }`);
+/** Sign-up form: the retreat a submission is for (server-side check, form questions + mails). */
+export const SIGNUP_RETREAT_QUERY = defineQuery(`*[_type == "retreat" && _id == $id][0]{
+  _id,
+  "slug": slug.current,
+  "title": ${t("title")},
+  startDate,
+  endDate,
+  capacity,
+  booked,
+  deposit,
+  "photo": cardPhoto->image.asset->url,
+  "form": ${RETREAT_FORM}
+}`);
+
+/** Sign-up page (/retreats/<slug>/inschrijven): a short summary of the retreat + its form. */
+export const SIGNUP_PAGE_QUERY = defineQuery(`*[_type == "retreat" && slug.current == $slug][0]{
+  ...${RETREAT_CARD},
+  "signupUrl": coalesce(signupUrl, *[_id == "settings"][0].defaultSignupUrl),
+  "photo": coalesce(closingPhoto, hero.photo)->${MEDIA},
+  "prices": prices[]{ _key, "label": ${t("label")}, amount },
+  "closingTitle": ${t("closingTitle")},
+  "form": ${RETREAT_FORM}
+}`);
 
 export const RETREAT_SLUGS_QUERY = defineQuery(`*[_type == "retreat" && defined(slug.current)].slug.current`);
 
@@ -212,8 +254,9 @@ export const LESSONS_QUERY = defineQuery(`{
     "studiosTitle": ${t("studiosTitle")},
     "scheduleTitle": ${t("scheduleTitle")},
     "scheduleEmpty": ${t("scheduleEmpty")},
+    "private": private{ "title": ${t("title")}, "text": ${t("text")}, "practical": ${t("practical")}, "button": ${t("button")}, "photo": photo->${MEDIA} },
     "schedule": schedule[]{
-      _key, day, startTime, durationMinutes,
+      _key, day, startTime, durationMinutes, "level": coalesce(level, "all"),
       "style": style->{ name, "slug": slug.current },
       "studio": studio->{ name },
       "bookingUrl": coalesce(bookingUrl, studio->website)
@@ -224,34 +267,26 @@ export const LESSONS_QUERY = defineQuery(`{
   "studios": *[_type == "studio"] | order(name asc){ _id, name, address, city, website, "photo": photo->${MEDIA} }
 }`);
 
-export const COACHING_QUERY = defineQuery(`*[_id == "coachingPage"][0]{
-  "hero": hero${HERO},
-  "blocks": blocks[]{ _key, "label": ${t("label")}, "title": ${t("title")}, "text": ${t("text")} },
-  "photos": photos[]->${MEDIA},
-  "ctaTitle": ${t("ctaTitle")},
-  "ctaButton": ${t("ctaButton")},
-  "seo": seo${SEO}
-}`);
-
 export const ABOUT_QUERY = defineQuery(`*[_id == "aboutPage"][0]{
   "hero": hero${HERO},
   "founders": founders[]->${PERSON},
-  "principlesLabel": ${t("principlesLabel")},
-  "principlesTitle": ${t("principlesTitle")},
-  "principles": principles[]{ _key, "title": ${t("title")}, "text": ${t("text")} },
+  "driveTitle": ${t("driveTitle")},
+  "driveText": ${t("driveText")},
+  "values": values[]{ _key, "title": ${t("title")}, "text": ${t("text")} },
   principlesVideoUrl,
+  "collaboratorsTitle": ${t("collaboratorsTitle")},
+  "collaboratorsIntro": ${t("collaboratorsIntro")},
+  // everyone except Rita & Philippe, automatically
+  "collaborators": *[_type == "person" && coalesce(kind, "collaborator") != "founder" && !(_id in ^.founders[]._ref) && hidden != true] | order(coalesce(orderRank, 1000) asc, name asc)${PERSON},
   "seo": seo${SEO}
 }`);
 
 export const GALLERY_QUERY = defineQuery(`{
   "page": *[_id == "galleryPage"][0]{ "title": ${t("title")}, "intro": ${t("intro")}, "seo": seo${SEO} },
-  "photos": *[_type == "mediaItem" && showInGallery != false] | order(takenAt desc, _createdAt desc){
+  "photos": *[_type == "mediaItem" && showInGallery != false] | order(_createdAt desc){
     ...${MEDIA},
-    "place": ${t("place")},
-    takenAt,
     categories,
-    highlight,
-    "retreat": retreat->{ "slug": slug.current, "title": ${t("title")} }
+    highlight
   }
 }`);
 
@@ -265,7 +300,8 @@ export const CONTACT_QUERY = defineQuery(`*[_id == "contactPage"][0]{
   "contact": *[_id == "settings"][0]{ email, phone }
 }`);
 
-export const PRIVACY_QUERY = defineQuery(`*[_id == "privacyPage"][0]{
+/** A legal page (privacy, terms, cancellation, cookies) by its fixed id (studio LEGAL_PAGES). */
+export const LEGAL_QUERY = defineQuery(`*[_type == "legalPage" && _id == $id][0]{
   "title": ${t("title")},
   "intro": ${t("intro")},
   "sections": sections[]{ _key, "title": ${t("title")}, "text": ${t("text")} },

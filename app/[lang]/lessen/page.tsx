@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { Photo } from "@/components/Photo";
 import { ClassTiles, Hero, SectionHead } from "@/components/sections";
 import { getDictionary } from "@/lib/dictionary";
@@ -30,46 +31,8 @@ export default async function Lessons({ params }: PageProps<"/[lang]/lessen">) {
     <>
       <Hero hero={page?.hero} short />
 
-      <section className="s" id="stijlen" style={{ borderTop: 0 }}>
-        <div className="wrap">
-          <SectionHead label={t.stylesLabel} title={page?.stylesTitle} />
-          {page?.intro ? (
-            <p className="muted" style={{ marginTop: -16, marginBottom: 32 }}>
-              {page.intro}
-            </p>
-          ) : null}
-          <ClassTiles lang={lang} styles={styles} to={href(lang, "lessons", { hash: "planning" })} />
-        </div>
-      </section>
-
-      {studios.length ? (
-        <section className="s alt" id="studios">
-          <div className="wrap">
-            <SectionHead label={t.studiosLabel} title={page?.studiosTitle} />
-            <div className="g3">
-              {studios.map((s) => (
-                <div key={s._id}>
-                  <Photo media={s.photo} ratio="r32" sizes="(max-width: 860px) 100vw, 33vw" />
-                  <h4 style={{ marginTop: 14 }}>{s.name}</h4>
-                  {s.address || s.city ? (
-                    <p className="muted small" style={{ margin: "6px 0 10px" }}>
-                      {[s.address, s.city].filter(Boolean).join(" · ")}
-                    </p>
-                  ) : null}
-                  {s.website ? (
-                    <a className="link" href={s.website} target="_blank" rel="noopener">
-                      {t.website}
-                    </a>
-                  ) : null}
-                </div>
-              ))}
-            </div>
-          </div>
-        </section>
-      ) : null}
-
       {/* Always rendered: the menu and the style tiles link to #planning. */}
-      <section className="s" id="planning">
+      <section className="s" id="planning" style={{ borderTop: 0 }}>
         <div className="wrap">
           <SectionHead label={t.scheduleLabel} title={page?.scheduleTitle} />
           {schedule.length ? (
@@ -102,6 +65,7 @@ export default async function Lessons({ params }: PageProps<"/[lang]/lessen">) {
                                 <>
                                   <b>{s.style?.name}</b>
                                   {[s.startTime, s.durationMinutes ? `${s.durationMinutes} min` : null, s.studio?.name].filter(Boolean).join(" · ")}
+                                  <span className={`level ${s.level}`}>{t.levels[s.level] ?? t.levels.all}</span>
                                 </>
                               );
                               return s.bookingUrl ? (
@@ -139,6 +103,63 @@ export default async function Lessons({ params }: PageProps<"/[lang]/lessen">) {
           )}
         </div>
       </section>
+      <section className="s alt" id="stijlen">
+        <div className="wrap">
+          <SectionHead label={t.stylesLabel} title={page?.stylesTitle} />
+          {page?.intro ? (
+            <p className="muted" style={{ marginTop: -16, marginBottom: 32 }}>
+              {page.intro}
+            </p>
+          ) : null}
+          <ClassTiles lang={lang} styles={styles} to={href(lang, "lessons", { hash: "planning" })} anchors />
+        </div>
+      </section>
+
+      {studios.length ? (
+        <section className="s" id="studios">
+          <div className="wrap">
+            <SectionHead label={t.studiosLabel} title={page?.studiosTitle} />
+            <div className="g3">
+              {studios.map((s) => (
+                <div key={s._id}>
+                  <Photo media={s.photo} ratio="r32" sizes="(max-width: 860px) 100vw, 33vw" />
+                  <h4 style={{ marginTop: 14 }}>{s.name}</h4>
+                  {s.address || s.city ? (
+                    <p className="muted small" style={{ margin: "6px 0 10px" }}>
+                      {[s.address, s.city].filter(Boolean).join(" · ")}
+                    </p>
+                  ) : null}
+                  {s.website ? (
+                    <a className="link" href={s.website} target="_blank" rel="noopener">
+                      {t.website}
+                    </a>
+                  ) : null}
+                </div>
+              ))}
+            </div>
+          </div>
+        </section>
+      ) : null}
+
+      {page?.private?.title || page?.private?.text ? (
+        // Privéles (the old Coaching page, in short): one row like the Home "who are we" block.
+        <section className="s alt" id="prive">
+          <div className="wrap">
+            <div className="g2">
+              <div>
+                <span className="label">{t.privateLabel}</span>
+                <h2>{page.private.title || t.privateTitle}</h2>
+                {page.private.text ? <p style={{ marginTop: 14 }}>{page.private.text}</p> : null}
+                {page.private.practical ? <p className="muted small">{page.private.practical}</p> : null}
+                <Link className="btn" href={href(lang, "contact")} style={{ marginTop: 18 }}>
+                  {page.private.button || t.privateButton}
+                </Link>
+              </div>
+              <Photo media={page.private.photo} ratio="r32" sizes="(max-width: 860px) 100vw, 50vw" />
+            </div>
+          </div>
+        </section>
+      ) : null}
     </>
   );
 }

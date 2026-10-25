@@ -18,10 +18,12 @@ sanity/                  shared with the Next.js app
 |---|---|---|
 | Instellingen | `settings` (singleton) | name, slogan, e-mail, GSM, socials, default sign-up link, default SEO |
 | Home | `homePage` (singleton) | opening image, intro (≤ 400 chars), featured retreat (empty = next one), ≤ 3 testimonials, "who are we" |
-| **Fotobank** | `mediaItem` | **every photo is stored once**: hotspot, alt text, title, description, place, date, categories, retreat, "show in gallery", "highlighted". Pages only *reference* photos. |
-| Retreats (pagina) … Privacyverklaring | `retreatsPage` · `lessonsPage` · `coachingPage` · `aboutPage` · `galleryPage` · `contactPage` · `privacyPage` (singletons, directly in the main menu) | opening image + page-specific fields + SEO. The weekly schedule lives on `lessonsPage`. |
+| **Fotobank** | `mediaItem` | **every photo is stored once**: hotspot, alt text (SEO), categories, "show in gallery", "highlighted". No title or place (the gallery shows none). Pages only *reference* photos. |
+| Pagina's | `homePage` · `retreatsPage` · `lessonsPage` · `aboutPage` · `galleryPage` · `contactPage` (singletons) | opening image + page-specific fields + SEO. The weekly schedule (with a level per class) and the Privéles block live on `lessonsPage`. |
+| Juridisch | `legalPage` × 4, fixed ids `legal-privacy`, `legal-terms`, `legal-cancellation`, `legal-cookies` | title, intro, sections. Footer links + sign-up consent. |
+| Inschrijfformulieren | `signupForm` | standard fields on/off (GSM, room, diet, message) + extra questions (text, long text, yes/no, choice). A retreat picks one; empty = the one marked "Standaard". "Gebruikt door" lists the retreats. |
 | Retreats | `retreat` | groups follow the detail page: basics · in a nutshell · the place · the people · programme · practical · closing. Komend / Voorbij is **derived from `endDate`**, never stored. |
-| Team & begeleiders | `person` | Rita, Philippe, guest guides (portrait + optional "object" photo for the hover swap) |
+| Personen | `person` | `kind`: founder (Rita & Philippe, optional "object" photo for the hover swap) or collaborator (teachers, cooks, a company…, with website + links). Every collaborator shows on Over ons automatically. |
 | Lessen | `yogaClass`, `studio` | styles (what / for whom / where), studios |
 | Testimonials | `testimonial` | quote ≤ 200 chars, optional link to a retreat |
 | Inschrijvingen | `signup` (from the site, private) | opens as a readable card with status buttons; "Bevestigd" updates `booked` on the retreat. Also: Nieuw (with count badge), Tabel (all fields, filter, CSV), Per retreat |
@@ -94,6 +96,8 @@ The frontend needs `NEXT_PUBLIC_SANITY_PROJECT_ID` and `NEXT_PUBLIC_SANITY_DATAS
 | `npm run typegen` | extract the schema and regenerate `../sanity/types.ts` (run after changing a schema or a query) |
 | `npm run validate` | schema validation |
 | `npm run seed` | idempotent seed: fills only empty fields, so Studio edits are kept (`-- --replace` overwrites). `npx sanity exec scripts/seed.ts -- --dry` prints it without writing |
+| `npm run migrate:v2` | one-off v2 migration on the live dataset (Fotobank fields, Coaching → Lessen, principles → values, person kind, privacy → legal page, booked). `-- --dry` first |
+| `npm run content:v2` | one-off v2 texts (docs/plan.html Part 1, `scripts/v2-content.ts`) as **drafts**, for R&P to review and publish. Run after `migrate:v2`. `-- --dry` first |
 
 ## Seed content
 

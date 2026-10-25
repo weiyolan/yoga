@@ -10,7 +10,7 @@ import { usePathname } from "next/navigation";
 import { useCallback, useEffect, useRef, useState, type CSSProperties, type ReactNode } from "react";
 import { getDictionary } from "@/lib/dictionary";
 import { dateRange, placesLabel } from "@/lib/format";
-import { href, parsePath, retreatHref, translatePath, type Route } from "@/lib/routes";
+import { href, parsePath, retreatHref, signupHref, translatePath, type Route } from "@/lib/routes";
 import { languages, type Lang } from "@/sanity/site.config";
 import { urlFor } from "@/sanity/image";
 import type { LAYOUT_QUERY_RESULT } from "@/sanity/types";
@@ -21,7 +21,7 @@ type PanelKey = "retreats" | "lessons" | "about";
 type Props = { lang: Lang; layout: Layout | null; children?: ReactNode };
 
 /** Pages without a hero get the solid header straight away. */
-const SOLID: Route[] = ["gallery", "contact", "privacy"];
+const SOLID: Route[] = ["gallery", "contact", "privacy", "terms", "cancellation", "cookies"];
 
 /** "Yoga, Zen & Tonic" → the ampersand in italic ember. */
 const logo = (name: string) =>
@@ -42,8 +42,9 @@ function MCard({ to, icon, title, desc }: { to: string; icon: IconName; title: s
 export function Nav({ lang, layout, children }: Props) {
   const t = getDictionary(lang).nav;
   const pathname = usePathname();
-  const { route } = parsePath(pathname);
-  const solid = !!route && SOLID.includes(route);
+  const { route, rest } = parsePath(pathname);
+  // + a retreat's sign-up page (/retreats/<slug>/inschrijven)
+  const solid = (!!route && SOLID.includes(route)) || (route === "retreats" && rest.length === 2);
   const next = layout?.nextRetreat;
   const nextHref = next?.slug ? retreatHref(lang, next.slug) : href(lang, "retreats");
   const nextMeta = next ? [dateRange(lang, next.startDate, next.endDate), next.country, placesLabel(lang, next)].filter(Boolean).join(" · ") : "";
@@ -56,6 +57,7 @@ export function Nav({ lang, layout, children }: Props) {
   const burger = useRef<HTMLButtonElement>(null);
   const mnav = useRef<HTMLDivElement>(null);
   const timer = useRef<ReturnType<typeof setTimeout>>(undefined);
+  const pointer = useRef("");
   const state = useRef({ panel, mobile });
   state.current = { panel, mobile };
 
@@ -139,7 +141,6 @@ export function Nav({ lang, layout, children }: Props) {
         <div className="stack">
           <MCard to={href(lang, "retreats", { hash: "komend" })} icon="cal" title={t.upcoming[0]} desc={x?.menuUpcoming || t.upcoming[1]} />
           <MCard to={href(lang, "retreats", { hash: "voorbij" })} icon="past" title={t.past[0]} desc={x?.menuPast || t.past[1]} />
-          <MCard to={href(lang, "retreats", { hash: "zoek" })} icon="search" title={t.search[0]} desc={x?.menuSearch || t.search[1]} />
         </div>
       </div>
     ),
@@ -147,7 +148,7 @@ export function Nav({ lang, layout, children }: Props) {
       <>
         <div className="panel-grid four">
           {(layout?.styles ?? []).map((s) => (
-            <MCard key={s._id} to={href(lang, "lessons", { hash: "stijlen" })} icon="dot" title={s.name ?? ""} desc={s.what} />
+            <MCard key={s._id} to={href(lang, "lessons", { hash: s.slug ?? "stijlen" })} icon="dot" title={s.name ?? ""} desc={s.what} />
           ))}
         </div>
         <div className="panel-foot">
@@ -173,8 +174,8 @@ export function Nav({ lang, layout, children }: Props) {
         </Link>
         <div className="stack">
           <MCard to={href(lang, "about", { hash: "team" })} icon="people" title={t.team[0]} desc={x?.menuTeam || t.team[1]} />
-          <MCard to={href(lang, "about", { hash: "principes" })} icon="leaf" title={t.drive[0]} desc={x?.menuDrive || t.drive[1]} />
-          <MCard to={href(lang, "gallery")} icon="photo" title={t.galleryItem[0]} desc={x?.menuGallery || t.galleryItem[1]} />
+          <MCard to={href(lang, "about", { hash: "drijft" })} icon="leaf" title={t.drive[0]} desc={x?.menuDrive || t.drive[1]} />
+          <MCard to={href(lang, "about", { hash: "samenwerkingen" })} icon="people" title={t.collaborators[0]} desc={x?.menuCollaborators || t.collaborators[1]} />
         </div>
       </div>
     ),
@@ -196,19 +197,19 @@ export function Nav({ lang, layout, children }: Props) {
       label: t.lessons,
       panel: "lessons",
       subs: [
-        [t.chips.styles, href(lang, "lessons", { hash: "stijlen" })],
-        [t.chips.studios, href(lang, "lessons", { hash: "studios" })],
         [t.chips.schedule, href(lang, "lessons", { hash: "planning" })],
+        ...(layout?.styles ?? []).map((s) => [s.name ?? "", href(lang, "lessons", { hash: s.slug ?? "stijlen" })] as [string, string]),
+        [t.chips.studios, href(lang, "lessons", { hash: "studios" })],
       ],
     },
-    { route: "coaching", label: t.coaching },
     {
       route: "about",
       label: t.about,
       panel: "about",
       subs: [
         [t.chips.team, href(lang, "about", { hash: "team" })],
-        [t.chips.principles, href(lang, "about", { hash: "principes" })],
+        [t.chips.principles, href(lang, "about", { hash: "drijft" })],
+        [t.chips.collaborators, href(lang, "about", { hash: "samenwerkingen" })],
       ],
     },
     { route: "gallery", label: t.gallery },
@@ -242,10 +243,31 @@ export function Nav({ lang, layout, children }: Props) {
               const open = panel === key;
               return (
                 <li key={m.route} className={`has-panel${open ? " open" : ""}`} onPointerEnter={hover(key, 80)} onPointerLeave={hover(null, 180)}>
-                  <button className={`trigger${on ? " on" : ""}`} type="button" aria-expanded={open} onClick={() => setPanel(open ? null : key)}>
+                  {/* The label goes to the page; hover (or a first tap on touch, or ↓ on the keyboard) opens the panel. */}
+                  <Link
+                    className={`trigger${on ? " on" : ""}`}
+                    href={href(lang, m.route)}
+                    aria-current={on ? "page" : undefined}
+                    aria-expanded={open}
+                    onPointerDown={(e) => (pointer.current = e.pointerType)}
+                    onClick={(e) => {
+                      if (pointer.current && pointer.current !== "mouse" && !open) {
+                        e.preventDefault();
+                        setPanel(key);
+                      }
+                      pointer.current = "";
+                    }}
+                    onKeyDown={(e) => {
+                      if (e.key !== "ArrowDown") return;
+                      e.preventDefault();
+                      const li = e.currentTarget.parentElement;
+                      setPanel(key);
+                      requestAnimationFrame(() => li?.querySelector<HTMLAnchorElement>(".panel a")?.focus());
+                    }}
+                  >
                     {m.label}
                     <Icon name="chev" className="chev" />
-                  </button>
+                  </Link>
                   <div className="panel" role="region" aria-label={m.label} onClick={(e) => (e.target as Element).closest("a") && setPanel(null)}>
                     <div className="panel-card">{panels[key]}</div>
                   </div>
@@ -268,7 +290,7 @@ export function Nav({ lang, layout, children }: Props) {
             </span>
           ))}
         </span>
-        <Link className="btn sm cta" href={next?.slug ? retreatHref(lang, next.slug, "inschrijven") : href(lang, "contact")}>
+        <Link className="btn sm cta" href={next?.slug ? signupHref(lang, next.slug) : href(lang, "contact")}>
           {t.signup}
         </Link>
         <button ref={burger} className="burger" type="button" aria-expanded={mobile} aria-controls="mnav" aria-label={mobile ? t.closeMenu : t.openMenu} onClick={toggleMobile}>

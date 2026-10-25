@@ -93,35 +93,53 @@ export function ContactForm({ lang, subjects, notifyLabel, thanks }: { lang: Lan
   );
 }
 
-/** Which step holds each field: after a failed submit the form opens on the first step with a problem. */
-const STEP_OF: Record<string, number> = { name: 0, email: 0, phone: 0, persons: 1, room: 1, diet: 2, message: 2, consent: 3 };
+export type SignupFormDef = {
+  phone: boolean | null;
+  room: boolean | null;
+  diet: boolean | null;
+  message: boolean | null;
+  questions: { _key: string; label: string | null; help: string | null; type: string | null; options: string[] | null; required: boolean | null }[] | null;
+} | null;
+
+type StepKey = "about" | "retreat" | "wishes" | "confirm";
 
 /**
- * Retreat sign-up (retreat page, #inschrijven): stored in Sanity → Inschrijvingen.
- * One question group at a time (Typeform-like) with a progress bar; every step stays in the DOM,
- * so the whole form is posted at once and refilled after a failed submit. `full`: waiting list.
+ * Retreat sign-up (its own page: /retreats/<slug>/inschrijven): stored in Sanity → Inschrijvingen.
+ * Always one person. Which standard fields show and the extra questions come from the retreat's
+ * sign-up form (Studio → Inschrijfformulieren). One question group at a time (Typeform-like) with a
+ * progress bar; every step stays in the DOM, so the whole form is posted at once and refilled after a
+ * failed submit. `full`: waiting list.
  */
-export function SignupForm({ lang, retreatId, rooms, texts, full = false }: { lang: Lang; retreatId: string; rooms: string[]; texts?: Texts; full?: boolean }) {
+export function SignupForm({ lang, retreatId, rooms, form, texts, full = false }: { lang: Lang; retreatId: string; rooms: string[]; form: SignupFormDef; texts?: Texts & { terms?: string | null }; full?: boolean }) {
   const t = getDictionary(lang).signup;
   const [state, action, pending] = useActionState(signup, idle);
   const [step, setStep] = useState(0);
   const [dir, setDir] = useState<"fwd" | "back">("fwd");
   const [summary, setSummary] = useState<[string, string][]>([]);
-  const form = useRef<HTMLFormElement>(null);
+  const formEl = useRef<HTMLFormElement>(null);
   const moved = useRef(false);
+
+  const roomOptions = form?.room === false ? [] : rooms.filter(Boolean);
+  const questions = (form?.questions ?? []).filter((q) => q.label);
+  const askPhone = form?.phone !== false;
+  const askDiet = form?.diet !== false;
+  const askMessage = form?.message !== false;
+  const steps: StepKey[] = ["about", ...(roomOptions.length || questions.length ? ["retreat" as const] : []), ...(askDiet || askMessage ? ["wishes" as const] : []), "confirm"];
+  const stepOf = (k: StepKey) => steps.indexOf(k);
 
   // Server said "invalid": go back to the first step with a missing or wrong answer.
   useEffect(() => {
     if (state.status !== "invalid") return;
     const v = state.values ?? {};
-    const bad = !v.name ? "name" : !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v.email ?? "") ? "email" : "consent";
-    setStep(STEP_OF[bad]);
+    const missing = questions.some((q) => q.required && !v[`q.${q._key}`]?.trim());
+    const bad: StepKey = !v.name || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v.email ?? "") ? "about" : missing ? "retreat" : "confirm";
+    setStep(Math.max(stepOf(bad), 0));
   }, [state]);
 
   // Focus the first field of a new step (not on page load).
   useEffect(() => {
     if (!moved.current) return;
-    form.current?.querySelector<HTMLElement>(`[data-step="${step}"] :is(input:not([type=hidden]), textarea, button[role=combobox], [role=combobox])`)?.focus({ preventScroll: true });
+    formEl.current?.querySelector<HTMLElement>(`[data-step="${step}"] :is(input:not([type=hidden]), textarea, button[role=combobox], [role=combobox])`)?.focus({ preventScroll: true });
   }, [step]);
 
   if (state.status === "sent")
@@ -131,12 +149,17 @@ export function SignupForm({ lang, retreatId, rooms, texts, full = false }: { la
       </p>
     );
 
-  const options = rooms.filter(Boolean);
-  const total = t.steps.length;
+  const total = steps.length;
   const last = step === total - 1;
+  const answer = (data: FormData, q: (typeof questions)[number]) => {
+    const v = String(data.get(`q.${q._key}`) ?? "");
+    if (q.type === "yesno") return v === "yes" ? t.yes : v === "no" ? t.no : "";
+    if (q.type === "choice") return v ? (q.options ?? []).filter(Boolean)[Number(v)] ?? "" : "";
+    return v;
+  };
 
   const go = (to: number) => {
-    const el = form.current;
+    const el = formEl.current;
     if (!el) return;
     if (to > step) {
       // validate the current step only
@@ -148,8 +171,8 @@ export function SignupForm({ lang, retreatId, rooms, texts, full = false }: { la
         [t.name, String(data.get("name") ?? "")],
         [t.email, String(data.get("email") ?? "")],
         [t.phone, String(data.get("phone") ?? "")],
-        [t.persons, t.personsN(Number(data.get("persons") ?? 1))],
-        [t.room, options.length ? String(data.get("room") ?? "") : ""],
+        [t.room, roomOptions.length ? String(data.get("room") ?? "") : ""],
+        ...questions.map((q) => [q.label ?? "", answer(data, q)] as [string, string]),
         [t.diet, String(data.get("diet") ?? "")],
         [t.message, String(data.get("message") ?? "")],
       ];
@@ -169,10 +192,19 @@ export function SignupForm({ lang, retreatId, rooms, texts, full = false }: { la
     go(step + 1);
   };
 
-  const at = (n: number) => ({ "data-step": n, hidden: step !== n, className: `form step${step === n ? " on" : ""}` });
+  const at = (k: StepKey) => {
+    const n = stepOf(k);
+    return { "data-step": n, hidden: step !== n, className: `form step${step === n ? " on" : ""}` };
+  };
+  const v = state.values ?? {};
+  const legalLink = (route: "terms" | "cancellation") => (
+    <Link href={href(lang, route)} target="_blank">
+      {getDictionary(lang).legal.titles[route].toLowerCase()}
+    </Link>
+  );
 
   return (
-    <form className="stepper" style={{ marginTop: 32 }} action={action} ref={form} onKeyDown={onKeyDown} data-dir={dir}>
+    <form className="stepper" style={{ marginTop: 32 }} action={action} ref={formEl} onKeyDown={onKeyDown} data-dir={dir}>
       <input type="hidden" name="retreat" value={retreatId} />
       <input type="hidden" name="lang" value={lang} />
       {full ? <p className="form-note">{t.waitlist}</p> : null}
@@ -181,64 +213,117 @@ export function SignupForm({ lang, retreatId, rooms, texts, full = false }: { la
         <span style={{ width: `${((step + 1) / total) * 100}%` }} />
       </div>
       <p className="progress-label" aria-live="polite">
-        <b>{t.step(step + 1, total)}</b> · {t.steps[step]}
+        <b>{t.step(step + 1, total)}</b> · {t.steps[steps[step]]}
       </p>
 
-      <fieldset {...at(0)}>
-        <legend className="visually-hidden">{t.steps[0]}</legend>
+      <fieldset {...at("about")}>
+        <legend className="visually-hidden">{t.steps.about}</legend>
         <div className="field full">
           <label htmlFor="s-name">{t.name}</label>
-          <input id="s-name" name="name" defaultValue={state.values?.name} required autoComplete="name" />
+          <input id="s-name" name="name" defaultValue={v.name} required autoComplete="name" />
         </div>
-        <div className="field">
+        <div className={`field${askPhone ? "" : " full"}`}>
           <label htmlFor="s-email">{t.email}</label>
-          <input id="s-email" name="email" type="email" defaultValue={state.values?.email} required autoComplete="email" />
+          <input id="s-email" name="email" type="email" defaultValue={v.email} required autoComplete="email" />
         </div>
-        <div className="field">
-          <label htmlFor="s-phone">{t.phone}</label>
-          <input id="s-phone" name="phone" type="tel" defaultValue={state.values?.phone} autoComplete="tel" />
-        </div>
-      </fieldset>
-
-      <fieldset {...at(1)}>
-        <legend className="visually-hidden">{t.steps[1]}</legend>
-        <div className="field full">
-          <Select label={t.persons} name="persons" defaultValue={state.values?.persons} options={[1, 2, 3, 4].map((n) => ({ value: String(n), label: t.personsN(n) }))} />
-        </div>
-        {options.length ? (
-          <div className="field full">
-            <Select label={t.room} name="room" defaultValue={state.values?.room} options={options.map((r) => ({ value: r, label: r }))} />
+        {askPhone ? (
+          <div className="field">
+            <label htmlFor="s-phone">{t.phone}</label>
+            <input id="s-phone" name="phone" type="tel" defaultValue={v.phone} autoComplete="tel" />
           </div>
         ) : null}
+        <p className="muted small full" style={{ margin: 0 }}>
+          {t.group}
+        </p>
       </fieldset>
 
-      <fieldset {...at(2)}>
-        <legend className="visually-hidden">{t.steps[2]}</legend>
-        <div className="field full">
-          <label htmlFor="s-diet">{t.diet}</label>
-          <input id="s-diet" name="diet" defaultValue={state.values?.diet} />
-        </div>
-        <div className="field full">
-          <label htmlFor="s-message">{t.message}</label>
-          <textarea id="s-message" name="message" defaultValue={state.values?.message} />
-        </div>
-      </fieldset>
+      {stepOf("retreat") >= 0 ? (
+        <fieldset {...at("retreat")}>
+          <legend className="visually-hidden">{t.steps.retreat}</legend>
+          {roomOptions.length ? (
+            <div className="field full">
+              <Select label={t.room} name="room" defaultValue={v.room} options={roomOptions.map((r) => ({ value: r, label: r }))} />
+            </div>
+          ) : null}
+          {questions.map((q) => {
+            const name = `q.${q._key}`;
+            const id = `s-q-${q._key}`;
+            const help = q.help ? (
+              <small className="muted" id={`${id}-help`}>
+                {q.help}
+              </small>
+            ) : null;
+            const label = `${q.label}${q.required ? " *" : ""}`;
+            if (q.type === "yesno" || q.type === "choice") {
+              const opts = q.type === "yesno" ? [["yes", t.yes], ["no", t.no]] : (q.options ?? []).filter(Boolean).map((o, i) => [String(i), o]);
+              return (
+                <fieldset key={q._key} className="field full choices" aria-describedby={q.help ? `${id}-help` : undefined}>
+                  <legend className="select-label">{label}</legend>
+                  {help}
+                  <div className="row">
+                    {opts.map(([value, text]) => (
+                      <label key={value} className="check">
+                        <input type="radio" name={name} value={value} defaultChecked={v[name] === value} required={!!q.required} /> {text}
+                      </label>
+                    ))}
+                  </div>
+                </fieldset>
+              );
+            }
+            return (
+              <div key={q._key} className="field full">
+                <label htmlFor={id}>{label}</label>
+                {q.type === "textarea" ? (
+                  <textarea id={id} name={name} defaultValue={v[name]} required={!!q.required} aria-describedby={q.help ? `${id}-help` : undefined} />
+                ) : (
+                  <input id={id} name={name} defaultValue={v[name]} required={!!q.required} aria-describedby={q.help ? `${id}-help` : undefined} />
+                )}
+                {help}
+              </div>
+            );
+          })}
+        </fieldset>
+      ) : null}
 
-      <fieldset {...at(3)}>
-        <legend className="visually-hidden">{t.steps[3]}</legend>
+      {stepOf("wishes") >= 0 ? (
+        <fieldset {...at("wishes")}>
+          <legend className="visually-hidden">{t.steps.wishes}</legend>
+          {askDiet ? (
+            <div className="field full">
+              <label htmlFor="s-diet">{t.diet}</label>
+              <input id="s-diet" name="diet" defaultValue={v.diet} />
+            </div>
+          ) : null}
+          {askMessage ? (
+            <div className="field full">
+              <label htmlFor="s-message">{t.message}</label>
+              <textarea id="s-message" name="message" defaultValue={v.message} />
+            </div>
+          ) : null}
+        </fieldset>
+      ) : null}
+
+      <fieldset {...at("confirm")}>
+        <legend className="visually-hidden">{t.steps.confirm}</legend>
         <div className="full">
           <h3 className="summary-title">{t.summary}</h3>
           <dl className="summary">
-            {summary.map(([k, v]) => (
+            {summary.map(([k, val]) => (
               <div key={k}>
                 <dt>{k}</dt>
-                <dd>{v}</dd>
+                <dd>{val}</dd>
               </div>
             ))}
           </dl>
         </div>
         <label className="check full">
-          <input type="checkbox" name="consent" defaultChecked={state.values?.consent === "on"} required />
+          <input type="checkbox" name="terms" defaultChecked={v.terms === "on"} required />
+          <span>
+            {texts?.terms || t.terms} ({legalLink("terms")} {t.and} {legalLink("cancellation")})
+          </span>
+        </label>
+        <label className="check full">
+          <input type="checkbox" name="consent" defaultChecked={v.consent === "on"} required />
           <span>
             {texts?.consent || t.consent}{" "}
             <Link href={href(lang, "privacy")} target="_blank">

@@ -1,4 +1,4 @@
-import { defineArrayMember, defineField } from "sanity";
+import { defineArrayMember, defineField, type ConditionalProperty } from "sanity";
 
 /**
  * Every image on the site is a `mediaItem` in the Fotobank: uploaded once, with
@@ -10,6 +10,7 @@ type Opts = {
   required?: boolean;
   group?: string | string[];
   fieldset?: string;
+  hidden?: ConditionalProperty;
 };
 
 export const mediaField = (name: string, { required, ...opts }: Opts = {}) =>

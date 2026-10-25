@@ -1,6 +1,7 @@
 import { ActivityIcon } from "@sanity/icons/Activity";
 import { defineArrayMember, defineField, defineType } from "sanity";
 import { i18nString, i18nText } from "../shared/i18n";
+import { mediaField } from "../shared/media";
 
 export const WEEKDAYS = [
   { title: "Maandag", value: "mon" },
@@ -12,14 +13,22 @@ export const WEEKDAYS = [
   { title: "Zondag", value: "sun" },
 ];
 
+export const LEVELS = [
+  { title: "Alle niveaus", value: "all" },
+  { title: "Beginner", value: "beginner" },
+  { title: "Gemiddeld", value: "intermediate" },
+  { title: "Gevorderd", value: "advanced" },
+];
+
 export const lessonsPage = defineType({
   name: "lessonsPage",
   title: "Lessen-pagina",
   type: "document",
   icon: ActivityIcon,
   groups: [
-    { name: "content", title: "Inhoud", default: true },
+    { name: "content", title: "Inhoud" },
     { name: "schedule", title: "Weekplanning" },
+    { name: "private", title: "Privéles" },
     { name: "seo", title: "SEO" },
   ],
   fields: [
@@ -52,16 +61,39 @@ export const lessonsPage = defineType({
             defineField({ name: "durationMinutes", title: "Duur (min.)", type: "number", initialValue: 60 }),
             defineField({ name: "style", title: "Stijl", type: "reference", to: [{ type: "yogaClass" }], validation: (rule) => rule.required() }),
             defineField({ name: "studio", title: "Studio", type: "reference", to: [{ type: "studio" }], validation: (rule) => rule.required() }),
+            defineField({
+              name: "level",
+              title: "Niveau",
+              type: "string",
+              options: { list: LEVELS, layout: "radio", direction: "horizontal" },
+              initialValue: "all",
+              description: "Leeg = alle niveaus.",
+            }),
             defineField({ name: "bookingUrl", title: "Boekingslink", type: "url", description: "Leeg = website van de studio." }),
           ],
           preview: {
-            select: { day: "day", time: "startTime", style: "style.name", studio: "studio.name" },
-            prepare: ({ day, time, style, studio }) => ({
+            select: { day: "day", time: "startTime", style: "style.name", studio: "studio.name", level: "level" },
+            prepare: ({ day, time, style, studio, level }) => ({
               title: `${WEEKDAYS.find((d) => d.value === day)?.title ?? "?"} ${time ?? ""} · ${style ?? "?"}`,
-              subtitle: studio,
+              subtitle: [studio, LEVELS.find((l) => l.value === (level ?? "all"))?.title].filter(Boolean).join(" · "),
             }),
           },
         }),
+      ],
+    }),
+    /* ---- privéles: one compact section at the bottom (#prive), replaces the old Coaching page ---- */
+    defineField({
+      name: "private",
+      title: "Privéles",
+      type: "object",
+      group: "private",
+      description: "Compact blok onderaan de Lessen-pagina. Leeg laten = niet getoond.",
+      fields: [
+        i18nString("title", { title: "Kop", description: "bv. “Liever één op één?”." }),
+        i18nText("text", { title: "Tekst", max: 300, description: "Wat en voor wie, in 1–3 zinnen." }),
+        i18nString("practical", { title: "Praktisch", max: 80, description: "Eén lijn: duur · prijs · locatie, bv. “60 of 90 min · € 70 · Antwerpen”." }),
+        mediaField("photo", { title: "Foto" }),
+        i18nString("button", { title: "Knop", description: "Leeg = “Contacteer Rita”. Gaat naar het contactformulier." }),
       ],
     }),
     defineField({ name: "seo", title: "SEO & delen", type: "seo", group: "seo" }),

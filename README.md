@@ -1,6 +1,6 @@
 # Yoga, Zen & Tonic
 
-Website for **Yoga, Zen & Tonic** (Rita & Philippe): retreats, classes and private coaching. _Beyond the mat, into the moment._
+Website for **Yoga, Zen & Tonic** (Rita & Philippe): retreats and classes. _Yoga, zen & een scheutje tonic._
 
 The site follows the approved wireframe (`docs/wireframe/`). All content and photos come from Sanity (`studio/`).
 
@@ -38,8 +38,8 @@ The Studio lives in `studio/`, an npm workspace: the root `npm install` installs
 - **Live preview.** Studio → "Live preview" (Presentation tool) loads the site in draft mode via `/api/draft-mode/enable`: draft content, fetched with `SANITY_API_READ_TOKEN`, never cached, with click-to-edit overlays (`<VisualEditing />`) only inside the Studio. The draft cookie is set for the whole domain, so the site itself can stay in draft mode afterwards: it then shows a "Voorbeeldmodus · Verlaten" bar instead of overlays (`components/DraftMode.tsx`, `/api/draft-mode/disable`). URL ↔ document mapping: `studio/presentation/resolve.ts`. Strings that the code compares or uses as URLs are kept free of edit markers (`PLAIN` in `sanity/client.ts`). The hosted Studio previews `https://yogazentonic.com` (`SITE_URL` in `studio/sanity.config.ts`, override with `SANITY_STUDIO_PREVIEW_URL`); `/studio` uses its own origin.
 - **Editable interface texts.** Section headings, menu descriptions and form texts live in the page singletons and in Instellingen → Menu / Formulieren. The seed fills them with the defaults from `lib/dictionary.ts`; a field left blank falls back to that same default, so nothing breaks. The sign-up confirmation mail fills in `{naam}`, `{retreat}` and `{datum}`.
 - **Images come from the Sanity CDN.** `components/Photo.tsx` writes a `srcset` and respects the hotspot from the Fotobank. The Next image optimizer isn't used.
-- **The only dynamic parts are the forms.** Contact and the footer "keep me posted" form are server actions in `app/actions/forms.ts` and send mail through Resend. Without `RESEND_API_KEY` they log to the console instead. Every form also stores its submission in Sanity: contact → `message` (Studio → Berichten), newsletter and the contact form's "keep me posted" → `subscriber` (Studio → Nieuwsbrief, one document per address), and the retreat sign-up form (`signup`) stores each sign-up as a `signup` document (Studio → Inschrijvingen) with a dotted `_id` (`signup.<uuid>`), so it is never readable through the public API. It needs `SANITY_WRITE_TOKEN`; without it, sign-ups are only logged. A retreat (or Instellingen) with an external sign-up link shows that link instead of the form.
-- **Sign-ups in the Studio.** Inschrijvingen shows a red count of new sign-ups (also on Berichten and Reviews). A sign-up opens as a readable card (`studio/components/SignupView.tsx`) with status buttons; "Bevestigd" counts towards `booked` on the retreat (`studio/lib/booked.ts`). Once a retreat has confirmed sign-ups, the site shows "nog x plaatsen" / "volzet", and a full retreat's form becomes a waiting-list request (`waitlist: true`). Inschrijvingen → Tabel lists every sign-up with a column per form field, filterable per retreat and status, with CSV export. The form on the site asks a few questions at a time with a progress bar (`SignupForm` in `components/Forms.tsx`).
+- **The only dynamic parts are the forms.** Contact and the footer "keep me posted" form are server actions in `app/actions/forms.ts` and send mail through Resend. Without `RESEND_API_KEY` they log to the console instead. Every form also stores its submission in Sanity: contact → `message` (Studio → Berichten), newsletter and the contact form's "keep me posted" → `subscriber` (Studio → Nieuwsbrief, one document per address), and the retreat sign-up page (`/retreats/<slug>/inschrijven`) stores each sign-up (always one person) as a `signup` document (Studio → Inschrijvingen) with a dotted `_id` (`signup.<uuid>`), so it is never readable through the public API. It needs `SANITY_WRITE_TOKEN`; without it, sign-ups are only logged. A retreat (or Instellingen) with an external sign-up link shows that link instead of the form. The questions come from the retreat's sign-up form (Studio → Inschrijfformulieren; empty = the one marked "Standaard"); each sign-up stores a snapshot of questions + answers. Mails are HTML (`lib/mail-template.ts`) + plain text.
+- **Sign-ups in the Studio.** Inschrijvingen shows a red count of new sign-ups (also on Berichten and Reviews). A sign-up opens as a readable card (`studio/components/SignupView.tsx`) with status buttons; "Bevestigd" counts towards `booked` on the retreat (`studio/lib/booked.ts`). With a capacity set, the site always shows "nog x plaatsen" / "volzet"; a full retreat's button becomes "Zet me op de wachtlijst" and its form a waiting-list request (`waitlist: true`). Inschrijvingen → Tabel lists every sign-up with a column per form field, filterable per retreat and status, with CSV export. The form on the site asks a few questions at a time with a progress bar (`SignupForm` in `components/Forms.tsx`).
 - **Reviews.** Past retreat pages have a review form (`#review`). A review is stored privately (`reviewSubmission.<uuid>`, with e-mail) under Studio → Reviews; "Gepubliceerd" copies it without e-mail to a public `review`, shown on that retreat page and, from 4★, on Home after the curated testimonials. "Geweigerd" takes it offline again.
 - **AI (✨).** Studio actions "Alt-tekst genereren" (on a photo), "Vertaal NL → EN" (any document; fills empty English fields) and Fotobank → "Alt-teksten aanvullen" call `/api/ai`, which uses Gemini (`GEMINI_API_KEY`). The Studio proves the caller can edit the dataset by creating a one-off private `aiTicket` document that the route checks and deletes. Results land in the draft (bulk alt texts are published directly), so check them before publishing.
 
@@ -49,7 +49,11 @@ The Studio lives in `studio/`, an npm workspace: the root `npm install` installs
 |---|---|
 | `/`, `/retreats`, `/retreats/<slug>` | `/en`, `/en/retreats`, `/en/retreats/<slug>` |
 | `/lessen`, `/over-ons` | `/en/lessons`, `/en/about` |
-| `/coaching`, `/gallery`, `/contact` | `/en/coaching`, `/en/gallery`, `/en/contact` |
+| `/retreats/<slug>/inschrijven` | `/en/retreats/<slug>/sign-up` |
+| `/gallery`, `/contact` | `/en/gallery`, `/en/contact` |
+| `/privacy`, `/voorwaarden`, `/annulatie`, `/cookies` | `/en/privacy`, `/en/terms`, `/en/cancellation`, `/en/cookies` |
+
+`/coaching` (old) → 308 `/lessen#prive` (`next.config.ts`).
 
 - **Routing.** Pages live in `app/[lang]/…` under their Dutch folder names. `proxy.ts` rewrites the public URLs onto them (rewrite only, so pages stay static). It also redirects `/nl/…` and Dutch segments under `/en` to the canonical URL.
 - **Where things are defined:**
@@ -66,7 +70,7 @@ app/studio/              Sanity Studio (/studio, own root layout)
 app/api/revalidate/      Sanity webhook
 app/actions/forms.ts     contact + newsletter server actions
 components/              Nav (client), Photo, sections (hero, cards, tiles),
-                         Lightbox, GalleryGrid, RetreatFilter, Testimonials, Forms
+                         Lightbox, GalleryGrid, Testimonials, Forms, LegalPage
 lib/                     routes, dictionary, format (dates/prices), metadata, mail
 sanity/                  queries, generated types, typed fetcher, image builder
 studio/                  Sanity Studio (schemas, desk structure, seed)

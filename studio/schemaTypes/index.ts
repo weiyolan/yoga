@@ -4,6 +4,7 @@ import { retreat } from "./documents/retreat";
 import { review, reviewSubmission } from "./documents/review";
 import { message } from "./documents/message";
 import { signup } from "./documents/signup";
+import { signupForm } from "./documents/signup-form";
 import { subscriber } from "./documents/subscriber";
 import { studio } from "./documents/studio";
 import { testimonial } from "./documents/testimonial";
@@ -12,27 +13,19 @@ import { hero } from "./objects/hero";
 import { seo } from "./objects/seo";
 import { simpleBlockContent } from "./objects/simple-block-content";
 import { aboutPage } from "./singletons/about-page";
-import { coachingPage } from "./singletons/coaching-page";
 import { contactPage } from "./singletons/contact-page";
 import { galleryPage } from "./singletons/gallery-page";
 import { homePage } from "./singletons/home-page";
+import { legalPage } from "./singletons/legal-page";
 import { lessonsPage } from "./singletons/lessons-page";
-import { privacyPage } from "./singletons/privacy-page";
 import { retreatsPage } from "./singletons/retreats-page";
 import { settings } from "./singletons/settings";
 
 /** Singleton types: one document each, fixed `_id` = type name (see structure/). */
-export const SINGLETONS = [
-  settings,
-  homePage,
-  retreatsPage,
-  lessonsPage,
-  coachingPage,
-  aboutPage,
-  galleryPage,
-  contactPage,
-  privacyPage,
-].map((t) => t.name);
+export const SINGLETONS = [settings, homePage, retreatsPage, lessonsPage, aboutPage, galleryPage, contactPage].map((t) => t.name);
+
+/** Fixed-id pages that aren't singletons by type: one `legalPage` per legal page (LEGAL_PAGES). */
+export const FIXED_TYPES = [legalPage.name];
 
 /** Only the website creates these (private dotted ids): hidden from "New document". */
 export const FORM_TYPES = [signup.name, message.name, subscriber.name, reviewSubmission.name];
@@ -45,6 +38,7 @@ export const schemaTypes = [
   // documents
   mediaItem,
   retreat,
+  signupForm,
   person,
   yogaClass,
   studio,
@@ -59,9 +53,8 @@ export const schemaTypes = [
   homePage,
   retreatsPage,
   lessonsPage,
-  coachingPage,
   aboutPage,
   galleryPage,
   contactPage,
-  privacyPage,
+  legalPage,
 ];

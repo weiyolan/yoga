@@ -9,7 +9,7 @@ import { getDictionary } from "@/lib/dictionary";
 import type { Lang } from "@/sanity/site.config";
 import { Icon } from "./icons";
 
-export type LightboxItem = { src: string; alt: string; caption?: string | null };
+export type LightboxItem = { src: string; alt: string };
 
 const Ctx = createContext<(index: number) => void>(() => {});
 
@@ -72,7 +72,7 @@ export function Lightbox({ lang, items, children }: { lang: Lang; items: Lightbo
           <figure>
             <img src={item.src} alt={item.alt} draggable={false} />
             <figcaption>
-              {item.caption ? <span>{item.caption}</span> : <span />}
+              <span />
               <span className="count">
                 {index! + 1} / {n}
               </span>

@@ -14,8 +14,8 @@ type Row = {
   name?: string;
   email?: string;
   phone?: string;
-  persons?: number;
   room?: string;
+  answers?: { question?: string; answer?: string }[];
   diet?: string;
   message?: string;
   lang?: string;
@@ -27,7 +27,7 @@ type Retreat = { _id: string; title?: string; startDate?: string; capacity?: num
 
 const NL = `coalesce(title[language == "nl"][0].value, title[0].value)`;
 const QUERY = `{
-  "signups": *[_type == "signup"] | order(submittedAt desc) { _id, status, submittedAt, name, email, phone, persons, room, diet, message, lang, notes, "retreatId": retreat._ref, "retreat": retreat->{ "t": ${NL} }.t },
+  "signups": *[_type == "signup"] | order(submittedAt desc) { _id, status, submittedAt, name, email, phone, room, answers, diet, message, lang, notes, "retreatId": retreat._ref, "retreat": retreat->{ "t": ${NL} }.t },
   "retreats": *[_type == "retreat" && !(_id in path("drafts.**"))] | order(startDate desc) { _id, "title": ${NL}, startDate, capacity, booked }
 }`;
 
@@ -38,15 +38,22 @@ const COLUMNS: { key: keyof Row; title: string; width?: number }[] = [
   { key: "name", title: "Naam", width: 150 },
   { key: "email", title: "E-mail", width: 200 },
   { key: "phone", title: "GSM", width: 130 },
-  { key: "persons", title: "Pers.", width: 60 },
   { key: "room", title: "Kamer / prijs", width: 160 },
+  { key: "answers", title: "Extra vragen", width: 260 },
   { key: "diet", title: "Dieet / allergieën", width: 200 },
   { key: "message", title: "Vragen / opmerkingen", width: 260 },
   { key: "lang", title: "Taal", width: 60 },
   { key: "notes", title: "Interne notitie", width: 200 },
 ];
 const statusTitle = (s?: string) => SIGNUP_STATUSES.find((x) => x.value === s)?.title ?? "Nieuw";
-const text = (r: Row, key: keyof Row) => (key === "status" ? statusTitle(r.status) : key === "submittedAt" ? (r.submittedAt ?? "").slice(0, 10) : String(r[key] ?? ""));
+const text = (r: Row, key: keyof Row) =>
+  key === "status"
+    ? statusTitle(r.status)
+    : key === "submittedAt"
+      ? (r.submittedAt ?? "").slice(0, 10)
+      : key === "answers"
+        ? (r.answers ?? []).map((a) => `${a.question}: ${a.answer || "-"}`).join(" · ")
+        : String(r[key] ?? "");
 
 function csv(rows: Row[]) {
   const esc = (v: string) => (/[",\n;]/.test(v) ? `"${v.replaceAll('"', '""')}"` : v);
@@ -103,8 +110,9 @@ export function SignupTable() {
   }, [data, retreat, status, sort]);
 
   const chosen = data?.retreats.find((r) => r._id === retreat);
-  const confirmed = rows.filter((r) => r.status === "confirmed").reduce((n, r) => n + (r.persons ?? 1), 0);
-  const total = rows.reduce((n, r) => n + (r.persons ?? 1), 0);
+  // one sign-up = one person
+  const confirmed = rows.filter((r) => r.status === "confirmed").length;
+  const total = rows.length;
 
   const download = () => {
     const blob = new Blob(["﻿" + csv(rows)], { type: "text/csv;charset=utf-8" });

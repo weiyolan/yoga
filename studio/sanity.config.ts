@@ -5,17 +5,17 @@ import { presentationTool } from "sanity/presentation";
 import { structureTool } from "sanity/structure";
 import { internationalizedArray } from "sanity-plugin-internationalized-array";
 import { apiVersion, defaultLanguage, languages } from "../sanity/site.config";
-import { FORM_TYPES, schemaTypes, SINGLETONS } from "./schemaTypes";
+import { FIXED_TYPES, FORM_TYPES, schemaTypes, SINGLETONS } from "./schemaTypes";
 import { resolve } from "./presentation/resolve";
 import { structure } from "./structure";
 import { defaultDocumentNode } from "./structure/views";
 import { siteOrigin } from "./lib/site";
 import { altTextAction, translateAction } from "./actions/ai";
+import { reviewLinkAction } from "./actions/review-link";
 import { newBadge } from "./actions/badges";
-import { LanguageNavbar } from "./components/LanguageNavbar";
 
 
-const singletons = new Set<string>(SINGLETONS);
+const singletons = new Set<string>([...SINGLETONS, ...FIXED_TYPES]);
 const formTypes = new Set<string>(FORM_TYPES);
 const singletonActions = new Set(["publish", "discardChanges", "restore"]);
 
@@ -24,6 +24,11 @@ export default defineConfig({
   title: "Yoga, Zen & Tonic",
   projectId: process.env.SANITY_STUDIO_PROJECT_ID || "1pbhk0to",
   dataset: process.env.SANITY_STUDIO_DATASET || "production",
+
+  // No content releases / scheduled drafts: one simple flow (edit the draft → Publiceer). Also removes the
+  // perspective picker, where an account got stuck on "Gepubliceerd" and couldn't edit anymore.
+  releases: { enabled: false },
+  scheduledDrafts: { enabled: false },
 
   plugins: [
     structureTool({ structure, defaultDocumentNode }),
@@ -48,8 +53,6 @@ export default defineConfig({
     visionTool({ defaultApiVersion: apiVersion }),
   ],
 
-  studio: { components: { navbar: LanguageNavbar } },
-
   schema: {
     types: schemaTypes,
     // singletons and form submissions can't be created from "New document"
@@ -63,7 +66,7 @@ export default defineConfig({
     actions: (prev, { schemaType }) => {
       if (formTypes.has(schemaType) || schemaType === "review") return prev.filter(({ action }) => action !== "duplicate");
       const base = singletons.has(schemaType) ? prev.filter(({ action }) => action && singletonActions.has(action)) : prev;
-      return [...base, ...(schemaType === "mediaItem" ? [altTextAction] : []), translateAction];
+      return [...base, ...(schemaType === "mediaItem" ? [altTextAction] : []), ...(schemaType === "retreat" ? [reviewLinkAction] : []), translateAction];
     },
     // "Nieuw" badge on submissions nobody has handled yet
     badges: (prev, { schemaType }) => (formTypes.has(schemaType) ? [...prev, newBadge] : prev),

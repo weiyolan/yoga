@@ -87,13 +87,13 @@ export function RetreatCard({ lang, retreat, tag }: { lang: Lang; retreat: Retre
   );
 }
 
-/** Class tiles with hover/tap reveal: what · for whom · where. */
-export function ClassTiles({ lang, styles, to }: { lang: Lang; styles: StyleData[]; to: string }) {
+/** Class tiles with hover/tap reveal: what · for whom · where. `anchors`: each tile gets its style's slug as id (nav → #vinyasa). */
+export function ClassTiles({ lang, styles, to, anchors }: { lang: Lang; styles: StyleData[]; to: string; anchors?: boolean }) {
   const t = getDictionary(lang).tile;
   return (
     <div className="g4">
       {styles.map((s) => (
-        <Link key={s._id} className="tile" href={to}>
+        <Link key={s._id} className="tile" href={to} id={anchors && s.slug ? s.slug : undefined}>
           <Photo media={s.photo} ratio="r34" sizes="(max-width: 860px) 50vw, 25vw" />
           <span className="name">{s.name}</span>
           <div className="info">

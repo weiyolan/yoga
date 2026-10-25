@@ -8,7 +8,7 @@ export const settings = defineType({
   type: "document",
   icon: CogIcon,
   groups: [
-    { name: "general", title: "Algemeen", default: true },
+    { name: "general", title: "Algemeen" },
     { name: "contact", title: "Contact & social" },
     { name: "menu", title: "Menu" },
     { name: "forms", title: "Formulieren" },
@@ -32,23 +32,46 @@ export const settings = defineType({
     /* ---- menu (dropdowns in the header) ---- */
     i18nString("menuFounders", { title: "Over ons: naam bij de foto", group: "menu", description: "Leeg = “Rita & Philippe”." }),
     i18nString("menuFoundersSub", { title: "Over ons: ondertitel bij de foto", group: "menu", description: "Leeg = “Yoga, natuur en freediving.”." }),
-    i18nString("menuTeam", { title: "Over ons → Het team: omschrijving", group: "menu", description: "Leeg = “Maak kennis met Rita en Philippe.”." }),
-    i18nString("menuDrive", { title: "Over ons → Wat ons drijft: omschrijving", group: "menu", description: "Leeg = “Geen druk, echte mensen, buiten zijn.”." }),
-    i18nString("menuGallery", { title: "Over ons → Gallery: omschrijving", group: "menu", description: "Leeg = “Momenten van onze retreats.”." }),
+    i18nString("menuTeam", { title: "Over ons → Wie zijn wij: omschrijving", group: "menu", description: "Leeg = “Maak kennis met Rita en Philippe.”." }),
+    i18nString("menuDrive", { title: "Over ons → Wat ons drijft: omschrijving", group: "menu", description: "Leeg = “Niets moet, echte mensen, buiten zijn.”." }),
+    i18nString("menuCollaborators", { title: "Over ons → Samenwerkingen: omschrijving", group: "menu", description: "Leeg = “Met wie we samenwerken.”." }),
     i18nString("menuUpcoming", { title: "Retreats → Komende: omschrijving", group: "menu", description: "Leeg = “Alle data en bestemmingen, chronologisch.”." }),
     i18nString("menuPast", { title: "Retreats → Voorbije: omschrijving", group: "menu", description: "Leeg = “Waar we al waren, in beeld.”." }),
-    i18nString("menuSearch", { title: "Retreats → Zoek: omschrijving", group: "menu", description: "Leeg = “Filter op bestemming of maand.”." }),
 
     /* ---- forms ---- */
     i18nString("newsletterTitle", { title: "Nieuwsbrief (footer): kop", group: "forms", description: "Leeg = “Hou me op de hoogte”." }),
     i18nString("newsletterThanks", { title: "Nieuwsbrief: bedankt", group: "forms", description: "Leeg = “Bedankt! We houden je op de hoogte.”." }),
     i18nString("contactThanks", { title: "Contactformulier: bedankt", group: "forms", description: "Leeg = “Bedankt! We antwoorden binnen 2 dagen.”." }),
     i18nText("signupConsent", { title: "Inschrijving: akkoordtekst", group: "forms", description: "Naast het vinkje. De link naar de privacyverklaring komt er automatisch achter. Leeg = standaardtekst." }),
+    i18nText("signupTerms", {
+      title: "Inschrijving: akkoord voorwaarden",
+      group: "forms",
+      description: "Tweede vinkje. De links naar de algemene voorwaarden en de annulatievoorwaarden komen er automatisch achter. Leeg = standaardtekst (incl. eigen reisverzekering).",
+    }),
     i18nText("signupThanks", { title: "Inschrijving: bedankt", group: "forms", description: "Getoond na het verzenden. Leeg = standaardtekst." }),
     i18nText("signupMail", {
       title: "Inschrijving: bevestigingsmail",
       group: "forms",
       description: "Mail naar de deelnemer. Gebruik {naam}, {retreat} en {datum}; die worden ingevuld. Leeg = standaardtekst.",
+    }),
+    i18nText("paymentMail", {
+      title: "Inschrijving: betaalgegevens (optioneel)",
+      group: "forms",
+      description:
+        "Blok onder de bevestigingsmail, enkel als de retreat een voorschot heeft. Gebruik {naam}, {retreat}, {datum} en {voorschot}, bv. “Om je plaats vast te leggen, schrijf je {voorschot} over op BE.. met mededeling {naam} {retreat}.”. Leeg = geen blok.",
+    }),
+    i18nText("waitlistMail", {
+      title: "Wachtlijst: bevestigingsmail",
+      group: "forms",
+      description: "Mail naar wie zich op de wachtlijst zet (retreat volzet). Gebruik {naam}, {retreat} en {datum}. Leeg = standaardtekst.",
+    }),
+    defineField({
+      name: "notifyEmail",
+      title: "Meldingen naar",
+      type: "string",
+      group: "forms",
+      description: "Wie krijgt een mail bij een nieuwe inschrijving, bericht of review? Leeg = het e-mailadres bij Contact & social.",
+      validation: (rule) => rule.email(),
     }),
     defineField({ name: "seo", title: "Standaard SEO", type: "seo", group: "seo", description: "Fallback voor pagina's zonder eigen SEO." }),
   ],

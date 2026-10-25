@@ -1,17 +1,18 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { ReviewForm, SignupForm } from "@/components/Forms";
+import { ReviewForm } from "@/components/Forms";
+import { HashRedirect } from "@/components/HashRedirect";
 import { Lightbox, LightboxTrigger, type LightboxItem } from "@/components/Lightbox";
 import { fullSrc, Photo } from "@/components/Photo";
 import { Paragraphs } from "@/components/RichText";
 import { Hero, ReviewList } from "@/components/sections";
 import { getDictionary } from "@/lib/dictionary";
-import { dateRange, euro, join, photoCaption, placesLabel, spotsLeft } from "@/lib/format";
+import { dateRange, euro, join, placesLabel, spotsLeft } from "@/lib/format";
 import { buildMetadata } from "@/lib/metadata";
-import { href, langParam } from "@/lib/routes";
+import { href, langParam, signupHref } from "@/lib/routes";
 import { isUpcoming, sanityFetch } from "@/sanity/fetch";
 import type { Media } from "@/sanity/image";
-import { LAYOUT_QUERY, RETREAT_BY_SLUG_QUERY, RETREAT_SLUGS_QUERY } from "@/sanity/queries";
+import { RETREAT_BY_SLUG_QUERY, RETREAT_SLUGS_QUERY } from "@/sanity/queries";
 
 /** Known retreats are prerendered; a new one renders on its first visit and is cached from then on. */
 export async function generateStaticParams() {
@@ -51,13 +52,26 @@ export default async function RetreatPage({ params }: PageProps<"/[lang]/retreat
   const highlights = clean(r.highlights);
   const included = clean(r.included);
   const notIncluded = clean(r.notIncluded);
-  const signup = r.signupUrl;
-  const texts = signup ? null : (await sanityFetch({ query: LAYOUT_QUERY, lang }))?.texts;
+  // Sign-up: an external link (Studio override) or our own sign-up page; full → the same page as waiting list.
+  const external = r.signupUrl;
+  const full = spotsLeft(r) === 0;
+  const signupTo = external || signupHref(lang, r.slug);
+  const signupLabel = full && !external ? t.waitlist : t.signup;
+  const signupLink = (className: string, style?: React.CSSProperties) =>
+    external ? (
+      <a className={className} href={external} target="_blank" rel="noopener" style={style}>
+        {signupLabel}
+      </a>
+    ) : (
+      <Link className={className} href={signupTo} style={style}>
+        {signupLabel}
+      </Link>
+    );
 
   if (!upcoming) {
     // Past retreat: a look back — photos, the nutshell and the facts; no booking box.
     const recap = (r.recapPhotos?.length ? r.recapPhotos : [...(r.moodPhotos ?? []), ...(r.placePhotos ?? [])]) as Media[];
-    const lb: LightboxItem[] = recap.map((m) => ({ src: fullSrc(m) ?? "", alt: m.alt, caption: photoCaption(lang, m) }));
+    const lb: LightboxItem[] = recap.map((m) => ({ src: fullSrc(m) ?? "", alt: m.alt }));
     const price = r.priceFrom ?? Math.min(...(r.prices ?? []).map((p) => p.amount ?? Infinity));
     const facts = [
       [t.where, join(where, r.venue)],
@@ -113,7 +127,7 @@ export default async function RetreatPage({ params }: PageProps<"/[lang]/retreat
               <div className="mosaic" style={{ marginTop: 28 }}>
                 {recap.map((m, i) => (
                   <figure key={`${m._id}-${i}`} className={["w2 h2", "", "", "w2", "", "h2", "", ""][i % 8] || undefined}>
-                    <LightboxTrigger index={i} label={`${t.photos}: ${m.alt || m.title || i + 1}`}>
+                    <LightboxTrigger index={i} label={`${t.photos}: ${m.alt || i + 1}`}>
                       <Photo media={m} sizes="(max-width: 700px) 50vw, 25vw" style={{ height: "100%" }} />
                     </LightboxTrigger>
                   </figure>
@@ -156,10 +170,10 @@ export default async function RetreatPage({ params }: PageProps<"/[lang]/retreat
   const mood = (r.moodPhotos ?? []).slice(0, 4);
   const place = (r.placePhotos ?? []).slice(0, 2);
   const all = [...mood, ...place] as Media[];
-  const items: LightboxItem[] = all.map((m) => ({ src: fullSrc(m) ?? "", alt: m.alt, caption: photoCaption(lang, m) }));
+  const items: LightboxItem[] = all.map((m) => ({ src: fullSrc(m) ?? "", alt: m.alt }));
   const thumb = (m: Media | undefined, i: number, sizes: string, ratio?: "r32", style?: React.CSSProperties) =>
     m ? (
-      <LightboxTrigger index={i} label={`${t.photos}: ${m.alt || m.title || i + 1}`} style={style}>
+      <LightboxTrigger index={i} label={`${t.photos}: ${m.alt || i + 1}`} style={style}>
         <Photo media={m} ratio={ratio} sizes={sizes} style={ratio ? undefined : { height: "100%" }} />
       </LightboxTrigger>
     ) : (
@@ -183,15 +197,11 @@ export default async function RetreatPage({ params }: PageProps<"/[lang]/retreat
           <>
             {when ? <span>{when}</span> : null}
             {where ? <span>{where}</span> : null}
-            {placesLabel(lang, r, true) ? <span>{placesLabel(lang, r, true)}</span> : null}
+            {group ? <span>{group}</span> : null}
             {r.priceFrom ? <span>{`${d.card.from} ${euro(lang, r.priceFrom)}`}</span> : null}
           </>
         }
-        actions={
-          <a className="btn white" href="#inschrijven">
-            {t.signup}
-          </a>
-        }
+        actions={signupLink("btn white")}
       />
 
       {mood.length ? (
@@ -354,9 +364,7 @@ export default async function RetreatPage({ params }: PageProps<"/[lang]/retreat
                 </>
               ) : null}
             </dl>
-            <a className="btn" href="#inschrijven" style={{ width: "100%", justifyContent: "center" }}>
-              {t.signup}
-            </a>
+            {signupLink("btn", { width: "100%", justifyContent: "center" })}
             <ul>
               {toc
                 .filter(([, , show]) => show)
@@ -370,40 +378,21 @@ export default async function RetreatPage({ params }: PageProps<"/[lang]/retreat
         </div>
       </section>
 
-      {signup ? (
-        // An external sign-up link (Studio override): the closing photo with a button that opens it in a new tab.
-        <section className="hero short" id="inschrijven" style={{ height: "70vh" }}>
-          <Photo media={r.closingPhoto} className="dark" sizes="100vw" />
-          <div className="txt center" style={{ left: 0, right: 0, bottom: "auto", top: "50%", transform: "translateY(-50%)" }}>
-            {r.closingTitle ? <h1 style={{ margin: "0 auto", maxWidth: "14ch" }}>{r.closingTitle}</h1> : null}
-            {r.closingText ? <p style={{ margin: "16px auto 24px" }}>{r.closingText}</p> : null}
-            <div className="row" style={{ justifyContent: "center" }}>
-              <a className="btn white" href={signup} target="_blank" rel="noopener">
-                {t.signup}
-              </a>
-              <Link className="btn light" href={href(lang, "contact")}>
-                {t.ask}
-              </Link>
-            </div>
+      {/* Closing photo + the sign-up button. Keeps the old #inschrijven anchor: it now forwards to the sign-up page. */}
+      <section className="hero short" id="inschrijven" style={{ height: "70vh" }}>
+        <Photo media={r.closingPhoto ?? r.hero?.photo} className="dark" sizes="100vw" />
+        <div className="txt center" style={{ left: 0, right: 0, bottom: "auto", top: "50%", transform: "translateY(-50%)" }}>
+          <h1 style={{ margin: "0 auto", maxWidth: "14ch" }}>{r.closingTitle || r.title}</h1>
+          {r.closingText ? <p style={{ margin: "16px auto 24px" }}>{r.closingText}</p> : null}
+          <div className="row" style={{ justifyContent: "center", marginTop: r.closingText ? 0 : 24 }}>
+            {signupLink("btn white")}
+            <Link className="btn light" href={href(lang, "contact")}>
+              {t.ask}
+            </Link>
           </div>
-        </section>
-      ) : (
-        <section className="split" id="inschrijven">
-          <Photo media={r.closingPhoto ?? r.hero?.photo} sizes="(max-width: 860px) 100vw, 50vw" />
-          <div className="pane">
-            <span className="label">{d.signup.label}</span>
-            <h2>{r.closingTitle || r.title}</h2>
-            {r.closingText ? <p className="muted">{r.closingText}</p> : null}
-            <SignupForm
-              lang={lang}
-              retreatId={r._id}
-              rooms={(r.prices ?? []).map((p) => [p.label, euro(lang, p.amount)].filter(Boolean).join(" · "))}
-              texts={{ thanks: texts?.signupThanks, consent: texts?.signupConsent }}
-              full={spotsLeft(r) === 0}
-            />
-          </div>
-        </section>
-      )}
+        </div>
+      </section>
+      {external ? null : <HashRedirect hash="inschrijven" to={signupTo} />}
     </Lightbox>
   );
 }

@@ -2,7 +2,7 @@
 
 import { createHash, randomUUID } from "node:crypto";
 import { getDictionary } from "@/lib/dictionary";
-import { dateRange } from "@/lib/format";
+import { dateRange, euro } from "@/lib/format";
 import { sendMail } from "@/lib/mail";
 import { isUpcoming, sanityFetch } from "@/sanity/fetch";
 import { LAYOUT_QUERY, SIGNUP_RETREAT_QUERY } from "@/sanity/queries";
@@ -17,10 +17,10 @@ const keep = (data: FormData, state: FormState): FormState =>
 const EMAIL = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 const field = (data: FormData, name: string, max = 5000) => String(data.get(name) ?? "").trim().slice(0, max);
 
-/** Recipient: CONTACT_TO, else the e-mail in Sanity → Instellingen. */
+/** Recipient: CONTACT_TO, else Sanity → Instellingen → Formulieren → Meldingen naar, else the contact e-mail. */
 async function recipient() {
   const settings = await sanityFetch({ query: LAYOUT_QUERY });
-  const to = process.env.CONTACT_TO || settings?.email;
+  const to = process.env.CONTACT_TO || settings?.notifyEmail || settings?.email;
   if (!to && !process.env.RESEND_API_KEY) return "(dev: no recipient)";
   if (!to) throw new Error("No recipient: set CONTACT_TO or the e-mail in Sanity → Instellingen");
   return to;
@@ -101,10 +101,16 @@ async function subscribeInner(data: FormData): Promise<FormState> {
   ]);
 }
 
+/** `{naam}`, `{retreat}`, `{datum}`, `{voorschot}` in a Studio mail text. */
+const fill = (text: string, vars: Record<string, string>) => Object.entries(vars).reduce((t, [k, v]) => t.replaceAll(`{${k}}`, v), text);
+
 /**
- * Retreat page sign-up: stored as a `signup` document (Studio → Inschrijvingen), then a mail
- * to the team and a confirmation to the participant. The dotted `_id` keeps it out of the public API.
- * Once stored, mail failures are logged but don't fail the form (no duplicate sign-ups on retry).
+ * Retreat sign-up (its own page, /retreats/<slug>/inschrijven): stored as a `signup` document
+ * (Studio → Inschrijvingen), then a mail to the team and a confirmation to the participant.
+ * Always one person. The retreat's sign-up form adds questions; their labels and answers are stored
+ * as a snapshot (in Dutch, for Rita & Philippe), so editing the form later never changes old sign-ups.
+ * The dotted `_id` keeps it out of the public API. Once stored, mail failures are logged but don't
+ * fail the form (no duplicate sign-ups on retry). Full retreat → a waiting-list sign-up.
  */
 export async function signup(_: FormState, data: FormData): Promise<FormState> {
   return keep(data, await signupInner(data));
@@ -116,15 +122,37 @@ async function signupInner(data: FormData): Promise<FormState> {
   const name = field(data, "name", 200);
   const email = field(data, "email", 200);
   const phone = field(data, "phone", 50);
-  const persons = Math.min(Math.max(Number.parseInt(field(data, "persons", 2), 10) || 1, 1), 10);
   const room = field(data, "room", 200);
   const diet = field(data, "diet", 1000);
   const message = field(data, "message");
   const consent = data.get("consent") === "on";
-  if (!name || !EMAIL.test(email) || !consent) return { status: "invalid" };
+  const terms = data.get("terms") === "on";
+  if (!name || !EMAIL.test(email) || !consent || !terms) return { status: "invalid" };
 
-  const retreat = await sanityFetch({ query: SIGNUP_RETREAT_QUERY, params: { id: field(data, "retreat", 100) }, lang });
-  if (!retreat || !isUpcoming(retreat.endDate)) return { status: "invalid" };
+  const id = field(data, "retreat", 100);
+  const [retreat, retreatNl] = await Promise.all([
+    sanityFetch({ query: SIGNUP_RETREAT_QUERY, params: { id }, lang }),
+    sanityFetch({ query: SIGNUP_RETREAT_QUERY, params: { id }, lang: "nl" }),
+  ]);
+  if (!retreat || !retreatNl || !isUpcoming(retreat.endDate)) return { status: "invalid" };
+
+  // Extra questions of the retreat's form: required ones must be answered; stored with the Dutch label.
+  const t = getDictionary(lang).signup;
+  const tNl = getDictionary("nl").signup;
+  const questions = (retreat.form?.questions ?? []).filter((q) => q.label);
+  const answerOf = (q: (typeof questions)[number], d: typeof t, options: string[]) => {
+    const v = field(data, `q.${q._key}`, 2000);
+    if (q.type === "yesno") return v === "yes" ? d.yes : v === "no" ? d.no : "";
+    if (q.type === "choice") return v && /^\d+$/.test(v) ? (options[Number(v)] ?? "") : "";
+    return v;
+  };
+  const opts = (q?: { options: string[] | null } | null) => (q?.options ?? []).filter(Boolean);
+  if (questions.some((q) => q.required && !answerOf(q, t, opts(q)))) return { status: "invalid" };
+  const answers = questions.map((q) => {
+    const nl = retreatNl.form?.questions?.find((x) => x._key === q._key);
+    return { label: q.label ?? "", labelNl: nl?.label ?? q.label ?? "", answer: answerOf(q, t, opts(q)), answerNl: answerOf(q, tNl, opts(nl).length ? opts(nl) : opts(q)) };
+  });
+
   const title = retreat.title ?? "retreat";
   const when = dateRange(lang, retreat.startDate, retreat.endDate);
   // Fully booked (Studio → confirmed sign-ups fill `booked`): a waiting-list request.
@@ -138,12 +166,14 @@ async function signupInner(data: FormData): Promise<FormState> {
     name,
     email,
     phone,
-    persons,
     room,
     diet,
     message,
+    answers: answers.map((a) => ({ _key: randomUUID().slice(0, 12), _type: "signupAnswer", question: a.labelNl, answer: a.answerNl })),
+    form: retreat.form?.name ?? undefined,
     lang,
     consent,
+    terms,
     waitlist,
     submittedAt: new Date().toISOString(),
   };
@@ -154,32 +184,48 @@ async function signupInner(data: FormData): Promise<FormState> {
     return { status: "error" };
   }
 
-  const t = getDictionary(lang).signup;
-  const custom = (await sanityFetch({ query: LAYOUT_QUERY, lang }))?.texts?.signupMail;
-  const body = custom ? custom.replaceAll("{naam}", name).replaceAll("{retreat}", title).replaceAll("{datum}", when) : t.mailBody(name, title, when);
+  const texts = (await sanityFetch({ query: LAYOUT_QUERY, lang }))?.texts;
+  const vars = { naam: name, retreat: title, datum: when, voorschot: euro(lang, retreat.deposit) };
+  const body = waitlist
+    ? texts?.waitlistMail ? fill(texts.waitlistMail, vars) : t.waitlistMailBody(name, title, when)
+    : texts?.signupMail ? fill(texts.signupMail, vars) : t.mailBody(name, title, when);
+  const payment = !waitlist && retreat.deposit && texts?.paymentMail ? fill(texts.paymentMail, vars) : "";
+  const yours: [string, string][] = [
+    [t.phone, phone],
+    [t.room, room],
+    ...answers.map((a) => [a.label, a.answer] as [string, string]),
+    [t.diet, diet],
+    [t.message, message],
+  ].filter(([, v]) => v) as [string, string][];
   const mails = [
     recipient().then((to) =>
       sendMail({
         to,
         replyTo: email,
-        subject: `${waitlist ? "Wachtlijst" : "Inschrijving"} ${title}: ${name}${persons > 1 ? ` (+${persons - 1})` : ""}`,
-        text: [
-          `Retreat: ${title} (${when})`,
-          `Naam: ${name}`,
-          `E-mail: ${email}`,
-          `GSM: ${phone || "-"}`,
-          `Personen: ${persons}`,
-          `Kamer: ${room || "-"}`,
-          `Dieet: ${diet || "-"}`,
-          `Taal: ${lang}`,
-          "",
-          message || "(geen bericht)",
-          "",
-          "Bekijk en beheer in de Studio → Inschrijvingen.",
-        ].join("\n"),
+        subject: `${waitlist ? "Wachtlijst" : "Inschrijving"} ${retreatNl.title ?? title}: ${name}`,
+        heading: `${waitlist ? "Wachtlijst" : "Nieuwe inschrijving"}: ${name}`,
+        text: `${retreatNl.title ?? title} (${dateRange("nl", retreat.startDate, retreat.endDate)})${waitlist ? "\n\nDe retreat is volzet: dit is een aanvraag voor de wachtlijst." : ""}`,
+        rows: [
+          ["Naam", name],
+          ["E-mail", email],
+          ["GSM", phone],
+          ["Kamer", room],
+          ...answers.map((a) => [a.labelNl, a.answerNl] as [string, string]),
+          ["Dieet", diet],
+          ["Bericht", message],
+          ["Taal", lang],
+        ],
+        footnote: "Bekijk en beheer in de Studio → Inschrijvingen.",
       }),
     ),
-    sendMail({ to: email, subject: t.mailSubject(title), text: waitlist ? `${t.waitlistSent}\n\n${body}` : body }),
+    sendMail({
+      to: email,
+      subject: waitlist ? t.waitlistMailSubject(title) : t.mailSubject(title),
+      heading: title,
+      photo: retreat.photo,
+      text: [body, payment].filter(Boolean).join("\n\n"),
+      rows: yours.length ? yours : undefined,
+    }),
   ];
   for (const r of await Promise.allSettled(mails)) if (r.status === "rejected") console.error("signup: mail", r.reason);
   return { status: "sent" };

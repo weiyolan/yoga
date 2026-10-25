@@ -24,7 +24,7 @@ export default async function Home({ params }: PageProps<"/[lang]">) {
   // Curated testimonials first, then the latest approved reviews (4★+).
   const quotes = [...(page?.testimonials ?? []), ...(page?.reviews ?? []).map((r) => ({ _id: r._id, quote: r.text, name: r.name, context: r.context, rating: r.rating }))].slice(0, 6);
   const f = page?.featuredRetreat;
-  const cards = [...(page?.upcomingRetreats ?? []), ...(page?.pastRetreats ?? [])].slice(0, 3);
+  const cards = page?.upcomingRetreats ?? [];
   const handle = layout?.instagram?.match(/instagram\.com\/([^/?#]+)/)?.[1];
 
   return (
@@ -54,7 +54,7 @@ export default async function Home({ params }: PageProps<"/[lang]">) {
                 <span className="label">{d.card.next}</span>
                 <h2>{f.title}</h2>
                 <p className="muted" style={{ marginTop: 12 }}>
-                  {[dateRange(lang, f.startDate, f.endDate), join(f.place, f.country), placesLabel(lang, f, true), f.priceFrom ? `${d.card.from} ${euro(lang, f.priceFrom)}` : null].filter(Boolean).join(" · ")}
+                  {[dateRange(lang, f.startDate, f.endDate), join(f.place, f.country), placesLabel(lang, f), f.priceFrom ? `${d.card.from} ${euro(lang, f.priceFrom)}` : null].filter(Boolean).join(" · ")}
                 </p>
                 {f.teaser ? <p>{f.teaser}</p> : null}
                 <div className="row" style={{ marginTop: 22 }}>
@@ -92,7 +92,7 @@ export default async function Home({ params }: PageProps<"/[lang]">) {
             </SectionHead>
             <div className="g3">
               {cards.map((r, i) => (
-                <RetreatCard key={r._id} lang={lang} retreat={r} tag={i === 0 && page?.upcomingRetreats?.[0]?._id === r._id ? d.card.next : undefined} />
+                <RetreatCard key={r._id} lang={lang} retreat={r} tag={i === 0 ? d.card.next : undefined} />
               ))}
             </div>
           </div>
@@ -102,11 +102,15 @@ export default async function Home({ params }: PageProps<"/[lang]">) {
       {page?.styles?.length ? (
         <section className="s alt">
           <div className="wrap">
+            {/* Not retreat content: what Rita does outside the retreats. */}
             <SectionHead label={t.lessonsLabel} title={page?.lessonsTitle || t.lessonsTitle}>
               <Link className="link" href={href(lang, "lessons", { hash: "planning" })}>
                 {t.lessonsLink}
               </Link>
             </SectionHead>
+            <p className="muted" style={{ marginTop: -16, marginBottom: 32, maxWidth: "60ch" }}>
+              {page?.lessonsText || t.lessonsText}
+            </p>
             <ClassTiles lang={lang} styles={page.styles} to={href(lang, "lessons", { hash: "stijlen" })} />
             {page.studios?.length ? (
               <p className="muted small" style={{ marginTop: 18 }}>
@@ -172,7 +176,7 @@ export default async function Home({ params }: PageProps<"/[lang]">) {
             <div className="g6">
               {page.instagram.map((m) =>
                 layout?.instagram ? (
-                  <a key={m._id} href={layout.instagram} target="_blank" rel="noopener" aria-label={`Instagram: ${m.alt || m.title || ""}`}>
+                  <a key={m._id} href={layout.instagram} target="_blank" rel="noopener" aria-label={`Instagram: ${m.alt}`}>
                     <Photo media={m} ratio="r1" sizes="(max-width: 860px) 33vw, 16vw" />
                   </a>
                 ) : (

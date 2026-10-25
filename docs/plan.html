@@ -59,6 +59,7 @@
   <a href="#legal-c">Legal</a>
   <a href="#misc-c">Contact, reviews, settings</a>
   <a href="#script">Seed script</a>
+  <a href="#status">Status</a>
   <a href="#p2">Part 2: changes</a>
   <a href="#studio">Studio</a>
   <a href="#site">Website</a>
@@ -66,6 +67,18 @@
   <a href="#todo">To-dos for R&amp;P</a>
   <a href="#questions">Decisions &amp; open questions</a>
 </nav>
+
+<div class="card" id="status">
+  <h3 style="margin-top:0">Status: implemented on branch <code>v2</code></h3>
+  <p><b>Done in code:</b> S1–S6, S8–S11, S15–S19 · W1–W3, W6–W23 (W4 was already a slider, W5 already there). S7/S12 needed no change. Checked: typecheck (site + Studio), schema validation, offline build, the sign-up flow end to end (form → stored sign-up with answers → mails), redirects (<code>/coaching</code>, <code>/en/…/sign-up</code>, old <code>#inschrijven</code>).</p>
+  <p><b>To run on the live dataset</b> (needs a write token; not run from here):</p>
+  <ol>
+    <li>Deploy the site + Studio.</li>
+    <li><code>cd studio &amp;&amp; npm run migrate:v2 -- --dry</code>, check, then <code>npm run migrate:v2</code> (schema data: Fotobank keeps alt text, Coaching → Privéles, values, person kind, privacy → legal page, booked).</li>
+    <li><code>npm run content:v2 -- --dry</code>, then <code>npm run content:v2</code>: the Part 1 texts as <b>drafts</b> (texts in <code>studio/scripts/v2-content.ts</code>). R&amp;P review in Live preview and publish, incl. the new sign-up forms and legal pages.</li>
+  </ol>
+  <p><b>Not done:</b> S13 early-bird and S14 Stripe (ideas, P3); review import from Excel (waiting for the file). Placeholders left for R&amp;P: <code>[prijs]</code>/<code>[locatie]</code> (Privéles), <code>[IBAN]</code> (payment mail, only sent when a retreat has a deposit), <code>[termijnen]</code> (cancellation), Rochefort details, collaborator bios/photos.</p>
+</div>
 
 <!-- =================================================================== PART 1 -->
 <h2 id="p1">Part 1: content to populate or update</h2>
@@ -245,7 +258,7 @@
 <tr><td>W18</td><td>Footer</td><td>Newsletter: keep collecting only, no sending. Rename the button from “Inschrijven” (confusing) to “Hou me op de hoogte”. Subscribers already go to <code>subscriber</code> ✓.</td><td><code>Footer.tsx</code>, <code>dictionary.ts</code></td><td>P2</td><td class="src">#8 00:10–00:41</td></tr>
 <tr><td>W19</td><td>All</td><td><b>Remove “Beyond the mat, into the moment”</b> everywhere and use the new localized tagline. Code: <code>seed.ts</code> (<code>settings.tagline</code>, Home hero, About hero subtitle). Dataset (content script): <code>settings.tagline</code>, <code>homePage.hero.title</code>/<code>subtitle</code>, <code>homePage.introTitle</code>, <code>aboutPage.hero.subtitle</code> → “Rita &amp; Philippe: yoga, zen &amp; een scheutje tonic.” Check the SEO description and the share image text too.</td><td><code>studio/scripts/seed.ts</code>, <code>content-v2.ts</code></td><td>P1</td><td class="src">#1</td></tr>
 <tr><td>W20</td><td>Lessen</td><td>Schedule shows the <b>level</b> per class (“Alle niveaus” / Beginner / Gevorderd …) as a small label (S17). Optionally a level filter later.</td><td><code>lessen/page.tsx</code></td><td>P1</td><td class="src">Yolan</td></tr>
-\1
+<tr><td>W21</td><td>Gallery</td><td>No caption/place under the photos or in the lightbox (S18); only the alt text for screen readers.</td><td><code>GalleryGrid.tsx</code>, <code>Lightbox.tsx</code></td><td>P1</td><td class="src">Yolan</td></tr>
 <tr><td>W22</td><td>Retreat sign-up</td><td><b>Dedicated sign-up page</b> instead of the form at the bottom of the retreat page: <code>/[lang]/retreats/[slug]/inschrijven</code> (EN <code>/en/retreats/[slug]/sign-up</code>). Short retreat summary at the top (photo, dates, place, price, “nog X plaatsen”), then the form (S5 questions), consent, thanks state. All “Inschrijven” buttons (retreat hero, closing block, nav CTA) link here; the old <code>#inschrijven</code> anchor redirects. Waitlist mode when full (W8). <code>noindex</code>.</td><td>new <code>app/[lang]/retreats/[slug]/inschrijven/page.tsx</code>, <code>retreats/[slug]/page.tsx</code>, <code>lib/routes.ts</code>, <code>Nav.tsx</code></td><td>P1</td><td class="src">Yolan</td></tr>
 <tr><td>W23</td><td>Nav</td><td><b>Clickable menu triggers</b>: “Retreats”, “Lessen” and “Over ons” are now <code>&lt;button&gt;</code>s that only open the panel → make the label a link to the page (hover/chevron still opens the panel; on touch, the 1st tap opens the panel, the 2nd navigates). <b>Logo → Home</b>: it is already a <code>Link</code>; check that nothing blocks the click (panel overlay, custom <code>Cursor</code>, draft-mode bar) and that it also works from the mobile menu.</td><td><code>Nav.tsx</code>, <code>app/globals.css</code></td><td>P1</td><td class="src">Yolan</td></tr>
 </table>

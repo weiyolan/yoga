@@ -34,21 +34,20 @@ const VOICE = `You write for Yoga, Zen & Tonic, a small Belgian yoga and retreat
 (retreats in nature, yoga classes, freediving, private coaching). Tone: warm, calm, personal, never salesy.
 Dutch is Flemish/Belgian Dutch with informal "je"; English is British English.`;
 
-/** Alt text + short title for a photo, in Dutch and English. */
+/** Alt text for a photo, in Dutch and English. */
 export function altText(image: { mime: string; base64: string }, context?: string) {
   const s = { type: "object", properties: { nl: { type: "string" }, en: { type: "string" } }, required: ["nl", "en"] };
-  return geminiJson<{ alt: { nl: string; en: string }; title: { nl: string; en: string } }>(
+  return geminiJson<{ alt: { nl: string; en: string } }>(
     [
       { inline_data: { mime_type: image.mime, data: image.base64 } },
       {
         text: `Describe this photo for the website.
 - alt: what a screen-reader user needs to know, max 125 characters, no "photo of" / "foto van", no trailing period.
-- title: a short caption of 2–6 words.
 ${context ? `Context (place, retreat): ${context}` : ""}`,
       },
     ],
-    { type: "object", properties: { alt: s, title: s }, required: ["alt", "title"] },
-    `${VOICE}\nYou write image alt texts and captions. Be concrete and factual about what is visible.`,
+    { type: "object", properties: { alt: s }, required: ["alt"] },
+    `${VOICE}\nYou write image alt texts. Be concrete and factual about what is visible.`,
   );
 }
 

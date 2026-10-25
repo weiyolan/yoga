@@ -8,7 +8,7 @@ export const retreatsPage = defineType({
   type: "document",
   icon: CalendarIcon,
   groups: [
-    { name: "page", title: "Overzicht", default: true },
+    { name: "page", title: "Overzicht" },
     { name: "detail", title: "Retreatpagina's" },
     { name: "seo", title: "SEO" },
   ],

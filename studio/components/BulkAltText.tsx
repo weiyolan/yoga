@@ -6,13 +6,13 @@ import { useClient } from "sanity";
 import { apiVersion } from "../../sanity/site.config";
 import { ai, imageUrl } from "../lib/ai";
 
-type Item = { _id: string; ref?: string; place?: string; alt?: { _key: string; language: string; value?: string }[]; title?: { _key: string; language: string; value?: string }[] };
+type Item = { _id: string; ref?: string; alt?: { _key: string; language: string; value?: string }[] };
 
 const QUERY = `*[_type == "mediaItem" && defined(image.asset) && !defined(alt[language == "nl"][0].value) && !(_id in path("drafts.**"))]{
-  _id, "ref": image.asset._ref, "place": place[language == "nl"][0].value, alt, title
+  _id, "ref": image.asset._ref, alt
 }`;
 
-/** Fotobank → ✨ Alt-teksten aanvullen: every photo without Dutch alt text gets NL + EN alt and title (published directly). */
+/** Fotobank → ✨ Alt-teksten aanvullen: every photo without Dutch alt text gets NL + EN alt text (published directly). */
 export function BulkAltText() {
   const client = useClient({ apiVersion });
   const [items, setItems] = useState<Item[] | null>(null);
@@ -29,14 +29,14 @@ export function BulkAltText() {
     for (const item of items) {
       if (!item.ref) continue;
       try {
-        const out = await ai<{ alt: Record<string, string>; title: Record<string, string> }>(client, { task: "alt", image: imageUrl(item.ref, projectId!, dataset!), context: item.place });
+        const out = await ai<{ alt: Record<string, string> }>(client, { task: "alt", image: imageUrl(item.ref, projectId!, dataset!) });
         const keep = (cur: Item["alt"], vals: Record<string, string>) => [
           ...(cur ?? []).filter((i) => i.value?.trim()),
           ...Object.entries(vals)
             .filter(([lang]) => !cur?.some((i) => i.language === lang && i.value?.trim()))
             .map(([language, value]) => ({ _key: randomKey(12), _type: "internationalizedArrayStringValue", language, value })),
         ];
-        const set = { alt: keep(item.alt, out.alt), title: keep(item.title, out.title) };
+        const set = { alt: keep(item.alt, out.alt) };
         const tx = client.transaction().patch(item._id, (p) => p.set(set));
         const draft = await client.getDocument(`drafts.${item._id}`);
         if (draft) tx.patch(draft._id, (p) => p.set(set));
@@ -57,7 +57,7 @@ export function BulkAltText() {
           {items === null ? "Laden…" : items.length ? `${items.length} foto's zonder Nederlandse alt-tekst.` : "Alle foto's hebben een alt-tekst. 🎉"}
         </Text>
         <Text size={1} muted>
-          AI (Gemini) bekijkt elke foto en vult de alt-tekst en titel in het Nederlands en Engels in, alleen waar ze leeg zijn. Dit wordt meteen gepubliceerd: kijk ze nadien even na in “Te doen” of “Alle foto's”.
+          AI (Gemini) bekijkt elke foto en vult de alt-tekst in het Nederlands en Engels in, alleen waar ze leeg zijn. Dit wordt meteen gepubliceerd: kijk ze nadien even na in “Te doen” of “Alle foto's”.
         </Text>
         <Box>
           <Button icon={SparklesIcon} text={busy ? "Bezig…" : "Alt-teksten aanvullen"} tone="primary" disabled={busy || !items?.length} onClick={run} />
