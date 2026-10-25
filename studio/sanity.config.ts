@@ -12,6 +12,7 @@ import { defaultDocumentNode } from "./structure/views";
 import { siteOrigin } from "./lib/site";
 import { altTextAction, translateAction } from "./actions/ai";
 import { reviewLinkAction } from "./actions/review-link";
+import { confirmationMailAction } from "./actions/confirmation-mail";
 import { newBadge } from "./actions/badges";
 
 
@@ -62,8 +63,10 @@ export default defineConfig({
   document: {
     // singletons can't be duplicated or deleted
     // form submissions can't be duplicated (a copy would get a public id)
+    // sign-ups: “Bevestigingsmail” first (actions/confirmation-mail.tsx)
     // + the AI helpers (✨, via the site's /api/ai): alt text on photos, NL → EN on everything with texts
     actions: (prev, { schemaType }) => {
+      if (schemaType === "signup") return [confirmationMailAction, ...prev.filter(({ action }) => action !== "duplicate")];
       if (formTypes.has(schemaType) || schemaType === "review") return prev.filter(({ action }) => action !== "duplicate");
       const base = singletons.has(schemaType) ? prev.filter(({ action }) => action && singletonActions.has(action)) : prev;
       return [...base, ...(schemaType === "mediaItem" ? [altTextAction] : []), ...(schemaType === "retreat" ? [reviewLinkAction] : []), translateAction];

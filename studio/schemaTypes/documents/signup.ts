@@ -58,6 +58,7 @@ export const signup = defineType({
     defineField({ name: "consent", title: "Akkoord gegevens", type: "boolean", readOnly: true }),
     defineField({ name: "terms", title: "Akkoord voorwaarden & annulatie", type: "boolean", readOnly: true }),
     defineField({ name: "submittedAt", title: "Ingeschreven op", type: "datetime", readOnly: true }),
+    defineField({ name: "confirmedAt", title: "Bevestigingsmail verstuurd op", type: "datetime", readOnly: true, hidden: ({ value }) => !value, description: "Automatisch, of via “Bevestigingsmail” (geopend in je mailprogramma)." }),
   ],
   orderings: [{ title: "Nieuwste eerst", name: "submittedDesc", by: [{ field: "submittedAt", direction: "desc" }] }],
   preview: {

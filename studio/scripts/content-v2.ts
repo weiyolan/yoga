@@ -58,12 +58,10 @@ function create(doc: Doc, why: string) {
 async function run() {
   const nlDict = getDictionary("nl");
 
-  /* settings: tagline, SEO, mails */
+  /* settings: tagline, SEO (the mail texts: Bevestigingsmails, migrate-mails.ts) */
   await draft("settings", {
     tagline: str(v2.tagline),
     "seo.description": txt(v2.seoDescription),
-    signupMail: txt(v2.mails.signupMail),
-    paymentMail: txt(v2.mails.paymentMail),
   });
 
   /* Home */

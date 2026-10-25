@@ -217,6 +217,20 @@ async function seed() {
       { name: f.name },
     );
 
+  /* confirmation mail */
+  await upsert(
+    {
+      _type: "confirmationMail",
+      name: "Standaard",
+      isDefault: true,
+      body: txt(v2.mails.signupMail),
+      payment: txt(v2.mails.paymentMail),
+      waitlistBody: txt(dict((d) => d.signup.waitlistMailBody("{naam}", "{retreat}", "{datum}"))),
+    },
+    "name == $name",
+    { name: "Standaard" },
+  );
+
   /* retreats */
   const retreat = (slug: string, doc: Record<string, unknown>) => upsert({ _type: "retreat", slug: { _type: "slug", current: slug }, ...doc }, "slug.current == $slug", { slug });
 
@@ -338,9 +352,6 @@ async function seed() {
     signupConsent: txt(dict((d) => d.signup.consent)),
     signupTerms: txt(dict((d) => d.signup.terms)),
     signupThanks: txt(dict((d) => d.signup.sent)),
-    signupMail: txt(v2.mails.signupMail),
-    paymentMail: txt(v2.mails.paymentMail),
-    waitlistMail: txt(dict((d) => d.signup.waitlistMailBody("{naam}", "{retreat}", "{datum}"))),
   });
   await singleton("homePage", {
     _type: "homePage",

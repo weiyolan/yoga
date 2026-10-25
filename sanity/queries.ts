@@ -75,6 +75,18 @@ const FORM = `{
   "questions": questions[]{ _key, "label": ${t("label")}, "help": ${t("help")}, type, "options": ${lines("options")}, required }
 }` as const;
 
+/** A confirmation mail (Studio → Bevestigingsmails), in the requested language: lib/confirmation.ts. */
+const MAIL = `{
+  "subject": ${t("subject")},
+  "body": ${t("body")},
+  "payment": ${t("payment")},
+  "waitlistSubject": ${t("waitlistSubject")},
+  "waitlistBody": ${t("waitlistBody")}
+}` as const;
+
+/** The retreat's own confirmation mail, else the one marked “Standaard” (null = the built-in text). */
+const RETREAT_MAIL = `coalesce(confirmationMail->${MAIL}, *[_type == "confirmationMail" && isDefault == true && !(_id in path("drafts.**"))][0]${MAIL})` as const;
+
 /** The retreat's own form, else the one marked “Standaard” (null = only the built-in fields). */
 const RETREAT_FORM = `coalesce(signupForm->${FORM}, *[_type == "signupForm" && isDefault == true && !(_id in path("drafts.**"))][0]${FORM})` as const;
 
@@ -131,12 +143,10 @@ export const LAYOUT_QUERY = defineQuery(`*[_id == "settings"][0]{
     "contactThanks": ${t("contactThanks")},
     "signupConsent": ${t("signupConsent")},
     "signupTerms": ${t("signupTerms")},
-    "signupThanks": ${t("signupThanks")},
-    "signupMail": ${t("signupMail")},
-    "paymentMail": ${t("paymentMail")},
-    "waitlistMail": ${t("waitlistMail")}
+    "signupThanks": ${t("signupThanks")}
   },
-  notifyEmail
+  notifyEmail,
+  "autoConfirm": autoConfirm == true
 }`);
 
 export const SETTINGS_QUERY = defineQuery(`*[_id == "settings"][0]{
@@ -199,7 +209,8 @@ export const SIGNUP_RETREAT_QUERY = defineQuery(`*[_type == "retreat" && _id == 
   booked,
   deposit,
   "photo": cardPhoto->image.asset->url,
-  "form": ${RETREAT_FORM}
+  "form": ${RETREAT_FORM},
+  "mail": ${RETREAT_MAIL}
 }`);
 
 /** Sign-up page (/retreats/<slug>/inschrijven): a short summary of the retreat + its form. */

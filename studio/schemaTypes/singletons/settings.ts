@@ -49,29 +49,23 @@ export const settings = defineType({
       description: "Tweede vinkje. De links naar de algemene voorwaarden en de annulatievoorwaarden komen er automatisch achter. Leeg = standaardtekst (incl. eigen reisverzekering).",
     }),
     i18nText("signupThanks", { title: "Inschrijving: bedankt", group: "forms", description: "Getoond na het verzenden. Leeg = standaardtekst." }),
-    i18nText("signupMail", {
-      title: "Inschrijving: bevestigingsmail",
+    defineField({
+      name: "autoConfirm",
+      title: "Bevestigingsmail automatisch versturen",
+      type: "boolean",
       group: "forms",
-      description: "Mail naar de deelnemer. Gebruik {naam}, {retreat} en {datum}; die worden ingevuld. Leeg = standaardtekst.",
-    }),
-    i18nText("paymentMail", {
-      title: "Inschrijving: betaalgegevens (optioneel)",
-      group: "forms",
+      initialValue: false,
       description:
-        "Blok onder de bevestigingsmail, enkel als de retreat een voorschot heeft. Gebruik {naam}, {retreat}, {datum} en {voorschot}, bv. “Om je plaats vast te leggen, schrijf je {voorschot} over op BE.. met mededeling {naam} {retreat}.”. Leeg = geen blok.",
-    }),
-    i18nText("waitlistMail", {
-      title: "Wachtlijst: bevestigingsmail",
-      group: "forms",
-      description: "Mail naar wie zich op de wachtlijst zet (retreat volzet). Gebruik {naam}, {retreat} en {datum}. Leeg = standaardtekst.",
+        "Aan = elke deelnemer krijgt meteen de bevestigingsmail van de retreat (Bevestigingsmails). Werkt pas als het verzenden naar deelnemers ingesteld is (zie README: Mail). Uit = je verstuurt ze zelf: open de inschrijving → “Bevestigingsmail”.",
     }),
     defineField({
       name: "notifyEmail",
       title: "Meldingen naar",
       type: "string",
       group: "forms",
-      description: "Wie krijgt een mail bij een nieuwe inschrijving, bericht of review? Leeg = het e-mailadres bij Contact & social.",
-      validation: (rule) => rule.email(),
+      description: "Wie krijgt een melding bij een nieuwe inschrijving, bericht of review? Meerdere adressen: scheiden met een komma. Leeg = het e-mailadres bij Contact & social.",
+      validation: (rule) =>
+        rule.custom((v?: string) => (!v || v.split(",").every((a) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(a.trim())) ? true : "Geen geldig e-mailadres (meerdere: scheiden met een komma)")),
     }),
     defineField({ name: "seo", title: "Standaard SEO", type: "seo", group: "seo", description: "Fallback voor pagina's zonder eigen SEO." }),
   ],

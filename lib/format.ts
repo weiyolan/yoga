@@ -1,5 +1,5 @@
-import { getDictionary } from "@/lib/dictionary";
-import type { Lang } from "@/sanity/site.config";
+import { getDictionary } from "./dictionary";
+import type { Lang } from "../sanity/site.config";
 
 const locale: Record<Lang, string> = { nl: "nl-BE", en: "en-GB" };
 const parse = (d: string) => new Date(`${d}T12:00:00Z`);

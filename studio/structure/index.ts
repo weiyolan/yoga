@@ -3,6 +3,7 @@ import { CalendarIcon } from "@sanity/icons/Calendar";
 import { CogIcon } from "@sanity/icons/Cog";
 import { EarthGlobeIcon } from "@sanity/icons/EarthGlobe";
 import { ClipboardIcon } from "@sanity/icons/Clipboard";
+import { ComposeIcon } from "@sanity/icons/Compose";
 import { HelpCircleIcon } from "@sanity/icons/HelpCircle";
 import { LockIcon } from "@sanity/icons/Lock";
 import { SparklesIcon } from "@sanity/icons/Sparkles";
@@ -133,6 +134,7 @@ export const structure: StructureResolver = (S) =>
             ]),
         ),
       S.documentTypeListItem("signupForm").title("Inschrijfformulieren").icon(ClipboardIcon),
+      S.documentTypeListItem("confirmationMail").title("Bevestigingsmails").icon(ComposeIcon),
       S.listItem()
         .id("lessons")
         .title("Lessen")

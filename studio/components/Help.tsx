@@ -21,6 +21,9 @@ export function Help() {
         <Text size={1} muted>
           Inschrijvingen, berichten en reviews komen binnen via de website. Hun status wijzig je op het tabblad Overzicht. Teksten in het Engels zijn optioneel: leeg = de Nederlandse tekst (of gebruik ✨ Vertaal).
         </Text>
+        <Text size={1} muted>
+          Bij elke nieuwe inschrijving krijgen jullie een mail. De deelnemer bevestigen: open de inschrijving → Bevestigingsmail. Die opent de tekst uit Bevestigingsmails, al ingevuld, in je eigen mailprogramma.
+        </Text>
       </Stack>
     </Box>
   );

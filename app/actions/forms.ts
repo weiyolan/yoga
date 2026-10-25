@@ -2,8 +2,9 @@
 
 import { createHash, randomUUID } from "node:crypto";
 import { getDictionary } from "@/lib/dictionary";
-import { dateRange, euro } from "@/lib/format";
-import { sendMail } from "@/lib/mail";
+import { confirmation } from "@/lib/confirmation";
+import { dateRange } from "@/lib/format";
+import { mailConfigured, sendMail } from "@/lib/mail";
 import { isUpcoming, sanityFetch } from "@/sanity/fetch";
 import { LAYOUT_QUERY, SIGNUP_RETREAT_QUERY } from "@/sanity/queries";
 import { writeClient } from "@/sanity/write";
@@ -21,7 +22,7 @@ const field = (data: FormData, name: string, max = 5000) => String(data.get(name
 async function recipient() {
   const settings = await sanityFetch({ query: LAYOUT_QUERY });
   const to = process.env.CONTACT_TO || settings?.notifyEmail || settings?.email;
-  if (!to && !process.env.RESEND_API_KEY) return "(dev: no recipient)";
+  if (!to && !mailConfigured()) return "(dev: no recipient)";
   if (!to) throw new Error("No recipient: set CONTACT_TO or the e-mail in Sanity → Instellingen");
   return to;
 }
@@ -101,12 +102,10 @@ async function subscribeInner(data: FormData): Promise<FormState> {
   ]);
 }
 
-/** `{naam}`, `{retreat}`, `{datum}`, `{voorschot}` in a Studio mail text. */
-const fill = (text: string, vars: Record<string, string>) => Object.entries(vars).reduce((t, [k, v]) => t.replaceAll(`{${k}}`, v), text);
-
 /**
  * Retreat sign-up (its own page, /retreats/<slug>/inschrijven): stored as a `signup` document
- * (Studio → Inschrijvingen), then a mail to the team and a confirmation to the participant.
+ * (Studio → Inschrijvingen), then a mail to the team and, when Instellingen → “Bevestigingsmail
+ * automatisch versturen” is on, the retreat's confirmation mail to the participant (Studio → Bevestigingsmails).
  * Always one person. The retreat's sign-up form adds questions; their labels and answers are stored
  * as a snapshot (in Dutch, for Rita & Philippe), so editing the form later never changes old sign-ups.
  * The dotted `_id` keeps it out of the public API. Once stored, mail failures are logged but don't
@@ -184,12 +183,8 @@ async function signupInner(data: FormData): Promise<FormState> {
     return { status: "error" };
   }
 
-  const texts = (await sanityFetch({ query: LAYOUT_QUERY, lang }))?.texts;
-  const vars = { naam: name, retreat: title, datum: when, voorschot: euro(lang, retreat.deposit) };
-  const body = waitlist
-    ? texts?.waitlistMail ? fill(texts.waitlistMail, vars) : t.waitlistMailBody(name, title, when)
-    : texts?.signupMail ? fill(texts.signupMail, vars) : t.mailBody(name, title, when);
-  const payment = !waitlist && retreat.deposit && texts?.paymentMail ? fill(texts.paymentMail, vars) : "";
+  const autoConfirm = (await sanityFetch({ query: LAYOUT_QUERY, lang }))?.autoConfirm === true;
+  const mail = confirmation(lang, retreat.mail, retreat, name, waitlist);
   const yours: [string, string][] = [
     [t.phone, phone],
     [t.room, room],
@@ -215,17 +210,18 @@ async function signupInner(data: FormData): Promise<FormState> {
           ["Bericht", message],
           ["Taal", lang],
         ],
-        footnote: "Bekijk en beheer in de Studio → Inschrijvingen.",
+        footnote: autoConfirm
+          ? "Bekijk en beheer in de Studio → Inschrijvingen. De bevestigingsmail is automatisch verstuurd."
+          : "Bekijk en beheer in de Studio → Inschrijvingen. Bevestigingsmail versturen: open de inschrijving → “Bevestigingsmail”.",
       }),
     ),
-    sendMail({
-      to: email,
-      subject: waitlist ? t.waitlistMailSubject(title) : t.mailSubject(title),
-      heading: title,
-      photo: retreat.photo,
-      text: [body, payment].filter(Boolean).join("\n\n"),
-      rows: yours.length ? yours : undefined,
-    }),
+    ...(autoConfirm
+      ? [
+          sendMail({ to: email, subject: mail.subject, heading: title, photo: retreat.photo, text: mail.text, rows: yours.length ? yours : undefined }).then(() =>
+            writeClient?.patch(doc._id).set({ confirmedAt: new Date().toISOString() }).commit(),
+          ),
+        ]
+      : []),
   ];
   for (const r of await Promise.allSettled(mails)) if (r.status === "rejected") console.error("signup: mail", r.reason);
   return { status: "sent" };

@@ -22,6 +22,7 @@ sanity/                  shared with the Next.js app
 | Pagina's | `homePage` · `retreatsPage` · `lessonsPage` · `aboutPage` · `galleryPage` · `contactPage` (singletons) | opening image + page-specific fields + SEO. The weekly schedule (with a level per class) and the Privéles block live on `lessonsPage`. |
 | Juridisch | `legalPage` × 4, fixed ids `legal-privacy`, `legal-terms`, `legal-cancellation`, `legal-cookies` | title, intro, sections. Footer links + sign-up consent. |
 | Inschrijfformulieren | `signupForm` | standard fields on/off (GSM, room, diet, message) + extra questions (text, long text, yes/no, choice). A retreat picks one; empty = the one marked "Standaard". "Gebruikt door" lists the retreats. |
+| Bevestigingsmails | `confirmationMail` | the participant's confirmation mail: subject, text, payment block, waiting-list version. Same "Standaard" / "Gebruikt door" as the forms. Sent automatically only with Instellingen → "Bevestigingsmail automatisch versturen"; else "Bevestigingsmail" on a sign-up opens it in your mail app. |
 | Retreats | `retreat` | groups follow the detail page: basics · in a nutshell · the place · the people · programme · practical · closing. Komend / Voorbij is **derived from `endDate`**, never stored. |
 | Personen | `person` | `kind`: founder (Rita & Philippe, optional "object" photo for the hover swap) or collaborator (teachers, cooks, a company…, with website + links). Every collaborator shows on Over ons automatically. |
 | Lessen | `yogaClass`, `studio` | styles (what / for whom / where), studios |
@@ -98,6 +99,7 @@ The frontend needs `NEXT_PUBLIC_SANITY_PROJECT_ID` and `NEXT_PUBLIC_SANITY_DATAS
 | `npm run seed` | idempotent seed: fills only empty fields, so Studio edits are kept (`-- --replace` overwrites). `npx sanity exec scripts/seed.ts -- --dry` prints it without writing |
 | `npm run migrate:v2` | one-off v2 migration on the live dataset (Fotobank fields, Coaching → Lessen, principles → values, person kind, privacy → legal page, booked). `-- --dry` first |
 | `npm run content:v2` | one-off v2 texts (docs/plan.html Part 1, `scripts/v2-content.ts`) as **drafts**, for R&P to review and publish. Run after `migrate:v2`. `-- --dry` first |
+| `npm run migrate:mails` | one-off: the confirmation mail texts in Instellingen → a "Standaard" Bevestigingsmail (published), then unsets them from Instellingen. `-- --dry` first |
 
 ## Seed content
 

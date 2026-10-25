@@ -1,7 +1,6 @@
 import { ClipboardIcon } from "@sanity/icons/Clipboard";
 import { defineArrayMember, defineField, defineType } from "sanity";
-import { apiVersion } from "../../../sanity/site.config";
-import { UsedByInput } from "../../components/UsedByInput";
+import { defaultFields } from "../shared/default";
 import { i18nLines, i18nString, pick } from "../shared/i18n";
 
 export const QUESTION_TYPES = [
@@ -24,21 +23,7 @@ export const signupForm = defineType({
   icon: ClipboardIcon,
   fields: [
     defineField({ name: "name", title: "Naam", type: "string", description: "Intern, bv. “Yoga & Freediving”.", validation: (rule) => rule.required() }),
-    defineField({
-      name: "isDefault",
-      title: "Standaard",
-      type: "boolean",
-      initialValue: false,
-      description: "Voor elke retreat zonder eigen formulier. Zet dit op één formulier.",
-      validation: (rule) =>
-        rule.custom(async (value, ctx) => {
-          if (!value) return true;
-          const id = ctx.document?._id.replace(/^drafts\./, "");
-          const others = await ctx.getClient({ apiVersion }).fetch<number>(`count(*[_type == "signupForm" && isDefault == true && !(_id in [$id, "drafts." + $id])])`, { id });
-          return others ? "Er is al een ander standaardformulier" : true;
-        }),
-    }),
-    defineField({ name: "usedBy", title: "Gebruikt door", type: "string", readOnly: true, components: { input: UsedByInput } }),
+    ...defaultFields("signupForm", "signupForm", "formulier"),
     defineField({
       name: "standard",
       title: "Standaardvragen",
