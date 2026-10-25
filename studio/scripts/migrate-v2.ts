@@ -13,6 +13,10 @@
  *  - S4  privacyPage → legalPage `legal-privacy` (same content), then deletes privacyPage.
  *  - S10/W15 Instellingen: drops menuSearch and menuGallery.
  *  - S6  Retreats: booked = people on confirmed sign-ups (old sign-ups keep their `persons`, new ones count 1).
+ *
+ * Clean-up options (also listed by --dry):
+ *   --delete-signups        deletes every sign-up (Inschrijvingen; test data) → booked = 0 everywhere
+ *   --delete-draft-people   deletes people that only exist as a draft (never published)
  */
 import { randomUUID } from "node:crypto";
 import { existsSync } from "node:fs";
@@ -20,6 +24,8 @@ import { getCliClient } from "sanity/cli";
 import { apiVersion } from "../../sanity/site.config.ts";
 
 const DRY = process.argv.includes("--dry");
+const DELETE_SIGNUPS = process.argv.includes("--delete-signups");
+const DELETE_DRAFT_PEOPLE = process.argv.includes("--delete-draft-people");
 if (existsSync(".env")) process.loadEnvFile(".env");
 const token = process.env.SANITY_AUTH_TOKEN || undefined;
 const client = getCliClient({ apiVersion, ...(token ? { token } : {}) });
@@ -79,9 +85,13 @@ async function run() {
     patch(id, { set, unset }, `${set ? "values ← principles, " : ""}remove ${unset.join(", ")}`);
   }
 
+  /* clean-up: people that only exist as a draft */
+  const draftOnly = new Set(docs.filter((d) => d._type === "person" && d._id.startsWith("drafts.") && !byId.has(d._id.slice(7))).map((d) => d._id));
+  if (DELETE_DRAFT_PEOPLE) for (const id of draftOnly) (tx.delete(id), log.push(`${id}: delete draft-only person “${byId.get(id)?.name ?? "?"}”`));
+
   /* S1: person.kind */
   const founders = new Set(((byId.get("aboutPage")?.founders as { _ref: string }[] | undefined) ?? []).map((r) => r._ref));
-  for (const d of docs.filter((d) => d._type === "person" && !d.kind)) {
+  for (const d of docs.filter((d) => d._type === "person" && !d.kind && !(DELETE_DRAFT_PEOPLE && draftOnly.has(d._id)))) {
     const kind = founders.has(d._id.replace(/^drafts\./, "")) ? "founder" : "collaborator";
     patch(d._id, { set: { kind } }, `kind = ${kind}`);
   }
@@ -108,12 +118,19 @@ async function run() {
     patch(id, { unset: ["menuSearch", "menuGallery"].filter((f) => d[f] !== undefined) }, "remove menuSearch, menuGallery");
   }
 
+  /* clean-up: every sign-up */
+  if (DELETE_SIGNUPS) {
+    const signups = await client.fetch<{ _id: string; name?: string }[]>(`*[_type == "signup"]{ _id, name }`, {}, { perspective: "raw" });
+    for (const d of signups) (tx.delete(d._id), log.push(`${d._id}: delete sign-up “${d.name ?? "?"}”`));
+  }
+
   /* S6: booked = confirmed sign-ups */
   const retreats = await client.fetch<{ _id: string; booked?: number; count: number }[]>(
     `*[_type == "retreat"]{ _id, booked, "count": coalesce(math::sum(*[_type == "signup" && retreat._ref == string::split(^._id, "drafts.")[-1] && status == "confirmed"]{ "p": coalesce(persons, 1) }.p), 0) }`,
     {},
     { perspective: "raw" },
   );
+  for (const r of retreats) if (DELETE_SIGNUPS) r.count = 0;
   for (const r of retreats) if ((r.booked ?? 0) !== r.count) patch(r._id, { set: { booked: r.count } }, `booked ${r.booked ?? 0} → ${r.count}`);
 
   console.log(log.length ? log.join("\n") : "Nothing to migrate.");
