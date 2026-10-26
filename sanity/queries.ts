@@ -121,7 +121,6 @@ const STYLE = `{
 export const LAYOUT_QUERY = defineQuery(`*[_id == "settings"][0]{
   siteName,
   "tagline": ${t("tagline")},
-  defaultSignupUrl,
   email,
   phone,
   instagram,
@@ -153,7 +152,6 @@ export const LAYOUT_QUERY = defineQuery(`*[_id == "settings"][0]{
 export const SETTINGS_QUERY = defineQuery(`*[_id == "settings"][0]{
   siteName,
   "tagline": ${t("tagline")},
-  defaultSignupUrl,
   email,
   phone,
   instagram,
@@ -217,7 +215,7 @@ export const SIGNUP_RETREAT_QUERY = defineQuery(`*[_type == "retreat" && _id == 
 /** Sign-up page (/retreats/<slug>/inschrijven): a short summary of the retreat + its form. */
 export const SIGNUP_PAGE_QUERY = defineQuery(`*[_type == "retreat" && slug.current == $slug][0]{
   ...${RETREAT_CARD},
-  "signupUrl": coalesce(signupUrl, *[_id == "settings"][0].defaultSignupUrl),
+  signupUrl,
   "photo": coalesce(closingPhoto, hero.photo)->${MEDIA},
   "prices": prices[]{ _key, "label": ${t("label")}, amount },
   "closingTitle": ${t("closingTitle")},
@@ -229,7 +227,7 @@ export const RETREAT_SLUGS_QUERY = defineQuery(`*[_type == "retreat" && defined(
 export const RETREAT_BY_SLUG_QUERY = defineQuery(`*[_type == "retreat" && slug.current == $slug][0]{
   ...${RETREAT_CARD},
   venue,
-  "signupUrl": coalesce(signupUrl, *[_id == "settings"][0].defaultSignupUrl),
+  signupUrl,
   "hero": hero${HERO},
   "moodPhotos": moodPhotos[]->${MEDIA},
   "nutshellTitle": ${t("nutshellTitle")},

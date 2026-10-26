@@ -32,7 +32,7 @@ export const altTextAction: DocumentActionComponent = ({ id, type, draft, publis
   const ref = doc?.image?.asset?._ref;
   const { projectId, dataset } = client.config();
   return {
-    label: busy ? "Bezig…" : "✨ Alt-tekst genereren",
+    label: busy ? "Bezig…" : "Alt-tekst genereren",
     icon: SparklesIcon,
     disabled: busy || !ref,
     title: ref ? "Vult lege alt-tekst (NL + EN) in met AI. Controleer en publiceer daarna." : "Upload eerst een foto",
@@ -65,7 +65,7 @@ export const translateAction: DocumentActionComponent = ({ id, type, draft, publ
   const [busy, setBusy] = useState(false);
   const jobs = doc ? findJobs(doc) : [];
   return {
-    label: busy ? "Bezig met vertalen…" : `✨ Vertaal NL → EN${jobs.length ? ` (${jobs.length})` : ""}`,
+    label: busy ? "Bezig met vertalen…" : `Vertaal NL → EN${jobs.length ? ` (${jobs.length})` : ""}`,
     icon: SparklesIcon,
     disabled: busy || !jobs.length,
     title: jobs.length ? "Vult de lege Engelse velden in met een AI-vertaling. Controleer en publiceer daarna." : "Alle Nederlandse teksten hebben al een Engelse versie",

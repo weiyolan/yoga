@@ -178,7 +178,7 @@ export const structure: StructureResolver = (S) =>
                 .icon(ImagesIcon)
                 .child(S.documentTypeList("mediaItem").title("Alle foto's").defaultOrdering([{ field: "_createdAt", direction: "desc" }])),
               filtered(S, "media-todo", "Te doen: zonder alt-tekst", "mediaItem", `!defined(alt[language == "${defaultLanguage}"][0].value)`, [{ field: "_createdAt", direction: "desc" }]).icon(WarningOutlineIcon),
-              S.listItem().id("media-ai").title("✨ Alt-teksten aanvullen (AI)").icon(SparklesIcon).child(S.component(BulkAltText).id("media-ai").title("Alt-teksten aanvullen")),
+              S.listItem().id("media-ai").title("Alt-teksten aanvullen (AI)").icon(SparklesIcon).child(S.component(BulkAltText).id("media-ai").title("Alt-teksten aanvullen")),
               filtered(S, "media-gallery", "In de gallery", "mediaItem", "showInGallery != false", [{ field: "_createdAt", direction: "desc" }]),
               S.divider(),
               ...MEDIA_CATEGORIES.map((c) =>

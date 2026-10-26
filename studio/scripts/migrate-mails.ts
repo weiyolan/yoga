@@ -7,7 +7,7 @@
  *
  *  - Creates the “Standaard” confirmation mail (published) from the texts in Instellingen (the draft
  *    if there is one); missing texts → the v2 texts / the built-in text. Skipped if one exists.
- *  - Unsets signupMail, paymentMail and waitlistMail on Instellingen (published + draft).
+ *  - Unsets signupMail, paymentMail, waitlistMail and defaultSignupUrl on Instellingen (published + draft).
  */
 import { randomUUID } from "node:crypto";
 import { existsSync } from "node:fs";
@@ -26,6 +26,8 @@ const key = () => randomUUID().replace(/-/g, "").slice(0, 12);
 const txt = (v: Record<string, string>) => Object.entries(v).map(([language, value]) => ({ _key: key(), _type: "internationalizedArrayTextValue", language, value }));
 const filled = (v?: I18n[]) => (v?.some((i) => i.value?.trim()) ? v : undefined);
 const FIELDS = ["signupMail", "paymentMail", "waitlistMail"];
+/** Also dropped from Instellingen: the default external sign-up link. */
+const UNSET = [...FIELDS, "defaultSignupUrl"];
 
 async function run() {
   const log: string[] = [];
@@ -50,7 +52,7 @@ async function run() {
     log.push(`${doc._id}: create confirmationMail “Standaard” (${FIELDS.map((f) => `${f}: ${src(f) ? "from Instellingen" : "default text"}`).join(", ")})`);
   }
   for (const d of [published, draft]) {
-    const unset = FIELDS.filter((f) => d?.[f] !== undefined);
+    const unset = UNSET.filter((f) => d?.[f] !== undefined);
     if (d && unset.length) {
       tx.patch(d._id, (p) => p.unset(unset));
       log.push(`${d._id}: unset ${unset.join(", ")}`);

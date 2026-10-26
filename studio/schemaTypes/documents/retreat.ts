@@ -68,7 +68,7 @@ export const retreat = defineType({
       title: "Inschrijflink",
       type: "url",
       group: "basics",
-      description: "Optioneel: externe inschrijflink. Leeg = standaard inschrijflink uit Instellingen, en anders het formulier op de site.",
+      description: "Optioneel: externe inschrijflink (bv. een partner). Leeg = het inschrijfformulier op de site.",
       validation: (rule) => rule.uri({ scheme: ["https"] }),
     }),
     defineField({
