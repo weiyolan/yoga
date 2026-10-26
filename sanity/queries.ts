@@ -106,6 +106,9 @@ const TESTIMONIAL = `{
 }` as const;
 
 /** An approved review (public copy, no e-mail), see studio/structure/views.tsx. */
+/** Reviews of other editions of the same retreat (same first slug word: eifel-2025 → eifel-2026). Inside a retreat projection. */
+const SAME_KIND = `*[_type == "review" && retreat._ref != ^._id && !(_id in path("drafts.**")) && string::split(retreat->slug.current, "-")[0] == string::split(^.slug.current, "-")[0]]` as const;
+
 const REVIEW = `{
   _id,
   name,
@@ -262,6 +265,11 @@ export const RETREAT_BY_SLUG_QUERY = defineQuery(`*[_type == "retreat" && slug.c
   "closingPhoto": closingPhoto->${MEDIA},
   "recapPhotos": recapPhotos[]->${MEDIA},
   "reviews": *[_type == "review" && retreat._ref == ^._id && !(_id in path("drafts.**"))] | order(submittedAt desc)${REVIEW},
+  // an upcoming retreat has none yet: the reviews of earlier editions (same first slug word: eifel-2025 → eifel-2026), else the best recent ones
+  "earlierReviews": select(
+    count(${SAME_KIND}) > 0 => ${SAME_KIND} | order(submittedAt desc)[0...6]${REVIEW},
+    *[_type == "review" && rating >= 4 && !(_id in path("drafts.**"))] | order(submittedAt desc)[0...6]${REVIEW}
+  ),
   "labels": *[_id == "retreatsPage"][0]{
     "peopleTitle": ${t("peopleTitle")},
     "programmeTitle": ${t("programmeTitle")},

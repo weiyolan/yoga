@@ -5,6 +5,7 @@ import { Lightbox, LightboxTrigger, type LightboxItem } from "@/components/Light
 import { fullSrc, Photo } from "@/components/Photo";
 import { Paragraphs } from "@/components/RichText";
 import { Hero, ReviewList } from "@/components/sections";
+import { Toc } from "@/components/Toc";
 import { getDictionary } from "@/lib/dictionary";
 import { dateRange, euro, join, placesLabel, spotsLeft } from "@/lib/format";
 import { buildMetadata } from "@/lib/metadata";
@@ -179,12 +180,15 @@ export default async function RetreatPage({ params }: PageProps<"/[lang]/retreat
       <div className="ph" style={style} />
     );
 
+  // its own reviews (once there are), else those of earlier editions
+  const reviews = r.reviews?.length ? r.reviews : (r.earlierReviews ?? []);
   const toc = [
     ["notendop", t.toc.nutshell, r.nutshellTitle || r.nutshellText || highlights.length],
     ["plek", t.toc.place, r.placeTitle || r.placeText],
     ["mensen", t.toc.people, r.hosts?.length],
     ["programma", t.toc.programme, r.programme?.length],
     ["praktisch", t.toc.practical, r.prices?.length || included.length || notIncluded.length],
+    ["reviews", t.toc.reviews, reviews.length],
   ] as const;
 
   return (
@@ -370,18 +374,20 @@ export default async function RetreatPage({ params }: PageProps<"/[lang]/retreat
               ) : null}
             </dl>
             {signupLink("btn", { width: "100%", justifyContent: "center" })}
-            <ul>
-              {toc
-                .filter(([, , show]) => show)
-                .map(([id, label]) => (
-                  <li key={id}>
-                    <a href={`#${id}`}>{label}</a>
-                  </li>
-                ))}
-            </ul>
+            <Toc label={t.toc.title} items={toc.filter(([, , show]) => show).map(([id, label]) => [id, label])} />
           </aside>
         </div>
       </section>
+
+      {reviews.length ? (
+        <section className="s alt" id="reviews">
+          <div className="wrap">
+            <span className="label">{d.review.label}</span>
+            <h2>{r.reviews?.length ? d.review.title : t.earlierReviews}</h2>
+            <ReviewList lang={lang} reviews={reviews} context={!r.reviews?.length} />
+          </div>
+        </section>
+      ) : null}
 
       {/* Closing photo + the sign-up button. Keeps the old #inschrijven anchor: it now forwards to the sign-up page. */}
       <section className="hero short" id="inschrijven" style={{ height: "70vh" }}>

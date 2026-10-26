@@ -125,11 +125,12 @@ export function ClassTiles({ lang, styles, to, anchors }: { lang: Lang; styles: 
   );
 }
 
-type ReviewData = { _id: string; name: string | null; rating: number | null; text: string | null };
+type ReviewData = { _id: string; name: string | null; rating: number | null; text: string | null; context?: string | null };
 const stars = (n: number) => "★".repeat(n) + "☆".repeat(5 - n);
 
 /** Approved reviews of a retreat: average score + one card per review. */
-export function ReviewList({ lang, reviews }: { lang: Lang; reviews: ReviewData[] }) {
+/** `context`: also which retreat each review is about (reviews of earlier editions on an upcoming retreat). */
+export function ReviewList({ lang, reviews, context = false }: { lang: Lang; reviews: ReviewData[]; context?: boolean }) {
   const t = getDictionary(lang).review;
   if (!reviews.length) return null;
   const avg = reviews.reduce((n, r) => n + (r.rating ?? 0), 0) / reviews.length;
@@ -148,7 +149,10 @@ export function ReviewList({ lang, reviews }: { lang: Lang; reviews: ReviewData[
               {stars(r.rating ?? 0)}
             </span>
             <blockquote>{r.text}</blockquote>
-            <figcaption>{r.name}</figcaption>
+            <figcaption>
+              {r.name}
+              {context && r.context ? <small className="muted"> · {r.context}</small> : null}
+            </figcaption>
           </figure>
         ))}
       </div>

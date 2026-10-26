@@ -17,7 +17,7 @@ import type { LAYOUT_QUERY_RESULT } from "@/sanity/types";
 import { Icon, type IconName } from "./icons";
 
 type Layout = NonNullable<LAYOUT_QUERY_RESULT>;
-type PanelKey = "retreats" | "lessons" | "about";
+type PanelKey = "retreats" | "lessons" | "about" | "contact";
 type Props = { lang: Lang; layout: Layout | null; children?: ReactNode };
 
 /** Pages without a hero get the solid header straight away. */
@@ -179,6 +179,12 @@ export function Nav({ lang, layout, children }: Props) {
         </div>
       </div>
     ),
+    contact: (
+      <div className="stack panel-small">
+        <MCard to={href(lang, "contact")} icon="mail" title={t.contactCard[0]} desc={t.contactCard[1]} />
+        <MCard to={href(lang, "faq")} icon="help" title={t.faqCard[0]} desc={t.faqCard[1]} />
+      </div>
+    ),
   };
 
   const menu: { route: Route; label: string; panel?: PanelKey; subs?: [string, string][] }[] = [
@@ -220,7 +226,7 @@ export function Nav({ lang, layout, children }: Props) {
         .filter(([c]) => layout?.galleryCategories?.includes(c))
         .map(([c, label]) => [label, href(lang, "gallery", { hash: c })] as [string, string]),
     },
-    { route: "contact", label: t.contact, subs: [[t.faq, href(lang, "faq")]] },
+    { route: "contact", label: t.contact, panel: "contact", subs: [[t.faq, href(lang, "faq")]] },
   ];
 
   const navClass = ["nav", solid && "solid", scrolled && "scrolled", tucked && !mobile && !panel && "tucked", mobile && "menu-open", panel && "panel-open"].filter(Boolean).join(" ");

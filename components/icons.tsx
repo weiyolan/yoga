@@ -9,6 +9,8 @@ const PATHS = {
   photo: <><path d="M4 6h16v12H4z" /><path d="M4 15l4-4 4 4 3-3 5 5" /><circle cx="15.5" cy="9.5" r="1.5" /></>,
   dot: <><circle cx="12" cy="12" r="7.5" /><circle cx="12" cy="12" r="1.6" fill="currentColor" stroke="none" /></>,
   arrow: <path d="M5 12h14M13 6l6 6-6 6" />,
+  mail: <><path d="M4 6h16v12H4z" /><path d="M4 7l8 6 8-6" /></>,
+  help: <><circle cx="12" cy="12" r="8" /><path d="M9.6 9.5a2.5 2.5 0 1 1 3.4 2.3c-.6.3-1 .8-1 1.5v.4" /><circle cx="12" cy="16.6" r=".6" fill="currentColor" /></>,
   chev: <path d="M7 10l5 5 5-5" />,
   left: <path d="M15 5l-7 7 7 7" />,
   right: <path d="M9 5l7 7-7 7" />,
