@@ -1,12 +1,13 @@
 import { UsersIcon } from "@sanity/icons/Users";
 import { defineArrayMember, defineField, defineType } from "sanity";
 import { StatusInput } from "../../components/StatusInput";
+import { statusPreview, type StatusDef } from "../../components/StatusPreview";
 
-export const SIGNUP_STATUSES = [
-  { title: "Nieuw", value: "new" },
-  { title: "Bevestigd", value: "confirmed" },
-  { title: "Wachtlijst", value: "waitlist" },
-  { title: "Geannuleerd", value: "cancelled" },
+export const SIGNUP_STATUSES: StatusDef[] = [
+  { title: "Nieuw", value: "new", tone: "primary" },
+  { title: "Bevestigd", value: "confirmed", tone: "positive" },
+  { title: "Wachtlijst", value: "waitlist", tone: "caution" },
+  { title: "Geannuleerd", value: "cancelled", tone: "critical" },
 ];
 
 /**
@@ -24,48 +25,166 @@ export const signup = defineType({
   icon: UsersIcon,
   liveEdit: true,
   fields: [
-    defineField({ name: "status", title: "Status", type: "string", options: { list: SIGNUP_STATUSES, layout: "radio", direction: "horizontal" }, initialValue: "new", components: { input: StatusInput } }),
-    defineField({ name: "notes", title: "Interne notitie", type: "text", rows: 3 }),
-    defineField({ name: "retreat", title: "Retreat", type: "reference", to: [{ type: "retreat" }], readOnly: true }),
-    defineField({ name: "name", title: "Naam", type: "string", readOnly: true }),
-    defineField({ name: "email", title: "E-mail", type: "string", readOnly: true }),
-    defineField({ name: "phone", title: "GSM", type: "string", readOnly: true }),
-    defineField({ name: "persons", title: "Aantal personen (oude inschrijvingen)", type: "number", readOnly: true, hidden: ({ value }) => !value || value === 1 }),
-    defineField({ name: "room", title: "Kamer / prijs", type: "string", readOnly: true }),
-    defineField({ name: "diet", title: "Dieetwensen of allergieën", type: "text", rows: 2, readOnly: true }),
-    defineField({ name: "message", title: "Vragen of opmerkingen", type: "text", rows: 3, readOnly: true }),
+    defineField({
+      name: "status",
+      title: "Status",
+      type: "string",
+      options: {
+        list: SIGNUP_STATUSES.map(({ title, value }) => ({ title, value })),
+        layout: "radio",
+        direction: "horizontal",
+      },
+      initialValue: "new",
+      components: { input: StatusInput },
+    }),
+    defineField({
+      name: "notes",
+      title: "Interne notitie",
+      type: "text",
+      rows: 3,
+    }),
+    defineField({
+      name: "retreat",
+      title: "Retreat",
+      type: "reference",
+      to: [{ type: "retreat" }],
+      readOnly: true,
+    }),
+    defineField({
+      name: "name",
+      title: "Naam",
+      type: "string",
+      readOnly: true,
+    }),
+    defineField({
+      name: "email",
+      title: "E-mail",
+      type: "string",
+      readOnly: true,
+    }),
+    defineField({
+      name: "phone",
+      title: "GSM",
+      type: "string",
+      readOnly: true,
+    }),
+    defineField({
+      name: "persons",
+      title: "Aantal personen (oude inschrijvingen)",
+      type: "number",
+      readOnly: true,
+      hidden: ({ value }) => !value || value === 1,
+    }),
+    defineField({
+      name: "room",
+      title: "Kamer / prijs",
+      type: "string",
+      readOnly: true,
+    }),
+    defineField({
+      name: "diet",
+      title: "Dieetwensen of allergieën",
+      type: "text",
+      rows: 2,
+      readOnly: true,
+    }),
+    defineField({
+      name: "message",
+      title: "Vragen of opmerkingen",
+      type: "text",
+      rows: 3,
+      readOnly: true,
+    }),
     defineField({
       name: "answers",
       title: "Antwoorden op de extra vragen",
       type: "array",
       readOnly: true,
-      description: "Kopie van de vragen zoals ze op het moment van inschrijven waren.",
+      description:
+        "Kopie van de vragen zoals ze op het moment van inschrijven waren.",
       of: [
         defineArrayMember({
           name: "signupAnswer",
           type: "object",
           fields: [
             defineField({ name: "question", title: "Vraag", type: "string" }),
-            defineField({ name: "answer", title: "Antwoord", type: "text", rows: 2 }),
+            defineField({
+              name: "answer",
+              title: "Antwoord",
+              type: "text",
+              rows: 2,
+            }),
           ],
           preview: { select: { title: "question", subtitle: "answer" } },
         }),
       ],
     }),
-    defineField({ name: "form", title: "Formulier", type: "string", readOnly: true, hidden: ({ value }) => !value }),
-    defineField({ name: "waitlist", title: "Aanvraag voor de wachtlijst (retreat was volzet)", type: "boolean", readOnly: true }),
-    defineField({ name: "lang", title: "Taal", type: "string", readOnly: true }),
-    defineField({ name: "consent", title: "Akkoord gegevens", type: "boolean", readOnly: true }),
-    defineField({ name: "terms", title: "Akkoord voorwaarden & annulatie", type: "boolean", readOnly: true }),
-    defineField({ name: "submittedAt", title: "Ingeschreven op", type: "datetime", readOnly: true }),
-    defineField({ name: "confirmedAt", title: "Bevestigingsmail verstuurd op", type: "datetime", readOnly: true, hidden: ({ value }) => !value, description: "Automatisch, of via “Bevestigingsmail” (geopend in je mailprogramma)." }),
+    defineField({
+      name: "form",
+      title: "Formulier",
+      type: "string",
+      readOnly: true,
+      hidden: ({ value }) => !value,
+    }),
+    defineField({
+      name: "waitlist",
+      title: "Aanvraag voor de wachtlijst (retreat was volzet)",
+      type: "boolean",
+      readOnly: true,
+    }),
+    defineField({
+      name: "lang",
+      title: "Taal",
+      type: "string",
+      readOnly: true,
+    }),
+    defineField({
+      name: "consent",
+      title: "Akkoord gegevens",
+      type: "boolean",
+      readOnly: true,
+    }),
+    defineField({
+      name: "terms",
+      title: "Akkoord voorwaarden & annulatie",
+      type: "boolean",
+      readOnly: true,
+    }),
+    defineField({
+      name: "submittedAt",
+      title: "Ingeschreven op",
+      type: "datetime",
+      readOnly: true,
+    }),
+    defineField({
+      name: "confirmedAt",
+      title: "Bevestigingsmail verstuurd op",
+      type: "datetime",
+      readOnly: true,
+      hidden: ({ value }) => !value,
+      description:
+        "Automatisch, of via “Bevestigingsmail” (geopend in je mailprogramma).",
+    }),
   ],
-  orderings: [{ title: "Nieuwste eerst", name: "submittedDesc", by: [{ field: "submittedAt", direction: "desc" }] }],
+  orderings: [
+    {
+      title: "Nieuwste eerst",
+      name: "submittedDesc",
+      by: [{ field: "submittedAt", direction: "desc" }],
+    },
+  ],
   preview: {
-    select: { name: "name", status: "status", retreat: "retreat.slug.current", at: "submittedAt" },
+    select: {
+      name: "name",
+      status: "status",
+      retreat: "retreat.slug.current",
+      at: "submittedAt",
+    },
     prepare: ({ name, status, retreat, at }) => ({
       title: name,
-      subtitle: [SIGNUP_STATUSES.find((s) => s.value === status)?.title, retreat, at?.slice(0, 10)].filter(Boolean).join(" · "),
+      subtitle: [retreat, at?.slice(0, 10)].filter(Boolean).join(" · "),
+      description: status ?? "new", // → the badge (components/StatusPreview.tsx)
     }),
   },
+  components: { preview: statusPreview(SIGNUP_STATUSES) },
 });
