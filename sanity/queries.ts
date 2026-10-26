@@ -297,7 +297,22 @@ export const LESSONS_QUERY = defineQuery(`{
     },
     "seo": seo${SEO}
   },
-  "styles": *[_type == "yogaClass"] | order(orderRank asc)${STYLE},
+  "styles": *[_type == "yogaClass"] | order(orderRank asc){
+    _id,
+    name,
+    "slug": slug.current,
+    "what": ${t("what")},
+    "forWhom": ${t("forWhom")},
+    "photo": photo->${MEDIA},
+    "studios": studios[]->name,
+    "tagline": ${t("tagline")},
+    "body": ${t("body")},
+    "expect": ${lines("expect")},
+    "benefits": ${lines("benefits")},
+    "level": ${t("level")},
+    "bring": ${t("bring")},
+    "photo2": photo2->${MEDIA}
+  },
   "studios": *[_type == "studio"] | order(name asc){ _id, name, address, city, website, "photo": photo->${MEDIA} }
 }`);
 

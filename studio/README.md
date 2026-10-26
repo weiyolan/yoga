@@ -112,6 +112,7 @@ The frontend needs `NEXT_PUBLIC_SANITY_PROJECT_ID` and `NEXT_PUBLIC_SANITY_DATAS
 | `npm run content:v3` | one-off drafts: Veelgestelde vragen (first version) + Eifel prices / inbegrepen / programma (from `eiffel.txt`, only where empty). `-- --dry` first |
 | `npm run content:v4` | one-off drafts: an example newsletter “Nieuwe retreats” (upcoming retreats as cards, button to /retreats) if there is none yet, and the existing public reviews with name + text in [brackets] (examples to replace); the Nieuwsbrief bevestiging greeting “Dag,” → “Dag {naam},”. Safe to run again. `-- --dry` first |
 | `npm run content:v5` | one-off drafts: the sign-up forms “Yoga & Freediving (Dahab)” and “Pilates, Yoga & Wellness (Eifel)” (from the Google Forms, NL + EN, with steps, conditional questions, “Andere”, “meer info / hou me op de hoogte”). Only if they don't exist. `-- --dry` first |
+| `npm run content:v6` | one-off drafts: the Lessen page's section per style (subtitle, text, “Zo verloopt een les”, “Wat het je geeft”, level, what to bring; NL + EN) for Ashtanga, Vinyasa, Pilates Mat and Pilates Reformer. Only fills empty fields. `-- --dry` first |
 | `npm run publish:drafts` | publishes every draft (Sanity's publish action, like the Studio button) and lists the `[placeholders]` still in them; draft-only references become normal ones. `-- --dry` to list, `-- --skip-placeholders` to keep drafts with `[..]` as drafts, `-- --only=faqPage,retreat` for some types |
 
 ## Seed content

@@ -235,6 +235,21 @@ blockquote { margin: 0 auto; max-width: 30ch; font: clamp(1.6rem, 3vw, 2.4rem)/1
 .facts dt { font: 600 .65rem/1 var(--sans); letter-spacing: .16em; text-transform: uppercase; color: var(--ember); margin-bottom: 8px; }
 .facts dd { margin: 0; font: 1.35rem/1.25 var(--serif); }
 @media (max-width: 860px) { .recap { grid-template-columns: 1fr; gap: 36px; } }
+/* Lessen: one section per style, photo and text alternating sides */
+.style-row { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.15fr); gap: 72px; align-items: start; }
+.style-row.rev > .style-photo { order: 2; }
+.style-photo { position: sticky; top: 110px; }
+.style-tagline { font: italic 1.35rem/1.35 var(--serif); margin: 10px 0 18px; }
+.style-lists { display: grid; grid-template-columns: 1fr 1fr; gap: 28px 36px; margin: 30px 0 6px; }
+.style-lists h3 { font: 600 .65rem/1 var(--sans); letter-spacing: .16em; text-transform: uppercase; color: var(--ember); margin: 0 0 14px; }
+.facts.sm { margin-top: 30px; gap: 20px 32px; }
+.facts.sm dd { font-size: 1.08rem; line-height: 1.35; }
+@media (max-width: 860px) {
+  .style-row { grid-template-columns: minmax(0, 1fr); gap: 28px; }
+  .style-row.rev > .style-photo { order: 0; }
+  .style-photo { position: static; max-width: 520px; }
+  .style-lists { grid-template-columns: 1fr; }
+}
 @media (max-width: 960px) { .detail { grid-template-columns: 1fr; } .detail aside { order: -1; position: static !important; } }
 .detail aside { position: sticky; top: 64px; border: 1px solid var(--line); background: var(--bg); padding: 26px; }
 .detail aside .price { font: 2.4rem/1 var(--serif); margin: 4px 0 18px; }

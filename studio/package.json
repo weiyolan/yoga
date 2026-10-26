@@ -17,6 +17,7 @@
     "content:v3": "sanity exec scripts/content-v3.ts --with-user-token --",
     "content:v4": "sanity exec scripts/content-v4.ts --with-user-token --",
     "content:v5": "sanity exec scripts/content-v5.ts --with-user-token --",
+    "content:v6": "sanity exec scripts/content-v6.ts --with-user-token --",
     "publish:drafts": "sanity exec scripts/publish-drafts.ts --with-user-token --",
     "typecheck": "tsc --noEmit"
   },

@@ -6,16 +6,34 @@ import { dateRange, euro, placesLabel } from "@/lib/format";
 import { retreatHref } from "@/lib/routes";
 import { isUpcoming } from "@/sanity/fetch";
 import type { Lang } from "@/sanity/site.config";
-import type { HOME_QUERY_RESULT, LESSONS_QUERY_RESULT, RETREATS_QUERY_RESULT } from "@/sanity/types";
+import type {
+  HOME_QUERY_RESULT,
+  LESSONS_QUERY_RESULT,
+  RETREATS_QUERY_RESULT,
+} from "@/sanity/types";
 import { Photo, SanityImg } from "./Photo";
 
 export type RetreatCardData = RETREATS_QUERY_RESULT["upcoming"][number];
-export type StyleData = LESSONS_QUERY_RESULT["styles"][number];
+export type StyleData = Pick<
+  LESSONS_QUERY_RESULT["styles"][number],
+  "_id" | "name" | "slug" | "what" | "forWhom" | "photo" | "studios"
+>;
 export type HeroData = NonNullable<NonNullable<HOME_QUERY_RESULT>["hero"]>;
 
 /** A direct video file (mp4/webm) can loop silently; Vimeo gets its background player. */
 function HeroVideo({ url, poster }: { url: string; poster?: string }) {
-  if (/\.(mp4|webm)(\?|$)/i.test(url)) return <video src={url} poster={poster} autoPlay muted loop playsInline aria-hidden="true" />;
+  if (/\.(mp4|webm)(\?|$)/i.test(url))
+    return (
+      <video
+        src={url}
+        poster={poster}
+        autoPlay
+        muted
+        loop
+        playsInline
+        aria-hidden="true"
+      />
+    );
   const vimeo = url.match(/vimeo\.com\/(?:video\/)?(\d+)/)?.[1];
   if (vimeo)
     return (
@@ -32,7 +50,23 @@ function HeroVideo({ url, poster }: { url: string; poster?: string }) {
 }
 
 /** Every page opens with one big photo (or a silent loop on Home). */
-export function Hero({ hero, short, meta, actions, title, subtitle, priority = true }: { hero: HeroData | null | undefined; short?: boolean; meta?: ReactNode; actions?: ReactNode; title?: string | null; subtitle?: string | null; priority?: boolean }) {
+export function Hero({
+  hero,
+  short,
+  meta,
+  actions,
+  title,
+  subtitle,
+  priority = true,
+}: {
+  hero: HeroData | null | undefined;
+  short?: boolean;
+  meta?: ReactNode;
+  actions?: ReactNode;
+  title?: string | null;
+  subtitle?: string | null;
+  priority?: boolean;
+}) {
   const h1 = title ?? hero?.title;
   const sub = subtitle ?? hero?.subtitle;
   return (
@@ -40,7 +74,12 @@ export function Hero({ hero, short, meta, actions, title, subtitle, priority = t
       <section className={`hero${short ? " short" : ""}`}>
         <div className="ph dark">
           <SanityImg media={hero?.photo} priority={priority} />
-          {hero?.videoUrl ? <HeroVideo url={hero.videoUrl} poster={hero.photo?.image?.asset?.url ?? undefined} /> : null}
+          {hero?.videoUrl ? (
+            <HeroVideo
+              url={hero.videoUrl}
+              poster={hero.photo?.image?.asset?.url ?? undefined}
+            />
+          ) : null}
         </div>
         <div className="txt">
           {h1 ? <h1>{h1}</h1> : null}
@@ -54,12 +93,30 @@ export function Hero({ hero, short, meta, actions, title, subtitle, priority = t
   );
 }
 
-export function SectionHead({ label, title, as: H = "h2", children }: { label?: string | null; title?: string | null; as?: "h1" | "h2"; children?: ReactNode }) {
+export function SectionHead({
+  label,
+  title,
+  as: H = "h2",
+  children,
+}: {
+  label?: string | null;
+  title?: string | null;
+  as?: "h1" | "h2";
+  children?: ReactNode;
+}) {
   return (
     <div className="head">
       <div>
         {label ? <span className="label">{label}</span> : null}
-        {title ? <H style={H === "h1" ? { fontSize: "clamp(2.4rem,5vw,4.2rem)" } : undefined}>{title}</H> : null}
+        {title ? (
+          <H
+            style={
+              H === "h1" ? { fontSize: "clamp(2.4rem,5vw,4.2rem)" } : undefined
+            }
+          >
+            {title}
+          </H>
+        ) : null}
       </div>
       {children}
     </div>
@@ -67,16 +124,43 @@ export function SectionHead({ label, title, as: H = "h2", children }: { label?: 
 }
 
 /** Retreat card: upcoming in colour, past in black & white (colour on hover). */
-export function RetreatCard({ lang, retreat, tag }: { lang: Lang; retreat: RetreatCardData; tag?: string }) {
+export function RetreatCard({
+  lang,
+  retreat,
+  tag,
+}: {
+  lang: Lang;
+  retreat: RetreatCardData;
+  tag?: string;
+}) {
   const t = getDictionary(lang).card;
   const past = !isUpcoming(retreat.endDate);
-  const extra = past ? (retreat.participantCount ? `${retreat.participantCount} ${t.participants}` : "") : retreat.priceFrom ? `${t.from} ${euro(lang, retreat.priceFrom)}` : "";
-  const when = [dateRange(lang, retreat.startDate, retreat.endDate), retreat.country, !past ? placesLabel(lang, retreat) : null].filter(Boolean).join(" · ");
+  const extra = past
+    ? retreat.participantCount
+      ? `${retreat.participantCount} ${t.participants}`
+      : ""
+    : retreat.priceFrom
+      ? `${t.from} ${euro(lang, retreat.priceFrom)}`
+      : "";
+  const when = [
+    dateRange(lang, retreat.startDate, retreat.endDate),
+    retreat.country,
+    !past ? placesLabel(lang, retreat) : null,
+  ]
+    .filter(Boolean)
+    .join(" · ");
   return (
     <Link className="card" href={retreatHref(lang, retreat.slug)}>
-      <Photo media={retreat.cardPhoto} ratio="r45" className={past ? "bw" : undefined} sizes="(max-width: 860px) 100vw, 33vw" />
+      <Photo
+        media={retreat.cardPhoto}
+        ratio="r45"
+        className={past ? "bw" : undefined}
+        sizes="(max-width: 860px) 100vw, 33vw"
+      />
       <div className="meta">
-        <span className={`tag${past ? " past" : ""}`}>{tag ?? (past ? t.past : t.soon)}</span>
+        <span className={`tag${past ? " past" : ""}`}>
+          {tag ?? (past ? t.past : t.soon)}
+        </span>
         <span>{extra}</span>
       </div>
       <h4>{retreat.title}</h4>
@@ -87,14 +171,31 @@ export function RetreatCard({ lang, retreat, tag }: { lang: Lang; retreat: Retre
   );
 }
 
-/** Class tiles with hover/tap reveal: what · for whom · where. `anchors`: each tile gets its style's slug as id (nav → #vinyasa). */
-export function ClassTiles({ lang, styles, to, anchors }: { lang: Lang; styles: StyleData[]; to: string; anchors?: boolean }) {
+/** Class tiles with hover/tap reveal: what · for whom · where. */
+/** `to`: one link for all tiles, or one per style (Lessen → the style's own section). */
+export function ClassTiles({
+  lang,
+  styles,
+  to,
+}: {
+  lang: Lang;
+  styles: StyleData[];
+  to: string | ((s: StyleData) => string);
+}) {
   const t = getDictionary(lang).tile;
   return (
     <div className="g4">
       {styles.map((s) => (
-        <Link key={s._id} className="tile" href={to} id={anchors && s.slug ? s.slug : undefined}>
-          <Photo media={s.photo} ratio="r34" sizes="(max-width: 860px) 50vw, 25vw" />
+        <Link
+          key={s._id}
+          className="tile"
+          href={typeof to === "string" ? to : to(s)}
+        >
+          <Photo
+            media={s.photo}
+            ratio="r34"
+            sizes="(max-width: 860px) 50vw, 25vw"
+          />
           <span className="name">{s.name}</span>
           <div className="info">
             <b>{s.name}</b>
@@ -125,12 +226,26 @@ export function ClassTiles({ lang, styles, to, anchors }: { lang: Lang; styles: 
   );
 }
 
-type ReviewData = { _id: string; name: string | null; rating: number | null; text: string | null; context?: string | null };
+type ReviewData = {
+  _id: string;
+  name: string | null;
+  rating: number | null;
+  text: string | null;
+  context?: string | null;
+};
 const stars = (n: number) => "★".repeat(n) + "☆".repeat(5 - n);
 
 /** Approved reviews of a retreat: average score + one card per review. */
 /** `context`: also which retreat each review is about (reviews of earlier editions on an upcoming retreat). */
-export function ReviewList({ lang, reviews, context = false }: { lang: Lang; reviews: ReviewData[]; context?: boolean }) {
+export function ReviewList({
+  lang,
+  reviews,
+  context = false,
+}: {
+  lang: Lang;
+  reviews: ReviewData[];
+  context?: boolean;
+}) {
   const t = getDictionary(lang).review;
   if (!reviews.length) return null;
   const avg = reviews.reduce((n, r) => n + (r.rating ?? 0), 0) / reviews.length;
@@ -140,18 +255,29 @@ export function ReviewList({ lang, reviews, context = false }: { lang: Lang; rev
         <span className="rating" aria-hidden="true">
           {stars(Math.round(avg))}
         </span>{" "}
-        {t.average(avg.toLocaleString(lang === "en" ? "en-GB" : "nl-BE", { maximumFractionDigits: 1 }), reviews.length)}
+        {t.average(
+          avg.toLocaleString(lang === "en" ? "en-GB" : "nl-BE", {
+            maximumFractionDigits: 1,
+          }),
+          reviews.length,
+        )}
       </p>
       <div className="reviews">
         {reviews.map((r) => (
           <figure key={r._id} className="review">
-            <span className="rating" role="img" aria-label={t.stars(r.rating ?? 0)}>
+            <span
+              className="rating"
+              role="img"
+              aria-label={t.stars(r.rating ?? 0)}
+            >
               {stars(r.rating ?? 0)}
             </span>
             <blockquote>{r.text}</blockquote>
             <figcaption>
               {r.name}
-              {context && r.context ? <small className="muted"> · {r.context}</small> : null}
+              {context && r.context ? (
+                <small className="muted"> · {r.context}</small>
+              ) : null}
             </figcaption>
           </figure>
         ))}
