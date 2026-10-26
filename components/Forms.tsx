@@ -1,11 +1,32 @@
 "use client";
 
 import Link from "next/link";
-import { useActionState, useEffect, useRef, useState, type KeyboardEvent } from "react";
-import { sendContact, sendReview, signup, subscribe, type FormState } from "@/app/actions/forms";
+import {
+  useActionState,
+  useEffect,
+  useRef,
+  useState,
+  type KeyboardEvent,
+} from "react";
+import {
+  requestClass,
+  sendContact,
+  sendReview,
+  signup,
+  subscribe,
+  type FormState,
+} from "@/app/actions/forms";
 import { getDictionary } from "@/lib/dictionary";
 import { href } from "@/lib/routes";
-import { answerText, fieldName, otherName, qName, questionSteps, visibleKeys, type FormQuestion } from "@/lib/signup-form";
+import {
+  answerText,
+  fieldName,
+  otherName,
+  qName,
+  questionSteps,
+  visibleKeys,
+  type FormQuestion,
+} from "@/lib/signup-form";
 import type { Lang } from "@/sanity/site.config";
 import { Select } from "./Select";
 
@@ -42,26 +63,79 @@ function useNotify(state: FormState) {
 /** Editable texts from Studio (Formulieren → Inschrijving, Contact, Menu & footer) (empty = the dictionary default). */
 type Texts = { thanks?: string | null; consent?: string | null };
 
-export function NewsletterForm({ lang, thanks }: { lang: Lang; thanks?: string | null }) {
+export function NewsletterForm({
+  lang,
+  thanks,
+}: {
+  lang: Lang;
+  thanks?: string | null;
+}) {
   const t = getDictionary(lang).footer;
   const [state, action, pending] = useActionState(subscribe, idle);
   useNotify(state);
-  if (state.status === "sent") return <p className="sub-done" role="status">{thanks || t.subscribed}</p>;
+  if (state.status === "sent")
+    return (
+      <p className="sub-done" role="status">
+        {thanks || t.subscribed}
+      </p>
+    );
   return (
     <form className="sub" action={action}>
-      <label className="visually-hidden" htmlFor="sub-name">{t.firstName}</label>
-      <input id="sub-name" name="name" type="text" defaultValue={state.values?.name} placeholder={t.firstName} autoComplete="given-name" maxLength={60} className="sub-name" />
-      <label className="visually-hidden" htmlFor="sub-email">{t.emailPlaceholder}</label>
-      <input id="sub-email" name="email" type="email" defaultValue={state.values?.email} required placeholder={t.emailPlaceholder} autoComplete="email" aria-invalid={state.status === "invalid" || undefined} />
+      <label className="visually-hidden" htmlFor="sub-name">
+        {t.firstName}
+      </label>
+      <input
+        id="sub-name"
+        name="name"
+        type="text"
+        defaultValue={state.values?.name}
+        placeholder={t.firstName}
+        autoComplete="given-name"
+        maxLength={60}
+        className="sub-name"
+      />
+      <label className="visually-hidden" htmlFor="sub-email">
+        {t.emailPlaceholder}
+      </label>
+      <input
+        id="sub-email"
+        name="email"
+        type="email"
+        defaultValue={state.values?.email}
+        required
+        placeholder={t.emailPlaceholder}
+        autoComplete="email"
+        aria-invalid={state.status === "invalid" || undefined}
+      />
       <input type="hidden" name="lang" value={lang} />
       <Honeypot />
-      <button className="btn sm white" disabled={pending}>{t.subscribe}</button>
-      {state.status === "error" || state.status === "invalid" ? <p className="form-msg" role="alert">{getDictionary(lang).contact[state.status === "error" ? "error" : "invalid"]}</p> : null}
+      <button className="btn sm white" disabled={pending}>
+        {t.subscribe}
+      </button>
+      {state.status === "error" || state.status === "invalid" ? (
+        <p className="form-msg" role="alert">
+          {
+            getDictionary(lang).contact[
+              state.status === "error" ? "error" : "invalid"
+            ]
+          }
+        </p>
+      ) : null}
     </form>
   );
 }
 
-export function ContactForm({ lang, subjects, notifyLabel, thanks }: { lang: Lang; subjects: string[]; notifyLabel: string | null; thanks?: string | null }) {
+export function ContactForm({
+  lang,
+  subjects,
+  notifyLabel,
+  thanks,
+}: {
+  lang: Lang;
+  subjects: string[];
+  notifyLabel: string | null;
+  thanks?: string | null;
+}) {
   const t = getDictionary(lang).contact;
   const [state, action, pending] = useActionState(sendContact, idle);
   useNotify(state);
@@ -77,29 +151,64 @@ export function ContactForm({ lang, subjects, notifyLabel, thanks }: { lang: Lan
       <input type="hidden" name="lang" value={lang} />
       <div className="field">
         <label htmlFor="c-name">{t.name}</label>
-        <input id="c-name" name="name" defaultValue={state.values?.name} required placeholder={t.namePlaceholder} autoComplete="name" />
+        <input
+          id="c-name"
+          name="name"
+          defaultValue={state.values?.name}
+          required
+          placeholder={t.namePlaceholder}
+          autoComplete="name"
+        />
       </div>
       <div className="field">
         <label htmlFor="c-email">{t.email}</label>
-        <input id="c-email" name="email" type="email" defaultValue={state.values?.email} required placeholder={t.emailPlaceholder} autoComplete="email" />
+        <input
+          id="c-email"
+          name="email"
+          type="email"
+          defaultValue={state.values?.email}
+          required
+          placeholder={t.emailPlaceholder}
+          autoComplete="email"
+        />
       </div>
       <div className="field full">
         {options.length ? (
-          <Select label={t.subject} name="subject" defaultValue={state.values?.subject} options={options.map((s) => ({ value: s, label: s }))} />
+          <Select
+            label={t.subject}
+            name="subject"
+            defaultValue={state.values?.subject}
+            options={options.map((s) => ({ value: s, label: s }))}
+          />
         ) : (
           <>
             <label htmlFor="c-subject">{t.subject}</label>
-            <input id="c-subject" name="subject" defaultValue={state.values?.subject} />
+            <input
+              id="c-subject"
+              name="subject"
+              defaultValue={state.values?.subject}
+            />
           </>
         )}
       </div>
       <div className="field full">
         <label htmlFor="c-message">{t.message}</label>
-        <textarea id="c-message" name="message" defaultValue={state.values?.message} required placeholder={t.messagePlaceholder} />
+        <textarea
+          id="c-message"
+          name="message"
+          defaultValue={state.values?.message}
+          required
+          placeholder={t.messagePlaceholder}
+        />
       </div>
       {notifyLabel ? (
         <label className="check full">
-          <input type="checkbox" name="notify" defaultChecked={state.values ? state.values.notify === "on" : true} /> {notifyLabel}
+          <input
+            type="checkbox"
+            name="notify"
+            defaultChecked={state.values ? state.values.notify === "on" : true}
+          />{" "}
+          {notifyLabel}
         </label>
       ) : null}
       <Honeypot />
@@ -117,13 +226,115 @@ export function ContactForm({ lang, subjects, notifyLabel, thanks }: { lang: Lan
   );
 }
 
+/** Lessen planning → a class's detail card: a request to Rita (trial class, sign up, question). */
+export function ClassRequestForm({ lang, slot }: { lang: Lang; slot: string }) {
+  const t = getDictionary(lang).lessons;
+  const c = getDictionary(lang).contact;
+  const [state, action, pending] = useActionState(requestClass, idle);
+  useNotify(state);
+  if (state.status === "sent")
+    return (
+      <p className="form-done" role="status">
+        {t.sent}
+      </p>
+    );
+  const wish = state.values?.wish ?? "trial";
+  return (
+    <form className="form class-form" action={action}>
+      <input type="hidden" name="lang" value={lang} />
+      <input type="hidden" name="slot" value={slot} />
+      <fieldset className="choices full">
+        <legend className="select-label">{t.wish}</legend>
+        <div className="row stack">
+          {(Object.keys(t.wishes) as (keyof typeof t.wishes)[]).map((k) => (
+            <label key={k} className="check">
+              <input
+                type="radio"
+                name="wish"
+                value={k}
+                defaultChecked={wish === k}
+              />{" "}
+              {t.wishes[k]}
+            </label>
+          ))}
+        </div>
+      </fieldset>
+      <div className="field">
+        <label htmlFor={`cr-name-${slot}`}>{c.name}</label>
+        <input
+          id={`cr-name-${slot}`}
+          name="name"
+          defaultValue={state.values?.name}
+          required
+          placeholder={c.namePlaceholder}
+          autoComplete="name"
+        />
+      </div>
+      <div className="field">
+        <label htmlFor={`cr-email-${slot}`}>{c.email}</label>
+        <input
+          id={`cr-email-${slot}`}
+          name="email"
+          type="email"
+          defaultValue={state.values?.email}
+          required
+          placeholder={c.emailPlaceholder}
+          autoComplete="email"
+        />
+      </div>
+      <div className="field full">
+        <label htmlFor={`cr-phone-${slot}`}>{t.phoneOptional}</label>
+        <input
+          id={`cr-phone-${slot}`}
+          name="phone"
+          type="tel"
+          defaultValue={state.values?.phone}
+          autoComplete="tel"
+        />
+      </div>
+      <div className="field full">
+        <label htmlFor={`cr-msg-${slot}`}>{t.messageOptional}</label>
+        <textarea
+          id={`cr-msg-${slot}`}
+          name="message"
+          defaultValue={state.values?.message}
+          placeholder={t.messagePlaceholder}
+        />
+      </div>
+      <label className="check full">
+        <input
+          type="checkbox"
+          name="notify"
+          defaultChecked={state.values?.notify === "on"}
+        />{" "}
+        {t.newsletter}
+      </label>
+      <Honeypot />
+      {state.status === "invalid" || state.status === "error" ? (
+        <p className="form-msg full" role="alert">
+          {c[state.status]}
+        </p>
+      ) : null}
+      <div className="full">
+        <button className="btn" disabled={pending}>
+          {pending ? c.sending : t.send}
+        </button>
+      </div>
+    </form>
+  );
+}
+
 export type SignupFormDef = {
   phone: boolean | null;
   room: boolean | null;
   diet: boolean | null;
   message: boolean | null;
   intro?: string | null;
-  intent?: { info: boolean | null; later: boolean | null; question: string | null } | null;
+  intent?: {
+    info: boolean | null;
+    later: boolean | null;
+    question: string | null;
+  } | null;
   questions: FormQuestion[] | null;
 } | null;
 
@@ -138,7 +349,21 @@ type Intent = "signup" | "info" | "later";
  * (steps off the chosen path and hidden questions are disabled: not validated, not sent). The form can
  * also offer “not now” (more info / keep me posted): then only name, e-mail and one question. `full`: waiting list.
  */
-export function SignupForm({ lang, retreatId, rooms, form, texts, full = false }: { lang: Lang; retreatId: string; rooms: string[]; form: SignupFormDef; texts?: Texts & { terms?: string | null }; full?: boolean }) {
+export function SignupForm({
+  lang,
+  retreatId,
+  rooms,
+  form,
+  texts,
+  full = false,
+}: {
+  lang: Lang;
+  retreatId: string;
+  rooms: string[];
+  form: SignupFormDef;
+  texts?: Texts & { terms?: string | null };
+  full?: boolean;
+}) {
   const t = getDictionary(lang).signup;
   const [state, action, pending] = useActionState(signup, idle);
   useNotify(state);
@@ -147,8 +372,14 @@ export function SignupForm({ lang, retreatId, rooms, form, texts, full = false }
   const [dir, setDir] = useState<"fwd" | "back">("fwd");
   const [summary, setSummary] = useState<[string, string][]>([]);
   const [vals, setVals] = useState<Record<string, string>>(v);
-  const intents: Intent[] = ["signup", ...(form?.intent?.info ? ["info" as const] : []), ...(form?.intent?.later ? ["later" as const] : [])];
-  const [intent, setIntent] = useState<Intent>((intents as string[]).includes(v.intent) ? (v.intent as Intent) : "signup");
+  const intents: Intent[] = [
+    "signup",
+    ...(form?.intent?.info ? ["info" as const] : []),
+    ...(form?.intent?.later ? ["later" as const] : []),
+  ];
+  const [intent, setIntent] = useState<Intent>(
+    (intents as string[]).includes(v.intent) ? (v.intent as Intent) : "signup",
+  );
   const formEl = useRef<HTMLFormElement>(null);
   const moved = useRef(false);
 
@@ -156,39 +387,72 @@ export function SignupForm({ lang, retreatId, rooms, form, texts, full = false }
   const placed = (type: string) => questions.some((q) => q.type === type);
   const roomOptions = rooms.filter(Boolean);
   // room / diet as a question of their own (own place + title), else the standard fields
-  const standardRoom = form?.room !== false && !placed("room") && roomOptions.length > 0;
+  const standardRoom =
+    form?.room !== false && !placed("room") && roomOptions.length > 0;
   const standardDiet = form?.diet !== false && !placed("diet");
   const askPhone = form?.phone !== false;
   const askMessage = form?.message !== false;
-  const groups = questionSteps(questions).filter((g) => g.questions.some((q) => q.type !== "room" || roomOptions.length));
-  if (standardRoom && !groups.length) groups.push({ key: "questions", title: null, help: null, questions: [] });
+  const groups = questionSteps(questions).filter((g) =>
+    g.questions.some((q) => q.type !== "room" || roomOptions.length),
+  );
+  if (standardRoom && !groups.length)
+    groups.push({ key: "questions", title: null, help: null, questions: [] });
   const shown = visibleKeys(questions, (name) => vals[name] ?? "");
 
   // a step whose questions are all hidden (e.g. freediving experience for “yoga only”) is skipped
-  const active = groups.filter((g, i) => (i === 0 && standardRoom) || g.questions.some((q) => shown.has(q._key)));
-  const signupSteps = ["about", ...active.map((g) => g.key), ...(standardDiet || askMessage ? ["wishes"] : []), "confirm"];
+  const active = groups.filter(
+    (g, i) =>
+      (i === 0 && standardRoom) || g.questions.some((q) => shown.has(q._key)),
+  );
+  const signupSteps = [
+    "about",
+    ...active.map((g) => g.key),
+    ...(standardDiet || askMessage ? ["wishes"] : []),
+    "confirm",
+  ];
   const steps = intent === "signup" ? signupSteps : ["about", "later"];
   const stepOf = (k: string) => steps.indexOf(k);
-  const titleOf = (k: string) => groups.find((g) => g.key === k)?.title || (k in t.steps ? t.steps[k as keyof typeof t.steps] : t.steps.retreat);
+  const titleOf = (k: string) =>
+    groups.find((g) => g.key === k)?.title ||
+    (k in t.steps ? t.steps[k as keyof typeof t.steps] : t.steps.retreat);
 
   // Server said "invalid": go back to the first step with a missing or wrong answer.
   useEffect(() => {
     if (state.status !== "invalid") return;
-    const missing = active.find((g) => g.questions.some((q) => q.required && shown.has(q._key) && !v[fieldName(q)]?.trim()));
-    const bad = !v.name || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v.email ?? "") ? "about" : missing ? missing.key : steps[steps.length - 1];
+    const missing = active.find((g) =>
+      g.questions.some(
+        (q) => q.required && shown.has(q._key) && !v[fieldName(q)]?.trim(),
+      ),
+    );
+    const bad =
+      !v.name || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v.email ?? "")
+        ? "about"
+        : missing
+          ? missing.key
+          : steps[steps.length - 1];
     setStep(Math.max(stepOf(bad), 0));
   }, [state]);
 
   // Focus the first field of a new step (not on page load).
   useEffect(() => {
     if (!moved.current) return;
-    formEl.current?.querySelector<HTMLElement>(`[data-step="${step}"] :is(input:not([type=hidden]):not(:disabled), textarea:not(:disabled), button[role=combobox], [role=combobox])`)?.focus({ preventScroll: true });
+    formEl.current
+      ?.querySelector<HTMLElement>(
+        `[data-step="${step}"] :is(input:not([type=hidden]):not(:disabled), textarea:not(:disabled), button[role=combobox], [role=combobox])`,
+      )
+      ?.focus({ preventScroll: true });
   }, [step]);
 
   if (state.status === "sent")
     return (
       <p className="form-done" role="status">
-        {intent === "later" ? t.laterSent : intent === "info" ? t.infoSent : full ? t.waitlistSent : texts?.thanks || t.sent}
+        {intent === "later"
+          ? t.laterSent
+          : intent === "info"
+            ? t.infoSent
+            : full
+              ? t.waitlistSent
+              : texts?.thanks || t.sent}
       </p>
     );
 
@@ -201,7 +465,10 @@ export function SignupForm({ lang, retreatId, rooms, form, texts, full = false }
     if (!el) return;
     if (to > step) {
       // validate the current step only
-      for (const f of el.querySelectorAll<HTMLInputElement>(`[data-step="${step}"] :is(input, textarea)`)) if (!f.checkValidity()) return void f.reportValidity();
+      for (const f of el.querySelectorAll<HTMLInputElement>(
+        `[data-step="${step}"] :is(input, textarea)`,
+      ))
+        if (!f.checkValidity()) return void f.reportValidity();
     }
     if (intent === "signup" && to === total - 1) {
       const data = new FormData(el);
@@ -213,7 +480,15 @@ export function SignupForm({ lang, retreatId, rooms, form, texts, full = false }
         [t.room, standardRoom ? get("room") : ""],
         ...questions
           .filter((q) => q.type !== "section" && shown.has(q._key))
-          .map((q) => [q.label ?? "", q.type === "room" || q.type === "diet" ? get(fieldName(q)) : answerText(q, get(qName(q)), get(otherName(q)), words)] as [string, string]),
+          .map(
+            (q) =>
+              [
+                q.label ?? "",
+                q.type === "room" || q.type === "diet"
+                  ? get(fieldName(q))
+                  : answerText(q, get(qName(q)), get(otherName(q)), words),
+              ] as [string, string],
+          ),
         [t.diet, standardDiet ? get("diet") : ""],
         [t.message, get("message")],
       ];
@@ -228,7 +503,13 @@ export function SignupForm({ lang, retreatId, rooms, form, texts, full = false }
   // Enter = next step (not in a textarea, not on the last step where it submits).
   const onKeyDown = (e: KeyboardEvent<HTMLFormElement>) => {
     const target = e.target as HTMLElement;
-    if (e.key !== "Enter" || last || target.tagName === "TEXTAREA" || target.getAttribute("role") === "combobox") return;
+    if (
+      e.key !== "Enter" ||
+      last ||
+      target.tagName === "TEXTAREA" ||
+      target.getAttribute("role") === "combobox"
+    )
+      return;
     e.preventDefault();
     go(step + 1);
   };
@@ -236,7 +517,12 @@ export function SignupForm({ lang, retreatId, rooms, form, texts, full = false }
   // every step is rendered; the ones off the current path are disabled (not validated, not posted)
   const at = (k: string) => {
     const n = stepOf(k);
-    return { "data-step": n >= 0 ? n : undefined, hidden: step !== n, disabled: n < 0, className: `form step${step === n ? " on" : ""}` };
+    return {
+      "data-step": n >= 0 ? n : undefined,
+      hidden: step !== n,
+      disabled: n < 0,
+      className: `form step${step === n ? " on" : ""}`,
+    };
   };
   const legalLink = (route: "terms" | "cancellation") => (
     <Link href={href(lang, route)} target="_blank">
@@ -245,7 +531,12 @@ export function SignupForm({ lang, retreatId, rooms, form, texts, full = false }
   );
   const roomSelect = (label: string, help?: string | null) => (
     <div className="field full">
-      <Select label={label} name="room" defaultValue={v.room} options={roomOptions.map((r) => ({ value: r, label: r }))} />
+      <Select
+        label={label}
+        name="room"
+        defaultValue={v.room}
+        options={roomOptions.map((r) => ({ value: r, label: r }))}
+      />
       {help ? <small className="muted">{help}</small> : null}
     </div>
   );
@@ -259,34 +550,73 @@ export function SignupForm({ lang, retreatId, rooms, form, texts, full = false }
       </small>
     ) : null;
     const label = `${q.label}${q.required ? " *" : ""}`;
-    if (q.type === "room") return roomOptions.length ? roomSelect(q.label ?? t.room, q.help) : null;
+    if (q.type === "room")
+      return roomOptions.length ? roomSelect(q.label ?? t.room, q.help) : null;
     if (q.type === "diet")
       return (
         <div className="field full">
           <label htmlFor="s-diet">{q.label}</label>
-          <input id="s-diet" name="diet" defaultValue={v.diet} required={!!q.required} aria-describedby={q.help ? `${id}-help` : undefined} />
+          <input
+            id="s-diet"
+            name="diet"
+            defaultValue={v.diet}
+            required={!!q.required}
+            aria-describedby={q.help ? `${id}-help` : undefined}
+          />
           {help}
         </div>
       );
     if (q.type === "yesno" || q.type === "choice") {
-      const opts = q.type === "yesno" ? [["yes", t.yes], ["no", t.no]] : (q.options ?? []).filter(Boolean).map((o, i) => [String(i), o]);
+      const opts =
+        q.type === "yesno"
+          ? [
+              ["yes", t.yes],
+              ["no", t.no],
+            ]
+          : (q.options ?? []).filter(Boolean).map((o, i) => [String(i), o]);
       return (
-        <fieldset className="field full choices" aria-describedby={q.help ? `${id}-help` : undefined}>
+        <fieldset
+          className="field full choices"
+          aria-describedby={q.help ? `${id}-help` : undefined}
+        >
           <legend className="select-label">{label}</legend>
           {help}
-          <div className={`row${q.type === "choice" && opts.length > 2 ? " stack" : ""}`}>
+          <div
+            className={`row${q.type === "choice" && opts.length > 2 ? " stack" : ""}`}
+          >
             {opts.map(([value, text]) => (
               <label key={value} className="check">
-                <input type="radio" name={name} value={value} defaultChecked={v[name] === value} required={!!q.required} /> {text}
+                <input
+                  type="radio"
+                  name={name}
+                  value={value}
+                  defaultChecked={v[name] === value}
+                  required={!!q.required}
+                />{" "}
+                {text}
               </label>
             ))}
             {q.type === "choice" && q.other ? (
               <label className="check other">
-                <input type="radio" name={name} value="other" defaultChecked={v[name] === "other"} required={!!q.required} /> {t.other}:
-                <input name={otherName(q)} defaultValue={v[otherName(q)]} placeholder={t.otherPlaceholder} aria-label={`${q.label}: ${t.other}`}
+                <input
+                  type="radio"
+                  name={name}
+                  value="other"
+                  defaultChecked={v[name] === "other"}
+                  required={!!q.required}
+                />{" "}
+                {t.other}:
+                <input
+                  name={otherName(q)}
+                  defaultValue={v[otherName(q)]}
+                  placeholder={t.otherPlaceholder}
+                  aria-label={`${q.label}: ${t.other}`}
                   // typing here picks “Andere”
                   onFocus={(e) => {
-                    const radio = e.currentTarget.parentElement?.querySelector<HTMLInputElement>("input[type=radio]");
+                    const radio =
+                      e.currentTarget.parentElement?.querySelector<HTMLInputElement>(
+                        "input[type=radio]",
+                      );
                     if (radio && !radio.checked) radio.click();
                   }}
                 />
@@ -300,9 +630,21 @@ export function SignupForm({ lang, retreatId, rooms, form, texts, full = false }
       <div className="field full">
         <label htmlFor={id}>{label}</label>
         {q.type === "textarea" ? (
-          <textarea id={id} name={name} defaultValue={v[name]} required={!!q.required} aria-describedby={q.help ? `${id}-help` : undefined} />
+          <textarea
+            id={id}
+            name={name}
+            defaultValue={v[name]}
+            required={!!q.required}
+            aria-describedby={q.help ? `${id}-help` : undefined}
+          />
         ) : (
-          <input id={id} name={name} defaultValue={v[name]} required={!!q.required} aria-describedby={q.help ? `${id}-help` : undefined} />
+          <input
+            id={id}
+            name={name}
+            defaultValue={v[name]}
+            required={!!q.required}
+            aria-describedby={q.help ? `${id}-help` : undefined}
+          />
         )}
         {help}
       </div>
@@ -316,13 +658,21 @@ export function SignupForm({ lang, retreatId, rooms, form, texts, full = false }
       action={action}
       ref={formEl}
       onKeyDown={onKeyDown}
-      onChange={(e) => setVals(Object.fromEntries([...new FormData(e.currentTarget)].map(([k, x]) => [k, String(x)])))}
+      onChange={(e) =>
+        setVals(
+          Object.fromEntries(
+            [...new FormData(e.currentTarget)].map(([k, x]) => [k, String(x)]),
+          ),
+        )
+      }
       data-dir={dir}
     >
       <input type="hidden" name="retreat" value={retreatId} />
       <input type="hidden" name="lang" value={lang} />
       {form?.intro ? <p className="form-intro">{form.intro}</p> : null}
-      {full && intent === "signup" ? <p className="form-note">{t.waitlist}</p> : null}
+      {full && intent === "signup" ? (
+        <p className="form-note">{t.waitlist}</p>
+      ) : null}
 
       <div className="progress" aria-hidden="true">
         <span style={{ width: `${((step + 1) / total) * 100}%` }} />
@@ -339,7 +689,14 @@ export function SignupForm({ lang, retreatId, rooms, form, texts, full = false }
             <div className="row stack">
               {intents.map((i) => (
                 <label key={i} className="check">
-                  <input type="radio" name="intent" value={i} checked={intent === i} onChange={() => setIntent(i)} /> {t.intents[i]}
+                  <input
+                    type="radio"
+                    name="intent"
+                    value={i}
+                    checked={intent === i}
+                    onChange={() => setIntent(i)}
+                  />{" "}
+                  {t.intents[i]}
                 </label>
               ))}
             </div>
@@ -347,16 +704,35 @@ export function SignupForm({ lang, retreatId, rooms, form, texts, full = false }
         ) : null}
         <div className="field full">
           <label htmlFor="s-name">{t.name}</label>
-          <input id="s-name" name="name" defaultValue={v.name} required autoComplete="name" />
+          <input
+            id="s-name"
+            name="name"
+            defaultValue={v.name}
+            required
+            autoComplete="name"
+          />
         </div>
         <div className={`field${askPhone ? "" : " full"}`}>
           <label htmlFor="s-email">{t.email}</label>
-          <input id="s-email" name="email" type="email" defaultValue={v.email} required autoComplete="email" />
+          <input
+            id="s-email"
+            name="email"
+            type="email"
+            defaultValue={v.email}
+            required
+            autoComplete="email"
+          />
         </div>
         {askPhone ? (
           <div className="field">
             <label htmlFor="s-phone">{t.phone}</label>
-            <input id="s-phone" name="phone" type="tel" defaultValue={v.phone} autoComplete="tel" />
+            <input
+              id="s-phone"
+              name="phone"
+              type="tel"
+              defaultValue={v.phone}
+              autoComplete="tel"
+            />
           </div>
         ) : null}
       </fieldset>
@@ -367,7 +743,12 @@ export function SignupForm({ lang, retreatId, rooms, form, texts, full = false }
           {g.help ? <p className="muted full step-help">{g.help}</p> : null}
           {gi === 0 && standardRoom ? roomSelect(t.room) : null}
           {g.questions.map((q) => (
-            <fieldset key={q._key} className="q-wrap" hidden={!shown.has(q._key)} disabled={!shown.has(q._key)}>
+            <fieldset
+              key={q._key}
+              className="q-wrap"
+              hidden={!shown.has(q._key)}
+              disabled={!shown.has(q._key)}
+            >
               {question(q)}
             </fieldset>
           ))}
@@ -386,7 +767,11 @@ export function SignupForm({ lang, retreatId, rooms, form, texts, full = false }
           {askMessage ? (
             <div className="field full">
               <label htmlFor="s-message">{t.message}</label>
-              <textarea id="s-message" name="message" defaultValue={v.message} />
+              <textarea
+                id="s-message"
+                name="message"
+                defaultValue={v.message}
+              />
             </div>
           ) : null}
         </fieldset>
@@ -406,13 +791,24 @@ export function SignupForm({ lang, retreatId, rooms, form, texts, full = false }
           </dl>
         </div>
         <label className="check full">
-          <input type="checkbox" name="terms" defaultChecked={v.terms === "on"} required />
+          <input
+            type="checkbox"
+            name="terms"
+            defaultChecked={v.terms === "on"}
+            required
+          />
           <span>
-            {texts?.terms || t.terms} ({legalLink("terms")} {t.and} {legalLink("cancellation")})
+            {texts?.terms || t.terms} ({legalLink("terms")} {t.and}{" "}
+            {legalLink("cancellation")})
           </span>
         </label>
         <label className="check full">
-          <input type="checkbox" name="consent" defaultChecked={v.consent === "on"} required />
+          <input
+            type="checkbox"
+            name="consent"
+            defaultChecked={v.consent === "on"}
+            required
+          />
           <span>
             {texts?.consent || t.consent}{" "}
             <Link href={href(lang, "privacy")} target="_blank">
@@ -426,11 +822,22 @@ export function SignupForm({ lang, retreatId, rooms, form, texts, full = false }
         <fieldset {...at("later")}>
           <legend className="visually-hidden">{t.steps.later}</legend>
           <div className="field full">
-            <label htmlFor="s-interests">{form?.intent?.question || t.laterQuestion}</label>
-            <textarea id="s-interests" name="interests" defaultValue={v.interests} />
+            <label htmlFor="s-interests">
+              {form?.intent?.question || t.laterQuestion}
+            </label>
+            <textarea
+              id="s-interests"
+              name="interests"
+              defaultValue={v.interests}
+            />
           </div>
           <label className="check full">
-            <input type="checkbox" name="consent" defaultChecked={v.consent === "on"} required />
+            <input
+              type="checkbox"
+              name="consent"
+              defaultChecked={v.consent === "on"}
+              required
+            />
             <span>
               {t.laterConsent}{" "}
               <Link href={href(lang, "privacy")} target="_blank">
@@ -457,7 +864,13 @@ export function SignupForm({ lang, retreatId, rooms, form, texts, full = false }
         )}
         {last ? (
           <button className="btn" disabled={pending}>
-            {pending ? t.sending : intent !== "signup" ? t.laterSend : full ? t.waitlistSend : t.send}
+            {pending
+              ? t.sending
+              : intent !== "signup"
+                ? t.laterSend
+                : full
+                  ? t.waitlistSend
+                  : t.send}
           </button>
         ) : (
           <span className="step-next">
@@ -473,7 +886,13 @@ export function SignupForm({ lang, retreatId, rooms, form, texts, full = false }
 }
 
 /** Review of a past retreat (/retreats/<slug>/review): moderated in Studio → Reviews before it shows on the site. */
-export function ReviewForm({ lang, retreatId }: { lang: Lang; retreatId: string }) {
+export function ReviewForm({
+  lang,
+  retreatId,
+}: {
+  lang: Lang;
+  retreatId: string;
+}) {
   const t = getDictionary(lang).review;
   const [state, action, pending] = useActionState(sendReview, idle);
   useNotify(state);
@@ -494,7 +913,13 @@ export function ReviewForm({ lang, retreatId }: { lang: Lang; retreatId: string 
         <div className="stars-row">
           {[5, 4, 3, 2, 1].map((n) => (
             <label key={n} title={t.stars(n)}>
-              <input type="radio" name="rating" value={n} defaultChecked={rating === String(n)} required />
+              <input
+                type="radio"
+                name="rating"
+                value={n}
+                defaultChecked={rating === String(n)}
+                required
+              />
               <span aria-hidden="true">★</span>
               <span className="visually-hidden">{t.stars(n)}</span>
             </label>
@@ -503,18 +928,43 @@ export function ReviewForm({ lang, retreatId }: { lang: Lang; retreatId: string 
       </fieldset>
       <div className="field">
         <label htmlFor="r-name">{t.name}</label>
-        <input id="r-name" name="name" defaultValue={state.values?.name} required autoComplete="given-name" />
+        <input
+          id="r-name"
+          name="name"
+          defaultValue={state.values?.name}
+          required
+          autoComplete="given-name"
+        />
       </div>
       <div className="field">
         <label htmlFor="r-email">{t.email}</label>
-        <input id="r-email" name="email" type="email" defaultValue={state.values?.email} required autoComplete="email" />
+        <input
+          id="r-email"
+          name="email"
+          type="email"
+          defaultValue={state.values?.email}
+          required
+          autoComplete="email"
+        />
       </div>
       <div className="field full">
         <label htmlFor="r-text">{t.text}</label>
-        <textarea id="r-text" name="text" defaultValue={state.values?.text} required maxLength={1200} placeholder={t.textPlaceholder} />
+        <textarea
+          id="r-text"
+          name="text"
+          defaultValue={state.values?.text}
+          required
+          maxLength={1200}
+          placeholder={t.textPlaceholder}
+        />
       </div>
       <label className="check full">
-        <input type="checkbox" name="consent" defaultChecked={state.values?.consent === "on"} required />
+        <input
+          type="checkbox"
+          name="consent"
+          defaultChecked={state.values?.consent === "on"}
+          required
+        />
         <span>
           {t.consent}{" "}
           <Link href={href(lang, "privacy")} target="_blank">

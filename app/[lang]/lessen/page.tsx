@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { Photo } from "@/components/Photo";
 import { Paragraphs } from "@/components/RichText";
+import { Schedule } from "@/components/Schedule";
 import { ClassTiles, Hero, SectionHead } from "@/components/sections";
 import { getDictionary } from "@/lib/dictionary";
 import { buildMetadata } from "@/lib/metadata";
@@ -23,8 +24,6 @@ export async function generateMetadata({
 }
 
 const DAYS = ["mon", "tue", "wed", "thu", "fri", "sat", "sun"] as const;
-/** Classes starting before 14:00 go in the morning row. */
-const isMorning = (time: string | null) => (time ?? "00:00") < "14:00";
 
 export default async function Lessons({ params }: PageProps<"/[lang]/lessen">) {
   const lang = await langParam(params);
@@ -36,10 +35,6 @@ export default async function Lessons({ params }: PageProps<"/[lang]/lessen">) {
   const schedule = [...(page?.schedule ?? [])].sort((a, b) =>
     (a.startTime ?? "").localeCompare(b.startTime ?? ""),
   );
-  const rows = [
-    [t.morning, schedule.filter((s) => isMorning(s.startTime))],
-    [t.evening, schedule.filter((s) => !isMorning(s.startTime))],
-  ] as const;
   /** Sections after the tiles (which are .alt) alternate: style 1 light, style 2 .alt, …, then Studio's and Privéles. */
   const alt = (n: number) => n % 2 === 1;
 
@@ -52,82 +47,7 @@ export default async function Lessons({ params }: PageProps<"/[lang]/lessen">) {
         <div className="wrap">
           <SectionHead label={t.scheduleLabel} title={page?.scheduleTitle} />
           {schedule.length ? (
-            <div className="week-wrap">
-              <table className="week">
-                <thead>
-                  <tr>
-                    <th>
-                      <span className="visually-hidden">{t.scheduleLabel}</span>
-                    </th>
-                    {DAYS.map((day) => (
-                      <th key={day} scope="col">
-                        {t.days[day]}
-                      </th>
-                    ))}
-                  </tr>
-                </thead>
-                <tbody>
-                  {rows.map(([label, slots]) => (
-                    <tr key={label}>
-                      <th
-                        scope="row"
-                        className="muted small"
-                        style={{
-                          font: "inherit",
-                          textTransform: "none",
-                          letterSpacing: 0,
-                          borderBottom: "1px solid var(--line)",
-                          verticalAlign: "top",
-                        }}
-                      >
-                        {label}
-                      </th>
-                      {DAYS.map((day) => (
-                        <td key={day}>
-                          {slots
-                            .filter((s) => s.day === day)
-                            .map((s) => {
-                              const body = (
-                                <>
-                                  <b>{s.style?.name}</b>
-                                  {[
-                                    s.startTime,
-                                    s.durationMinutes
-                                      ? `${s.durationMinutes} min`
-                                      : null,
-                                    s.studio?.name,
-                                  ]
-                                    .filter(Boolean)
-                                    .join(" · ")}
-                                  <span className={`level ${s.level}`}>
-                                    {t.levels[s.level] ?? t.levels.all}
-                                  </span>
-                                </>
-                              );
-                              return s.bookingUrl ? (
-                                <a
-                                  key={s._key}
-                                  className="slot"
-                                  href={s.bookingUrl}
-                                  target="_blank"
-                                  rel="noopener"
-                                  title={t.book}
-                                >
-                                  {body}
-                                </a>
-                              ) : (
-                                <span key={s._key} className="slot">
-                                  {body}
-                                </span>
-                              );
-                            })}
-                        </td>
-                      ))}
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
+            <Schedule lang={lang} slots={schedule} />
           ) : (
             <div className="schedule-empty">
               <p className="muted">{page?.scheduleEmpty || t.scheduleEmpty}</p>

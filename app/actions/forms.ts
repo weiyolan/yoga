@@ -7,33 +7,70 @@ import { dateRange } from "@/lib/format";
 import { mailConfigured, sendMail } from "@/lib/mail";
 import { mailText, type MailContent } from "@/lib/mail-template";
 import { newsletterContent } from "@/lib/newsletter";
-import { answerText, fieldName, otherName, visibleKeys, type FormQuestion } from "@/lib/signup-form";
+import {
+  answerText,
+  fieldName,
+  otherName,
+  visibleKeys,
+  type FormQuestion,
+} from "@/lib/signup-form";
 import { subscriberId, unsubscribeUrl } from "@/lib/unsubscribe";
 import { isUpcoming, sanityFetch } from "@/sanity/fetch";
-import { LAYOUT_QUERY, NEWSLETTER_MAIL_QUERY, SIGNUP_RETREAT_QUERY } from "@/sanity/queries";
+import {
+  LAYOUT_QUERY,
+  LESSONS_QUERY,
+  NEWSLETTER_MAIL_QUERY,
+  SIGNUP_RETREAT_QUERY,
+} from "@/sanity/queries";
 import { writeClient } from "@/sanity/write";
 
 /** A team notification for Netlify Forms (form “melding”, public/__forms.html): the browser posts it. */
-export type Notify = { soort: string; subject: string; naam: string; email: string; bericht: string };
+export type Notify = {
+  soort: string;
+  subject: string;
+  naam: string;
+  email: string;
+  bericht: string;
+};
 
 /**
  * `values`: what was typed, so a failed submit refills the form (React resets it after every action).
  * `notify`: set when the team is notified through Netlify Forms (see toTeam).
  */
-export type FormState = { status: "idle" | "sent" | "invalid" | "error"; values?: Record<string, string>; notify?: Notify };
+export type FormState = {
+  status: "idle" | "sent" | "invalid" | "error";
+  values?: Record<string, string>;
+  notify?: Notify;
+};
 
 const keep = (data: FormData, state: FormState): FormState =>
-  state.status === "sent" ? state : { ...state, values: Object.fromEntries([...data].filter(([k, v]) => typeof v === "string" && k !== "website" && !k.startsWith("$")) as [string, string][]) };
+  state.status === "sent"
+    ? state
+    : {
+        ...state,
+        values: Object.fromEntries(
+          [...data].filter(
+            ([k, v]) =>
+              typeof v === "string" && k !== "website" && !k.startsWith("$"),
+          ) as [string, string][],
+        ),
+      };
 
 const EMAIL = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-const field = (data: FormData, name: string, max = 5000) => String(data.get(name) ?? "").trim().slice(0, max);
+const field = (data: FormData, name: string, max = 5000) =>
+  String(data.get(name) ?? "")
+    .trim()
+    .slice(0, max);
 
 /** Recipient: CONTACT_TO, else Studio → Mails → Opties → “Meldingen naar”, else the Contact page e-mail. */
 async function recipient() {
   const settings = await sanityFetch({ query: LAYOUT_QUERY });
   const to = process.env.CONTACT_TO || settings?.notifyEmail || settings?.email;
   if (!to && !mailConfigured()) return "(dev: no recipient)";
-  if (!to) throw new Error("No recipient: set CONTACT_TO or the e-mail on the Contact page in Sanity");
+  if (!to)
+    throw new Error(
+      "No recipient: set CONTACT_TO or the e-mail on the Contact page in Sanity",
+    );
   return to;
 }
 
@@ -41,14 +78,33 @@ async function recipient() {
  * Saves a submission in Sanity (Studio → Contactformulier / Nieuwsbrief / Inschrijvingen). Dotted ids
  * keep personal data out of the public API. Without SANITY_WRITE_TOKEN it's only logged.
  */
-async function store(doc: { _id: string; _type: string; [key: string]: unknown }, { once = false } = {}) {
-  if (!writeClient) return void console.info(`[${doc._type}:dev] not stored (no SANITY_WRITE_TOKEN)`, doc);
-  if (once) await writeClient.transaction().createIfNotExists(doc).patch(doc._id, (p) => p.set({ unsubscribed: false, ...(doc.name ? { name: doc.name } : {}) })).commit();
+async function store(
+  doc: { _id: string; _type: string; [key: string]: unknown },
+  { once = false } = {},
+) {
+  if (!writeClient)
+    return void console.info(
+      `[${doc._type}:dev] not stored (no SANITY_WRITE_TOKEN)`,
+      doc,
+    );
+  if (once)
+    await writeClient
+      .transaction()
+      .createIfNotExists(doc)
+      .patch(doc._id, (p) =>
+        p.set({ unsubscribed: false, ...(doc.name ? { name: doc.name } : {}) }),
+      )
+      .commit();
   else await writeClient.create(doc);
 }
 
 /** One subscriber document per address (re-subscribing just clears "unsubscribed"). */
-const subscriberDoc = (email: string, lang: string, source: "footer" | "contact" | "signup", name?: string) => ({
+const subscriberDoc = (
+  email: string,
+  lang: string,
+  source: "footer" | "contact" | "signup",
+  name?: string,
+) => ({
   _id: subscriberId(email),
   _type: "subscriber",
   email,
@@ -68,16 +124,29 @@ type Subscriber = ReturnType<typeof subscriberDoc>;
  * mail never fails the sign-up.
  */
 async function subscribeWithWelcome(doc: Subscriber) {
-  const before = writeClient ? await writeClient.getDocument<{ unsubscribed?: boolean }>(doc._id).catch(() => null) : null;
+  const before = writeClient
+    ? await writeClient
+        .getDocument<{ unsubscribed?: boolean }>(doc._id)
+        .catch(() => null)
+    : null;
   await store(doc, { once: true });
   if (before && before.unsubscribed !== true) return;
   if (!mailConfigured()) return;
   try {
     const lang = doc.lang === "en" ? "en" : "nl";
-    const [layout, mail] = await Promise.all([sanityFetch({ query: LAYOUT_QUERY, lang }), sanityFetch({ query: NEWSLETTER_MAIL_QUERY, lang })]);
+    const [layout, mail] = await Promise.all([
+      sanityFetch({ query: LAYOUT_QUERY, lang }),
+      sanityFetch({ query: NEWSLETTER_MAIL_QUERY, lang }),
+    ]);
     if (layout?.newsletterConfirm === false) return;
-    const { subject, content } = newsletterContent(lang, mail, doc.name, unsubscribeUrl(doc._id));
-    const replyTo = layout?.notifyEmail?.split(",")[0]?.trim() || layout?.email || undefined;
+    const { subject, content } = newsletterContent(
+      lang,
+      mail,
+      doc.name,
+      unsubscribeUrl(doc._id),
+    );
+    const replyTo =
+      layout?.notifyEmail?.split(",")[0]?.trim() || layout?.email || undefined;
     await sendMail({ to: doc.email, replyTo, subject, ...content });
   } catch (err) {
     console.error("newsletter: confirmation mail", err);
@@ -90,23 +159,57 @@ async function subscribeWithWelcome(doc: Subscriber) {
  * which posts it to Netlify Forms (components/Forms.tsx); Netlify mails it to the addresses under
  * Forms → Form notifications. Else (local dev): logged.
  */
-function toTeam({ soort, name, email, subject, ...content }: { soort: string; name?: string; email: string; subject: string } & MailContent): { step: Promise<unknown>; notify?: Notify } {
+function toTeam({
+  soort,
+  name,
+  email,
+  subject,
+  ...content
+}: {
+  soort: string;
+  name?: string;
+  email: string;
+  subject: string;
+} & MailContent): { step: Promise<unknown>; notify?: Notify } {
   if (!mailConfigured() && process.env.NETLIFY_FORMS === "1")
-    return { step: Promise.resolve(), notify: { soort, subject, naam: name ?? "", email, bericht: mailText(content) } };
-  return { step: recipient().then((to) => sendMail({ to, replyTo: email, subject, ...content })) };
+    return {
+      step: Promise.resolve(),
+      notify: {
+        soort,
+        subject,
+        naam: name ?? "",
+        email,
+        bericht: mailText(content),
+      },
+    };
+  return {
+    step: recipient().then((to) =>
+      sendMail({ to, replyTo: email, subject, ...content }),
+    ),
+  };
 }
 
 /** Runs each step; the form succeeds if at least one of them did (stored or the team notified). */
-async function anyOf(label: string, steps: Promise<unknown>[], notify?: Notify): Promise<FormState> {
+async function anyOf(
+  label: string,
+  steps: Promise<unknown>[],
+  notify?: Notify,
+): Promise<FormState> {
   const results = await Promise.allSettled(steps);
-  for (const r of results) if (r.status === "rejected") console.error(label, r.reason);
-  return results.some((r) => r.status === "fulfilled") ? { status: "sent", notify } : { status: "error" };
+  for (const r of results)
+    if (r.status === "rejected") console.error(label, r.reason);
+  return results.some((r) => r.status === "fulfilled")
+    ? { status: "sent", notify }
+    : { status: "error" };
 }
 
 const langOf = (data: FormData) => (data.get("lang") === "en" ? "en" : "nl");
 
 /** Contact page form. `website` is a honeypot: bots fill it, people never see it. */
-export async function sendContact(_: FormState, data: FormData): Promise<FormState> {
+export async function sendContact(
+  _: FormState,
+  data: FormData,
+): Promise<FormState> {
   return keep(data, await sendContactInner(data));
 }
 
@@ -125,13 +228,33 @@ async function sendContactInner(data: FormData): Promise<FormState> {
     name,
     email,
     subject: `Website: ${subject || "bericht"} (${name})`,
-    text: [`Naam: ${name}`, `E-mail: ${email}`, `Onderwerp: ${subject || "-"}`, `Op de hoogte houden: ${notify ? "ja" : "nee"}`, "", message].join("\n"),
+    text: [
+      `Naam: ${name}`,
+      `E-mail: ${email}`,
+      `Onderwerp: ${subject || "-"}`,
+      `Op de hoogte houden: ${notify ? "ja" : "nee"}`,
+      "",
+      message,
+    ].join("\n"),
   });
   return anyOf(
     "contact form",
     [
-      store({ _id: `message.${randomUUID()}`, _type: "message", status: "new", name, email, subject, message, notify, lang, submittedAt }),
-      ...(notify ? [subscribeWithWelcome(subscriberDoc(email, lang, "contact", name))] : []),
+      store({
+        _id: `message.${randomUUID()}`,
+        _type: "message",
+        status: "new",
+        name,
+        email,
+        subject,
+        message,
+        notify,
+        lang,
+        submittedAt,
+      }),
+      ...(notify
+        ? [subscribeWithWelcome(subscriberDoc(email, lang, "contact", name))]
+        : []),
       team.step,
     ],
     team.notify,
@@ -139,7 +262,10 @@ async function sendContactInner(data: FormData): Promise<FormState> {
 }
 
 /** Footer "Hou me op de hoogte": stored as a subscriber (Studio → Contactboek), a confirmation mail to them + a mail to the team. */
-export async function subscribe(_: FormState, data: FormData): Promise<FormState> {
+export async function subscribe(
+  _: FormState,
+  data: FormData,
+): Promise<FormState> {
   return keep(data, await subscribeInner(data));
 }
 
@@ -148,8 +274,21 @@ async function subscribeInner(data: FormData): Promise<FormState> {
   const email = field(data, "email", 200);
   if (!EMAIL.test(email)) return { status: "invalid" };
   const name = field(data, "name", 60) || undefined;
-  const team = toTeam({ soort: "Nieuwsbrief", name, email, subject: "Website: nieuwe inschrijving nieuwsbrief", text: `Graag op de hoogte houden: ${name ? `${name} ` : ""}${email}` });
-  return anyOf("subscribe", [subscribeWithWelcome(subscriberDoc(email, langOf(data), "footer", name)), team.step], team.notify);
+  const team = toTeam({
+    soort: "Nieuwsbrief",
+    name,
+    email,
+    subject: "Website: nieuwe inschrijving nieuwsbrief",
+    text: `Graag op de hoogte houden: ${name ? `${name} ` : ""}${email}`,
+  });
+  return anyOf(
+    "subscribe",
+    [
+      subscribeWithWelcome(subscriberDoc(email, langOf(data), "footer", name)),
+      team.step,
+    ],
+    team.notify,
+  );
 }
 
 /**
@@ -183,11 +322,21 @@ async function signupInner(data: FormData): Promise<FormState> {
     sanityFetch({ query: SIGNUP_RETREAT_QUERY, params: { id }, lang }),
     sanityFetch({ query: SIGNUP_RETREAT_QUERY, params: { id }, lang: "nl" }),
   ]);
-  if (!retreat || !retreatNl || !isUpcoming(retreat.endDate)) return { status: "invalid" };
+  if (!retreat || !retreatNl || !isUpcoming(retreat.endDate))
+    return { status: "invalid" };
 
   // “Not now” (more info / keep me posted), if the form offers it: a message + newsletter, no sign-up.
   const intent = field(data, "intent", 10);
-  if ((intent === "info" && retreat.form?.intent?.info) || (intent === "later" && retreat.form?.intent?.later)) return interest(data, intent, retreat, retreatNl.title ?? retreat.title ?? "retreat");
+  if (
+    (intent === "info" && retreat.form?.intent?.info) ||
+    (intent === "later" && retreat.form?.intent?.later)
+  )
+    return interest(
+      data,
+      intent,
+      retreat,
+      retreatNl.title ?? retreat.title ?? "retreat",
+    );
   if (!terms) return { status: "invalid" };
 
   // Extra questions of the retreat's form: the ones that show (lib/signup-form.ts) and are required must be
@@ -196,11 +345,15 @@ async function signupInner(data: FormData): Promise<FormState> {
   const tNl = getDictionary("nl").signup;
   const all = (retreat.form?.questions ?? []).filter((q) => q.label);
   const shown = visibleKeys(all, (name) => field(data, name, 2000));
-  const questions = all.filter((q) => shown.has(q._key) && q.type !== "section");
+  const questions = all.filter(
+    (q) => shown.has(q._key) && q.type !== "section",
+  );
   const raw = (q: FormQuestion) => field(data, fieldName(q), 2000);
   // (a placed room choice isn't enforced: without prices on the retreat there is nothing to pick)
-  if (questions.some((q) => q.required && q.type !== "room" && !raw(q))) return { status: "invalid" };
-  const opts = (q?: { options: string[] | null } | null) => (q?.options ?? []).filter(Boolean);
+  if (questions.some((q) => q.required && q.type !== "room" && !raw(q)))
+    return { status: "invalid" };
+  const opts = (q?: { options: string[] | null } | null) =>
+    (q?.options ?? []).filter(Boolean);
   const answers = questions
     .filter((q) => q.type !== "room" && q.type !== "diet")
     .map((q) => {
@@ -210,14 +363,21 @@ async function signupInner(data: FormData): Promise<FormState> {
         label: q.label ?? "",
         labelNl: nl?.label ?? q.label ?? "",
         answer: answerText(q, raw(q), other, t),
-        answerNl: answerText(q, raw(q), other, tNl, opts(nl).length ? opts(nl) : opts(q)),
+        answerNl: answerText(
+          q,
+          raw(q),
+          other,
+          tNl,
+          opts(nl).length ? opts(nl) : opts(q),
+        ),
       };
     });
 
   const title = retreat.title ?? "retreat";
   const when = dateRange(lang, retreat.startDate, retreat.endDate);
   // Fully booked (Studio → confirmed sign-ups fill `booked`): a waiting-list request.
-  const waitlist = !!retreat.capacity && (retreat.booked ?? 0) >= retreat.capacity;
+  const waitlist =
+    !!retreat.capacity && (retreat.booked ?? 0) >= retreat.capacity;
 
   const doc = {
     _id: `signup.${randomUUID()}`,
@@ -230,7 +390,12 @@ async function signupInner(data: FormData): Promise<FormState> {
     room,
     diet,
     message,
-    answers: answers.map((a) => ({ _key: randomUUID().slice(0, 12), _type: "signupAnswer", question: a.labelNl, answer: a.answerNl })),
+    answers: answers.map((a) => ({
+      _key: randomUUID().slice(0, 12),
+      _type: "signupAnswer",
+      question: a.labelNl,
+      answer: a.answerNl,
+    })),
     form: retreat.form?.name ?? undefined,
     lang,
     consent,
@@ -245,7 +410,8 @@ async function signupInner(data: FormData): Promise<FormState> {
     return { status: "error" };
   }
 
-  const autoConfirm = (await sanityFetch({ query: LAYOUT_QUERY, lang }))?.autoConfirm === true;
+  const autoConfirm =
+    (await sanityFetch({ query: LAYOUT_QUERY, lang }))?.autoConfirm === true;
   const yours: [string, string][] = [
     [t.phone, phone],
     [t.room, room],
@@ -279,15 +445,30 @@ async function signupInner(data: FormData): Promise<FormState> {
     ...(autoConfirm
       ? [
           (() => {
-            const mail = confirmationContent(lang, retreat.mail, retreat, name, waitlist, yours);
-            return sendMail({ to: email, subject: mail.subject, ...mail.content });
+            const mail = confirmationContent(
+              lang,
+              retreat.mail,
+              retreat,
+              name,
+              waitlist,
+              yours,
+            );
+            return sendMail({
+              to: email,
+              subject: mail.subject,
+              ...mail.content,
+            });
           })().then(() =>
-            writeClient?.patch(doc._id).set({ confirmedAt: new Date().toISOString() }).commit(),
+            writeClient
+              ?.patch(doc._id)
+              .set({ confirmedAt: new Date().toISOString() })
+              .commit(),
           ),
         ]
       : []),
   ];
-  for (const r of await Promise.allSettled(mails)) if (r.status === "rejected") console.error("signup: mail", r.reason);
+  for (const r of await Promise.allSettled(mails))
+    if (r.status === "rejected") console.error("signup: mail", r.reason);
   return { status: "sent", notify: team.notify };
 }
 
@@ -296,7 +477,12 @@ async function signupInner(data: FormData): Promise<FormState> {
  * Contactformulier, subject “Meer info: <retreat>” / “Op de hoogte houden: <retreat>”), a newsletter
  * subscription (with its confirmation mail) and a mail to the team.
  */
-async function interest(data: FormData, intent: "info" | "later", retreat: { _id: string }, title: string): Promise<FormState> {
+async function interest(
+  data: FormData,
+  intent: "info" | "later",
+  retreat: { _id: string },
+  title: string,
+): Promise<FormState> {
   const lang = langOf(data);
   const name = field(data, "name", 200);
   const email = field(data, "email", 200);
@@ -309,19 +495,40 @@ async function interest(data: FormData, intent: "info" | "later", retreat: { _id
     email,
     subject: `Website: ${subject} (${name})`,
     heading: subject,
-    text: [intent === "info" ? `${name} twijfelt nog en wil graag meer info over ${title}.` : `${name} kan deze keer niet, maar wil op de hoogte blijven.`, text].filter(Boolean).join("\n\n"),
+    text: [
+      intent === "info"
+        ? `${name} twijfelt nog en wil graag meer info over ${title}.`
+        : `${name} kan deze keer niet, maar wil op de hoogte blijven.`,
+      text,
+    ]
+      .filter(Boolean)
+      .join("\n\n"),
     rows: [
       ["Naam", name],
       ["E-mail", email],
       ["GSM", phone],
       ["Taal", lang],
     ],
-    footnote: "Staat in de Studio → Contactformulier; ingeschreven voor de nieuwsbrief.",
+    footnote:
+      "Staat in de Studio → Contactformulier; ingeschreven voor de nieuwsbrief.",
   });
   return anyOf(
     "signup interest",
     [
-      store({ _id: `message.${randomUUID()}`, _type: "message", status: "new", name, email, phone, subject, message: text, notify: true, retreat: { _type: "reference", _ref: retreat._id }, lang, submittedAt: new Date().toISOString() }),
+      store({
+        _id: `message.${randomUUID()}`,
+        _type: "message",
+        status: "new",
+        name,
+        email,
+        phone,
+        subject,
+        message: text,
+        notify: true,
+        retreat: { _type: "reference", _ref: retreat._id },
+        lang,
+        submittedAt: new Date().toISOString(),
+      }),
       subscribeWithWelcome(subscriberDoc(email, lang, "signup", name)),
       team.step,
     ],
@@ -333,7 +540,10 @@ async function interest(data: FormData, intent: "info" | "later", retreat: { _id
  * Review form (/retreats/<slug>/review): stored as a private `reviewSubmission` (Studio → Reviews)
  * + a mail to the team. Only once the team sets it to "Gepubliceerd" does a public copy (no e-mail) go online.
  */
-export async function sendReview(_: FormState, data: FormData): Promise<FormState> {
+export async function sendReview(
+  _: FormState,
+  data: FormData,
+): Promise<FormState> {
   return keep(data, await sendReviewInner(data));
 }
 
@@ -345,15 +555,35 @@ async function sendReviewInner(data: FormData): Promise<FormState> {
   const text = field(data, "text", 1200);
   const rating = Number.parseInt(field(data, "rating", 1), 10);
   const consent = data.get("consent") === "on";
-  if (!name || !EMAIL.test(email) || !text || !(rating >= 1 && rating <= 5) || !consent) return { status: "invalid" };
-  const retreat = await sanityFetch({ query: SIGNUP_RETREAT_QUERY, params: { id: field(data, "retreat", 100) }, lang });
+  if (
+    !name ||
+    !EMAIL.test(email) ||
+    !text ||
+    !(rating >= 1 && rating <= 5) ||
+    !consent
+  )
+    return { status: "invalid" };
+  const retreat = await sanityFetch({
+    query: SIGNUP_RETREAT_QUERY,
+    params: { id: field(data, "retreat", 100) },
+    lang,
+  });
   if (!retreat) return { status: "invalid" };
   const team = toTeam({
     soort: "Review",
     name,
     email,
     subject: `Nieuwe review ${"★".repeat(rating)}: ${retreat.title ?? "retreat"} (${name})`,
-    text: [`Retreat: ${retreat.title}`, `Naam: ${name}`, `E-mail: ${email}`, `Score: ${rating}/5`, "", text, "", "Keur goed of weiger in de Studio → Reviews."].join("\n"),
+    text: [
+      `Retreat: ${retreat.title}`,
+      `Naam: ${name}`,
+      `E-mail: ${email}`,
+      `Score: ${rating}/5`,
+      "",
+      text,
+      "",
+      "Keur goed of weiger in de Studio → Reviews.",
+    ].join("\n"),
   });
   return anyOf(
     "review form",
@@ -370,6 +600,99 @@ async function sendReviewInner(data: FormData): Promise<FormState> {
         lang,
         submittedAt: new Date().toISOString(),
       }),
+      team.step,
+    ],
+    team.notify,
+  );
+}
+
+/**
+ * A class in the Lessen planning (the detail card): a request to Rita, who helps with signing up at the
+ * studio. Stored as a message (Studio → Contactformulier, subject “Les: <stijl> · <dag> <uur> · <studio>”)
+ * + a mail to the team. The class is looked up by its key, so the subject can't be made up.
+ */
+export async function requestClass(
+  _: FormState,
+  data: FormData,
+): Promise<FormState> {
+  return keep(data, await requestClassInner(data));
+}
+
+const CLASS_WISHES = {
+  trial: "Een proefles",
+  join: "Me inschrijven voor deze les",
+  question: "Een vraag",
+} as Record<string, string>;
+const DAY_NAMES = {
+  mon: "maandag",
+  tue: "dinsdag",
+  wed: "woensdag",
+  thu: "donderdag",
+  fri: "vrijdag",
+  sat: "zaterdag",
+  sun: "zondag",
+} as Record<string, string>;
+
+async function requestClassInner(data: FormData): Promise<FormState> {
+  if (field(data, "website")) return { status: "sent" };
+  const lang = langOf(data);
+  const name = field(data, "name", 200);
+  const email = field(data, "email", 200);
+  const phone = field(data, "phone", 50);
+  const message = field(data, "message");
+  const wish = CLASS_WISHES[field(data, "wish", 20)] ?? CLASS_WISHES.question;
+  const notify = data.get("notify") === "on";
+  if (!name || !EMAIL.test(email)) return { status: "invalid" };
+  const { page } = await sanityFetch({ query: LESSONS_QUERY });
+  const slot = page?.schedule?.find((s) => s._key === field(data, "slot", 60));
+  if (!slot) return { status: "invalid" };
+  const when =
+    `${DAY_NAMES[slot.day ?? ""] ?? slot.day} ${slot.startTime ?? ""}`.trim();
+  const title = [slot.style?.name, when, slot.studio?.name]
+    .filter(Boolean)
+    .join(" · ");
+  const subject = `Les: ${title}`;
+  const team = toTeam({
+    soort: "Les",
+    name,
+    email,
+    subject: `Website: ${wish.toLowerCase()}, ${title} (${name})`,
+    heading: `${wish}: ${title}`,
+    text: [
+      `${name} wil graag ${wish === CLASS_WISHES.question ? "iets vragen over" : wish === CLASS_WISHES.trial ? "een proefles bij" : "zich inschrijven voor"} ${slot.style?.name ?? "een les"} op ${when}${slot.studio?.name ? ` in ${slot.studio.name}` : ""}.`,
+      message,
+    ]
+      .filter(Boolean)
+      .join("\n\n"),
+    rows: [
+      ["Naam", name],
+      ["E-mail", email],
+      ["GSM", phone],
+      ["Wens", wish],
+      ["Nieuwsbrief", notify ? "ja" : "nee"],
+      ["Taal", lang],
+    ],
+    footnote: "Staat in de Studio → Contactformulier.",
+  });
+  return anyOf(
+    "class request",
+    [
+      store({
+        _id: `message.${randomUUID()}`,
+        _type: "message",
+        status: "new",
+        name,
+        email,
+        phone,
+        subject: `${subject} (${wish.toLowerCase()})`,
+        message,
+        notify,
+        lang,
+        submittedAt: new Date().toISOString(),
+      }),
+      ...(notify
+        ? [subscribeWithWelcome(subscriberDoc(email, lang, "contact", name))]
+        : []),
       team.step,
     ],
     team.notify,

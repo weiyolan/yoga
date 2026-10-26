@@ -291,8 +291,8 @@ export const LESSONS_QUERY = defineQuery(`{
     "private": private{ "title": ${t("title")}, "text": ${t("text")}, "practical": ${t("practical")}, "button": ${t("button")}, "photo": photo->${MEDIA} },
     "schedule": schedule[]{
       _key, day, startTime, durationMinutes, "level": coalesce(level, "all"),
-      "style": style->{ name, "slug": slug.current },
-      "studio": studio->{ name },
+      "style": style->{ name, "slug": slug.current, "what": ${t("what")} },
+      "studio": studio->{ name, address, city },
       "bookingUrl": coalesce(bookingUrl, studio->website)
     },
     "seo": seo${SEO}
