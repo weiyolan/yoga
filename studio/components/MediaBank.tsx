@@ -68,7 +68,11 @@ const FILTERS: { id: string; title: string; match: (i: Item) => boolean }[] = [
 ];
 
 /** Patch the published photo and, when there is one, its draft (the Fotobank edits apply at once). */
-async function save(client: Client, id: string, set: Record<string, unknown>) {
+export async function save(
+  client: Client,
+  id: string,
+  set: Record<string, unknown>,
+) {
   const tx = client.transaction().patch(id, (p) => p.set(set));
   const draft = await client.getDocument(`drafts.${id}`);
   if (draft) tx.patch(draft._id, (p) => p.set(set));
@@ -76,7 +80,7 @@ async function save(client: Client, id: string, set: Record<string, unknown>) {
 }
 
 /** NL + EN alt text by AI; `overwrite` false keeps what's already filled in. */
-async function aiAlt(client: Client, item: Item, overwrite: boolean) {
+export async function aiAlt(client: Client, item: Item, overwrite: boolean) {
   const { projectId, dataset } = client.config();
   if (!item.ref) throw new Error("geen foto");
   const out = await ai<{ alt: Record<string, string> }>(client, {
