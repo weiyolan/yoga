@@ -17,7 +17,7 @@ const ogImage = (m: Media | null | undefined) => {
 };
 
 /**
- * Page metadata from the page's SEO object, falling back to Instellingen → Standaard SEO.
+ * Page metadata from the page's SEO object, falling back to Algemeen → Standaard SEO.
  * `fallbackTitle` (e.g. the hero title) is used when the page has no SEO title.
  */
 export async function buildMetadata({ lang, route, slug, seo, fallbackTitle, fallbackImage }: { lang: Lang; route: Route; slug?: string; seo?: Seo; fallbackTitle?: string | null; fallbackImage?: Media | null }): Promise<Metadata> {

@@ -17,7 +17,10 @@ sanity/                  shared with the Next.js app
 | Studio | Type | Notes |
 |---|---|---|
 | Veelgestelde vragen | `faqPage` (singleton) | `/faq`: title, intro, groups of question + answer (fold-out, FAQPage data for Google). Linked from the footer, Contact and the mobile menu. |
-| Instellingen | `settings` (singleton) | name, slogan, e-mail, GSM, socials, default sign-up link, default SEO |
+| Algemeen | `settings` (singleton, first of the pages) | site name, slogan, default SEO |
+| Menu & footer | `navigation` (singleton) | the short texts in the header dropdowns, newsletter title + thanks |
+| Formulieren → Inschrijving | `signupSettings` (singleton) | akkoord/bedankt texts of the sign-up form, "Bevestigingsmail automatisch versturen", "Meldingen naar" |
+| Contact | `contactPage` (singleton) | the page + Contact & social (e-mail, GSM, Instagram, Facebook; also in the footer) and the contact form's thanks |
 | Home | `homePage` (singleton) | opening image, intro (≤ 400 chars), featured retreat (empty = next one), ≤ 3 testimonials, "who are we" |
 | **Fotobank** | `mediaItem` | **every photo is stored once**: hotspot, alt text (SEO), categories, "show in gallery", "highlighted". No title or place (the gallery shows none). Pages only *reference* photos. |
 | Pagina's | `homePage` · `retreatsPage` · `lessonsPage` · `aboutPage` · `galleryPage` · `contactPage` (singletons) | opening image + page-specific fields + SEO. The weekly schedule (with a level per class) and the Privéles block live on `lessonsPage`. |
@@ -100,7 +103,8 @@ The frontend needs `NEXT_PUBLIC_SANITY_PROJECT_ID` and `NEXT_PUBLIC_SANITY_DATAS
 | `npm run seed` | idempotent seed: fills only empty fields, so Studio edits are kept (`-- --replace` overwrites). `npx sanity exec scripts/seed.ts -- --dry` prints it without writing |
 | `npm run migrate:v2` | one-off v2 migration on the live dataset (Fotobank fields, Coaching → Lessen, principles → values, person kind, privacy → legal page, booked). `-- --dry` first |
 | `npm run content:v2` | one-off v2 texts (docs/plan.html Part 1, `scripts/v2-content.ts`) as **drafts**, for R&P to review and publish. Run after `migrate:v2`. `-- --dry` first |
-| `npm run migrate:mails` | one-off: the confirmation mail texts in Instellingen → a "Standaard" Bevestigingsmail (published), then unsets them from Instellingen. `-- --dry` first |
+| `npm run migrate:mails` | one-off: the confirmation mail texts in the old Instellingen → a "Standaard" Bevestigingsmail (published), then unsets them (and the default sign-up link). `-- --dry` first |
+| `npm run migrate:settings` | one-off: moves the old Instellingen fields to Contact (contact & social, contact thanks), Menu & footer and Formulieren → Inschrijving; published → published, draft → draft; then unsets them from Algemeen. `-- --dry` first |
 | `npm run content:v3` | one-off drafts: Veelgestelde vragen (first version) + Eifel prices / inbegrepen / programma (from `eiffel.txt`, only where empty). `-- --dry` first |
 | `npm run publish:drafts` | publishes every draft (Sanity's publish action, like the Studio button) and lists the `[placeholders]` still in them; draft-only references become normal ones. `-- --dry` to list, `-- --skip-placeholders` to keep drafts with `[..]` as drafts, `-- --only=faqPage,retreat` for some types |
 

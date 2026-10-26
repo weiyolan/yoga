@@ -70,6 +70,11 @@ export type ContactPage = {
   intro?: InternationalizedArrayText;
   subjects?: InternationalizedArrayText;
   notifyLabel?: InternationalizedArrayString;
+  contactThanks?: InternationalizedArrayString;
+  email?: string;
+  phone?: string;
+  instagram?: string;
+  facebook?: string;
   seo?: Seo;
 };
 
@@ -252,18 +257,25 @@ export type HomePage = {
   seo?: Seo;
 };
 
-export type Settings = {
+export type SignupSettings = {
   _id: string;
-  _type: "settings";
+  _type: "signupSettings";
   _createdAt: string;
   _updatedAt: string;
   _rev: string;
-  siteName?: string;
-  tagline?: InternationalizedArrayString;
-  email?: string;
-  phone?: string;
-  instagram?: string;
-  facebook?: string;
+  signupConsent?: InternationalizedArrayText;
+  signupTerms?: InternationalizedArrayText;
+  signupThanks?: InternationalizedArrayText;
+  autoConfirm?: boolean;
+  notifyEmail?: string;
+};
+
+export type Navigation = {
+  _id: string;
+  _type: "navigation";
+  _createdAt: string;
+  _updatedAt: string;
+  _rev: string;
   menuFounders?: InternationalizedArrayString;
   menuFoundersSub?: InternationalizedArrayString;
   menuTeam?: InternationalizedArrayString;
@@ -273,12 +285,16 @@ export type Settings = {
   menuPast?: InternationalizedArrayString;
   newsletterTitle?: InternationalizedArrayString;
   newsletterThanks?: InternationalizedArrayString;
-  contactThanks?: InternationalizedArrayString;
-  signupConsent?: InternationalizedArrayText;
-  signupTerms?: InternationalizedArrayText;
-  signupThanks?: InternationalizedArrayText;
-  autoConfirm?: boolean;
-  notifyEmail?: string;
+};
+
+export type Settings = {
+  _id: string;
+  _type: "settings";
+  _createdAt: string;
+  _updatedAt: string;
+  _rev: string;
+  siteName?: string;
+  tagline?: InternationalizedArrayString;
   seo?: Seo;
 };
 
@@ -773,6 +789,8 @@ export type AllSanitySchemaTypes =
   | RetreatReference
   | TestimonialReference
   | HomePage
+  | SignupSettings
+  | Navigation
   | Settings
   | Subscriber
   | Message
@@ -809,15 +827,15 @@ export type AllSanitySchemaTypes =
 
 // Source: ../sanity/queries.ts
 // Variable: LAYOUT_QUERY
-// Query: *[_id == "settings"][0]{  siteName,  "tagline": coalesce(tagline[language == $lang][0].value, tagline[language == "nl"][0].value),  email,  phone,  instagram,  facebook,  "nextRetreat": *[_type == "retreat" && dateTime(endDate + "T23:59:59Z") >= dateTime(now())] | order(startDate asc)[0]{  _id,  "slug": slug.current,  "title": coalesce(title[language == $lang][0].value, title[language == "nl"][0].value),  startDate,  endDate,  "place": coalesce(place[language == $lang][0].value, place[language == "nl"][0].value),  "country": coalesce(country[language == $lang][0].value, country[language == "nl"][0].value),  capacity,  booked,  priceFrom,  participantCount,  "cardPhoto": cardPhoto->{  _id,  "alt": coalesce(alt[language == $lang][0].value, alt[language == "nl"][0].value, ""),  image { asset->{ _id, url, metadata { lqip, dimensions { width, height, aspectRatio } } }, hotspot, crop }}},  "styles": *[_type == "yogaClass"] | order(orderRank asc){ _id, name, "slug": slug.current, "what": coalesce(what[language == $lang][0].value, what[language == "nl"][0].value) },  "studios": *[_type == "studio"] | order(name asc).name,  "galleryCategories": array::unique(*[_type == "mediaItem" && showInGallery != false].categories[]),  "foundersPhoto": *[_id == "homePage"][0].aboutPhoto->{  _id,  "alt": coalesce(alt[language == $lang][0].value, alt[language == "nl"][0].value, ""),  image { asset->{ _id, url, metadata { lqip, dimensions { width, height, aspectRatio } } }, hotspot, crop }},  "texts": {    "menuFounders": coalesce(menuFounders[language == $lang][0].value, menuFounders[language == "nl"][0].value),    "menuFoundersSub": coalesce(menuFoundersSub[language == $lang][0].value, menuFoundersSub[language == "nl"][0].value),    "menuTeam": coalesce(menuTeam[language == $lang][0].value, menuTeam[language == "nl"][0].value),    "menuDrive": coalesce(menuDrive[language == $lang][0].value, menuDrive[language == "nl"][0].value),    "menuCollaborators": coalesce(menuCollaborators[language == $lang][0].value, menuCollaborators[language == "nl"][0].value),    "menuUpcoming": coalesce(menuUpcoming[language == $lang][0].value, menuUpcoming[language == "nl"][0].value),    "menuPast": coalesce(menuPast[language == $lang][0].value, menuPast[language == "nl"][0].value),    "newsletterTitle": coalesce(newsletterTitle[language == $lang][0].value, newsletterTitle[language == "nl"][0].value),    "newsletterThanks": coalesce(newsletterThanks[language == $lang][0].value, newsletterThanks[language == "nl"][0].value),    "contactThanks": coalesce(contactThanks[language == $lang][0].value, contactThanks[language == "nl"][0].value),    "signupConsent": coalesce(signupConsent[language == $lang][0].value, signupConsent[language == "nl"][0].value),    "signupTerms": coalesce(signupTerms[language == $lang][0].value, signupTerms[language == "nl"][0].value),    "signupThanks": coalesce(signupThanks[language == $lang][0].value, signupThanks[language == "nl"][0].value)  },  notifyEmail,  "autoConfirm": autoConfirm == true}
+// Query: *[_id == "settings"][0]{  siteName,  "tagline": coalesce(tagline[language == $lang][0].value, tagline[language == "nl"][0].value),  "email": *[_id == "contactPage"][0].email,  "phone": *[_id == "contactPage"][0].phone,  "instagram": *[_id == "contactPage"][0].instagram,  "facebook": *[_id == "contactPage"][0].facebook,  "nextRetreat": *[_type == "retreat" && dateTime(endDate + "T23:59:59Z") >= dateTime(now())] | order(startDate asc)[0]{  _id,  "slug": slug.current,  "title": coalesce(title[language == $lang][0].value, title[language == "nl"][0].value),  startDate,  endDate,  "place": coalesce(place[language == $lang][0].value, place[language == "nl"][0].value),  "country": coalesce(country[language == $lang][0].value, country[language == "nl"][0].value),  capacity,  booked,  priceFrom,  participantCount,  "cardPhoto": cardPhoto->{  _id,  "alt": coalesce(alt[language == $lang][0].value, alt[language == "nl"][0].value, ""),  image { asset->{ _id, url, metadata { lqip, dimensions { width, height, aspectRatio } } }, hotspot, crop }}},  "styles": *[_type == "yogaClass"] | order(orderRank asc){ _id, name, "slug": slug.current, "what": coalesce(what[language == $lang][0].value, what[language == "nl"][0].value) },  "studios": *[_type == "studio"] | order(name asc).name,  "galleryCategories": array::unique(*[_type == "mediaItem" && showInGallery != false].categories[]),  "foundersPhoto": *[_id == "homePage"][0].aboutPhoto->{  _id,  "alt": coalesce(alt[language == $lang][0].value, alt[language == "nl"][0].value, ""),  image { asset->{ _id, url, metadata { lqip, dimensions { width, height, aspectRatio } } }, hotspot, crop }},  "texts": {    "menuFounders": *[_id == "navigation"][0]{ "v": coalesce(menuFounders[language == $lang][0].value, menuFounders[language == "nl"][0].value) }.v,    "menuFoundersSub": *[_id == "navigation"][0]{ "v": coalesce(menuFoundersSub[language == $lang][0].value, menuFoundersSub[language == "nl"][0].value) }.v,    "menuTeam": *[_id == "navigation"][0]{ "v": coalesce(menuTeam[language == $lang][0].value, menuTeam[language == "nl"][0].value) }.v,    "menuDrive": *[_id == "navigation"][0]{ "v": coalesce(menuDrive[language == $lang][0].value, menuDrive[language == "nl"][0].value) }.v,    "menuCollaborators": *[_id == "navigation"][0]{ "v": coalesce(menuCollaborators[language == $lang][0].value, menuCollaborators[language == "nl"][0].value) }.v,    "menuUpcoming": *[_id == "navigation"][0]{ "v": coalesce(menuUpcoming[language == $lang][0].value, menuUpcoming[language == "nl"][0].value) }.v,    "menuPast": *[_id == "navigation"][0]{ "v": coalesce(menuPast[language == $lang][0].value, menuPast[language == "nl"][0].value) }.v,    "newsletterTitle": *[_id == "navigation"][0]{ "v": coalesce(newsletterTitle[language == $lang][0].value, newsletterTitle[language == "nl"][0].value) }.v,    "newsletterThanks": *[_id == "navigation"][0]{ "v": coalesce(newsletterThanks[language == $lang][0].value, newsletterThanks[language == "nl"][0].value) }.v,    "contactThanks": *[_id == "contactPage"][0]{ "v": coalesce(contactThanks[language == $lang][0].value, contactThanks[language == "nl"][0].value) }.v,    "signupConsent": *[_id == "signupSettings"][0]{ "v": coalesce(signupConsent[language == $lang][0].value, signupConsent[language == "nl"][0].value) }.v,    "signupTerms": *[_id == "signupSettings"][0]{ "v": coalesce(signupTerms[language == $lang][0].value, signupTerms[language == "nl"][0].value) }.v,    "signupThanks": *[_id == "signupSettings"][0]{ "v": coalesce(signupThanks[language == $lang][0].value, signupThanks[language == "nl"][0].value) }.v  },  "notifyEmail": *[_id == "signupSettings"][0].notifyEmail,  "autoConfirm": *[_id == "signupSettings"][0].autoConfirm == true}
 export type LAYOUT_QUERY_RESULT =
   | {
       siteName: null;
       tagline: null;
-      email: null;
-      phone: null;
-      instagram: null;
-      facebook: null;
+      email: null | string;
+      phone: null | string;
+      instagram: null | string;
+      facebook: null | string;
       nextRetreat: {
         _id: string;
         slug: string | null;
@@ -880,202 +898,30 @@ export type LAYOUT_QUERY_RESULT =
         } | null;
       } | null;
       texts: {
-        menuFounders: null;
-        menuFoundersSub: null;
-        menuTeam: null;
-        menuDrive: null;
-        menuCollaborators: null;
-        menuUpcoming: null;
-        menuPast: null;
-        newsletterTitle: null;
-        newsletterThanks: null;
-        contactThanks: null;
-        signupConsent: null;
-        signupTerms: null;
-        signupThanks: null;
+        menuFounders: null | string;
+        menuFoundersSub: null | string;
+        menuTeam: null | string;
+        menuDrive: null | string;
+        menuCollaborators: null | string;
+        menuUpcoming: null | string;
+        menuPast: null | string;
+        newsletterTitle: null | string;
+        newsletterThanks: null | string;
+        contactThanks: null | string;
+        signupConsent: null | string;
+        signupTerms: null | string;
+        signupThanks: null | string;
       };
-      notifyEmail: null;
-      autoConfirm: false;
-    }
-  | {
-      siteName: null;
-      tagline: null;
-      email: string | null;
-      phone: null;
-      instagram: null;
-      facebook: null;
-      nextRetreat: {
-        _id: string;
-        slug: string | null;
-        title: string | null;
-        startDate: string | null;
-        endDate: string | null;
-        place: string | null;
-        country: string | null;
-        capacity: number | null;
-        booked: number | null;
-        priceFrom: number | null;
-        participantCount: number | null;
-        cardPhoto: {
-          _id: string;
-          alt: string | "";
-          image: {
-            asset: {
-              _id: string;
-              url: string | null;
-              metadata: {
-                lqip: string | null;
-                dimensions: {
-                  width: number | null;
-                  height: number | null;
-                  aspectRatio: number | null;
-                } | null;
-              } | null;
-            } | null;
-            hotspot: SanityImageHotspot | null;
-            crop: SanityImageCrop | null;
-          } | null;
-        } | null;
-      } | null;
-      styles: Array<{
-        _id: string;
-        name: string | null;
-        slug: string | null;
-        what: string | null;
-      }>;
-      studios: Array<string | null>;
-      galleryCategories: Array<string | null>;
-      foundersPhoto: {
-        _id: string;
-        alt: string | "";
-        image: {
-          asset: {
-            _id: string;
-            url: string | null;
-            metadata: {
-              lqip: string | null;
-              dimensions: {
-                width: number | null;
-                height: number | null;
-                aspectRatio: number | null;
-              } | null;
-            } | null;
-          } | null;
-          hotspot: SanityImageHotspot | null;
-          crop: SanityImageCrop | null;
-        } | null;
-      } | null;
-      texts: {
-        menuFounders: null;
-        menuFoundersSub: null;
-        menuTeam: null;
-        menuDrive: null;
-        menuCollaborators: null;
-        menuUpcoming: null;
-        menuPast: null;
-        newsletterTitle: null;
-        newsletterThanks: null;
-        contactThanks: null;
-        signupConsent: null;
-        signupTerms: null;
-        signupThanks: null;
-      };
-      notifyEmail: null;
-      autoConfirm: false;
-    }
-  | {
-      siteName: null;
-      tagline: null;
-      email: string | null;
-      phone: string | null;
-      instagram: null;
-      facebook: null;
-      nextRetreat: {
-        _id: string;
-        slug: string | null;
-        title: string | null;
-        startDate: string | null;
-        endDate: string | null;
-        place: string | null;
-        country: string | null;
-        capacity: number | null;
-        booked: number | null;
-        priceFrom: number | null;
-        participantCount: number | null;
-        cardPhoto: {
-          _id: string;
-          alt: string | "";
-          image: {
-            asset: {
-              _id: string;
-              url: string | null;
-              metadata: {
-                lqip: string | null;
-                dimensions: {
-                  width: number | null;
-                  height: number | null;
-                  aspectRatio: number | null;
-                } | null;
-              } | null;
-            } | null;
-            hotspot: SanityImageHotspot | null;
-            crop: SanityImageCrop | null;
-          } | null;
-        } | null;
-      } | null;
-      styles: Array<{
-        _id: string;
-        name: string | null;
-        slug: string | null;
-        what: string | null;
-      }>;
-      studios: Array<string | null>;
-      galleryCategories: Array<string | null>;
-      foundersPhoto: {
-        _id: string;
-        alt: string | "";
-        image: {
-          asset: {
-            _id: string;
-            url: string | null;
-            metadata: {
-              lqip: string | null;
-              dimensions: {
-                width: number | null;
-                height: number | null;
-                aspectRatio: number | null;
-              } | null;
-            } | null;
-          } | null;
-          hotspot: SanityImageHotspot | null;
-          crop: SanityImageCrop | null;
-        } | null;
-      } | null;
-      texts: {
-        menuFounders: null;
-        menuFoundersSub: null;
-        menuTeam: null;
-        menuDrive: null;
-        menuCollaborators: null;
-        menuUpcoming: null;
-        menuPast: null;
-        newsletterTitle: null;
-        newsletterThanks: null;
-        contactThanks: null;
-        signupConsent: null;
-        signupTerms: null;
-        signupThanks: null;
-      };
-      notifyEmail: null;
-      autoConfirm: false;
+      notifyEmail: null | string;
+      autoConfirm: boolean | false;
     }
   | {
       siteName: string | null;
       tagline: string | null;
-      email: string | null;
-      phone: string | null;
-      instagram: string | null;
-      facebook: string | null;
+      email: null | string;
+      phone: null | string;
+      instagram: null | string;
+      facebook: null | string;
       nextRetreat: {
         _id: string;
         slug: string | null;
@@ -1138,45 +984,45 @@ export type LAYOUT_QUERY_RESULT =
         } | null;
       } | null;
       texts: {
-        menuFounders: string | null;
-        menuFoundersSub: string | null;
-        menuTeam: string | null;
-        menuDrive: string | null;
-        menuCollaborators: string | null;
-        menuUpcoming: string | null;
-        menuPast: string | null;
-        newsletterTitle: string | null;
-        newsletterThanks: string | null;
-        contactThanks: string | null;
-        signupConsent: string | null;
-        signupTerms: string | null;
-        signupThanks: string | null;
+        menuFounders: null | string;
+        menuFoundersSub: null | string;
+        menuTeam: null | string;
+        menuDrive: null | string;
+        menuCollaborators: null | string;
+        menuUpcoming: null | string;
+        menuPast: null | string;
+        newsletterTitle: null | string;
+        newsletterThanks: null | string;
+        contactThanks: null | string;
+        signupConsent: null | string;
+        signupTerms: null | string;
+        signupThanks: null | string;
       };
-      notifyEmail: string | null;
+      notifyEmail: null | string;
       autoConfirm: boolean | false;
     }
   | null;
 
 // Source: ../sanity/queries.ts
 // Variable: SETTINGS_QUERY
-// Query: *[_id == "settings"][0]{  siteName,  "tagline": coalesce(tagline[language == $lang][0].value, tagline[language == "nl"][0].value),  email,  phone,  instagram,  facebook,  "seo": seo{ "title": coalesce(title[language == $lang][0].value, title[language == "nl"][0].value), "description": coalesce(description[language == $lang][0].value, description[language == "nl"][0].value), "shareImage": shareImage->{  _id,  "alt": coalesce(alt[language == $lang][0].value, alt[language == "nl"][0].value, ""),  image { asset->{ _id, url, metadata { lqip, dimensions { width, height, aspectRatio } } }, hotspot, crop }} }}
+// Query: *[_id == "settings"][0]{  siteName,  "tagline": coalesce(tagline[language == $lang][0].value, tagline[language == "nl"][0].value),  "email": *[_id == "contactPage"][0].email,  "phone": *[_id == "contactPage"][0].phone,  "instagram": *[_id == "contactPage"][0].instagram,  "facebook": *[_id == "contactPage"][0].facebook,  "seo": seo{ "title": coalesce(title[language == $lang][0].value, title[language == "nl"][0].value), "description": coalesce(description[language == $lang][0].value, description[language == "nl"][0].value), "shareImage": shareImage->{  _id,  "alt": coalesce(alt[language == $lang][0].value, alt[language == "nl"][0].value, ""),  image { asset->{ _id, url, metadata { lqip, dimensions { width, height, aspectRatio } } }, hotspot, crop }} }}
 export type SETTINGS_QUERY_RESULT =
   | {
       siteName: null;
       tagline: null;
-      email: null;
-      phone: null;
-      instagram: null;
-      facebook: null;
+      email: null | string;
+      phone: null | string;
+      instagram: null | string;
+      facebook: null | string;
       seo: null;
     }
   | {
       siteName: null;
       tagline: null;
-      email: null;
-      phone: null;
-      instagram: null;
-      facebook: null;
+      email: null | string;
+      phone: null | string;
+      instagram: null | string;
+      facebook: null | string;
       seo: {
         title: string | null;
         description: string | null;
@@ -1203,30 +1049,12 @@ export type SETTINGS_QUERY_RESULT =
       } | null;
     }
   | {
-      siteName: null;
-      tagline: null;
-      email: string | null;
-      phone: null;
-      instagram: null;
-      facebook: null;
-      seo: null;
-    }
-  | {
-      siteName: null;
-      tagline: null;
-      email: string | null;
-      phone: string | null;
-      instagram: null;
-      facebook: null;
-      seo: null;
-    }
-  | {
       siteName: string | null;
       tagline: string | null;
-      email: string | null;
-      phone: string | null;
-      instagram: string | null;
-      facebook: string | null;
+      email: null | string;
+      phone: null | string;
+      instagram: null | string;
+      facebook: null | string;
       seo: {
         title: string | null;
         description: string | null;
@@ -3873,7 +3701,7 @@ export type GALLERY_QUERY_RESULT = {
 
 // Source: ../sanity/queries.ts
 // Variable: CONTACT_QUERY
-// Query: *[_id == "contactPage"][0]{  "photo": photo->{  _id,  "alt": coalesce(alt[language == $lang][0].value, alt[language == "nl"][0].value, ""),  image { asset->{ _id, url, metadata { lqip, dimensions { width, height, aspectRatio } } }, hotspot, crop }},  "title": coalesce(title[language == $lang][0].value, title[language == "nl"][0].value),  "intro": coalesce(intro[language == $lang][0].value, intro[language == "nl"][0].value),  "subjects": string::split(coalesce(subjects[language == $lang][0].value, subjects[language == "nl"][0].value, ""), "\n"),  "notifyLabel": coalesce(notifyLabel[language == $lang][0].value, notifyLabel[language == "nl"][0].value),  "seo": seo{ "title": coalesce(title[language == $lang][0].value, title[language == "nl"][0].value), "description": coalesce(description[language == $lang][0].value, description[language == "nl"][0].value), "shareImage": shareImage->{  _id,  "alt": coalesce(alt[language == $lang][0].value, alt[language == "nl"][0].value, ""),  image { asset->{ _id, url, metadata { lqip, dimensions { width, height, aspectRatio } } }, hotspot, crop }} },  "contact": *[_id == "settings"][0]{ email, phone }}
+// Query: *[_id == "contactPage"][0]{  "photo": photo->{  _id,  "alt": coalesce(alt[language == $lang][0].value, alt[language == "nl"][0].value, ""),  image { asset->{ _id, url, metadata { lqip, dimensions { width, height, aspectRatio } } }, hotspot, crop }},  "title": coalesce(title[language == $lang][0].value, title[language == "nl"][0].value),  "intro": coalesce(intro[language == $lang][0].value, intro[language == "nl"][0].value),  "subjects": string::split(coalesce(subjects[language == $lang][0].value, subjects[language == "nl"][0].value, ""), "\n"),  "notifyLabel": coalesce(notifyLabel[language == $lang][0].value, notifyLabel[language == "nl"][0].value),  "seo": seo{ "title": coalesce(title[language == $lang][0].value, title[language == "nl"][0].value), "description": coalesce(description[language == $lang][0].value, description[language == "nl"][0].value), "shareImage": shareImage->{  _id,  "alt": coalesce(alt[language == $lang][0].value, alt[language == "nl"][0].value, ""),  image { asset->{ _id, url, metadata { lqip, dimensions { width, height, aspectRatio } } }, hotspot, crop }} },  "contact": { email, phone }}
 export type CONTACT_QUERY_RESULT =
   | {
       photo: null;
@@ -3882,20 +3710,10 @@ export type CONTACT_QUERY_RESULT =
       subjects: Array<string>;
       notifyLabel: null;
       seo: null;
-      contact:
-        | {
-            email: null;
-            phone: null;
-          }
-        | {
-            email: string | null;
-            phone: null;
-          }
-        | {
-            email: string | null;
-            phone: string | null;
-          }
-        | null;
+      contact: {
+        email: null;
+        phone: null;
+      };
     }
   | {
       photo: null;
@@ -3927,20 +3745,10 @@ export type CONTACT_QUERY_RESULT =
           } | null;
         } | null;
       } | null;
-      contact:
-        | {
-            email: null;
-            phone: null;
-          }
-        | {
-            email: string | null;
-            phone: null;
-          }
-        | {
-            email: string | null;
-            phone: string | null;
-          }
-        | null;
+      contact: {
+        email: null;
+        phone: null;
+      };
     }
   | {
       photo: null;
@@ -3972,20 +3780,10 @@ export type CONTACT_QUERY_RESULT =
           } | null;
         } | null;
       } | null;
-      contact:
-        | {
-            email: null;
-            phone: null;
-          }
-        | {
-            email: string | null;
-            phone: null;
-          }
-        | {
-            email: string | null;
-            phone: string | null;
-          }
-        | null;
+      contact: {
+        email: null;
+        phone: null;
+      };
     }
   | {
       photo: {
@@ -4013,20 +3811,10 @@ export type CONTACT_QUERY_RESULT =
       subjects: Array<string>;
       notifyLabel: null;
       seo: null;
-      contact:
-        | {
-            email: null;
-            phone: null;
-          }
-        | {
-            email: string | null;
-            phone: null;
-          }
-        | {
-            email: string | null;
-            phone: string | null;
-          }
-        | null;
+      contact: {
+        email: null;
+        phone: null;
+      };
     }
   | {
       photo: null;
@@ -4058,20 +3846,10 @@ export type CONTACT_QUERY_RESULT =
           } | null;
         } | null;
       } | null;
-      contact:
-        | {
-            email: null;
-            phone: null;
-          }
-        | {
-            email: string | null;
-            phone: null;
-          }
-        | {
-            email: string | null;
-            phone: string | null;
-          }
-        | null;
+      contact: {
+        email: null;
+        phone: null;
+      };
     }
   | {
       photo: null;
@@ -4103,20 +3881,34 @@ export type CONTACT_QUERY_RESULT =
           } | null;
         } | null;
       } | null;
-      contact:
-        | {
-            email: null;
-            phone: null;
-          }
-        | {
-            email: string | null;
-            phone: null;
-          }
-        | {
-            email: string | null;
-            phone: string | null;
-          }
-        | null;
+      contact: {
+        email: null;
+        phone: null;
+      };
+    }
+  | {
+      photo: null;
+      title: null;
+      intro: null;
+      subjects: Array<string>;
+      notifyLabel: null;
+      seo: null;
+      contact: {
+        email: string | null;
+        phone: null;
+      };
+    }
+  | {
+      photo: null;
+      title: null;
+      intro: null;
+      subjects: Array<string>;
+      notifyLabel: null;
+      seo: null;
+      contact: {
+        email: string | null;
+        phone: string | null;
+      };
     }
   | {
       photo: {
@@ -4167,20 +3959,10 @@ export type CONTACT_QUERY_RESULT =
           } | null;
         } | null;
       } | null;
-      contact:
-        | {
-            email: null;
-            phone: null;
-          }
-        | {
-            email: string | null;
-            phone: null;
-          }
-        | {
-            email: string | null;
-            phone: string | null;
-          }
-        | null;
+      contact: {
+        email: string | null;
+        phone: string | null;
+      };
     }
   | null;
 
@@ -4225,8 +4007,8 @@ export type LEGAL_QUERY_RESULT = {
 // Query TypeMap
 declare global {
   interface SanityQueries {
-    '*[_id == "settings"][0]{\n  siteName,\n  "tagline": coalesce(tagline[language == $lang][0].value, tagline[language == "nl"][0].value),\n  email,\n  phone,\n  instagram,\n  facebook,\n  "nextRetreat": *[_type == "retreat" && dateTime(endDate + "T23:59:59Z") >= dateTime(now())] | order(startDate asc)[0]{\n  _id,\n  "slug": slug.current,\n  "title": coalesce(title[language == $lang][0].value, title[language == "nl"][0].value),\n  startDate,\n  endDate,\n  "place": coalesce(place[language == $lang][0].value, place[language == "nl"][0].value),\n  "country": coalesce(country[language == $lang][0].value, country[language == "nl"][0].value),\n  capacity,\n  booked,\n  priceFrom,\n  participantCount,\n  "cardPhoto": cardPhoto->{\n  _id,\n  "alt": coalesce(alt[language == $lang][0].value, alt[language == "nl"][0].value, ""),\n  image { asset->{ _id, url, metadata { lqip, dimensions { width, height, aspectRatio } } }, hotspot, crop }\n}\n},\n  "styles": *[_type == "yogaClass"] | order(orderRank asc){ _id, name, "slug": slug.current, "what": coalesce(what[language == $lang][0].value, what[language == "nl"][0].value) },\n  "studios": *[_type == "studio"] | order(name asc).name,\n  "galleryCategories": array::unique(*[_type == "mediaItem" && showInGallery != false].categories[]),\n  "foundersPhoto": *[_id == "homePage"][0].aboutPhoto->{\n  _id,\n  "alt": coalesce(alt[language == $lang][0].value, alt[language == "nl"][0].value, ""),\n  image { asset->{ _id, url, metadata { lqip, dimensions { width, height, aspectRatio } } }, hotspot, crop }\n},\n  "texts": {\n    "menuFounders": coalesce(menuFounders[language == $lang][0].value, menuFounders[language == "nl"][0].value),\n    "menuFoundersSub": coalesce(menuFoundersSub[language == $lang][0].value, menuFoundersSub[language == "nl"][0].value),\n    "menuTeam": coalesce(menuTeam[language == $lang][0].value, menuTeam[language == "nl"][0].value),\n    "menuDrive": coalesce(menuDrive[language == $lang][0].value, menuDrive[language == "nl"][0].value),\n    "menuCollaborators": coalesce(menuCollaborators[language == $lang][0].value, menuCollaborators[language == "nl"][0].value),\n    "menuUpcoming": coalesce(menuUpcoming[language == $lang][0].value, menuUpcoming[language == "nl"][0].value),\n    "menuPast": coalesce(menuPast[language == $lang][0].value, menuPast[language == "nl"][0].value),\n    "newsletterTitle": coalesce(newsletterTitle[language == $lang][0].value, newsletterTitle[language == "nl"][0].value),\n    "newsletterThanks": coalesce(newsletterThanks[language == $lang][0].value, newsletterThanks[language == "nl"][0].value),\n    "contactThanks": coalesce(contactThanks[language == $lang][0].value, contactThanks[language == "nl"][0].value),\n    "signupConsent": coalesce(signupConsent[language == $lang][0].value, signupConsent[language == "nl"][0].value),\n    "signupTerms": coalesce(signupTerms[language == $lang][0].value, signupTerms[language == "nl"][0].value),\n    "signupThanks": coalesce(signupThanks[language == $lang][0].value, signupThanks[language == "nl"][0].value)\n  },\n  notifyEmail,\n  "autoConfirm": autoConfirm == true\n}': LAYOUT_QUERY_RESULT;
-    '*[_id == "settings"][0]{\n  siteName,\n  "tagline": coalesce(tagline[language == $lang][0].value, tagline[language == "nl"][0].value),\n  email,\n  phone,\n  instagram,\n  facebook,\n  "seo": seo{ "title": coalesce(title[language == $lang][0].value, title[language == "nl"][0].value), "description": coalesce(description[language == $lang][0].value, description[language == "nl"][0].value), "shareImage": shareImage->{\n  _id,\n  "alt": coalesce(alt[language == $lang][0].value, alt[language == "nl"][0].value, ""),\n  image { asset->{ _id, url, metadata { lqip, dimensions { width, height, aspectRatio } } }, hotspot, crop }\n} }\n}': SETTINGS_QUERY_RESULT;
+    '*[_id == "settings"][0]{\n  siteName,\n  "tagline": coalesce(tagline[language == $lang][0].value, tagline[language == "nl"][0].value),\n  "email": *[_id == "contactPage"][0].email,\n  "phone": *[_id == "contactPage"][0].phone,\n  "instagram": *[_id == "contactPage"][0].instagram,\n  "facebook": *[_id == "contactPage"][0].facebook,\n  "nextRetreat": *[_type == "retreat" && dateTime(endDate + "T23:59:59Z") >= dateTime(now())] | order(startDate asc)[0]{\n  _id,\n  "slug": slug.current,\n  "title": coalesce(title[language == $lang][0].value, title[language == "nl"][0].value),\n  startDate,\n  endDate,\n  "place": coalesce(place[language == $lang][0].value, place[language == "nl"][0].value),\n  "country": coalesce(country[language == $lang][0].value, country[language == "nl"][0].value),\n  capacity,\n  booked,\n  priceFrom,\n  participantCount,\n  "cardPhoto": cardPhoto->{\n  _id,\n  "alt": coalesce(alt[language == $lang][0].value, alt[language == "nl"][0].value, ""),\n  image { asset->{ _id, url, metadata { lqip, dimensions { width, height, aspectRatio } } }, hotspot, crop }\n}\n},\n  "styles": *[_type == "yogaClass"] | order(orderRank asc){ _id, name, "slug": slug.current, "what": coalesce(what[language == $lang][0].value, what[language == "nl"][0].value) },\n  "studios": *[_type == "studio"] | order(name asc).name,\n  "galleryCategories": array::unique(*[_type == "mediaItem" && showInGallery != false].categories[]),\n  "foundersPhoto": *[_id == "homePage"][0].aboutPhoto->{\n  _id,\n  "alt": coalesce(alt[language == $lang][0].value, alt[language == "nl"][0].value, ""),\n  image { asset->{ _id, url, metadata { lqip, dimensions { width, height, aspectRatio } } }, hotspot, crop }\n},\n  "texts": {\n    "menuFounders": *[_id == "navigation"][0]{ "v": coalesce(menuFounders[language == $lang][0].value, menuFounders[language == "nl"][0].value) }.v,\n    "menuFoundersSub": *[_id == "navigation"][0]{ "v": coalesce(menuFoundersSub[language == $lang][0].value, menuFoundersSub[language == "nl"][0].value) }.v,\n    "menuTeam": *[_id == "navigation"][0]{ "v": coalesce(menuTeam[language == $lang][0].value, menuTeam[language == "nl"][0].value) }.v,\n    "menuDrive": *[_id == "navigation"][0]{ "v": coalesce(menuDrive[language == $lang][0].value, menuDrive[language == "nl"][0].value) }.v,\n    "menuCollaborators": *[_id == "navigation"][0]{ "v": coalesce(menuCollaborators[language == $lang][0].value, menuCollaborators[language == "nl"][0].value) }.v,\n    "menuUpcoming": *[_id == "navigation"][0]{ "v": coalesce(menuUpcoming[language == $lang][0].value, menuUpcoming[language == "nl"][0].value) }.v,\n    "menuPast": *[_id == "navigation"][0]{ "v": coalesce(menuPast[language == $lang][0].value, menuPast[language == "nl"][0].value) }.v,\n    "newsletterTitle": *[_id == "navigation"][0]{ "v": coalesce(newsletterTitle[language == $lang][0].value, newsletterTitle[language == "nl"][0].value) }.v,\n    "newsletterThanks": *[_id == "navigation"][0]{ "v": coalesce(newsletterThanks[language == $lang][0].value, newsletterThanks[language == "nl"][0].value) }.v,\n    "contactThanks": *[_id == "contactPage"][0]{ "v": coalesce(contactThanks[language == $lang][0].value, contactThanks[language == "nl"][0].value) }.v,\n    "signupConsent": *[_id == "signupSettings"][0]{ "v": coalesce(signupConsent[language == $lang][0].value, signupConsent[language == "nl"][0].value) }.v,\n    "signupTerms": *[_id == "signupSettings"][0]{ "v": coalesce(signupTerms[language == $lang][0].value, signupTerms[language == "nl"][0].value) }.v,\n    "signupThanks": *[_id == "signupSettings"][0]{ "v": coalesce(signupThanks[language == $lang][0].value, signupThanks[language == "nl"][0].value) }.v\n  },\n  "notifyEmail": *[_id == "signupSettings"][0].notifyEmail,\n  "autoConfirm": *[_id == "signupSettings"][0].autoConfirm == true\n}': LAYOUT_QUERY_RESULT;
+    '*[_id == "settings"][0]{\n  siteName,\n  "tagline": coalesce(tagline[language == $lang][0].value, tagline[language == "nl"][0].value),\n  "email": *[_id == "contactPage"][0].email,\n  "phone": *[_id == "contactPage"][0].phone,\n  "instagram": *[_id == "contactPage"][0].instagram,\n  "facebook": *[_id == "contactPage"][0].facebook,\n  "seo": seo{ "title": coalesce(title[language == $lang][0].value, title[language == "nl"][0].value), "description": coalesce(description[language == $lang][0].value, description[language == "nl"][0].value), "shareImage": shareImage->{\n  _id,\n  "alt": coalesce(alt[language == $lang][0].value, alt[language == "nl"][0].value, ""),\n  image { asset->{ _id, url, metadata { lqip, dimensions { width, height, aspectRatio } } }, hotspot, crop }\n} }\n}': SETTINGS_QUERY_RESULT;
     '*[_id == "homePage"][0]{\n  "hero": hero{ "photo": photo->{\n  _id,\n  "alt": coalesce(alt[language == $lang][0].value, alt[language == "nl"][0].value, ""),\n  image { asset->{ _id, url, metadata { lqip, dimensions { width, height, aspectRatio } } }, hotspot, crop }\n}, videoUrl, "title": coalesce(title[language == $lang][0].value, title[language == "nl"][0].value), "subtitle": coalesce(subtitle[language == $lang][0].value, subtitle[language == "nl"][0].value) },\n  "introTitle": coalesce(introTitle[language == $lang][0].value, introTitle[language == "nl"][0].value),\n  "intro": coalesce(intro[language == $lang][0].value, intro[language == "nl"][0].value),\n  "featuredRetreat": coalesce(\n    featuredRetreat->{\n  _id,\n  "slug": slug.current,\n  "title": coalesce(title[language == $lang][0].value, title[language == "nl"][0].value),\n  startDate,\n  endDate,\n  "place": coalesce(place[language == $lang][0].value, place[language == "nl"][0].value),\n  "country": coalesce(country[language == $lang][0].value, country[language == "nl"][0].value),\n  capacity,\n  booked,\n  priceFrom,\n  participantCount,\n  "cardPhoto": cardPhoto->{\n  _id,\n  "alt": coalesce(alt[language == $lang][0].value, alt[language == "nl"][0].value, ""),\n  image { asset->{ _id, url, metadata { lqip, dimensions { width, height, aspectRatio } } }, hotspot, crop }\n},\n  "teaser": coalesce(nutshellTitle[language == $lang][0].value, nutshellTitle[language == "nl"][0].value)\n},\n    *[_type == "retreat" && dateTime(endDate + "T23:59:59Z") >= dateTime(now()) && !coalesce(capacity > 0 && coalesce(booked, 0) >= capacity, false)] | order(startDate asc)[0]{\n  _id,\n  "slug": slug.current,\n  "title": coalesce(title[language == $lang][0].value, title[language == "nl"][0].value),\n  startDate,\n  endDate,\n  "place": coalesce(place[language == $lang][0].value, place[language == "nl"][0].value),\n  "country": coalesce(country[language == $lang][0].value, country[language == "nl"][0].value),\n  capacity,\n  booked,\n  priceFrom,\n  participantCount,\n  "cardPhoto": cardPhoto->{\n  _id,\n  "alt": coalesce(alt[language == $lang][0].value, alt[language == "nl"][0].value, ""),\n  image { asset->{ _id, url, metadata { lqip, dimensions { width, height, aspectRatio } } }, hotspot, crop }\n},\n  "teaser": coalesce(nutshellTitle[language == $lang][0].value, nutshellTitle[language == "nl"][0].value)\n},\n    *[_type == "retreat" && dateTime(endDate + "T23:59:59Z") >= dateTime(now())] | order(startDate asc)[0]{\n  _id,\n  "slug": slug.current,\n  "title": coalesce(title[language == $lang][0].value, title[language == "nl"][0].value),\n  startDate,\n  endDate,\n  "place": coalesce(place[language == $lang][0].value, place[language == "nl"][0].value),\n  "country": coalesce(country[language == $lang][0].value, country[language == "nl"][0].value),\n  capacity,\n  booked,\n  priceFrom,\n  participantCount,\n  "cardPhoto": cardPhoto->{\n  _id,\n  "alt": coalesce(alt[language == $lang][0].value, alt[language == "nl"][0].value, ""),\n  image { asset->{ _id, url, metadata { lqip, dimensions { width, height, aspectRatio } } }, hotspot, crop }\n},\n  "teaser": coalesce(nutshellTitle[language == $lang][0].value, nutshellTitle[language == "nl"][0].value)\n}\n  ),\n  "upcomingRetreats": *[_type == "retreat" && dateTime(endDate + "T23:59:59Z") >= dateTime(now())] | order(startDate asc)[0...3]{\n  _id,\n  "slug": slug.current,\n  "title": coalesce(title[language == $lang][0].value, title[language == "nl"][0].value),\n  startDate,\n  endDate,\n  "place": coalesce(place[language == $lang][0].value, place[language == "nl"][0].value),\n  "country": coalesce(country[language == $lang][0].value, country[language == "nl"][0].value),\n  capacity,\n  booked,\n  priceFrom,\n  participantCount,\n  "cardPhoto": cardPhoto->{\n  _id,\n  "alt": coalesce(alt[language == $lang][0].value, alt[language == "nl"][0].value, ""),\n  image { asset->{ _id, url, metadata { lqip, dimensions { width, height, aspectRatio } } }, hotspot, crop }\n}\n},\n  "styles": *[_type == "yogaClass"] | order(orderRank asc){\n  _id,\n  name,\n  "slug": slug.current,\n  "what": coalesce(what[language == $lang][0].value, what[language == "nl"][0].value),\n  "forWhom": coalesce(forWhom[language == $lang][0].value, forWhom[language == "nl"][0].value),\n  "photo": photo->{\n  _id,\n  "alt": coalesce(alt[language == $lang][0].value, alt[language == "nl"][0].value, ""),\n  image { asset->{ _id, url, metadata { lqip, dimensions { width, height, aspectRatio } } }, hotspot, crop }\n},\n  "studios": studios[]->name\n},\n  "studios": *[_type == "studio"] | order(name asc){ _id, name, website },\n  "instagram": *[_type == "mediaItem" && highlight == true] | order(_createdAt desc)[0...6]{\n  _id,\n  "alt": coalesce(alt[language == $lang][0].value, alt[language == "nl"][0].value, ""),\n  image { asset->{ _id, url, metadata { lqip, dimensions { width, height, aspectRatio } } }, hotspot, crop }\n},\n  "testimonials": testimonials[]->{\n  _id,\n  "quote": coalesce(quote[language == $lang][0].value, quote[language == "nl"][0].value),\n  name,\n  "context": coalesce(coalesce(context[language == $lang][0].value, context[language == "nl"][0].value), coalesce(retreat->title[language == $lang][0].value, retreat->title[language == "nl"][0].value) + " " + string::split(retreat->startDate, "-")[0])\n},\n  "reviews": *[_type == "review" && rating >= 4 && !(_id in path("drafts.**"))] | order(submittedAt desc)[0...3]{\n  _id,\n  name,\n  rating,\n  text,\n  "context": coalesce(retreat->title[language == $lang][0].value, retreat->title[language == "nl"][0].value) + " " + string::split(retreat->startDate, "-")[0]\n},\n  "aboutTitle": coalesce(aboutTitle[language == $lang][0].value, aboutTitle[language == "nl"][0].value),\n  "aboutText": coalesce(aboutText[language == $lang][0].value, aboutText[language == "nl"][0].value),\n  "introLink": coalesce(introLink[language == $lang][0].value, introLink[language == "nl"][0].value),\n  "retreatsTitle": coalesce(retreatsTitle[language == $lang][0].value, retreatsTitle[language == "nl"][0].value),\n  "lessonsTitle": coalesce(lessonsTitle[language == $lang][0].value, lessonsTitle[language == "nl"][0].value),\n  "lessonsText": coalesce(lessonsText[language == $lang][0].value, lessonsText[language == "nl"][0].value),\n  "testimonialsTitle": coalesce(testimonialsTitle[language == $lang][0].value, testimonialsTitle[language == "nl"][0].value),\n  "aboutPhoto": aboutPhoto->{\n  _id,\n  "alt": coalesce(alt[language == $lang][0].value, alt[language == "nl"][0].value, ""),\n  image { asset->{ _id, url, metadata { lqip, dimensions { width, height, aspectRatio } } }, hotspot, crop }\n},\n  "seo": seo{ "title": coalesce(title[language == $lang][0].value, title[language == "nl"][0].value), "description": coalesce(description[language == $lang][0].value, description[language == "nl"][0].value), "shareImage": shareImage->{\n  _id,\n  "alt": coalesce(alt[language == $lang][0].value, alt[language == "nl"][0].value, ""),\n  image { asset->{ _id, url, metadata { lqip, dimensions { width, height, aspectRatio } } }, hotspot, crop }\n} }\n}': HOME_QUERY_RESULT;
     '{\n  "page": *[_id == "retreatsPage"][0]{\n    "hero": hero{ "photo": photo->{\n  _id,\n  "alt": coalesce(alt[language == $lang][0].value, alt[language == "nl"][0].value, ""),\n  image { asset->{ _id, url, metadata { lqip, dimensions { width, height, aspectRatio } } }, hotspot, crop }\n}, videoUrl, "title": coalesce(title[language == $lang][0].value, title[language == "nl"][0].value), "subtitle": coalesce(subtitle[language == $lang][0].value, subtitle[language == "nl"][0].value) },\n    "upcomingTitle": coalesce(upcomingTitle[language == $lang][0].value, upcomingTitle[language == "nl"][0].value),\n    "pastTitle": coalesce(pastTitle[language == $lang][0].value, pastTitle[language == "nl"][0].value),\n    "noneUpcoming": coalesce(noneUpcoming[language == $lang][0].value, noneUpcoming[language == "nl"][0].value),\n    "seo": seo{ "title": coalesce(title[language == $lang][0].value, title[language == "nl"][0].value), "description": coalesce(description[language == $lang][0].value, description[language == "nl"][0].value), "shareImage": shareImage->{\n  _id,\n  "alt": coalesce(alt[language == $lang][0].value, alt[language == "nl"][0].value, ""),\n  image { asset->{ _id, url, metadata { lqip, dimensions { width, height, aspectRatio } } }, hotspot, crop }\n} }\n  },\n  "upcoming": *[_type == "retreat" && dateTime(endDate + "T23:59:59Z") >= dateTime(now())] | order(startDate asc){\n  _id,\n  "slug": slug.current,\n  "title": coalesce(title[language == $lang][0].value, title[language == "nl"][0].value),\n  startDate,\n  endDate,\n  "place": coalesce(place[language == $lang][0].value, place[language == "nl"][0].value),\n  "country": coalesce(country[language == $lang][0].value, country[language == "nl"][0].value),\n  capacity,\n  booked,\n  priceFrom,\n  participantCount,\n  "cardPhoto": cardPhoto->{\n  _id,\n  "alt": coalesce(alt[language == $lang][0].value, alt[language == "nl"][0].value, ""),\n  image { asset->{ _id, url, metadata { lqip, dimensions { width, height, aspectRatio } } }, hotspot, crop }\n}\n},\n  "past": *[_type == "retreat" && !(dateTime(endDate + "T23:59:59Z") >= dateTime(now()))] | order(startDate desc){\n  _id,\n  "slug": slug.current,\n  "title": coalesce(title[language == $lang][0].value, title[language == "nl"][0].value),\n  startDate,\n  endDate,\n  "place": coalesce(place[language == $lang][0].value, place[language == "nl"][0].value),\n  "country": coalesce(country[language == $lang][0].value, country[language == "nl"][0].value),\n  capacity,\n  booked,\n  priceFrom,\n  participantCount,\n  "cardPhoto": cardPhoto->{\n  _id,\n  "alt": coalesce(alt[language == $lang][0].value, alt[language == "nl"][0].value, ""),\n  image { asset->{ _id, url, metadata { lqip, dimensions { width, height, aspectRatio } } }, hotspot, crop }\n}\n}\n}': RETREATS_QUERY_RESULT;
     '*[_type == "retreat" && _id == $id][0]{\n  _id,\n  "slug": slug.current,\n  "title": coalesce(title[language == $lang][0].value, title[language == "nl"][0].value),\n  startDate,\n  endDate,\n  capacity,\n  booked,\n  deposit,\n  "photo": cardPhoto->image.asset->url,\n  "form": coalesce(signupForm->{\n  _id,\n  name,\n  "phone": coalesce(standard.phone, true),\n  "room": coalesce(standard.room, true),\n  "diet": coalesce(standard.diet, true),\n  "message": coalesce(message, true),\n  "questions": questions[]{ _key, "label": coalesce(label[language == $lang][0].value, label[language == "nl"][0].value), "help": coalesce(help[language == $lang][0].value, help[language == "nl"][0].value), type, "options": string::split(coalesce(options[language == $lang][0].value, options[language == "nl"][0].value, ""), "\\n"), required }\n}, *[_type == "signupForm" && isDefault == true && !(_id in path("drafts.**"))][0]{\n  _id,\n  name,\n  "phone": coalesce(standard.phone, true),\n  "room": coalesce(standard.room, true),\n  "diet": coalesce(standard.diet, true),\n  "message": coalesce(message, true),\n  "questions": questions[]{ _key, "label": coalesce(label[language == $lang][0].value, label[language == "nl"][0].value), "help": coalesce(help[language == $lang][0].value, help[language == "nl"][0].value), type, "options": string::split(coalesce(options[language == $lang][0].value, options[language == "nl"][0].value, ""), "\\n"), required }\n}),\n  "mail": coalesce(confirmationMail->{\n  "subject": coalesce(subject[language == $lang][0].value, subject[language == "nl"][0].value),\n  "body": coalesce(body[language == $lang][0].value, body[language == "nl"][0].value),\n  "payment": coalesce(payment[language == $lang][0].value, payment[language == "nl"][0].value),\n  "waitlistSubject": coalesce(waitlistSubject[language == $lang][0].value, waitlistSubject[language == "nl"][0].value),\n  "waitlistBody": coalesce(waitlistBody[language == $lang][0].value, waitlistBody[language == "nl"][0].value)\n}, *[_type == "confirmationMail" && isDefault == true && !(_id in path("drafts.**"))][0]{\n  "subject": coalesce(subject[language == $lang][0].value, subject[language == "nl"][0].value),\n  "body": coalesce(body[language == $lang][0].value, body[language == "nl"][0].value),\n  "payment": coalesce(payment[language == $lang][0].value, payment[language == "nl"][0].value),\n  "waitlistSubject": coalesce(waitlistSubject[language == $lang][0].value, waitlistSubject[language == "nl"][0].value),\n  "waitlistBody": coalesce(waitlistBody[language == $lang][0].value, waitlistBody[language == "nl"][0].value)\n})\n}': SIGNUP_RETREAT_QUERY_RESULT;
@@ -4237,7 +4019,7 @@ declare global {
     '*[_id == "aboutPage"][0]{\n  "hero": hero{ "photo": photo->{\n  _id,\n  "alt": coalesce(alt[language == $lang][0].value, alt[language == "nl"][0].value, ""),\n  image { asset->{ _id, url, metadata { lqip, dimensions { width, height, aspectRatio } } }, hotspot, crop }\n}, videoUrl, "title": coalesce(title[language == $lang][0].value, title[language == "nl"][0].value), "subtitle": coalesce(subtitle[language == $lang][0].value, subtitle[language == "nl"][0].value) },\n  "founders": founders[]->{\n  _id,\n  name,\n  "role": coalesce(role[language == $lang][0].value, role[language == "nl"][0].value),\n  "bio": coalesce(bio[language == $lang][0].value, bio[language == "nl"][0].value),\n  "portrait": portrait->{\n  _id,\n  "alt": coalesce(alt[language == $lang][0].value, alt[language == "nl"][0].value, ""),\n  image { asset->{ _id, url, metadata { lqip, dimensions { width, height, aspectRatio } } }, hotspot, crop }\n},\n  "object": object->{\n  _id,\n  "alt": coalesce(alt[language == $lang][0].value, alt[language == "nl"][0].value, ""),\n  image { asset->{ _id, url, metadata { lqip, dimensions { width, height, aspectRatio } } }, hotspot, crop }\n},\n  website,\n  "links": links[]{ _key, label, url }\n},\n  "driveTitle": coalesce(driveTitle[language == $lang][0].value, driveTitle[language == "nl"][0].value),\n  "driveText": coalesce(driveText[language == $lang][0].value, driveText[language == "nl"][0].value),\n  "values": values[]{ _key, "title": coalesce(title[language == $lang][0].value, title[language == "nl"][0].value), "text": coalesce(text[language == $lang][0].value, text[language == "nl"][0].value) },\n  principlesVideoUrl,\n  "collaboratorsTitle": coalesce(collaboratorsTitle[language == $lang][0].value, collaboratorsTitle[language == "nl"][0].value),\n  "collaboratorsIntro": coalesce(collaboratorsIntro[language == $lang][0].value, collaboratorsIntro[language == "nl"][0].value),\n  // everyone except Rita & Philippe, automatically\n  "collaborators": *[_type == "person" && coalesce(kind, "collaborator") != "founder" && !(_id in ^.founders[]._ref) && hidden != true] | order(coalesce(orderRank, 1000) asc, name asc){\n  _id,\n  name,\n  "role": coalesce(role[language == $lang][0].value, role[language == "nl"][0].value),\n  "bio": coalesce(bio[language == $lang][0].value, bio[language == "nl"][0].value),\n  "portrait": portrait->{\n  _id,\n  "alt": coalesce(alt[language == $lang][0].value, alt[language == "nl"][0].value, ""),\n  image { asset->{ _id, url, metadata { lqip, dimensions { width, height, aspectRatio } } }, hotspot, crop }\n},\n  "object": object->{\n  _id,\n  "alt": coalesce(alt[language == $lang][0].value, alt[language == "nl"][0].value, ""),\n  image { asset->{ _id, url, metadata { lqip, dimensions { width, height, aspectRatio } } }, hotspot, crop }\n},\n  website,\n  "links": links[]{ _key, label, url }\n},\n  "seo": seo{ "title": coalesce(title[language == $lang][0].value, title[language == "nl"][0].value), "description": coalesce(description[language == $lang][0].value, description[language == "nl"][0].value), "shareImage": shareImage->{\n  _id,\n  "alt": coalesce(alt[language == $lang][0].value, alt[language == "nl"][0].value, ""),\n  image { asset->{ _id, url, metadata { lqip, dimensions { width, height, aspectRatio } } }, hotspot, crop }\n} }\n}': ABOUT_QUERY_RESULT;
     '*[_id == "faqPage"][0]{\n  "title": coalesce(title[language == $lang][0].value, title[language == "nl"][0].value),\n  "intro": coalesce(intro[language == $lang][0].value, intro[language == "nl"][0].value),\n  "groups": groups[]{ _key, "title": coalesce(title[language == $lang][0].value, title[language == "nl"][0].value), "items": items[]{ _key, "question": coalesce(question[language == $lang][0].value, question[language == "nl"][0].value), "answer": coalesce(answer[language == $lang][0].value, answer[language == "nl"][0].value) } },\n  "seo": seo{ "title": coalesce(title[language == $lang][0].value, title[language == "nl"][0].value), "description": coalesce(description[language == $lang][0].value, description[language == "nl"][0].value), "shareImage": shareImage->{\n  _id,\n  "alt": coalesce(alt[language == $lang][0].value, alt[language == "nl"][0].value, ""),\n  image { asset->{ _id, url, metadata { lqip, dimensions { width, height, aspectRatio } } }, hotspot, crop }\n} }\n}': FAQ_QUERY_RESULT;
     '{\n  "page": *[_id == "galleryPage"][0]{ "title": coalesce(title[language == $lang][0].value, title[language == "nl"][0].value), "intro": coalesce(intro[language == $lang][0].value, intro[language == "nl"][0].value), "seo": seo{ "title": coalesce(title[language == $lang][0].value, title[language == "nl"][0].value), "description": coalesce(description[language == $lang][0].value, description[language == "nl"][0].value), "shareImage": shareImage->{\n  _id,\n  "alt": coalesce(alt[language == $lang][0].value, alt[language == "nl"][0].value, ""),\n  image { asset->{ _id, url, metadata { lqip, dimensions { width, height, aspectRatio } } }, hotspot, crop }\n} } },\n  "photos": *[_type == "mediaItem" && showInGallery != false] | order(_createdAt desc){\n    ...{\n  _id,\n  "alt": coalesce(alt[language == $lang][0].value, alt[language == "nl"][0].value, ""),\n  image { asset->{ _id, url, metadata { lqip, dimensions { width, height, aspectRatio } } }, hotspot, crop }\n},\n    categories,\n    highlight\n  }\n}': GALLERY_QUERY_RESULT;
-    '*[_id == "contactPage"][0]{\n  "photo": photo->{\n  _id,\n  "alt": coalesce(alt[language == $lang][0].value, alt[language == "nl"][0].value, ""),\n  image { asset->{ _id, url, metadata { lqip, dimensions { width, height, aspectRatio } } }, hotspot, crop }\n},\n  "title": coalesce(title[language == $lang][0].value, title[language == "nl"][0].value),\n  "intro": coalesce(intro[language == $lang][0].value, intro[language == "nl"][0].value),\n  "subjects": string::split(coalesce(subjects[language == $lang][0].value, subjects[language == "nl"][0].value, ""), "\\n"),\n  "notifyLabel": coalesce(notifyLabel[language == $lang][0].value, notifyLabel[language == "nl"][0].value),\n  "seo": seo{ "title": coalesce(title[language == $lang][0].value, title[language == "nl"][0].value), "description": coalesce(description[language == $lang][0].value, description[language == "nl"][0].value), "shareImage": shareImage->{\n  _id,\n  "alt": coalesce(alt[language == $lang][0].value, alt[language == "nl"][0].value, ""),\n  image { asset->{ _id, url, metadata { lqip, dimensions { width, height, aspectRatio } } }, hotspot, crop }\n} },\n  "contact": *[_id == "settings"][0]{ email, phone }\n}': CONTACT_QUERY_RESULT;
+    '*[_id == "contactPage"][0]{\n  "photo": photo->{\n  _id,\n  "alt": coalesce(alt[language == $lang][0].value, alt[language == "nl"][0].value, ""),\n  image { asset->{ _id, url, metadata { lqip, dimensions { width, height, aspectRatio } } }, hotspot, crop }\n},\n  "title": coalesce(title[language == $lang][0].value, title[language == "nl"][0].value),\n  "intro": coalesce(intro[language == $lang][0].value, intro[language == "nl"][0].value),\n  "subjects": string::split(coalesce(subjects[language == $lang][0].value, subjects[language == "nl"][0].value, ""), "\\n"),\n  "notifyLabel": coalesce(notifyLabel[language == $lang][0].value, notifyLabel[language == "nl"][0].value),\n  "seo": seo{ "title": coalesce(title[language == $lang][0].value, title[language == "nl"][0].value), "description": coalesce(description[language == $lang][0].value, description[language == "nl"][0].value), "shareImage": shareImage->{\n  _id,\n  "alt": coalesce(alt[language == $lang][0].value, alt[language == "nl"][0].value, ""),\n  image { asset->{ _id, url, metadata { lqip, dimensions { width, height, aspectRatio } } }, hotspot, crop }\n} },\n  "contact": { email, phone }\n}': CONTACT_QUERY_RESULT;
     '*[_type == "legalPage" && _id == $id][0]{\n  "title": coalesce(title[language == $lang][0].value, title[language == "nl"][0].value),\n  "intro": coalesce(intro[language == $lang][0].value, intro[language == "nl"][0].value),\n  "sections": sections[]{ _key, "title": coalesce(title[language == $lang][0].value, title[language == "nl"][0].value), "text": coalesce(text[language == $lang][0].value, text[language == "nl"][0].value) },\n  updatedAt,\n  "seo": seo{ "title": coalesce(title[language == $lang][0].value, title[language == "nl"][0].value), "description": coalesce(description[language == $lang][0].value, description[language == "nl"][0].value), "shareImage": shareImage->{\n  _id,\n  "alt": coalesce(alt[language == $lang][0].value, alt[language == "nl"][0].value, ""),\n  image { asset->{ _id, url, metadata { lqip, dimensions { width, height, aspectRatio } } }, hotspot, crop }\n} }\n}': LEGAL_QUERY_RESULT;
   }
 }

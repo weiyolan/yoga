@@ -337,11 +337,10 @@ async function seed() {
     _type: "settings",
     siteName: "Yoga, Zen & Tonic",
     tagline: str(v2.tagline),
-    phone: "+32 477 74 42 40",
-    instagram: "https://www.instagram.com/",
-    facebook: "https://www.facebook.com/yogazentonic",
     seo: { ...seo("Yoga, Zen & Tonic", v2.seoDescription), shareImage: m("handstand") },
-    // Menu
+  });
+  await singleton("navigation", {
+    _type: "navigation",
     menuFounders: str(dict((d) => d.nav.founders)),
     menuFoundersSub: str(dict((d) => d.nav.foundersSub)),
     menuTeam: str(dict((d) => d.nav.team[1])),
@@ -349,13 +348,15 @@ async function seed() {
     menuCollaborators: str(dict((d) => d.nav.collaborators[1])),
     menuUpcoming: str(dict((d) => d.nav.upcoming[1])),
     menuPast: str(dict((d) => d.nav.past[1])),
-    // Formulieren
     newsletterTitle: str(dict((d) => d.footer.keepPosted)),
     newsletterThanks: str(dict((d) => d.footer.subscribed)),
-    contactThanks: str(dict((d) => d.contact.sent)),
+  });
+  await singleton("signupSettings", {
+    _type: "signupSettings",
     signupConsent: txt(dict((d) => d.signup.consent)),
     signupTerms: txt(dict((d) => d.signup.terms)),
     signupThanks: txt(dict((d) => d.signup.sent)),
+    autoConfirm: false,
   });
   await singleton("homePage", {
     _type: "homePage",
@@ -437,6 +438,10 @@ async function seed() {
     intro: txt(v2.contact.intro),
     subjects: lines(v2.contact.subjects.nl, v2.contact.subjects.en),
     notifyLabel: str({ nl: "Hou me op de hoogte van de volgende retreat", en: "Let me know about the next retreat" }),
+    contactThanks: str(dict((d) => d.contact.sent)),
+    phone: "+32 477 74 42 40",
+    instagram: "https://www.instagram.com/",
+    facebook: "https://www.facebook.com/yogazentonic",
   });
 
   // Starting point only: have it checked before going live.

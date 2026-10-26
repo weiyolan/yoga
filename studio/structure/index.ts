@@ -4,6 +4,8 @@ import { CogIcon } from "@sanity/icons/Cog";
 import { EarthGlobeIcon } from "@sanity/icons/EarthGlobe";
 import { ClipboardIcon } from "@sanity/icons/Clipboard";
 import { ComposeIcon } from "@sanity/icons/Compose";
+import { ControlsIcon } from "@sanity/icons/Controls";
+import { MenuIcon } from "@sanity/icons/Menu";
 import { HelpCircleIcon } from "@sanity/icons/HelpCircle";
 import { LockIcon } from "@sanity/icons/Lock";
 import { SparklesIcon } from "@sanity/icons/Sparkles";
@@ -47,7 +49,7 @@ function filtered(S: StructureBuilder, id: string, title: string, type: string, 
 
 /**
  * Main menu, in the order of daily work: what comes in → the main documents → the pages →
- * legal → settings (last). Every menu item has a stable id (Presentation & deep links).
+ * legal. Every menu item has a stable id (Presentation & deep links).
  */
 export const structure: StructureResolver = (S) =>
   S.list()
@@ -135,8 +137,19 @@ export const structure: StructureResolver = (S) =>
               S.documentTypeListItem("retreat").title("Alle retreats"),
             ]),
         ),
-      S.documentTypeListItem("signupForm").title("Inschrijfformulieren").icon(ClipboardIcon),
-      S.documentTypeListItem("confirmationMail").title("Bevestigingsmails").icon(ComposeIcon),
+      S.listItem()
+        .id("forms")
+        .title("Formulieren")
+        .icon(ClipboardIcon)
+        .child(
+          S.list()
+            .title("Formulieren")
+            .items([
+              singleton(S, "signupSettings", "Inschrijving: teksten & mails", ControlsIcon),
+              S.documentTypeListItem("signupForm").title("Inschrijfformulieren").icon(ClipboardIcon),
+              S.documentTypeListItem("confirmationMail").title("Bevestigingsmails").icon(ComposeIcon),
+            ]),
+        ),
       S.listItem()
         .id("lessons")
         .title("Lessen")
@@ -189,6 +202,7 @@ export const structure: StructureResolver = (S) =>
 
       /* ---- 3. pages ---- */
       S.divider().title("Pagina's"),
+      singleton(S, "settings", "Algemeen", CogIcon),
       singleton(S, "homePage", "Home", HomeIcon),
       singleton(S, "retreatsPage", "Retreats (pagina)", EarthGlobeIcon),
       singleton(S, "lessonsPage", "Lessen (pagina)", ActivityIcon),
@@ -196,6 +210,7 @@ export const structure: StructureResolver = (S) =>
       singleton(S, "galleryPage", "Gallery", ImagesIcon),
       singleton(S, "faqPage", "Veelgestelde vragen", HelpCircleIcon),
       singleton(S, "contactPage", "Contact", EnvelopeIcon),
+      singleton(S, "navigation", "Menu & footer", MenuIcon),
 
       /* ---- 4. legal ---- */
       S.listItem()
@@ -207,8 +222,4 @@ export const structure: StructureResolver = (S) =>
             .title("Juridisch")
             .items(LEGAL_PAGES.map((p) => S.listItem().id(p.id).title(p.title).icon(LockIcon).child(S.document().schemaType("legalPage").documentId(p.id).title(p.title)))),
         ),
-
-      /* ---- 5. settings, last ---- */
-      S.divider(),
-      singleton(S, "settings", "Instellingen", CogIcon),
     ]);

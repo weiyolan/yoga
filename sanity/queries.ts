@@ -117,45 +117,52 @@ const STYLE = `{
   "studios": studios[]->name
 }` as const;
 
-/** Header, mobile menu and footer: settings + the bits the menus show. */
+/** A localized field of another (singleton) document: `of("navigation", "menuPast")`. */
+// (spelled out instead of calling t(): typegen can't follow a helper inside a helper)
+const of = <I extends string, F extends string>(id: I, field: F) =>
+  `*[_id == "${id}"][0]{ "v": coalesce(${field}[language == $lang][0].value, ${field}[language == "${defaultLanguage}"][0].value) }.v` as const;
+/** Contact & social live on the Contact page (also used by the footer, the menu and the forms). */
+const CONTACT = `"email": *[_id == "contactPage"][0].email,
+  "phone": *[_id == "contactPage"][0].phone,
+  "instagram": *[_id == "contactPage"][0].instagram,
+  "facebook": *[_id == "contactPage"][0].facebook` as const;
+
+/**
+ * Header, mobile menu, footer and forms: Algemeen (`settings`) + Contact & social (Contact page) +
+ * Menu & footer (`navigation`) + Formulieren → Inschrijving (`signupSettings`).
+ */
 export const LAYOUT_QUERY = defineQuery(`*[_id == "settings"][0]{
   siteName,
   "tagline": ${t("tagline")},
-  email,
-  phone,
-  instagram,
-  facebook,
+  ${CONTACT},
   "nextRetreat": *[_type == "retreat" && ${UPCOMING}] | order(startDate asc)[0]${RETREAT_CARD},
   "styles": *[_type == "yogaClass"] | order(orderRank asc){ _id, name, "slug": slug.current, "what": ${t("what")} },
   "studios": *[_type == "studio"] | order(name asc).name,
   "galleryCategories": array::unique(*[_type == "mediaItem" && showInGallery != false].categories[]),
   "foundersPhoto": *[_id == "homePage"][0].aboutPhoto->${MEDIA},
   "texts": {
-    "menuFounders": ${t("menuFounders")},
-    "menuFoundersSub": ${t("menuFoundersSub")},
-    "menuTeam": ${t("menuTeam")},
-    "menuDrive": ${t("menuDrive")},
-    "menuCollaborators": ${t("menuCollaborators")},
-    "menuUpcoming": ${t("menuUpcoming")},
-    "menuPast": ${t("menuPast")},
-    "newsletterTitle": ${t("newsletterTitle")},
-    "newsletterThanks": ${t("newsletterThanks")},
-    "contactThanks": ${t("contactThanks")},
-    "signupConsent": ${t("signupConsent")},
-    "signupTerms": ${t("signupTerms")},
-    "signupThanks": ${t("signupThanks")}
+    "menuFounders": ${of("navigation", "menuFounders")},
+    "menuFoundersSub": ${of("navigation", "menuFoundersSub")},
+    "menuTeam": ${of("navigation", "menuTeam")},
+    "menuDrive": ${of("navigation", "menuDrive")},
+    "menuCollaborators": ${of("navigation", "menuCollaborators")},
+    "menuUpcoming": ${of("navigation", "menuUpcoming")},
+    "menuPast": ${of("navigation", "menuPast")},
+    "newsletterTitle": ${of("navigation", "newsletterTitle")},
+    "newsletterThanks": ${of("navigation", "newsletterThanks")},
+    "contactThanks": ${of("contactPage", "contactThanks")},
+    "signupConsent": ${of("signupSettings", "signupConsent")},
+    "signupTerms": ${of("signupSettings", "signupTerms")},
+    "signupThanks": ${of("signupSettings", "signupThanks")}
   },
-  notifyEmail,
-  "autoConfirm": autoConfirm == true
+  "notifyEmail": *[_id == "signupSettings"][0].notifyEmail,
+  "autoConfirm": *[_id == "signupSettings"][0].autoConfirm == true
 }`);
 
 export const SETTINGS_QUERY = defineQuery(`*[_id == "settings"][0]{
   siteName,
   "tagline": ${t("tagline")},
-  email,
-  phone,
-  instagram,
-  facebook,
+  ${CONTACT},
   "seo": seo${SEO}
 }`);
 
@@ -315,7 +322,7 @@ export const CONTACT_QUERY = defineQuery(`*[_id == "contactPage"][0]{
   "subjects": ${lines("subjects")},
   "notifyLabel": ${t("notifyLabel")},
   "seo": seo${SEO},
-  "contact": *[_id == "settings"][0]{ email, phone }
+  "contact": { email, phone }
 }`);
 
 /** A legal page (privacy, terms, cancellation, cookies) by its fixed id (studio LEGAL_PAGES). */

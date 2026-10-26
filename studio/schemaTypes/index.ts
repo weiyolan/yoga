@@ -21,10 +21,12 @@ import { homePage } from "./singletons/home-page";
 import { legalPage } from "./singletons/legal-page";
 import { lessonsPage } from "./singletons/lessons-page";
 import { retreatsPage } from "./singletons/retreats-page";
+import { navigation } from "./singletons/navigation";
 import { settings } from "./singletons/settings";
+import { signupSettings } from "./singletons/signup-settings";
 
 /** Singleton types: one document each, fixed `_id` = type name (see structure/). */
-export const SINGLETONS = [settings, homePage, retreatsPage, lessonsPage, aboutPage, galleryPage, faqPage, contactPage].map((t) => t.name);
+export const SINGLETONS = [settings, navigation, signupSettings, homePage, retreatsPage, lessonsPage, aboutPage, galleryPage, faqPage, contactPage].map((t) => t.name);
 
 /** Fixed-id pages that aren't singletons by type: one `legalPage` per legal page (LEGAL_PAGES). */
 export const FIXED_TYPES = [legalPage.name];
@@ -53,6 +55,8 @@ export const schemaTypes = [
   subscriber,
   // singletons
   settings,
+  navigation,
+  signupSettings,
   homePage,
   retreatsPage,
   lessonsPage,

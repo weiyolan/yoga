@@ -25,12 +25,12 @@ const keep = (data: FormData, state: FormState): FormState =>
 const EMAIL = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 const field = (data: FormData, name: string, max = 5000) => String(data.get(name) ?? "").trim().slice(0, max);
 
-/** Recipient: CONTACT_TO, else Sanity → Instellingen → Formulieren → Meldingen naar, else the contact e-mail. */
+/** Recipient: CONTACT_TO, else Studio → Formulieren → Inschrijving → “Meldingen naar”, else the Contact page e-mail. */
 async function recipient() {
   const settings = await sanityFetch({ query: LAYOUT_QUERY });
   const to = process.env.CONTACT_TO || settings?.notifyEmail || settings?.email;
   if (!to && !mailConfigured()) return "(dev: no recipient)";
-  if (!to) throw new Error("No recipient: set CONTACT_TO or the e-mail in Sanity → Instellingen");
+  if (!to) throw new Error("No recipient: set CONTACT_TO or the e-mail on the Contact page in Sanity");
   return to;
 }
 
@@ -58,7 +58,7 @@ const subscriberDoc = (email: string, lang: string, source: "footer" | "contact"
 
 /**
  * Team notification (“Inschrijving”, “Bericht”, …). With a mail transport (lib/mail.ts): mailed to
- * Instellingen → “Meldingen naar”. Deployed on Netlify without one: handed back to the browser,
+ * Formulieren → Inschrijving → “Meldingen naar”. Deployed on Netlify without one: handed back to the browser,
  * which posts it to Netlify Forms (components/Forms.tsx); Netlify mails it to the addresses under
  * Forms → Form notifications. Else (local dev): logged.
  */
@@ -125,7 +125,7 @@ async function subscribeInner(data: FormData): Promise<FormState> {
 
 /**
  * Retreat sign-up (its own page, /retreats/<slug>/inschrijven): stored as a `signup` document
- * (Studio → Inschrijvingen), then a mail to the team and, when Instellingen → “Bevestigingsmail
+ * (Studio → Inschrijvingen), then a mail to the team and, when Formulieren → Inschrijving → “Bevestigingsmail
  * automatisch versturen” is on, the retreat's confirmation mail to the participant (Studio → Bevestigingsmails).
  * Always one person. The retreat's sign-up form adds questions; their labels and answers are stored
  * as a snapshot (in Dutch, for Rita & Philippe), so editing the form later never changes old sign-ups.

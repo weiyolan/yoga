@@ -9,7 +9,7 @@ const VARS = "Gebruik {naam}, {retreat} en {datum}; die worden ingevuld.";
 /**
  * Bevestigingsmail: what a participant gets after signing up (lib/confirmation.ts). A retreat picks
  * one (`retreat.confirmationMail`); empty = the one marked “Standaard”. Shared by retreats of the
- * same kind, like the sign-up forms. Sent automatically only when Instellingen → Formulieren →
+ * same kind, like the sign-up forms. Sent automatically only when Formulieren → Inschrijving →
  * “Automatisch versturen” is on; otherwise “Bevestigingsmail” on a sign-up opens it in your mail app.
  */
 export const confirmationMail = defineType({
