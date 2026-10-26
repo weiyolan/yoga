@@ -1,7 +1,6 @@
 import { ActivityIcon } from "@sanity/icons/Activity";
 import { CalendarIcon } from "@sanity/icons/Calendar";
 import { CogIcon } from "@sanity/icons/Cog";
-import { EarthGlobeIcon } from "@sanity/icons/EarthGlobe";
 import { ClipboardIcon } from "@sanity/icons/Clipboard";
 import { ComposeIcon } from "@sanity/icons/Compose";
 import { ControlsIcon } from "@sanity/icons/Controls";
@@ -27,12 +26,10 @@ import { Help } from "../components/Help";
 import { Placeholders } from "../components/Placeholders";
 import { countBadgeIcon } from "../components/CountBadgeIcon";
 import { SignupTable } from "../components/SignupTable";
+import { RetreatList, RETREATS_PAGE_ID } from "../components/RetreatList";
 import { apiVersion, defaultLanguage } from "../../sanity/site.config";
 import { MEDIA_CATEGORIES } from "../schemaTypes/documents/media-item";
 import { LEGAL_PAGES } from "../schemaTypes/singletons/legal-page";
-
-/** Same rule as the frontend queries: a retreat is upcoming until its last day is over. */
-const UPCOMING = `dateTime(endDate + "T23:59:59Z") >= dateTime(now())`;
 
 function singleton(S: StructureBuilder, type: string, title: string, icon?: ComponentType) {
   return S.listItem()
@@ -126,19 +123,16 @@ export const structure: StructureResolver = (S) =>
 
       /* ---- 2. main documents ---- */
       S.divider().title("Inhoud"),
+      // every retreat at once, filtered by chips; the Retreats page is the first row (components/RetreatList.tsx)
       S.listItem()
         .id("retreats")
         .title("Retreats")
         .icon(CalendarIcon)
         .child(
-          S.list()
+          S.component(RetreatList)
+            .id("retreats")
             .title("Retreats")
-            .items([
-              filtered(S, "retreats-upcoming", "Komend", "retreat", UPCOMING, [{ field: "startDate", direction: "asc" }]),
-              filtered(S, "retreats-past", "Voorbij", "retreat", `!(${UPCOMING})`, [{ field: "startDate", direction: "desc" }]),
-              S.divider(),
-              S.documentTypeListItem("retreat").title("Alle retreats"),
-            ]),
+            .child((id) => (id === RETREATS_PAGE_ID ? S.document().schemaType("retreatsPage").documentId("retreatsPage").title("Retreats-pagina") : S.document().schemaType("retreat").documentId(id))),
         ),
       S.listItem()
         .id("forms")
@@ -161,6 +155,8 @@ export const structure: StructureResolver = (S) =>
           S.list()
             .title("Lessen")
             .items([
+              singleton(S, "lessonsPage", "Lessen-pagina", ActivityIcon),
+              S.divider(),
               S.documentTypeListItem("yogaClass").title("Stijlen"),
               S.documentTypeListItem("studio").title("Studio's"),
             ]),
@@ -207,8 +203,6 @@ export const structure: StructureResolver = (S) =>
       S.divider().title("Pagina's"),
       singleton(S, "settings", "Algemeen", CogIcon),
       singleton(S, "homePage", "Home", HomeIcon),
-      singleton(S, "retreatsPage", "Retreats (pagina)", EarthGlobeIcon),
-      singleton(S, "lessonsPage", "Lessen (pagina)", ActivityIcon),
       singleton(S, "aboutPage", "Over ons", UsersIcon),
       singleton(S, "galleryPage", "Gallery", ImagesIcon),
       singleton(S, "faqPage", "Veelgestelde vragen", HelpCircleIcon),
