@@ -157,7 +157,7 @@ async function subscribeWithWelcome(doc: Subscriber) {
  * Team notification (“Inschrijving”, “Bericht”, …). With a mail transport (lib/mail.ts): mailed to
  * Mails → Opties → “Meldingen naar”. Deployed on Netlify without one: handed back to the browser,
  * which posts it to Netlify Forms (components/Forms.tsx); Netlify mails it to the addresses under
- * Forms → Form notifications. Else (local dev): logged.
+ * Forms → Form notifications. Also when the mail provider fails on Netlify (fallback). Else (local dev): logged.
  */
 function toTeam({
   soort,
@@ -182,20 +182,36 @@ function toTeam({
         bericht: mailText(content),
       },
     };
-  return {
-    step: recipient().then((to) =>
-      sendMail({ to, replyTo: email, subject, ...content }),
-    ),
+  const team: { step: Promise<unknown>; notify?: Notify } = {
+    step: recipient()
+      .then((to) => sendMail({ to, replyTo: email, subject, ...content }))
+      .catch((err) => {
+        // the mail provider failed (e.g. Resend domain not verified): on Netlify, Netlify Forms takes over
+        if (process.env.NETLIFY_FORMS !== "1") throw err;
+        console.error(
+          `${soort}: team mail failed, via Netlify Forms instead`,
+          err,
+        );
+        team.notify = {
+          soort,
+          subject,
+          naam: name ?? "",
+          email,
+          bericht: mailText(content),
+        };
+      }),
   };
+  return team;
 }
 
 /** Runs each step; the form succeeds if at least one of them did (stored or the team notified). */
 async function anyOf(
   label: string,
   steps: Promise<unknown>[],
-  notify?: Notify,
+  team?: { notify?: Notify },
 ): Promise<FormState> {
   const results = await Promise.allSettled(steps);
+  const notify = team?.notify; // set once the team mail settled (Netlify Forms fallback)
   for (const r of results)
     if (r.status === "rejected") console.error(label, r.reason);
   return results.some((r) => r.status === "fulfilled")
@@ -286,7 +302,7 @@ async function sendContactInner(data: FormData): Promise<FormState> {
         : []),
       team.step,
     ],
-    team.notify,
+    team,
   );
   return receipt(state, email, r.contactSubject, {
     heading: r.contactHeading,
@@ -324,7 +340,7 @@ async function subscribeInner(data: FormData): Promise<FormState> {
       subscribeWithWelcome(subscriberDoc(email, langOf(data), "footer", name)),
       team.step,
     ],
-    team.notify,
+    team,
   );
 }
 
@@ -569,7 +585,7 @@ async function interest(
       subscribeWithWelcome(subscriberDoc(email, lang, "signup", name)),
       team.step,
     ],
-    team.notify,
+    team,
   );
 }
 
@@ -641,7 +657,7 @@ async function sendReviewInner(data: FormData): Promise<FormState> {
       }),
       team.step,
     ],
-    team.notify,
+    team,
   );
   return receipt(state, email, r.reviewSubject, {
     heading: r.reviewHeading,
@@ -755,7 +771,7 @@ async function requestClassInner(data: FormData): Promise<FormState> {
         : []),
       team.step,
     ],
-    team.notify,
+    team,
   );
   return receipt(state, email, r.classSubject(slot.style?.name ?? theirs), {
     heading: r.classHeading,

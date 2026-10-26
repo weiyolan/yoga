@@ -1,4 +1,4 @@
-import { DivingMask, YogaBlock } from "@/components/icons";
+import { DivingMask, YogaMat } from "@/components/icons";
 import { Photo } from "@/components/Photo";
 import { RichText } from "@/components/RichText";
 import { Hero, SectionHead } from "@/components/sections";
@@ -32,7 +32,7 @@ export default async function About({ params }: PageProps<"/[lang]/over-ons">) {
   const lang = await langParam(params);
   const page = await sanityFetch({ query: ABOUT_QUERY, lang });
   const t = getDictionary(lang).about;
-  const objects = [YogaBlock, DivingMask];
+  const objects = [YogaMat, DivingMask];
 
   return (
     <>
