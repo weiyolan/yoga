@@ -203,6 +203,31 @@ async function anyOf(
     : { status: "error" };
 }
 
+/**
+ * “We got it” mail to whoever sent a form (in their language, replies go to the team). Only once the
+ * form went through and a mail provider is set up (Resend: on a verified domain, else it only reaches
+ * the account's own address); a failing mail is logged, never fails the form.
+ */
+async function receipt(
+  state: FormState,
+  to: string,
+  subject: string,
+  content: MailContent,
+) {
+  if (state.status !== "sent" || !mailConfigured()) return state;
+  try {
+    const layout = await sanityFetch({ query: LAYOUT_QUERY });
+    const replyTo =
+      (process.env.CONTACT_TO || layout?.notifyEmail)?.split(",")[0]?.trim() ||
+      layout?.email ||
+      undefined;
+    await sendMail({ to, replyTo, subject, ...content });
+  } catch (err) {
+    console.error("receipt mail", to, err);
+  }
+  return state;
+}
+
 const langOf = (data: FormData) => (data.get("lang") === "en" ? "en" : "nl");
 
 /** Contact page form. `website` is a honeypot: bots fill it, people never see it. */
@@ -228,16 +253,20 @@ async function sendContactInner(data: FormData): Promise<FormState> {
     name,
     email,
     subject: `Website: ${subject || "bericht"} (${name})`,
-    text: [
-      `Naam: ${name}`,
-      `E-mail: ${email}`,
-      `Onderwerp: ${subject || "-"}`,
-      `Op de hoogte houden: ${notify ? "ja" : "nee"}`,
-      "",
-      message,
-    ].join("\n"),
+    heading: `Nieuw bericht van ${name}`,
+    text: message,
+    rows: [
+      ["Naam", name],
+      ["E-mail", email],
+      ["Onderwerp", subject],
+      ["Nieuwsbrief", notify ? "ja" : "nee"],
+      ["Taal", lang],
+    ],
+    footnote:
+      "Antwoord gewoon op deze mail. Staat in de Studio → Contactformulier.",
   });
-  return anyOf(
+  const r = getDictionary(lang).receipt;
+  const state = await anyOf(
     "contact form",
     [
       store({
@@ -259,6 +288,14 @@ async function sendContactInner(data: FormData): Promise<FormState> {
     ],
     team.notify,
   );
+  return receipt(state, email, r.contactSubject, {
+    heading: r.contactHeading,
+    text: r.contactBody(name),
+    rows: [
+      ...(subject ? [[r.subject, subject] as [string, string]] : []),
+      [r.yours, message],
+    ],
+  });
 }
 
 /** Footer "Hou me op de hoogte": stored as a subscriber (Studio → Contactboek), a confirmation mail to them + a mail to the team. */
@@ -574,18 +611,20 @@ async function sendReviewInner(data: FormData): Promise<FormState> {
     name,
     email,
     subject: `Nieuwe review ${"★".repeat(rating)}: ${retreat.title ?? "retreat"} (${name})`,
-    text: [
-      `Retreat: ${retreat.title}`,
-      `Naam: ${name}`,
-      `E-mail: ${email}`,
-      `Score: ${rating}/5`,
-      "",
-      text,
-      "",
-      "Keur goed of weiger in de Studio → Reviews.",
-    ].join("\n"),
+    heading: `Nieuwe review: ${"★".repeat(rating)}${"☆".repeat(5 - rating)}`,
+    photo: retreat.photo,
+    text,
+    rows: [
+      ["Retreat", retreat.title ?? ""],
+      ["Naam", name],
+      ["E-mail", email],
+      ["Score", `${rating}/5`],
+      ["Taal", lang],
+    ],
+    footnote: "Keur goed of weiger in de Studio → Reviews.",
   });
-  return anyOf(
+  const r = getDictionary(lang).receipt;
+  const state = await anyOf(
     "review form",
     [
       store({
@@ -604,6 +643,16 @@ async function sendReviewInner(data: FormData): Promise<FormState> {
     ],
     team.notify,
   );
+  return receipt(state, email, r.reviewSubject, {
+    heading: r.reviewHeading,
+    photo: retreat.photo,
+    text: r.reviewBody(name, retreat.title ?? "retreat"),
+    rows: [
+      [r.retreat, retreat.title ?? ""],
+      [r.score, `${"★".repeat(rating)}${"☆".repeat(5 - rating)}`],
+      [r.yours, text],
+    ],
+  });
 }
 
 /**
@@ -652,6 +701,17 @@ async function requestClassInner(data: FormData): Promise<FormState> {
     .filter(Boolean)
     .join(" · ");
   const subject = `Les: ${title}`;
+  const r = getDictionary(lang).receipt;
+  const wishKey = field(data, "wish", 20);
+  const days: Record<string, string> = getDictionary(lang).lessons.days;
+  // the class as they saw it, in their language (Yin yoga · Di 19:30 · Studio)
+  const theirs = [
+    slot.style?.name,
+    `${days[slot.day ?? ""] ?? ""} ${slot.startTime ?? ""}`.trim(),
+    slot.studio?.name,
+  ]
+    .filter(Boolean)
+    .join(" · ");
   const team = toTeam({
     soort: "Les",
     name,
@@ -674,7 +734,7 @@ async function requestClassInner(data: FormData): Promise<FormState> {
     ],
     footnote: "Staat in de Studio → Contactformulier.",
   });
-  return anyOf(
+  const state = await anyOf(
     "class request",
     [
       store({
@@ -697,4 +757,13 @@ async function requestClassInner(data: FormData): Promise<FormState> {
     ],
     team.notify,
   );
+  return receipt(state, email, r.classSubject(slot.style?.name ?? theirs), {
+    heading: r.classHeading,
+    text: r.classBody(name, theirs),
+    rows: [
+      [r.lesson, theirs],
+      [r.wish, r.wishes[wishKey] ?? r.wishes.question],
+      ...(message ? [[r.yours, message] as [string, string]] : []),
+    ],
+  });
 }
