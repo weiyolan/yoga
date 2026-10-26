@@ -263,10 +263,10 @@ blockquote { margin: 0 auto; max-width: 30ch; font: clamp(1.6rem, 3vw, 2.4rem)/1
 /* “On this page”: links with a line that fills as you scroll (components/Toc.tsx) */
 .toc { margin-top: 26px; padding-top: 20px; border-top: 1px solid var(--line); }
 .toc-label { display: block; font: 600 .68rem/1 var(--sans); letter-spacing: .16em; text-transform: uppercase; color: var(--ink-soft); margin-bottom: 12px; }
-/* dots centred on a 1px line, 7px from the left; rows 40px high (dot + line ends at 20px) */
-.toc-body { position: relative; padding-left: 26px; --dot-x: 7px; }
-.toc-line { position: absolute; left: calc(var(--dot-x) - .5px); top: 20px; bottom: 20px; width: 1px; height: calc(100% - 40px); overflow: visible; }
-.toc-line line { stroke-width: 1; vector-effect: non-scaling-stroke; } .toc-line .track { stroke: var(--line); } .toc-line .fill { stroke: var(--ember); transition: stroke-dashoffset .2s linear; }
+/* dots (odd sizes) centred on a 1px line at 6–7px, so both land on whole pixels; rows 40px high (dot + line ends at 20px) */
+.toc-body { position: relative; padding-left: 26px; --dot-x: 6.5px; }
+.toc-line { position: absolute; left: calc(var(--dot-x) - .5px); top: 20px; bottom: 20px; width: 1px; background: var(--line); }
+.toc-line .fill { position: absolute; inset: 0; background: var(--ember); transform-origin: top; transition: transform .2s linear; }
 .toc ol { list-style: none; padding: 0; margin: 0; display: grid; }
 .toc li { position: relative; }
 /* upcoming: small hollow dot · passed: small ember dot · current: ember ring with a dot (the menu button's mark) */
@@ -274,7 +274,7 @@ blockquote { margin: 0 auto; max-width: 30ch; font: clamp(1.6rem, 3vw, 2.4rem)/1
 .toc li::before { width: 7px; height: 7px; background: var(--bg); box-shadow: inset 0 0 0 1px var(--line); }
 .toc li.done::before { width: 5px; height: 5px; background: var(--ember); box-shadow: none; }
 .toc li.on::before { width: 13px; height: 13px; background: var(--bg); box-shadow: inset 0 0 0 1px var(--ember); }
-.toc li.on::after { width: 4px; height: 4px; background: var(--ember); }
+.toc li.on::after { width: 5px; height: 5px; background: var(--ember); }
 .toc a { display: flex; justify-content: space-between; align-items: center; gap: 10px; padding: 8px 0; line-height: 24px; font-size: .9rem; color: var(--ink-soft); text-decoration: none; transition: color .2s; }
 .toc a .ic { width: 15px; height: 15px; opacity: .45; transform: translateX(-4px); transition: transform .25s var(--ease), opacity .25s; }
 .toc a:hover, .toc a:focus-visible, .toc li.on a { color: var(--ink); } .toc li.on a { font-weight: 600; }
@@ -495,6 +495,24 @@ body.has-cursor :is(input:not([type=checkbox]):not([type=radio]), textarea, [con
 .lb-prev { left: 18px; top: 50%; transform: translateY(-50%); }
 .lb-next { right: 18px; top: 50%; transform: translateY(-50%); }
 @media (max-width: 700px) { .lb-prev, .lb-next { top: auto; bottom: 18px; transform: none; } }
+
+/* Home: quotes slider (components/Testimonials.tsx) */
+.quotes-head { display: flex; align-items: center; justify-content: space-between; gap: 16px; margin-bottom: 22px; }
+.quotes-head .label { margin: 0; }
+.quotes-nav { display: flex; gap: 8px; }
+.quotes-nav button { width: 44px; height: 44px; border-radius: 50%; border: 1px solid var(--line); background: transparent; color: var(--ink); display: grid; place-items: center; cursor: pointer; transition: border-color .2s, opacity .2s; }
+.quotes-nav button:hover:not(:disabled) { border-color: var(--ink); }
+.quotes-nav button:disabled { opacity: .35; cursor: default; }
+.quotes-nav .ic { width: 18px; height: 18px; } .quotes-nav .flip { transform: scaleX(-1); }
+.quotes-track { display: grid; grid-auto-flow: column; grid-auto-columns: calc((100% - 2 * 24px) / 3); gap: 24px; overflow-x: auto; scroll-snap-type: x mandatory; scrollbar-width: none; overscroll-behavior-x: contain; outline: none; }
+.quotes-track::-webkit-scrollbar { display: none; }
+.quote { scroll-snap-align: start; margin: 0; padding: 28px 26px 24px; background: var(--bg-2); border-top: 2px solid var(--ember); display: flex; flex-direction: column; min-width: 0; }
+section.alt .quote { background: var(--bg); }
+.quote .rating { margin: 0 0 12px; font-size: .9rem; }
+.quote blockquote { margin: 0; max-width: none; text-align: left; font: 1.25rem/1.4 var(--serif); white-space: pre-line; display: -webkit-box; -webkit-line-clamp: 9; -webkit-box-orient: vertical; overflow: hidden; }
+.quote figcaption { margin-top: auto; padding-top: 18px; }
+@media (max-width: 1000px) { .quotes-track { grid-auto-columns: calc((100% - 24px) / 2); } }
+@media (max-width: 700px) { .quotes-track { grid-auto-columns: 86%; gap: 14px; } .quotes-nav { display: none; } .quote { padding: 24px 20px 20px; } }
 
 /* testimonial dots are buttons (bigger hit area, same 7px dot) */
 .dots button { width: 23px; height: 23px; padding: 8px; border: 0; background: none; cursor: pointer; }

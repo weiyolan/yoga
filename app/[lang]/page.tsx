@@ -47,7 +47,7 @@ export default async function Home({ params }: PageProps<"/[lang]">) {
       context: r.context,
       rating: r.rating,
     })),
-  ].slice(0, 6);
+  ].slice(0, 12);
   const f = page?.featuredRetreat;
   const cards = page?.upcomingRetreats ?? [];
   const handle = layout?.instagram?.match(/instagram\.com\/([^/?#]+)/)?.[1];

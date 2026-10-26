@@ -193,7 +193,7 @@ export const HOME_QUERY = defineQuery(`*[_id == "homePage"][0]{
   "studios": *[_type == "studio"] | order(name asc){ _id, name, website },
   "instagram": *[_type == "mediaItem" && highlight == true] | order(_createdAt desc)[0...6]${MEDIA},
   "testimonials": testimonials[]->${TESTIMONIAL},
-  "reviews": *[_type == "review" && rating >= 4 && !(_id in path("drafts.**"))] | order(submittedAt desc)[0...3]${REVIEW},
+  "reviews": *[_type == "review" && rating >= 4 && !(_id in path("drafts.**"))] | order(submittedAt desc)[0...12]${REVIEW},
   "aboutTitle": ${t("aboutTitle")},
   "aboutText": ${t("aboutText")},
   "introLink": ${t("introLink")},

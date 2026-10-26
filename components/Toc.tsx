@@ -60,19 +60,9 @@ export function Toc({
     <nav className="toc" aria-label={label}>
       <span className="toc-label">{label}</span>
       <div className="toc-body">
-        <svg className="toc-line" aria-hidden="true" preserveAspectRatio="none">
-          <line x1="0.5" y1="0" x2="0.5" y2="100%" className="track" />
-          <line
-            x1="0.5"
-            y1="0"
-            x2="0.5"
-            y2="100%"
-            className="fill"
-            pathLength={1}
-            strokeDasharray="1 1"
-            strokeDashoffset={1 - progress}
-          />
-        </svg>
+        <span className="toc-line" aria-hidden="true">
+          <span className="fill" style={{ transform: `scaleY(${progress})` }} />
+        </span>
         <ol>
           {items.map(([id, text], i) => (
             <li
