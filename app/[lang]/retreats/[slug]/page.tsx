@@ -74,7 +74,6 @@ export async function generateMetadata({
       retreat.nutshellTitle,
       retreat.nutshellText,
     ),
-    fallbackImage: retreat.hero?.photo ?? retreat.cardPhoto,
     type: "article",
   });
 }

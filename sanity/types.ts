@@ -4450,6 +4450,371 @@ export type LEGAL_QUERY_RESULT = {
   } | null;
 } | null;
 
+// Source: ../sanity/queries.ts
+// Variable: OG_QUERY
+// Query: {  "site": *[_id == "settings"][0]{ siteName, "tagline": coalesce(tagline[language == $lang][0].value, tagline[language == "nl"][0].value), "share": seo.shareImage->{  _id,  "alt": coalesce(alt[language == $lang][0].value, alt[language == "nl"][0].value, ""),  image { asset->{ _id, url, metadata { lqip, dimensions { width, height, aspectRatio } } }, hotspot, crop }} },  "page": *[_id == $id][0]{    "seoTitle": coalesce(seo.title[language == $lang][0].value, seo.title[language == "nl"][0].value),    "title": coalesce(coalesce(hero.title[language == $lang][0].value, hero.title[language == "nl"][0].value), coalesce(title[language == $lang][0].value, title[language == "nl"][0].value)),    "subtitle": coalesce(coalesce(hero.subtitle[language == $lang][0].value, hero.subtitle[language == "nl"][0].value), coalesce(intro[language == $lang][0].value, intro[language == "nl"][0].value)),    "share": seo.shareImage->{  _id,  "alt": coalesce(alt[language == $lang][0].value, alt[language == "nl"][0].value, ""),  image { asset->{ _id, url, metadata { lqip, dimensions { width, height, aspectRatio } } }, hotspot, crop }},    "photo": coalesce(hero.photo, photo)->{  _id,  "alt": coalesce(alt[language == $lang][0].value, alt[language == "nl"][0].value, ""),  image { asset->{ _id, url, metadata { lqip, dimensions { width, height, aspectRatio } } }, hotspot, crop }}  },  "retreat": *[_type == "retreat" && slug.current == $slug][0]{    "title": coalesce(title[language == $lang][0].value, title[language == "nl"][0].value),    startDate,    endDate,    "place": coalesce(place[language == $lang][0].value, place[language == "nl"][0].value),    "country": coalesce(country[language == $lang][0].value, country[language == "nl"][0].value),    priceFrom,    capacity,    booked,    "share": seo.shareImage->{  _id,  "alt": coalesce(alt[language == $lang][0].value, alt[language == "nl"][0].value, ""),  image { asset->{ _id, url, metadata { lqip, dimensions { width, height, aspectRatio } } }, hotspot, crop }},    "photo": coalesce(hero.photo, cardPhoto)->{  _id,  "alt": coalesce(alt[language == $lang][0].value, alt[language == "nl"][0].value, ""),  image { asset->{ _id, url, metadata { lqip, dimensions { width, height, aspectRatio } } }, hotspot, crop }}  },  "fallback": *[_type == "mediaItem" && highlight == true] | order(_createdAt desc)[0]{  _id,  "alt": coalesce(alt[language == $lang][0].value, alt[language == "nl"][0].value, ""),  image { asset->{ _id, url, metadata { lqip, dimensions { width, height, aspectRatio } } }, hotspot, crop }}}
+export type OG_QUERY_RESULT = {
+  site:
+    | {
+        siteName: null;
+        tagline: null;
+        share: null;
+      }
+    | {
+        siteName: null;
+        tagline: string | null;
+        share: null;
+      }
+    | {
+        siteName: null;
+        tagline: null;
+        share: {
+          _id: string;
+          alt: string | "";
+          image: {
+            asset: {
+              _id: string;
+              url: string | null;
+              metadata: {
+                lqip: string | null;
+                dimensions: {
+                  width: number | null;
+                  height: number | null;
+                  aspectRatio: number | null;
+                } | null;
+              } | null;
+            } | null;
+            hotspot: SanityImageHotspot | null;
+            crop: SanityImageCrop | null;
+          } | null;
+        } | null;
+      }
+    | {
+        siteName: string | null;
+        tagline: string | null;
+        share: {
+          _id: string;
+          alt: string | "";
+          image: {
+            asset: {
+              _id: string;
+              url: string | null;
+              metadata: {
+                lqip: string | null;
+                dimensions: {
+                  width: number | null;
+                  height: number | null;
+                  aspectRatio: number | null;
+                } | null;
+              } | null;
+            } | null;
+            hotspot: SanityImageHotspot | null;
+            crop: SanityImageCrop | null;
+          } | null;
+        } | null;
+      }
+    | null;
+  page:
+    | {
+        seoTitle: null;
+        title: null;
+        subtitle: null;
+        share: null;
+        photo: null;
+      }
+    | {
+        seoTitle: null;
+        title: null;
+        subtitle: string | null;
+        share: null;
+        photo: null;
+      }
+    | {
+        seoTitle: string | null;
+        title: null;
+        subtitle: null;
+        share: {
+          _id: string;
+          alt: string | "";
+          image: {
+            asset: {
+              _id: string;
+              url: string | null;
+              metadata: {
+                lqip: string | null;
+                dimensions: {
+                  width: number | null;
+                  height: number | null;
+                  aspectRatio: number | null;
+                } | null;
+              } | null;
+            } | null;
+            hotspot: SanityImageHotspot | null;
+            crop: SanityImageCrop | null;
+          } | null;
+        } | null;
+        photo: null;
+      }
+    | {
+        seoTitle: string | null;
+        title: string | null;
+        subtitle: string | null;
+        share: {
+          _id: string;
+          alt: string | "";
+          image: {
+            asset: {
+              _id: string;
+              url: string | null;
+              metadata: {
+                lqip: string | null;
+                dimensions: {
+                  width: number | null;
+                  height: number | null;
+                  aspectRatio: number | null;
+                } | null;
+              } | null;
+            } | null;
+            hotspot: SanityImageHotspot | null;
+            crop: SanityImageCrop | null;
+          } | null;
+        } | null;
+        photo: null;
+      }
+    | {
+        seoTitle: null;
+        title: null;
+        subtitle: null;
+        share: null;
+        photo: {
+          _id: string;
+          alt: string | "";
+          image: {
+            asset: {
+              _id: string;
+              url: string | null;
+              metadata: {
+                lqip: string | null;
+                dimensions: {
+                  width: number | null;
+                  height: number | null;
+                  aspectRatio: number | null;
+                } | null;
+              } | null;
+            } | null;
+            hotspot: SanityImageHotspot | null;
+            crop: SanityImageCrop | null;
+          } | null;
+        } | null;
+      }
+    | {
+        seoTitle: string | null;
+        title: string | null;
+        subtitle: string | null;
+        share: {
+          _id: string;
+          alt: string | "";
+          image: {
+            asset: {
+              _id: string;
+              url: string | null;
+              metadata: {
+                lqip: string | null;
+                dimensions: {
+                  width: number | null;
+                  height: number | null;
+                  aspectRatio: number | null;
+                } | null;
+              } | null;
+            } | null;
+            hotspot: SanityImageHotspot | null;
+            crop: SanityImageCrop | null;
+          } | null;
+        } | null;
+        photo: {
+          _id: string;
+          alt: string | "";
+          image: {
+            asset: {
+              _id: string;
+              url: string | null;
+              metadata: {
+                lqip: string | null;
+                dimensions: {
+                  width: number | null;
+                  height: number | null;
+                  aspectRatio: number | null;
+                } | null;
+              } | null;
+            } | null;
+            hotspot: SanityImageHotspot | null;
+            crop: SanityImageCrop | null;
+          } | null;
+        } | null;
+      }
+    | {
+        seoTitle: string | null;
+        title: string | null;
+        subtitle: string | null;
+        share: {
+          _id: string;
+          alt: string | "";
+          image: {
+            asset: {
+              _id: string;
+              url: string | null;
+              metadata: {
+                lqip: string | null;
+                dimensions: {
+                  width: number | null;
+                  height: number | null;
+                  aspectRatio: number | null;
+                } | null;
+              } | null;
+            } | null;
+            hotspot: SanityImageHotspot | null;
+            crop: SanityImageCrop | null;
+          } | null;
+        } | null;
+        photo: {
+          _id: string;
+          alt: string | "";
+          image: {
+            asset: {
+              _id: string;
+              url: string | null;
+              metadata: {
+                lqip: string | null;
+                dimensions: {
+                  width: number | null;
+                  height: number | null;
+                  aspectRatio: number | null;
+                } | null;
+              } | null;
+            } | null;
+            hotspot: SanityImageHotspot | null;
+            crop: SanityImageCrop | null;
+          } | null;
+        } | null;
+      }
+    | {
+        seoTitle: string | null;
+        title: string | null;
+        subtitle: string | null;
+        share: {
+          _id: string;
+          alt: string | "";
+          image: {
+            asset: {
+              _id: string;
+              url: string | null;
+              metadata: {
+                lqip: string | null;
+                dimensions: {
+                  width: number | null;
+                  height: number | null;
+                  aspectRatio: number | null;
+                } | null;
+              } | null;
+            } | null;
+            hotspot: SanityImageHotspot | null;
+            crop: SanityImageCrop | null;
+          } | null;
+        } | null;
+        photo: {
+          _id: string;
+          alt: string | "";
+          image: {
+            asset: {
+              _id: string;
+              url: string | null;
+              metadata: {
+                lqip: string | null;
+                dimensions: {
+                  width: number | null;
+                  height: number | null;
+                  aspectRatio: number | null;
+                } | null;
+              } | null;
+            } | null;
+            hotspot: SanityImageHotspot | null;
+            crop: SanityImageCrop | null;
+          } | null;
+        } | null;
+      }
+    | null;
+  retreat: {
+    title: string | null;
+    startDate: string | null;
+    endDate: string | null;
+    place: string | null;
+    country: string | null;
+    priceFrom: number | null;
+    capacity: number | null;
+    booked: number | null;
+    share: {
+      _id: string;
+      alt: string | "";
+      image: {
+        asset: {
+          _id: string;
+          url: string | null;
+          metadata: {
+            lqip: string | null;
+            dimensions: {
+              width: number | null;
+              height: number | null;
+              aspectRatio: number | null;
+            } | null;
+          } | null;
+        } | null;
+        hotspot: SanityImageHotspot | null;
+        crop: SanityImageCrop | null;
+      } | null;
+    } | null;
+    photo: {
+      _id: string;
+      alt: string | "";
+      image: {
+        asset: {
+          _id: string;
+          url: string | null;
+          metadata: {
+            lqip: string | null;
+            dimensions: {
+              width: number | null;
+              height: number | null;
+              aspectRatio: number | null;
+            } | null;
+          } | null;
+        } | null;
+        hotspot: SanityImageHotspot | null;
+        crop: SanityImageCrop | null;
+      } | null;
+    } | null;
+  } | null;
+  fallback: {
+    _id: string;
+    alt: string | "";
+    image: {
+      asset: {
+        _id: string;
+        url: string | null;
+        metadata: {
+          lqip: string | null;
+          dimensions: {
+            width: number | null;
+            height: number | null;
+            aspectRatio: number | null;
+          } | null;
+        } | null;
+      } | null;
+      hotspot: SanityImageHotspot | null;
+      crop: SanityImageCrop | null;
+    } | null;
+  } | null;
+};
+
 // Query TypeMap
 declare global {
   interface SanityQueries {
@@ -4469,6 +4834,7 @@ declare global {
     '{\n  "page": *[_id == "galleryPage"][0]{ "title": coalesce(title[language == $lang][0].value, title[language == "nl"][0].value), "intro": coalesce(intro[language == $lang][0].value, intro[language == "nl"][0].value), "seo": seo{ "title": coalesce(title[language == $lang][0].value, title[language == "nl"][0].value), "description": coalesce(description[language == $lang][0].value, description[language == "nl"][0].value), "shareImage": shareImage->{\n  _id,\n  "alt": coalesce(alt[language == $lang][0].value, alt[language == "nl"][0].value, ""),\n  image { asset->{ _id, url, metadata { lqip, dimensions { width, height, aspectRatio } } }, hotspot, crop }\n} } },\n  "photos": *[_type == "mediaItem" && showInGallery != false] | order(_createdAt desc){\n    ...{\n  _id,\n  "alt": coalesce(alt[language == $lang][0].value, alt[language == "nl"][0].value, ""),\n  image { asset->{ _id, url, metadata { lqip, dimensions { width, height, aspectRatio } } }, hotspot, crop }\n},\n    categories,\n    highlight\n  }\n}': GALLERY_QUERY_RESULT;
     '*[_id == "contactPage"][0]{\n  "photo": photo->{\n  _id,\n  "alt": coalesce(alt[language == $lang][0].value, alt[language == "nl"][0].value, ""),\n  image { asset->{ _id, url, metadata { lqip, dimensions { width, height, aspectRatio } } }, hotspot, crop }\n},\n  "title": coalesce(title[language == $lang][0].value, title[language == "nl"][0].value),\n  "intro": coalesce(intro[language == $lang][0].value, intro[language == "nl"][0].value),\n  "subjects": string::split(coalesce(subjects[language == $lang][0].value, subjects[language == "nl"][0].value, ""), "\\n"),\n  "notifyLabel": coalesce(notifyLabel[language == $lang][0].value, notifyLabel[language == "nl"][0].value),\n  "seo": seo{ "title": coalesce(title[language == $lang][0].value, title[language == "nl"][0].value), "description": coalesce(description[language == $lang][0].value, description[language == "nl"][0].value), "shareImage": shareImage->{\n  _id,\n  "alt": coalesce(alt[language == $lang][0].value, alt[language == "nl"][0].value, ""),\n  image { asset->{ _id, url, metadata { lqip, dimensions { width, height, aspectRatio } } }, hotspot, crop }\n} },\n  "contact": { email, phone }\n}': CONTACT_QUERY_RESULT;
     '*[_type == "legalPage" && _id == $id][0]{\n  "title": coalesce(title[language == $lang][0].value, title[language == "nl"][0].value),\n  "intro": coalesce(intro[language == $lang][0].value, intro[language == "nl"][0].value),\n  "sections": sections[]{ _key, "title": coalesce(title[language == $lang][0].value, title[language == "nl"][0].value), "text": coalesce(text[language == $lang][0].value, text[language == "nl"][0].value) },\n  updatedAt,\n  "seo": seo{ "title": coalesce(title[language == $lang][0].value, title[language == "nl"][0].value), "description": coalesce(description[language == $lang][0].value, description[language == "nl"][0].value), "shareImage": shareImage->{\n  _id,\n  "alt": coalesce(alt[language == $lang][0].value, alt[language == "nl"][0].value, ""),\n  image { asset->{ _id, url, metadata { lqip, dimensions { width, height, aspectRatio } } }, hotspot, crop }\n} }\n}': LEGAL_QUERY_RESULT;
+    '{\n  "site": *[_id == "settings"][0]{ siteName, "tagline": coalesce(tagline[language == $lang][0].value, tagline[language == "nl"][0].value), "share": seo.shareImage->{\n  _id,\n  "alt": coalesce(alt[language == $lang][0].value, alt[language == "nl"][0].value, ""),\n  image { asset->{ _id, url, metadata { lqip, dimensions { width, height, aspectRatio } } }, hotspot, crop }\n} },\n  "page": *[_id == $id][0]{\n    "seoTitle": coalesce(seo.title[language == $lang][0].value, seo.title[language == "nl"][0].value),\n    "title": coalesce(coalesce(hero.title[language == $lang][0].value, hero.title[language == "nl"][0].value), coalesce(title[language == $lang][0].value, title[language == "nl"][0].value)),\n    "subtitle": coalesce(coalesce(hero.subtitle[language == $lang][0].value, hero.subtitle[language == "nl"][0].value), coalesce(intro[language == $lang][0].value, intro[language == "nl"][0].value)),\n    "share": seo.shareImage->{\n  _id,\n  "alt": coalesce(alt[language == $lang][0].value, alt[language == "nl"][0].value, ""),\n  image { asset->{ _id, url, metadata { lqip, dimensions { width, height, aspectRatio } } }, hotspot, crop }\n},\n    "photo": coalesce(hero.photo, photo)->{\n  _id,\n  "alt": coalesce(alt[language == $lang][0].value, alt[language == "nl"][0].value, ""),\n  image { asset->{ _id, url, metadata { lqip, dimensions { width, height, aspectRatio } } }, hotspot, crop }\n}\n  },\n  "retreat": *[_type == "retreat" && slug.current == $slug][0]{\n    "title": coalesce(title[language == $lang][0].value, title[language == "nl"][0].value),\n    startDate,\n    endDate,\n    "place": coalesce(place[language == $lang][0].value, place[language == "nl"][0].value),\n    "country": coalesce(country[language == $lang][0].value, country[language == "nl"][0].value),\n    priceFrom,\n    capacity,\n    booked,\n    "share": seo.shareImage->{\n  _id,\n  "alt": coalesce(alt[language == $lang][0].value, alt[language == "nl"][0].value, ""),\n  image { asset->{ _id, url, metadata { lqip, dimensions { width, height, aspectRatio } } }, hotspot, crop }\n},\n    "photo": coalesce(hero.photo, cardPhoto)->{\n  _id,\n  "alt": coalesce(alt[language == $lang][0].value, alt[language == "nl"][0].value, ""),\n  image { asset->{ _id, url, metadata { lqip, dimensions { width, height, aspectRatio } } }, hotspot, crop }\n}\n  },\n  "fallback": *[_type == "mediaItem" && highlight == true] | order(_createdAt desc)[0]{\n  _id,\n  "alt": coalesce(alt[language == $lang][0].value, alt[language == "nl"][0].value, ""),\n  image { asset->{ _id, url, metadata { lqip, dimensions { width, height, aspectRatio } } }, hotspot, crop }\n}\n}': OG_QUERY_RESULT;
   }
 }
 // Lets @sanity/client releases that predate the global registry read it too

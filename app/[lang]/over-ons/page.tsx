@@ -11,7 +11,7 @@ import { ABOUT_QUERY } from "@/sanity/queries";
 export async function generateMetadata({ params }: PageProps<"/[lang]/over-ons">) {
   const lang = await langParam(params);
   const page = await sanityFetch({ query: ABOUT_QUERY, lang });
-  return buildMetadata({ lang, route: "about", seo: page?.seo, fallbackTitle: page?.hero?.title, fallbackDescription: page?.hero?.subtitle || page?.driveText, fallbackImage: page?.hero?.photo });
+  return buildMetadata({ lang, route: "about", seo: page?.seo, fallbackTitle: page?.hero?.title, fallbackDescription: page?.hero?.subtitle || page?.driveText });
 }
 
 const anchor = (name: string | null) =>

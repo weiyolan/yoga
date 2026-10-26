@@ -25,7 +25,6 @@ export async function generateMetadata({ params }: PageProps<"/[lang]">) {
     route: "home",
     seo: page?.seo,
     fallbackDescription: page?.hero?.subtitle || page?.intro,
-    fallbackImage: page?.hero?.photo,
   });
 }
 

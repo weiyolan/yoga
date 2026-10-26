@@ -371,3 +371,28 @@ export const LEGAL_QUERY = defineQuery(`*[_type == "legalPage" && _id == $id][0]
   updatedAt,
   "seo": seo${SEO}
 }`);
+
+/** Share image (app/og): the page's photo + texts; `$id` a page singleton, `$slug` a retreat. */
+export const OG_QUERY = defineQuery(`{
+  "site": *[_id == "settings"][0]{ siteName, "tagline": ${t("tagline")}, "share": seo.shareImage->${MEDIA} },
+  "page": *[_id == $id][0]{
+    "seoTitle": ${t("seo.title")},
+    "title": coalesce(${t("hero.title")}, ${t("title")}),
+    "subtitle": coalesce(${t("hero.subtitle")}, ${t("intro")}),
+    "share": seo.shareImage->${MEDIA},
+    "photo": coalesce(hero.photo, photo)->${MEDIA}
+  },
+  "retreat": *[_type == "retreat" && slug.current == $slug][0]{
+    "title": ${t("title")},
+    startDate,
+    endDate,
+    "place": ${t("place")},
+    "country": ${t("country")},
+    priceFrom,
+    capacity,
+    booked,
+    "share": seo.shareImage->${MEDIA},
+    "photo": coalesce(hero.photo, cardPhoto)->${MEDIA}
+  },
+  "fallback": *[_type == "mediaItem" && highlight == true] | order(_createdAt desc)[0]${MEDIA}
+}`);

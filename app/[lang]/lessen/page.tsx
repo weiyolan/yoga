@@ -20,7 +20,6 @@ export async function generateMetadata({
     seo: page?.seo,
     fallbackTitle: page?.hero?.title,
     fallbackDescription: page?.hero?.subtitle || page?.intro,
-    fallbackImage: page?.hero?.photo,
   });
 }
 

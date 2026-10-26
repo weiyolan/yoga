@@ -8,7 +8,7 @@ import {
   languages,
   type Lang,
 } from "../../sanity/site.config";
-import { SITE_URL } from "../lib/site";
+import { SITE_URL, siteOrigin } from "../lib/site";
 
 type I18n = { language?: string; value?: unknown }[] | undefined;
 const of = (items: I18n, lang: Lang) => {
@@ -91,6 +91,26 @@ export function SeoInput(props: ObjectInputProps) {
           <Text size={1} weight="semibold">
             Zo toont Google deze pagina
           </Text>
+          <Card padding={2} radius={2} border>
+            <Stack gap={2}>
+              <Text size={0} muted>
+                Deelkaart voor WhatsApp & Facebook (gepubliceerde versie, NL)
+              </Text>
+              <img
+                src={`${siteOrigin()}/og/${defaultLanguage}/${doc?._type === "retreat" && doc.slug?.current ? `retreat.${doc.slug.current}` : route}.jpg`}
+                alt=""
+                style={{
+                  width: "100%",
+                  maxWidth: 480,
+                  aspectRatio: "1200 / 630",
+                  objectFit: "cover",
+                  borderRadius: 4,
+                  background: "#0F1A1D",
+                }}
+                onError={(e) => (e.currentTarget.style.display = "none")}
+              />
+            </Stack>
+          </Card>
           {languages.map((l) => {
             const fb = fallbacks(doc, l.id);
             const own = of(value?.title, l.id);

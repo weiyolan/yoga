@@ -31,7 +31,7 @@ async function load(params: Props["params"]) {
 export async function generateMetadata({ params }: Props) {
   const { lang, slug, retreat } = await load(params);
   if (!retreat) return {};
-  const meta = await buildMetadata({ lang, route: "retreats", slug, fallbackTitle: `Review: ${retreat.title}`, fallbackImage: retreat.photo });
+  const meta = await buildMetadata({ lang, route: "retreats", slug, fallbackTitle: `Review: ${retreat.title}` });
   return { ...meta, alternates: undefined, robots: { index: false, follow: false } };
 }
 

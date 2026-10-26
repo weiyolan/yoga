@@ -32,7 +32,7 @@ export async function generateMetadata({ params }: Props) {
   const { lang, slug, retreat } = await load(params);
   if (!retreat) return {};
   const t = getDictionary(lang).signup;
-  const meta = await buildMetadata({ lang, route: "retreats", slug, fallbackTitle: `${t.pageLabel}: ${retreat.title}`, fallbackImage: retreat.photo });
+  const meta = await buildMetadata({ lang, route: "retreats", slug, fallbackTitle: `${t.pageLabel}: ${retreat.title}` });
   return { ...meta, alternates: undefined, robots: { index: false, follow: true } };
 }
 

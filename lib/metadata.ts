@@ -1,9 +1,10 @@
 import type { Metadata } from "next";
 import { getDictionary } from "@/lib/dictionary";
-import { urlFor, type Media } from "@/sanity/image";
+import type { Media } from "@/sanity/image";
 import { defaultLanguage, languages, type Lang } from "@/sanity/site.config";
 import { sanityFetch } from "@/sanity/fetch";
 import { SETTINGS_QUERY } from "@/sanity/queries";
+import { OG_SIZE, ogPath } from "./og";
 import { href, type Route } from "./routes";
 
 type Seo =
@@ -30,19 +31,6 @@ export const siteUrl = (
 /** Netlify deploy previews and branch deploys (*.netlify.app) stay out of Google. */
 export const indexable =
   !process.env.CONTEXT || process.env.CONTEXT === "production";
-
-const ogImage = (m: Media | null | undefined) => {
-  const url = m?.image?.asset?.url;
-  if (!url) return undefined;
-  return [
-    {
-      url: url.startsWith("/") ? url : urlFor(m).width(1200).height(630).url(),
-      width: 1200,
-      height: 630,
-      alt: m.alt || undefined,
-    },
-  ];
-};
 
 /** Open Graph locales (`og:locale` wants language_TERRITORY). */
 const OG_LOCALE: Record<Lang, string> = { nl: "nl_BE", en: "en_GB" };
@@ -75,7 +63,6 @@ export async function buildMetadata({
   seo,
   fallbackTitle,
   fallbackDescription,
-  fallbackImage,
   type = "website",
 }: {
   lang: Lang;
@@ -84,7 +71,6 @@ export async function buildMetadata({
   seo?: Seo;
   fallbackTitle?: string | null;
   fallbackDescription?: string | null;
-  fallbackImage?: Media | null;
   type?: "website" | "article";
 }): Promise<Metadata> {
   const settings = await sanityFetch({ query: SETTINGS_QUERY, lang });
@@ -106,10 +92,16 @@ export async function buildMetadata({
     clip(settings?.seo?.description) ??
     clip(settings?.tagline);
   const path = href(lang, route, { slug });
-  const images =
-    ogImage(seo?.shareImage) ??
-    ogImage(fallbackImage) ??
-    ogImage(settings?.seo?.shareImage);
+  // The share card (app/og): the page's photo (SEO → Deelafbeelding, else its opening photo) + site name, title and one line.
+  const images = [
+    {
+      url: ogPath(lang, route, slug),
+      width: OG_SIZE.width,
+      height: OG_SIZE.height,
+      type: "image/jpeg",
+      alt: title ?? fullTitle,
+    },
+  ];
   return {
     metadataBase: new URL(siteUrl),
     title: fullTitle,
@@ -139,7 +131,7 @@ export async function buildMetadata({
       card: "summary_large_image",
       title: title ?? fullTitle,
       description,
-      images: images?.map((i) => i.url),
+      images: images.map((i) => i.url),
     },
   };
 }
