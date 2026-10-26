@@ -76,9 +76,9 @@ const FORM = `{
 }` as const;
 
 /** Mails → Nieuwsbrief-bevestiging (lib/newsletter.ts). */
-export const NEWSLETTER_MAIL_QUERY = defineQuery(`*[_id == "newsletterMail"][0]{ "subject": ${t("subject")}, "body": ${t("body")} }`);
+export const NEWSLETTER_MAIL_QUERY = defineQuery(`*[_type == "newsletterMail" && _id == "newsletterMail"][0]{ "subject": ${t("subject")}, "body": ${t("body")} }`);
 
-/** A confirmation mail (Studio → Bevestigingsmails), in the requested language: lib/confirmation.ts. */
+/** A confirmation mail (Studio → Mails → Inschrijving bevestiging), in the requested language: lib/confirmation.ts. */
 const MAIL = `{
   "subject": ${t("subject")},
   "body": ${t("body")},

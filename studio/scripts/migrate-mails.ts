@@ -1,6 +1,6 @@
 /**
  * Bevestigingsmails: the confirmation mail texts move from Instellingen → Formulieren to their own
- * documents (Studio → Bevestigingsmails), like the sign-up forms. Run once after deploying the Studio.
+ * documents (Studio → Mails → Inschrijving bevestiging), like the sign-up forms. Run once after deploying the Studio.
  *
  *   npx sanity exec scripts/migrate-mails.ts --with-user-token -- --dry   # prints what it would do
  *   npx sanity exec scripts/migrate-mails.ts --with-user-token            # applies it

@@ -25,7 +25,10 @@ export function Help() {
           Tekst tussen [haken], zoals [IBAN], moet nog ingevuld worden: dat veld krijgt een gele waarschuwing, en “Nog in te vullen [ ]” in het menu toont alle plaatsen.
         </Text>
         <Text size={1} muted>
-          Bij elke nieuwe inschrijving krijgen jullie een mail. De deelnemer bevestigen: open de inschrijving → Bevestigingsmail. Die gebruikt de tekst uit Mails → Bevestigingsmails. Elke mail heeft rechts een voorbeeld (het oog bovenaan).
+          Bij elke nieuwe inschrijving krijgen jullie een mail. De deelnemer bevestigen: open de inschrijving → Bevestigingsmail. Die gebruikt de tekst uit Mails → Inschrijving bevestiging. Elke mail heeft rechts een voorbeeld (het oog bovenaan).
+        </Text>
+        <Text size={1} muted>
+          Nieuwsbrief: Mails → Nieuwsbrieven → nieuw. Schrijf, kijk het voorbeeld na, stuur een testmail naar jezelf, publiceer, dan “Nieuwsbrief versturen…”. Wie hem krijgt zie je in Binnengekomen → Contactboek.
         </Text>
       </Stack>
     </Box>

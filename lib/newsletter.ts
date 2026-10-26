@@ -1,5 +1,5 @@
 /**
- * The confirmation mail after signing up for the newsletter (Studio → Mails → Nieuwsbrief-bevestiging,
+ * The confirmation mail after signing up for the newsletter (Studio → Mails → Nieuwsbrief bevestiging,
  * else the built-in text), with an unsubscribe link at the bottom. Shared by the site
  * (app/actions/forms.ts) and the Studio preview. No `@/` imports: the Studio imports this too.
  */

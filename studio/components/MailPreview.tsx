@@ -8,6 +8,7 @@ import { confirmationContent, type ConfirmationMail, type ConfirmationRetreat } 
 import { getDictionary } from "../../lib/dictionary";
 import { mailHtml } from "../../lib/mail-template";
 import { newsletterContent } from "../../lib/newsletter";
+import { NEWSLETTER_ISSUE_QUERY, newsletterIssueContent, type NewsletterIssue } from "../../lib/newsletter-issue";
 import { apiVersion, defaultLanguage, languages, type Lang } from "../../sanity/site.config";
 import { mailConfigured, siteApi } from "../lib/ai";
 import { SITE_URL } from "../lib/site";
@@ -16,8 +17,8 @@ type I18n = { language?: string; value?: unknown }[];
 type Doc = { _id: string; _type: string; isDefault?: boolean; [k: string]: unknown };
 type Retreat = ConfirmationRetreat & { _id: string; mailRef?: string; upcoming: boolean };
 
-/** Mail documents with a preview: Bevestigingsmail (per retreat) and Nieuwsbrief-bevestiging. */
-export const MAIL_TYPES = ["confirmationMail", "newsletterMail"];
+/** Mail documents with a preview: Bevestigingsmail (per retreat), Nieuwsbrief-bevestiging and Nieuwsbrief. */
+export const MAIL_TYPES = ["confirmationMail", "newsletterMail", "newsletter"];
 const FIELDS = ["subject", "body", "payment", "waitlistSubject", "waitlistBody"] as const;
 
 /** Side panel next to the form (Sanity document inspector): open by default on wide screens; on a phone via the eye button at the top. */
@@ -25,7 +26,7 @@ export function MailPreviewInspector() {
   const { displayed } = useDocumentPane();
   return (
     <Box padding={3} style={{ overflow: "auto", height: "100%" }}>
-      <MailPreviewPanel doc={displayed as Doc} />
+      {displayed?._type === "newsletter" ? <IssuePreview doc={displayed as Doc} /> : <MailPreviewPanel doc={displayed as Doc} />}
     </Box>
   );
 }
@@ -37,21 +38,13 @@ export function MailPreviewInspector() {
  */
 export function MailPreviewPanel({ doc }: { doc: Doc | null | undefined }) {
   const client = useClient({ apiVersion });
-  const user = useCurrentUser();
-  const toast = useToast();
   const newsletter = doc?._type === "newsletterMail";
   const [lang, setLang] = useState<Lang>(defaultLanguage);
   const [waitlist, setWaitlist] = useState(false);
   const [retreats, setRetreats] = useState<Retreat[]>([]);
   const [retreatId, setRetreatId] = useState("");
-  const [to, setTo] = useState("");
-  const [canSend, setCanSend] = useState<boolean | null>(null);
-  const [busy, setBusy] = useState(false);
-  const [height, setHeight] = useState(700);
   const id = doc?._id?.replace(/^drafts\./, "");
 
-  useEffect(() => setTo((t) => t || user?.email || ""), [user?.email]);
-  useEffect(() => void mailConfigured().then(setCanSend), []);
   useEffect(() => {
     if (newsletter) return;
     client
@@ -87,19 +80,6 @@ export function MailPreviewPanel({ doc }: { doc: Doc | null | undefined }) {
   const { subject, content } = newsletter
     ? newsletterContent(lang, mail, "Anna", `${SITE_URL}/api/unsubscribe?id=…`)
     : confirmationContent(lang, mail, retreats.find((r) => r._id === retreatId) ?? { title: "Retreat" }, "Anna", waitlist, example);
-  const html = mailHtml(content);
-
-  const send = async () => {
-    setBusy(true);
-    try {
-      await siteApi(client, "/api/mail", newsletter ? { task: "test-newsletter", to, lang, mail } : { task: "test", to, lang, waitlist, retreatId, mail });
-      toast.push({ status: "success", title: "Testmail verstuurd", description: to });
-    } catch (err) {
-      toast.push({ status: "error", title: "Testmail mislukt", description: String(err instanceof Error ? err.message : err) });
-    } finally {
-      setBusy(false);
-    }
-  };
 
   return (
     <Stack gap={3}>
@@ -129,6 +109,23 @@ export function MailPreviewPanel({ doc }: { doc: Doc | null | undefined }) {
           </>
         )}
       </Flex>
+      <Rendered subject={subject} html={mailHtml(content)} />
+      <Text size={0} muted>
+        {newsletter ? "Voorbeeld voor “Anna”; de afmeldlink is per persoon." : "Voorbeeld voor “Anna” met twee voorbeeldantwoorden. Het betaalblok verschijnt enkel bij een retreat met voorschot."}
+      </Text>
+      <TestMail
+        disabled={!newsletter && !retreatId}
+        send={(to) => siteApi(client, "/api/mail", newsletter ? { task: "test-newsletter", to, lang, mail } : { task: "test", to, lang, waitlist, retreatId, mail })}
+      />
+    </Stack>
+  );
+}
+
+/** Subject + the HTML mail in an iframe that grows with its content. */
+function Rendered({ subject, html }: { subject: string; html: string }) {
+  const [height, setHeight] = useState(700);
+  return (
+    <>
       <Card padding={3} radius={2} border>
         <Text size={0} muted>
           Onderwerp
@@ -147,23 +144,78 @@ export function MailPreviewPanel({ doc }: { doc: Doc | null | undefined }) {
           onLoad={(e) => setHeight((e.currentTarget.contentDocument?.documentElement.scrollHeight ?? 680) + 20)}
         />
       </Card>
+    </>
+  );
+}
+
+/** “Stuur testmail” to your own address (needs mail on the site). */
+function TestMail({ disabled, send }: { disabled?: boolean; send: (to: string) => Promise<unknown> }) {
+  const user = useCurrentUser();
+  const toast = useToast();
+  const [to, setTo] = useState("");
+  const [canSend, setCanSend] = useState<boolean | null>(null);
+  const [busy, setBusy] = useState(false);
+  useEffect(() => setTo((t) => t || user?.email || ""), [user?.email]);
+  useEffect(() => void mailConfigured().then(setCanSend), []);
+  const go = async () => {
+    setBusy(true);
+    try {
+      await send(to);
+      toast.push({ status: "success", title: "Testmail verstuurd", description: to });
+    } catch (err) {
+      toast.push({ status: "error", title: "Testmail mislukt", description: String(err instanceof Error ? err.message : err) });
+    } finally {
+      setBusy(false);
+    }
+  };
+  return (
+    <Card padding={3} radius={2} border tone={canSend === false ? "caution" : "default"}>
+      <Stack gap={3}>
+        <Text size={1} weight="semibold">
+          Testmail
+        </Text>
+        {canSend === false ? <Text size={1}>De site kan nog geen mail versturen: zet RESEND_API_KEY (of SMTP_URL) in Netlify → Environment variables.</Text> : null}
+        <Flex gap={2} wrap="wrap">
+          <Box flex={1} style={{ minWidth: 180 }}>
+            <TextInput type="email" value={to} onChange={(e) => setTo(e.currentTarget.value)} placeholder="jij@voorbeeld.be" fontSize={1} />
+          </Box>
+          <Button text={busy ? "Versturen…" : "Stuur testmail"} tone="primary" fontSize={1} disabled={busy || !to || disabled || canSend === false} onClick={go} />
+        </Flex>
+      </Stack>
+    </Card>
+  );
+}
+
+/**
+ * A Nieuwsbrief as it goes out, for “Anna”. Follows the draft (refetched a moment after each change,
+ * with the retreats and photos resolved by the same query the site sends with).
+ */
+function IssuePreview({ doc }: { doc: Doc }) {
+  const client = useClient({ apiVersion });
+  const [lang, setLang] = useState<Lang>(defaultLanguage);
+  const [issue, setIssue] = useState<NewsletterIssue>(null);
+  const id = doc._id.replace(/^drafts\./, "");
+  useEffect(() => {
+    const t = setTimeout(() => client.fetch<NewsletterIssue>(NEWSLETTER_ISSUE_QUERY, { id, lang }, { perspective: "drafts" }).then(setIssue, console.error), 600);
+    return () => clearTimeout(t);
+  }, [client, id, lang, doc]);
+  const { subject, content } = newsletterIssueContent(lang, issue, "Anna", `${SITE_URL}/api/unsubscribe?id=…`, SITE_URL);
+  return (
+    <Stack gap={3}>
+      <Flex gap={2}>
+        <Select value={lang} onChange={(e) => setLang(e.currentTarget.value as Lang)} fontSize={1} padding={2} style={{ minWidth: 110 }}>
+          {languages.map((l) => (
+            <option key={l.id} value={l.id}>
+              {l.title}
+            </option>
+          ))}
+        </Select>
+      </Flex>
+      <Rendered subject={subject} html={mailHtml(content)} />
       <Text size={0} muted>
-        {newsletter ? "Voorbeeld voor “Anna”; de afmeldlink is per persoon." : "Voorbeeld voor “Anna” met twee voorbeeldantwoorden. Het betaalblok verschijnt enkel bij een retreat met voorschot."}
+        Voorbeeld voor “Anna”; iedereen krijgt hem in zijn eigen taal (EN leeg = NL) met een eigen afmeldlink. Versturen: publiceer, dan “Nieuwsbrief versturen” onderaan.
       </Text>
-      <Card padding={3} radius={2} border tone={canSend === false ? "caution" : "default"}>
-        <Stack gap={3}>
-          <Text size={1} weight="semibold">
-            Testmail
-          </Text>
-          {canSend === false ? <Text size={1}>De site kan nog geen mail versturen: zet RESEND_API_KEY (of SMTP_URL) in Netlify → Environment variables.</Text> : null}
-          <Flex gap={2} wrap="wrap">
-            <Box flex={1} style={{ minWidth: 180 }}>
-              <TextInput type="email" value={to} onChange={(e) => setTo(e.currentTarget.value)} placeholder="jij@voorbeeld.be" fontSize={1} />
-            </Box>
-            <Button text={busy ? "Versturen…" : "Stuur testmail"} tone="primary" fontSize={1} disabled={busy || !to || (!newsletter && !retreatId) || canSend === false} onClick={send} />
-          </Flex>
-        </Stack>
-      </Card>
+      <TestMail send={(to) => siteApi(client, "/api/mail", { task: "test-issue", to, lang, id })} />
     </Stack>
   );
 }

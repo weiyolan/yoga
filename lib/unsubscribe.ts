@@ -1,5 +1,5 @@
 import "server-only";
-import { createHmac, timingSafeEqual } from "node:crypto";
+import { createHash, createHmac, timingSafeEqual } from "node:crypto";
 import { siteUrl } from "./metadata";
 
 /**
@@ -10,8 +10,12 @@ import { siteUrl } from "./metadata";
 const secret = () => process.env.UNSUBSCRIBE_SECRET || process.env.SANITY_REVALIDATE_SECRET || "";
 const sign = (id: string) => createHmac("sha256", secret()).update(id).digest("base64url").slice(0, 32);
 
-export function unsubscribeUrl(id: string) {
-  return secret() ? `${siteUrl}/api/unsubscribe?id=${encodeURIComponent(id)}&t=${sign(id)}` : null;
+/** One subscriber document per address: `subscriber.<hash of the e-mail>` (also for someone who never subscribed but unsubscribes). */
+export const subscriberId = (email: string) => `subscriber.${createHash("sha256").update(email.trim().toLowerCase()).digest("hex").slice(0, 32)}`;
+
+/** `email`: lets the link also work for an address without subscriber document yet (a retreat participant getting a newsletter). */
+export function unsubscribeUrl(id: string, email?: string, lang?: string) {
+  return secret() ? `${siteUrl}/api/unsubscribe?id=${encodeURIComponent(id)}&t=${sign(id)}${email ? `&e=${encodeURIComponent(email)}` : ""}${lang === "en" ? "&lang=en" : ""}` : null;
 }
 
 export function verifyUnsubscribe(id: string, t: string) {

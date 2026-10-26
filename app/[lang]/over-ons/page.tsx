@@ -101,7 +101,7 @@ export default async function About({ params }: PageProps<"/[lang]/over-ons">) {
       ) : null}
 
       {page?.collaborators?.length ? (
-        // Everyone in Studio → Personen except Rita & Philippe, automatically.
+        // Everyone in Studio → Over ons → Samenwerkingen except Rita & Philippe, automatically.
         <section className="s" id="samenwerkingen">
           <div className="wrap">
             <SectionHead label={t.collaboratorsLabel} title={page.collaboratorsTitle || t.collaboratorsTitle} />

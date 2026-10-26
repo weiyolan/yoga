@@ -17,7 +17,7 @@ const QUERY = `*[_id == $id][0].retreat->{
 }`;
 
 /**
- * Sign-up → “Bevestigingsmail”: the retreat's confirmation mail (Studio → Bevestigingsmails), filled in
+ * Sign-up → “Bevestigingsmail”: the retreat's confirmation mail (Studio → Mails → Inschrijving bevestiging), filled in
  * for this person in their language. Site can send mail (Resend / SMTP): sent as the HTML mail, after
  * a confirm (app/api/mail). Else: opened in your own mail app as plain text (and copied). Both mark
  * the sign-up “Bevestigingsmail verstuurd op”.

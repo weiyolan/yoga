@@ -14,6 +14,8 @@ import { TranslateIcon } from "@sanity/icons/Translate";
 import { HomeIcon } from "@sanity/icons/Home";
 import { ImagesIcon } from "@sanity/icons/Images";
 import { BellIcon } from "@sanity/icons/Bell";
+import { BookIcon } from "@sanity/icons/Book";
+import { DocumentTextIcon } from "@sanity/icons/DocumentText";
 import { EnvelopeIcon } from "@sanity/icons/Envelope";
 import { UserIcon } from "@sanity/icons/User";
 import { UsersIcon } from "@sanity/icons/Users";
@@ -22,6 +24,7 @@ import type { ComponentType } from "react";
 import type { StructureBuilder, StructureResolver } from "sanity/structure";
 import { BulkAltText } from "../components/BulkAltText";
 import { BulkTranslate } from "../components/BulkTranslate";
+import { ContactBook } from "../components/ContactBook";
 import { Help } from "../components/Help";
 import { Placeholders } from "../components/Placeholders";
 import { countBadgeIcon } from "../components/CountBadgeIcon";
@@ -95,11 +98,11 @@ export const structure: StructureResolver = (S) =>
         ),
       S.listItem()
         .id("messages")
-        .title("Berichten")
+        .title("Contactformulier")
         .icon(countBadgeIcon(EnvelopeIcon, "message"))
         .child(
           S.list()
-            .title("Berichten")
+            .title("Contactformulier")
             .items([
               filtered(S, "messages-new", "Nieuw", "message", `status == "new"`, [{ field: "submittedAt", direction: "desc" }]),
               S.documentTypeListItem("message").title("Alle berichten"),
@@ -119,7 +122,8 @@ export const structure: StructureResolver = (S) =>
               S.documentTypeListItem("reviewSubmission").title("Alle inzendingen"),
             ]),
         ),
-      filtered(S, "subscribers", "Nieuwsbrief", "subscriber", "unsubscribed != true", [{ field: "subscribedAt", direction: "desc" }]).icon(BellIcon),
+      // every address from sign-ups, newsletter, contact form and reviews (components/ContactBook.tsx)
+      S.listItem().id("contacts").title("Contactboek").icon(BookIcon).child(S.component(ContactBook).id("contacts").title("Contactboek")),
 
       /* ---- 2. main documents ---- */
       S.divider().title("Inhoud"),
@@ -154,9 +158,11 @@ export const structure: StructureResolver = (S) =>
           S.list()
             .title("Mails")
             .items([
-              singleton(S, "mailSettings", "Verzending", EnvelopeIcon),
-              S.documentTypeListItem("confirmationMail").title("Bevestigingsmails (inschrijving)").icon(ComposeIcon),
-              singleton(S, "newsletterMail", "Nieuwsbrief-bevestiging", BellIcon),
+              singleton(S, "mailSettings", "Opties", ControlsIcon),
+              S.documentTypeListItem("confirmationMail").title("Inschrijving bevestiging").icon(ComposeIcon),
+              singleton(S, "newsletterMail", "Nieuwsbrief bevestiging", BellIcon),
+              S.divider(),
+              S.documentTypeListItem("newsletter").title("Nieuwsbrieven").icon(DocumentTextIcon),
             ]),
         ),
       S.listItem()
@@ -171,20 +177,6 @@ export const structure: StructureResolver = (S) =>
               S.divider(),
               S.documentTypeListItem("yogaClass").title("Stijlen"),
               S.documentTypeListItem("studio").title("Studio's"),
-            ]),
-        ),
-      S.listItem()
-        .id("people")
-        .title("Personen")
-        .icon(UsersIcon)
-        .child(
-          S.list()
-            .title("Personen")
-            .items([
-              filtered(S, "people-founders", "Rita & Philippe", "person", `kind == "founder"`, [{ field: "name", direction: "asc" }]).icon(UserIcon),
-              filtered(S, "people-collaborators", "Samenwerkingen", "person", `coalesce(kind, "collaborator") != "founder"`, [{ field: "name", direction: "asc" }]).icon(UsersIcon),
-              S.divider(),
-              S.documentTypeListItem("person").title("Alle personen"),
             ]),
         ),
       S.documentTypeListItem("testimonial").title("Testimonials"),
@@ -215,7 +207,22 @@ export const structure: StructureResolver = (S) =>
       S.divider().title("Pagina's"),
       singleton(S, "settings", "Algemeen", CogIcon),
       singleton(S, "homePage", "Home", HomeIcon),
-      singleton(S, "aboutPage", "Over ons", UsersIcon),
+      // the page + everyone on it (Rita & Philippe, collaborators)
+      S.listItem()
+        .id("about")
+        .title("Over ons")
+        .icon(UsersIcon)
+        .child(
+          S.list()
+            .title("Over ons")
+            .items([
+              singleton(S, "aboutPage", "Over ons-pagina", UsersIcon),
+              S.divider().title("Personen"),
+              filtered(S, "people-founders", "Rita & Philippe", "person", `kind == "founder"`, [{ field: "name", direction: "asc" }]).icon(UserIcon),
+              filtered(S, "people-collaborators", "Samenwerkingen", "person", `coalesce(kind, "collaborator") != "founder"`, [{ field: "name", direction: "asc" }]).icon(UsersIcon),
+              S.documentTypeListItem("person").title("Alle personen"),
+            ]),
+        ),
       singleton(S, "galleryPage", "Gallery", ImagesIcon),
       singleton(S, "faqPage", "Veelgestelde vragen", HelpCircleIcon),
       singleton(S, "contactPage", "Contact", EnvelopeIcon),

@@ -17,7 +17,7 @@ export const aboutPage = defineType({
       name: "founders",
       title: "Rita & Philippe",
       type: "array",
-      description: "Yoga, Zen & Tonic zelf: groot bovenaan. Iedereen anders bij Personen staat automatisch onder Samenwerkingen.",
+      description: "Yoga, Zen & Tonic zelf: groot bovenaan. Iedereen anders onder Over ons → Personen staat automatisch onder Samenwerkingen.",
       of: [defineArrayMember({ type: "reference", to: [{ type: "person" }], options: { filter: 'kind == "founder" || !defined(kind)' } })],
       validation: (rule) => [rule.required(), rule.unique()],
     }),
@@ -44,7 +44,7 @@ export const aboutPage = defineType({
 
     /* ---- samenwerkingen ---- */
     i18nString("collaboratorsTitle", { title: "Samenwerkingen: kop", description: "Leeg = “Onze fijne samenwerkingen”." }),
-    i18nText("collaboratorsIntro", { title: "Samenwerkingen: intro", max: 250, description: "De lijst zelf komt uit Personen → Samenwerkingen." }),
+    i18nText("collaboratorsIntro", { title: "Samenwerkingen: intro", max: 250, description: "De lijst zelf komt uit Over ons → Samenwerkingen." }),
     defineField({ name: "seo", title: "SEO & delen", type: "seo" }),
   ],
   preview: { prepare: () => ({ title: "Over ons" }) },

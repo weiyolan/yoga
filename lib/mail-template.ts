@@ -20,8 +20,81 @@ function paragraphs(text: string) {
     .join("");
 }
 
+/** Portable Text as the Studio stores it (simpleBlockContent: paragraphs, bullets, bold/italic, links). */
+export type MailBlock = {
+  _type: string;
+  _key?: string;
+  style?: string;
+  listItem?: string;
+  children?: { _type: string; text?: string; marks?: string[] }[];
+  markDefs?: { _key: string; _type: string; href?: string }[];
+};
+
+/** A small linked card, e.g. a retreat in a newsletter. */
+export type MailCard = { title: string; meta?: string; url: string; photo?: string | null; more?: string };
+
+/** Rich text → mail HTML: paragraphs, bullet lists, bold/italic, links. */
+function blocksHtml(blocks: MailBlock[], fill: (s: string) => string) {
+  const P = `margin:0 0 16px;font:16px/1.6 ${SANS};color:${C.ink};overflow-wrap:anywhere;word-break:break-word`;
+  const inline = (b: MailBlock) =>
+    (b.children ?? [])
+      .map((c) => {
+        let h = esc(fill(c.text ?? "")).replaceAll("\n", "<br>");
+        for (const m of c.marks ?? []) {
+          if (m === "strong") h = `<strong>${h}</strong>`;
+          else if (m === "em") h = `<em>${h}</em>`;
+          else {
+            const href = b.markDefs?.find((d) => d._key === m)?.href;
+            if (href) h = `<a href="${esc(href)}" style="color:${C.ember}">${h}</a>`;
+          }
+        }
+        return h;
+      })
+      .join("");
+  let out = "";
+  let list = "";
+  for (const b of blocks.filter((x) => x._type === "block")) {
+    if (b.listItem) {
+      list += `<li style="margin:0 0 6px">${inline(b)}</li>`;
+      continue;
+    }
+    if (list) (out += `<ul style="${P};padding-left:22px">${list}</ul>`), (list = "");
+    out += `<p style="${P}">${inline(b)}</p>`;
+  }
+  if (list) out += `<ul style="${P};padding-left:22px">${list}</ul>`;
+  return out;
+}
+
+/** Rich text → plain text (links as “text (url)”), for the text version of the mail. */
+export function blocksText(blocks: MailBlock[], fill: (s: string) => string = (s) => s) {
+  return blocks
+    .filter((b) => b._type === "block")
+    .map((b) => {
+      const t = (b.children ?? [])
+        .map((c) => {
+          const href = c.marks?.map((m) => b.markDefs?.find((d) => d._key === m)?.href).find(Boolean);
+          const text = fill(c.text ?? "");
+          return href && href !== text ? `${text} (${href})` : text;
+        })
+        .join("");
+      return b.listItem ? `• ${t}` : t;
+    })
+    .join("\n\n")
+    .replace(/(• [^\n]*)\n\n(?=• )/g, "$1\n");
+}
+
 export type MailContent = {
   text: string;
+  /** Rich text instead of `text` in the HTML version (`text` stays the plain-text version). */
+  blocks?: MailBlock[];
+  /** Applied to the text in `blocks`, e.g. {naam} → the name. */
+  fill?: (s: string) => string;
+  /** Big button under the text. */
+  button?: { label: string; url: string } | null;
+  /** Linked cards under the text (photo, title, one line). */
+  cards?: MailCard[];
+  /** Small unsubscribe link at the very bottom. */
+  unsubscribe?: { label: string; url: string } | null;
   /** Big serif title above the text. */
   heading?: string;
   /** Absolute image URL (e.g. the retreat's card photo), shown full-width on top. */
@@ -32,7 +105,22 @@ export type MailContent = {
   footnote?: string;
 };
 
-export function mailHtml({ text, heading, photo, rows, footnote }: MailContent) {
+export function mailHtml({ text, heading, photo, rows, footnote, blocks, fill, button, cards, unsubscribe }: MailContent) {
+  const btn = button?.url && button.label
+    ? `<table role="presentation" cellpadding="0" cellspacing="0" style="margin:8px 0 24px"><tr><td style="background:${C.dark};border-radius:999px"><a href="${esc(button.url)}" style="display:inline-block;padding:14px 28px;font:600 15px/1 ${SANS};color:#FFFFFF;text-decoration:none">${esc(button.label)}</a></td></tr></table>`
+    : "";
+  const cardList = cards?.length
+    ? cards
+        .map(
+          (c) =>
+            `<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="margin:0 0 16px;border:1px solid ${C.line}"><tr>${
+              c.photo ? `<td width="38%" style="width:38%;vertical-align:top"><a href="${esc(c.url)}"><img src="${esc(c.photo)}?w=440&h=330&fit=crop&auto=format" width="200" alt="" style="display:block;width:100%;height:auto;border:0"></a></td>` : ""
+            }<td style="padding:14px 16px;vertical-align:middle"><a href="${esc(c.url)}" style="font:400 20px/1.25 ${SERIF};color:${C.ink};text-decoration:none">${esc(c.title)}</a>${
+              c.meta ? `<div style="margin-top:6px;font:13px/1.4 ${SANS};color:${C.soft}">${esc(c.meta)}</div>` : ""
+            }<div style="margin-top:10px"><a href="${esc(c.url)}" style="font:600 13px/1 ${SANS};color:${C.ember};text-decoration:none">${esc(c.more ?? "")} →</a></div></td></tr></table>`,
+        )
+        .join("")
+    : "";
   const img = photo ? `<tr><td><img src="${esc(photo)}?w=1200&h=600&fit=crop&auto=format" width="600" alt="" style="display:block;width:100%;height:auto;border:0"></td></tr>` : "";
   const table = rows?.length
     ? `<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="margin:8px 0 16px;border-top:1px solid ${C.line}">${rows
@@ -51,14 +139,21 @@ export function mailHtml({ text, heading, photo, rows, footnote }: MailContent) 
 ${img}
 <tr><td style="padding:32px 32px 16px">
 ${heading ? `<h1 style="margin:0 0 20px;font:400 30px/1.2 ${SERIF};color:${C.ink}">${esc(heading)}</h1>` : ""}
-${paragraphs(text)}
+${blocks?.length ? blocksHtml(blocks, fill ?? ((x) => x)) : paragraphs(text)}
+${cardList}
+${btn}
 ${table}
 </td></tr></table></td></tr>
-<tr><td style="padding:20px 4px;font:12px/1.5 ${SANS};color:${C.soft}">${footnote ? `${esc(footnote)}<br>` : ""}<a href="https://yogazentonic.com" style="color:${C.soft}">yogazentonic.com</a></td></tr>
+<tr><td style="padding:20px 4px;font:12px/1.5 ${SANS};color:${C.soft}">${footnote ? `${esc(footnote)}<br>` : ""}<a href="https://yogazentonic.com" style="color:${C.soft}">yogazentonic.com</a>${unsubscribe ? ` · <a href="${esc(unsubscribe.url)}" style="color:${C.soft}">${esc(unsubscribe.label)}</a>` : ""}</td></tr>
 </table></td></tr></table></body></html>`;
 }
 
 /** The plain-text twin: text + rows as "Label: value" lines. */
-export function mailText({ text, rows, footnote }: MailContent) {
-  return [text.trim(), rows?.length ? rows.map(([k, v]) => `${k}: ${v || "-"}`).join("\n") : "", footnote ?? ""].filter(Boolean).join("\n\n");
+export function mailText({ text, rows, footnote, button, cards, unsubscribe }: MailContent) {
+  return [
+    text.trim(),
+    button?.url && button.label ? `${button.label}: ${button.url}` : "",
+    cards?.length ? cards.map((c) => [c.title, c.meta, c.url].filter(Boolean).join("\n")).join("\n\n") : "",
+    unsubscribe ? `${unsubscribe.label}: ${unsubscribe.url}` : "",
+    rows?.length ? rows.map(([k, v]) => `${k}: ${v || "-"}`).join("\n") : "", footnote ?? ""].filter(Boolean).join("\n\n");
 }

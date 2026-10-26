@@ -6,6 +6,7 @@ import { message } from "./documents/message";
 import { signup } from "./documents/signup";
 import { signupForm } from "./documents/signup-form";
 import { confirmationMail } from "./documents/confirmation-mail";
+import { newsletter } from "./documents/newsletter";
 import { subscriber } from "./documents/subscriber";
 import { studio } from "./documents/studio";
 import { testimonial } from "./documents/testimonial";
@@ -46,6 +47,7 @@ export const schemaTypes = [
   retreat,
   signupForm,
   confirmationMail,
+  newsletter,
   person,
   yogaClass,
   studio,

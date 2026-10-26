@@ -4,7 +4,7 @@
  *  - Contact page: email, phone, instagram, facebook (Contact & social) + contactThanks.
  *  - Menu & footer (`navigation`): menu* texts + newsletterTitle, newsletterThanks.
  *  - Formulieren → Inschrijving (`signupSettings`): signupConsent, signupTerms, signupThanks.
- *  - Mails → Verzending (`mailSettings`): autoConfirm, notifyEmail (from Instellingen or Formulieren → Inschrijving).
+ *  - Mails → Opties (`mailSettings`): autoConfirm, notifyEmail (from Instellingen or Formulieren → Inschrijving).
  * Published Instellingen → the published targets; an Instellingen draft → drafts of the targets.
  * A value already set on the target is kept. Then the moved fields are unset on `settings`. Run once
  * after deploying the Studio; safe to run again.
@@ -26,7 +26,7 @@ const MOVES: { from: string; id: string; type: string; fields: string[] }[] = [
   { from: "settings", id: "contactPage", type: "contactPage", fields: ["email", "phone", "instagram", "facebook", "contactThanks"] },
   { from: "settings", id: "navigation", type: "navigation", fields: ["menuFounders", "menuFoundersSub", "menuTeam", "menuDrive", "menuCollaborators", "menuUpcoming", "menuPast", "newsletterTitle", "newsletterThanks"] },
   { from: "settings", id: "signupSettings", type: "signupSettings", fields: ["signupConsent", "signupTerms", "signupThanks"] },
-  // Mails → Verzending: from the old Instellingen, or from Formulieren → Inschrijving (where they were briefly)
+  // Mails → Opties: from the old Instellingen, or from Formulieren → Inschrijving (where they were briefly)
   { from: "settings", id: "mailSettings", type: "mailSettings", fields: ["autoConfirm", "notifyEmail"] },
   { from: "signupSettings", id: "mailSettings", type: "mailSettings", fields: ["autoConfirm", "notifyEmail"] },
 ];

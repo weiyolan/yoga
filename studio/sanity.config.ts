@@ -13,6 +13,7 @@ import { siteOrigin } from "./lib/site";
 import { altTextAction, translateAction } from "./actions/ai";
 import { reviewLinkAction } from "./actions/review-link";
 import { confirmationMailAction } from "./actions/confirmation-mail";
+import { sendNewsletterAction } from "./actions/newsletter";
 import { newBadge } from "./actions/badges";
 import { I18nTabsField, I18nTabsInput, I18nTabsItem } from "./components/I18nTabs";
 import { MAIL_TYPES, mailPreviewInspector } from "./components/MailPreview";
@@ -75,6 +76,8 @@ export default defineConfig({
       if (schemaType === "signup") return [confirmationMailAction, ...prev.filter(({ action }) => action !== "duplicate")];
       if (formTypes.has(schemaType) || schemaType === "review") return prev.filter(({ action }) => action !== "duplicate");
       const base = singletons.has(schemaType) ? prev.filter(({ action }) => action && singletonActions.has(action)) : prev;
+      // newsletters: “Versturen” is the main button once published (it hides itself while there are unpublished changes)
+      if (schemaType === "newsletter") return [sendNewsletterAction, ...base, translateAction];
       return [...base, ...(schemaType === "mediaItem" ? [altTextAction] : []), ...(schemaType === "retreat" ? [reviewLinkAction] : []), translateAction];
     },
     // mails: the HTML preview as a side panel next to the form (open by default on wide screens)

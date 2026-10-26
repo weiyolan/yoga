@@ -20,21 +20,23 @@ sanity/                  shared with the Next.js app
 | Algemeen | `settings` (singleton, first of the pages) | site name, slogan, default SEO |
 | Menu & footer | `navigation` (singleton) | the short texts in the header dropdowns, newsletter title + thanks |
 | Formulieren → Inschrijving: teksten | `signupSettings` (singleton) | akkoord/bedankt texts of the sign-up form |
-| Mails → Verzending | `mailSettings` (singleton) | "Bevestigingsmail automatisch versturen", "Meldingen naar", "Nieuwsbrief: bevestigingsmail versturen" |
-| Mails → Nieuwsbrief-bevestiging | `newsletterMail` (singleton) | subject + text of the mail after a newsletter sign-up (+ unsubscribe link); preview side panel |
+| Mails → Opties | `mailSettings` (singleton) | "Bevestigingsmail automatisch versturen", "Meldingen naar", "Nieuwsbrief: bevestigingsmail versturen" |
+| Mails → Nieuwsbrief bevestiging | `newsletterMail` (singleton) | subject + text of the mail after a newsletter sign-up (+ unsubscribe link); preview side panel |
+| Mails → Nieuwsbrieven | `newsletter` | a newsletter to the contact book: subject, header photo, title, rich text, retreat cards, optional button; "Naar wie" (subscribers / retreat participants / everyone). Preview + test mail on the right; publish, then "Nieuwsbrief versturen…" (count, confirm, once). Each person gets it in their language with their own unsubscribe link (also as List-Unsubscribe header) |
 | Contact | `contactPage` (singleton) | the page + Contact & social (e-mail, GSM, Instagram, Facebook; also in the footer) and the contact form's thanks |
 | Home | `homePage` (singleton) | opening image, intro (≤ 400 chars), featured retreat (empty = next one), ≤ 3 testimonials, "who are we" |
 | **Fotobank** | `mediaItem` | **every photo is stored once**: hotspot, alt text (SEO), categories, "show in gallery", "highlighted". No title or place (the gallery shows none). Pages only *reference* photos. |
 | Pagina's | `homePage` · `retreatsPage` · `lessonsPage` · `aboutPage` · `galleryPage` · `contactPage` (singletons) | opening image + page-specific fields + SEO. The weekly schedule (with a level per class) and the Privéles block live on `lessonsPage`. |
 | Juridisch | `legalPage` × 4, fixed ids `legal-privacy`, `legal-terms`, `legal-cancellation`, `legal-cookies` | title, intro, sections. Footer links + sign-up consent. |
 | Inschrijfformulieren | `signupForm` | standard fields on/off (GSM, room, diet, message) + extra questions (text, long text, yes/no, choice). A retreat picks one; empty = the one marked "Standaard". "Gebruikt door" lists the retreats. |
-| Bevestigingsmails | `confirmationMail` | the participant's confirmation mail: subject, text, payment block, waiting-list version. Same "Standaard" / "Gebruikt door" as the forms. Sent automatically only with Instellingen → "Bevestigingsmail automatisch versturen"; else "Bevestigingsmail" on a sign-up opens it in your mail app. |
+| Mails → Inschrijving bevestiging | `confirmationMail` | the participant's confirmation mail: subject, text, payment block, waiting-list version. Same "Standaard" / "Gebruikt door" as the forms. Sent automatically only with Mails → Opties → "Bevestigingsmail automatisch versturen"; else "Bevestigingsmail" on a sign-up opens it in your mail app. |
 | Retreats | `retreat` | groups follow the detail page: basics · in a nutshell · the place · the people · programme · practical · closing. Komend / Voorbij is **derived from `endDate`**, never stored. |
-| Personen | `person` | `kind`: founder (Rita & Philippe, optional "object" photo for the hover swap) or collaborator (teachers, cooks, a company…, with website + links). Every collaborator shows on Over ons automatically. |
+| Over ons → Rita & Philippe / Samenwerkingen | `person` (+ the `aboutPage` singleton in the same menu item) | `kind`: founder (Rita & Philippe, optional "object" photo for the hover swap) or collaborator (teachers, cooks, a company…, with website + links). Every collaborator shows on Over ons automatically. |
 | Lessen | `yogaClass`, `studio` | styles (what / for whom / where), studios |
 | Testimonials | `testimonial` | quote ≤ 200 chars, optional link to a retreat |
 | Inschrijvingen | `signup` (from the site, private) | opens as a readable card with status buttons; "Bevestigd" updates `booked` on the retreat. Also: Nieuw (with count badge), Tabel (all fields, filter, CSV), Per retreat |
-| Berichten | `message` (from the site, private) | card view with status |
+| Contactformulier | `message` (from the site, private) | card view with status |
+| Contactboek | `signup` + `subscriber` + `message` + `reviewSubmission` | one row per e-mail address (lib/contacts.ts): where it came from, newsletter yes / unsubscribed (toggle by hand), search, filter chips, copy addresses, CSV. The newsletters use the same list |
 | Reviews | `reviewSubmission` (private) → `review` (public) | "Gepubliceerd" copies a submission without e-mail to a public review |
 
 Design rules (from the agent-toolkit skills `sanity-best-practices` and `content-modeling-best-practices`):
@@ -106,8 +108,9 @@ The frontend needs `NEXT_PUBLIC_SANITY_PROJECT_ID` and `NEXT_PUBLIC_SANITY_DATAS
 | `npm run migrate:v2` | one-off v2 migration on the live dataset (Fotobank fields, Coaching → Lessen, principles → values, person kind, privacy → legal page, booked). `-- --dry` first |
 | `npm run content:v2` | one-off v2 texts (docs/plan.html Part 1, `scripts/v2-content.ts`) as **drafts**, for R&P to review and publish. Run after `migrate:v2`. `-- --dry` first |
 | `npm run migrate:mails` | one-off: the confirmation mail texts in the old Instellingen → a "Standaard" Bevestigingsmail (published), then unsets them (and the default sign-up link). `-- --dry` first |
-| `npm run migrate:settings` | one-off: moves the old Instellingen fields to Contact (contact & social, contact thanks), Menu & footer, Formulieren → Inschrijving (texts) and Mails → Verzending (autoConfirm, notifyEmail, also from Formulieren → Inschrijving); published → published, draft → draft; then unsets them from Algemeen. `-- --dry` first |
+| `npm run migrate:settings` | one-off: moves the old Instellingen fields to Contact (contact & social, contact thanks), Menu & footer, Formulieren → Inschrijving (texts) and Mails → Opties (autoConfirm, notifyEmail, also from Formulieren → Inschrijving); published → published, draft → draft; then unsets them from Algemeen. `-- --dry` first |
 | `npm run content:v3` | one-off drafts: Veelgestelde vragen (first version) + Eifel prices / inbegrepen / programma (from `eiffel.txt`, only where empty). `-- --dry` first |
+| `npm run content:v4` | one-off drafts: an example newsletter “Nieuwe retreats” (upcoming retreats as cards, button to /retreats) if there is none yet, and the existing public reviews with name + text in [brackets] (examples to replace). `-- --dry` first |
 | `npm run publish:drafts` | publishes every draft (Sanity's publish action, like the Studio button) and lists the `[placeholders]` still in them; draft-only references become normal ones. `-- --dry` to list, `-- --skip-placeholders` to keep drafts with `[..]` as drafts, `-- --only=faqPage,retreat` for some types |
 
 ## Seed content

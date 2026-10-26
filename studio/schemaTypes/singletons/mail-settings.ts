@@ -2,13 +2,13 @@ import { EnvelopeIcon } from "@sanity/icons/Envelope";
 import { defineField, defineType } from "sanity";
 
 /**
- * Mails → Verzending: what goes out automatically and who gets notified. Fixed `_id` "mailSettings".
+ * Mails → Opties: what goes out automatically and who gets notified. Fixed `_id` "mailSettings".
  * Everything here needs a mail provider on the site (Resend, see README); without one only the team
  * notifications go out (Netlify Forms).
  */
 export const mailSettings = defineType({
   name: "mailSettings",
-  title: "Mails: verzending",
+  title: "Mails: opties",
   type: "document",
   icon: EnvelopeIcon,
   fields: [
@@ -33,8 +33,8 @@ export const mailSettings = defineType({
       title: "Nieuwsbrief: bevestigingsmail versturen",
       type: "boolean",
       initialValue: true,
-      description: "Aan = wie zich inschrijft voor de nieuwsbrief krijgt meteen de mail uit Mails → Nieuwsbrief-bevestiging, met een afmeldlink.",
+      description: "Aan = wie zich inschrijft voor de nieuwsbrief krijgt meteen de mail uit Mails → Nieuwsbrief bevestiging, met een afmeldlink.",
     }),
   ],
-  preview: { prepare: () => ({ title: "Mails: verzending" }) },
+  preview: { prepare: () => ({ title: "Mails: opties" }) },
 });
