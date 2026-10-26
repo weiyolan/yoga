@@ -6,8 +6,10 @@ import { confirmationContent } from "@/lib/confirmation";
 import { dateRange } from "@/lib/format";
 import { mailConfigured, sendMail } from "@/lib/mail";
 import { mailText, type MailContent } from "@/lib/mail-template";
+import { newsletterContent } from "@/lib/newsletter";
+import { unsubscribeUrl } from "@/lib/unsubscribe";
 import { isUpcoming, sanityFetch } from "@/sanity/fetch";
-import { LAYOUT_QUERY, SIGNUP_RETREAT_QUERY } from "@/sanity/queries";
+import { LAYOUT_QUERY, NEWSLETTER_MAIL_QUERY, SIGNUP_RETREAT_QUERY } from "@/sanity/queries";
 import { writeClient } from "@/sanity/write";
 
 /** A team notification for Netlify Forms (form “melding”, public/__forms.html): the browser posts it. */
@@ -25,7 +27,7 @@ const keep = (data: FormData, state: FormState): FormState =>
 const EMAIL = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 const field = (data: FormData, name: string, max = 5000) => String(data.get(name) ?? "").trim().slice(0, max);
 
-/** Recipient: CONTACT_TO, else Studio → Formulieren → Inschrijving → “Meldingen naar”, else the Contact page e-mail. */
+/** Recipient: CONTACT_TO, else Studio → Mails → Verzending → “Meldingen naar”, else the Contact page e-mail. */
 async function recipient() {
   const settings = await sanityFetch({ query: LAYOUT_QUERY });
   const to = process.env.CONTACT_TO || settings?.notifyEmail || settings?.email;
@@ -56,9 +58,34 @@ const subscriberDoc = (email: string, lang: string, source: "footer" | "contact"
   unsubscribed: false,
 });
 
+type Subscriber = ReturnType<typeof subscriberDoc>;
+
+/**
+ * Newsletter sign-up: stored, then — only when it's new (or they had unsubscribed) — the confirmation
+ * mail from Mails → Nieuwsbrief-bevestiging with an unsubscribe link (lib/unsubscribe.ts). Needs a mail
+ * provider and Mails → Verzending → “Nieuwsbrief: bevestigingsmail versturen” on (default). A failing
+ * mail never fails the sign-up.
+ */
+async function subscribeWithWelcome(doc: Subscriber) {
+  const before = writeClient ? await writeClient.getDocument<{ unsubscribed?: boolean }>(doc._id).catch(() => null) : null;
+  await store(doc, { once: true });
+  if (before && before.unsubscribed !== true) return;
+  if (!mailConfigured()) return;
+  try {
+    const lang = doc.lang === "en" ? "en" : "nl";
+    const [layout, mail] = await Promise.all([sanityFetch({ query: LAYOUT_QUERY, lang }), sanityFetch({ query: NEWSLETTER_MAIL_QUERY, lang })]);
+    if (layout?.newsletterConfirm === false) return;
+    const { subject, content } = newsletterContent(lang, mail, doc.name, unsubscribeUrl(doc._id));
+    const replyTo = layout?.notifyEmail?.split(",")[0]?.trim() || layout?.email || undefined;
+    await sendMail({ to: doc.email, replyTo, subject, ...content });
+  } catch (err) {
+    console.error("newsletter: confirmation mail", err);
+  }
+}
+
 /**
  * Team notification (“Inschrijving”, “Bericht”, …). With a mail transport (lib/mail.ts): mailed to
- * Formulieren → Inschrijving → “Meldingen naar”. Deployed on Netlify without one: handed back to the browser,
+ * Mails → Verzending → “Meldingen naar”. Deployed on Netlify without one: handed back to the browser,
  * which posts it to Netlify Forms (components/Forms.tsx); Netlify mails it to the addresses under
  * Forms → Form notifications. Else (local dev): logged.
  */
@@ -103,14 +130,14 @@ async function sendContactInner(data: FormData): Promise<FormState> {
     "contact form",
     [
       store({ _id: `message.${randomUUID()}`, _type: "message", status: "new", name, email, subject, message, notify, lang, submittedAt }),
-      ...(notify ? [store(subscriberDoc(email, lang, "contact", name), { once: true })] : []),
+      ...(notify ? [subscribeWithWelcome(subscriberDoc(email, lang, "contact", name))] : []),
       team.step,
     ],
     team.notify,
   );
 }
 
-/** Footer "Hou me op de hoogte": stored as a subscriber (Studio → Nieuwsbrief) + a mail to the team. */
+/** Footer "Hou me op de hoogte": stored as a subscriber (Studio → Nieuwsbrief), a confirmation mail to them + a mail to the team. */
 export async function subscribe(_: FormState, data: FormData): Promise<FormState> {
   return keep(data, await subscribeInner(data));
 }
@@ -120,12 +147,12 @@ async function subscribeInner(data: FormData): Promise<FormState> {
   const email = field(data, "email", 200);
   if (!EMAIL.test(email)) return { status: "invalid" };
   const team = toTeam({ soort: "Nieuwsbrief", email, subject: "Website: nieuwe inschrijving nieuwsbrief", text: `Graag op de hoogte houden: ${email}` });
-  return anyOf("subscribe", [store(subscriberDoc(email, langOf(data), "footer"), { once: true }), team.step], team.notify);
+  return anyOf("subscribe", [subscribeWithWelcome(subscriberDoc(email, langOf(data), "footer")), team.step], team.notify);
 }
 
 /**
  * Retreat sign-up (its own page, /retreats/<slug>/inschrijven): stored as a `signup` document
- * (Studio → Inschrijvingen), then a mail to the team and, when Formulieren → Inschrijving → “Bevestigingsmail
+ * (Studio → Inschrijvingen), then a mail to the team and, when Mails → Verzending → “Bevestigingsmail
  * automatisch versturen” is on, the retreat's confirmation mail to the participant (Studio → Bevestigingsmails).
  * Always one person. The retreat's sign-up form adds questions; their labels and answers are stored
  * as a snapshot (in Dutch, for Rita & Philippe), so editing the form later never changes old sign-ups.

@@ -142,9 +142,21 @@ export const structure: StructureResolver = (S) =>
           S.list()
             .title("Formulieren")
             .items([
-              singleton(S, "signupSettings", "Inschrijving: teksten & mails", ControlsIcon),
+              singleton(S, "signupSettings", "Inschrijving: teksten", ControlsIcon),
               S.documentTypeListItem("signupForm").title("Inschrijfformulieren").icon(ClipboardIcon),
-              S.documentTypeListItem("confirmationMail").title("Bevestigingsmails").icon(ComposeIcon),
+            ]),
+        ),
+      S.listItem()
+        .id("mails")
+        .title("Mails")
+        .icon(ComposeIcon)
+        .child(
+          S.list()
+            .title("Mails")
+            .items([
+              singleton(S, "mailSettings", "Verzending", EnvelopeIcon),
+              S.documentTypeListItem("confirmationMail").title("Bevestigingsmails (inschrijving)").icon(ComposeIcon),
+              singleton(S, "newsletterMail", "Nieuwsbrief-bevestiging", BellIcon),
             ]),
         ),
       S.listItem()

@@ -7,6 +7,7 @@ import { createContext, useContext, useState, type MouseEvent, type ReactNode } 
 import { insert, set, setIfMissing, useClient, type ArrayOfObjectsInputProps, type FieldProps, type InputProps, type ItemProps } from "sanity";
 import { apiVersion, defaultLanguage, languages } from "../../sanity/site.config";
 import { findJobs, translatedValue, translateJobs } from "../lib/ai";
+import { MAIL_TYPES, OpenMailPreview } from "./MailPreview";
 
 /**
  * NL | EN tabs (small, after the field title) on every localized field (sanity-plugin-internationalized-array): one language at a
@@ -33,6 +34,13 @@ export function I18nTabsField(props: FieldProps) {
 
 /** form.components.input: the plugin's own input + an “add” button when the active language has no item yet. */
 export function I18nTabsInput(props: InputProps) {
+  if (props.id === "root" && MAIL_TYPES.includes(props.schemaType.name))
+    return (
+      <>
+        <OpenMailPreview />
+        {props.renderDefault(props)}
+      </>
+    );
   const ctx = useContext(ActiveLanguage);
   if (!ctx || !isArray(props.schemaType.name)) return props.renderDefault(props);
   return <TabsInput {...(props as ArrayOfObjectsInputProps)} active={ctx.active} />;

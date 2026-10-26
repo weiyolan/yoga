@@ -75,6 +75,9 @@ const FORM = `{
   "questions": questions[]{ _key, "label": ${t("label")}, "help": ${t("help")}, type, "options": ${lines("options")}, required }
 }` as const;
 
+/** Mails → Nieuwsbrief-bevestiging (lib/newsletter.ts). */
+export const NEWSLETTER_MAIL_QUERY = defineQuery(`*[_id == "newsletterMail"][0]{ "subject": ${t("subject")}, "body": ${t("body")} }`);
+
 /** A confirmation mail (Studio → Bevestigingsmails), in the requested language: lib/confirmation.ts. */
 const MAIL = `{
   "subject": ${t("subject")},
@@ -129,7 +132,7 @@ const CONTACT = `"email": *[_id == "contactPage"][0].email,
 
 /**
  * Header, mobile menu, footer and forms: Algemeen (`settings`) + Contact & social (Contact page) +
- * Menu & footer (`navigation`) + Formulieren → Inschrijving (`signupSettings`).
+ * Menu & footer (`navigation`) + Formulieren → Inschrijving (`signupSettings`) + Mails → Verzending (`mailSettings`).
  */
 export const LAYOUT_QUERY = defineQuery(`*[_id == "settings"][0]{
   siteName,
@@ -155,8 +158,9 @@ export const LAYOUT_QUERY = defineQuery(`*[_id == "settings"][0]{
     "signupTerms": ${of("signupSettings", "signupTerms")},
     "signupThanks": ${of("signupSettings", "signupThanks")}
   },
-  "notifyEmail": *[_id == "signupSettings"][0].notifyEmail,
-  "autoConfirm": *[_id == "signupSettings"][0].autoConfirm == true
+  "notifyEmail": *[_id == "mailSettings"][0].notifyEmail,
+  "autoConfirm": *[_id == "mailSettings"][0].autoConfirm == true,
+  "newsletterConfirm": *[_id == "mailSettings"][0].newsletterConfirm != false
 }`);
 
 export const SETTINGS_QUERY = defineQuery(`*[_id == "settings"][0]{

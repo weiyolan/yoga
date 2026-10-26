@@ -1,5 +1,4 @@
 import type { DefaultDocumentNodeResolver } from "sanity/structure";
-import { MailPreview } from "../components/MailPreview";
 import { SignupView } from "../components/SignupView";
 import { submissionView } from "../components/SubmissionView";
 import { REVIEW_STATUSES } from "../schemaTypes/documents/review";
@@ -42,10 +41,8 @@ const ReviewView = submissionView({
 });
 
 
-/** Form submissions open as a readable card ("Overzicht"); the raw fields stay under "Velden". Bevestigingsmail: + “Voorbeeld”. */
+/** Form submissions open as a readable card ("Overzicht"); the raw fields stay under "Velden". (Mails: the preview is a side panel, components/MailPreview.tsx.) */
 export const defaultDocumentNode: DefaultDocumentNodeResolver = (S, { schemaType }) => {
-  // Bevestigingsmail: edit the texts, “Voorbeeld” shows the HTML mail (components/MailPreview.tsx)
-  if (schemaType === "confirmationMail") return S.document().views([S.view.form().title("Tekst").id("edit"), S.view.component(MailPreview).title("Voorbeeld").id("preview")]);
   const view = schemaType === "signup" ? SignupView : schemaType === "message" ? MessageView : schemaType === "reviewSubmission" ? ReviewView : null;
   if (!view) return S.document();
   return S.document().views([S.view.component(view).title("Overzicht").id("overview"), S.view.form().title("Velden")]);

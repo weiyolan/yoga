@@ -19,6 +19,7 @@ export const subscriber = defineType({
     defineField({ name: "lang", title: "Taal", type: "string", readOnly: true }),
     defineField({ name: "subscribedAt", title: "Ingeschreven op", type: "datetime", readOnly: true }),
     defineField({ name: "unsubscribed", title: "Uitgeschreven", type: "boolean", initialValue: false }),
+    defineField({ name: "unsubscribedAt", title: "Uitgeschreven op", type: "datetime", readOnly: true, hidden: ({ value }) => !value, description: "Via de afmeldlink in de mail." }),
   ],
   orderings: [{ title: "Nieuwste eerst", name: "subscribedDesc", by: [{ field: "subscribedAt", direction: "desc" }] }],
   preview: {

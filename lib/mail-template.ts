@@ -16,7 +16,7 @@ function paragraphs(text: string) {
   return text
     .trim()
     .split(/\n{2,}/)
-    .map((p) => `<p style="margin:0 0 16px;font:16px/1.6 ${SANS};color:${C.ink}">${link(esc(p)).replaceAll("\n", "<br>")}</p>`)
+    .map((p) => `<p style="margin:0 0 16px;font:16px/1.6 ${SANS};color:${C.ink};overflow-wrap:anywhere;word-break:break-word">${link(esc(p)).replaceAll("\n", "<br>")}</p>`)
     .join("");
 }
 

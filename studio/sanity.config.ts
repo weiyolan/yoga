@@ -15,6 +15,7 @@ import { reviewLinkAction } from "./actions/review-link";
 import { confirmationMailAction } from "./actions/confirmation-mail";
 import { newBadge } from "./actions/badges";
 import { I18nTabsField, I18nTabsInput, I18nTabsItem } from "./components/I18nTabs";
+import { MAIL_TYPES, mailPreviewInspector } from "./components/MailPreview";
 
 
 const singletons = new Set<string>([...SINGLETONS, ...FIXED_TYPES]);
@@ -76,6 +77,8 @@ export default defineConfig({
       const base = singletons.has(schemaType) ? prev.filter(({ action }) => action && singletonActions.has(action)) : prev;
       return [...base, ...(schemaType === "mediaItem" ? [altTextAction] : []), ...(schemaType === "retreat" ? [reviewLinkAction] : []), translateAction];
     },
+    // mails: the HTML preview as a side panel next to the form (open by default on wide screens)
+    inspectors: (prev, { documentType }) => (MAIL_TYPES.includes(documentType) ? [mailPreviewInspector, ...prev] : prev),
     // "Nieuw" badge on submissions nobody has handled yet
     badges: (prev, { schemaType }) => (formTypes.has(schemaType) ? [...prev, newBadge] : prev),
   },

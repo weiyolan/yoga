@@ -4,6 +4,7 @@
  *   POST { task: "test", to, lang, waitlist, retreatId, mail }
  *        → the Bevestigingsmail as it is in the editor (also unpublished changes), with example
  *          answers, to `to` (the editor's own address). Subject starts with “[Test]”.
+ *   POST { task: "test-newsletter", to, lang, mail } → the Nieuwsbrief-bevestiging, same idea.
  *   POST { task: "signup", signupId }
  *        → the retreat's confirmation mail to that participant, with their answers; marks the
  *          sign-up “Bevestigingsmail verstuurd op”.
@@ -12,6 +13,8 @@ import { NextResponse, type NextRequest } from "next/server";
 import { confirmationContent, type ConfirmationMail } from "@/lib/confirmation";
 import { getDictionary } from "@/lib/dictionary";
 import { mailConfigured, sendMail } from "@/lib/mail";
+import { siteUrl } from "@/lib/metadata";
+import { newsletterContent } from "@/lib/newsletter";
 import { cors, json, redeemTicket } from "@/lib/studio-ticket";
 import { sanityFetch } from "@/sanity/fetch";
 import { LAYOUT_QUERY, SIGNUP_RETREAT_QUERY } from "@/sanity/queries";
@@ -58,6 +61,16 @@ export async function POST(request: NextRequest) {
         [t.diet, lang === "en" ? "Vegetarian" : "Vegetarisch"],
       ];
       const { subject, content } = confirmationContent(lang, mail, retreat, "Anna", body.waitlist === true, example);
+      await sendMail({ to, replyTo, subject: `[Test] ${subject}`, ...content });
+      return json(request, { ok: true });
+    }
+
+    if (body.task === "test-newsletter") {
+      const to = str(body.to, 200);
+      if (!to || !EMAIL.test(to)) return json(request, { message: "Geen geldig e-mailadres" }, 400);
+      const lang: Lang = body.lang === "en" ? "en" : "nl";
+      const m = (body.mail ?? {}) as Record<string, unknown>;
+      const { subject, content } = newsletterContent(lang, { subject: str(m.subject), body: str(m.body) }, "Anna", `${siteUrl}/api/unsubscribe?id=voorbeeld`);
       await sendMail({ to, replyTo, subject: `[Test] ${subject}`, ...content });
       return json(request, { ok: true });
     }

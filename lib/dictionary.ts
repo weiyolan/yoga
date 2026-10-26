@@ -49,6 +49,11 @@ const nl = {
     offer: "Aanbod",
     about: "Over",
     follow: "Volg ons",
+    mailSubject: "Je bent ingeschreven voor onze nieuwsbrief",
+    mailBody: "Dag,\n\nBedankt voor je inschrijving! We laten je weten wanneer er een nieuwe retreat aankomt of er iets leuks te vertellen is. Niet te vaak, beloofd.\n\nTot snel,\nRita & Philippe\nYoga, Zen & Tonic",
+    unsubscribe: (url: string) => `Liever geen mails meer? Afmelden: ${url}`,
+    unsubscribed: "Je bent afgemeld. Je krijgt geen nieuwsbrief meer van ons.",
+    unsubscribeFailed: "Deze afmeldlink werkt niet (meer). Stuur ons gerust een bericht.",
   },
   card: {
     next: "Volgende retreat",
@@ -282,6 +287,11 @@ const en: Dictionary = {
     offer: "What we do",
     about: "About",
     follow: "Follow us",
+    mailSubject: "You're subscribed to our newsletter",
+    mailBody: "Hi,\n\nThanks for subscribing! We'll let you know when a new retreat is coming up or when there's something nice to share. Not too often, promise.\n\nSee you soon,\nRita & Philippe\nYoga, Zen & Tonic",
+    unsubscribe: (url: string) => `Rather not get these mails? Unsubscribe: ${url}`,
+    unsubscribed: "You've been unsubscribed. You won't get our newsletter anymore.",
+    unsubscribeFailed: "This unsubscribe link doesn't work (anymore). Feel free to send us a message.",
   },
   card: {
     next: "Next retreat",

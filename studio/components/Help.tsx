@@ -25,7 +25,7 @@ export function Help() {
           Tekst tussen [haken], zoals [IBAN], moet nog ingevuld worden: dat veld krijgt een gele waarschuwing, en “Nog in te vullen [ ]” in het menu toont alle plaatsen.
         </Text>
         <Text size={1} muted>
-          Bij elke nieuwe inschrijving krijgen jullie een mail. De deelnemer bevestigen: open de inschrijving → Bevestigingsmail. Die opent de tekst uit Bevestigingsmails, al ingevuld, in je eigen mailprogramma.
+          Bij elke nieuwe inschrijving krijgen jullie een mail. De deelnemer bevestigen: open de inschrijving → Bevestigingsmail. Die gebruikt de tekst uit Mails → Bevestigingsmails. Elke mail heeft rechts een voorbeeld (het oog bovenaan).
         </Text>
       </Stack>
     </Box>

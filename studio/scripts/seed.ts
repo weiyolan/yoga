@@ -356,7 +356,12 @@ async function seed() {
     signupConsent: txt(dict((d) => d.signup.consent)),
     signupTerms: txt(dict((d) => d.signup.terms)),
     signupThanks: txt(dict((d) => d.signup.sent)),
-    autoConfirm: false,
+  });
+  await singleton("mailSettings", { _type: "mailSettings", autoConfirm: false, newsletterConfirm: true });
+  await singleton("newsletterMail", {
+    _type: "newsletterMail",
+    subject: str(dict((d) => d.footer.mailSubject)),
+    body: txt(dict((d) => d.footer.mailBody)),
   });
   await singleton("homePage", {
     _type: "homePage",
