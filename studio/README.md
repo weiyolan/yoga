@@ -36,7 +36,7 @@ sanity/                  shared with the Next.js app
 | Testimonials | `testimonial` | quote ≤ 200 chars, optional link to a retreat |
 | Inschrijvingen | `signup` (from the site, private) | opens as a readable card with status buttons; "Bevestigd" updates `booked` on the retreat. Also: Nieuw (with count badge), Tabel (all fields, filter, CSV), Per retreat |
 | Contactformulier | `message` (from the site, private) | card view with status |
-| Contactboek | `signup` + `subscriber` + `message` + `reviewSubmission` | one row per e-mail address (lib/contacts.ts): where it came from, newsletter yes / unsubscribed (toggle by hand), search, filter chips, copy addresses, CSV. The newsletters use the same list |
+| Contactboek | `signup` + `subscriber` + `message` + `reviewSubmission` + `contact` | one row per e-mail address (lib/contacts.ts): where it came from, newsletter yes / unsubscribed (toggle by hand), search, filter chips, copy addresses, CSV export. "Toevoegen" (one by hand) and "CSV importeren" (column E-mail + optional Naam, GSM, Taal, Nieuwsbrief ja/afgemeld; `;` or `,`; the export works too; preview with new/existing count) make private `contact.<hash>` documents, + a subscriber when asked. The newsletters use the same list |
 | Reviews | `reviewSubmission` (private) → `review` (public) | "Gepubliceerd" copies a submission without e-mail to a public review |
 
 Design rules (from the agent-toolkit skills `sanity-best-practices` and `content-modeling-best-practices`):

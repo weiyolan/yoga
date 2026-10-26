@@ -317,6 +317,21 @@ export type Settings = {
   seo?: Seo;
 };
 
+export type Contact = {
+  _id: string;
+  _type: "contact";
+  _createdAt: string;
+  _updatedAt: string;
+  _rev: string;
+  name?: string;
+  email?: string;
+  phone?: string;
+  lang?: "nl" | "en";
+  notes?: string;
+  source?: "manual" | "csv";
+  addedAt?: string;
+};
+
 export type Subscriber = {
   _id: string;
   _type: "subscriber";
@@ -837,6 +852,7 @@ export type AllSanitySchemaTypes =
   | SignupSettings
   | Navigation
   | Settings
+  | Contact
   | Subscriber
   | Message
   | Signup

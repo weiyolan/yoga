@@ -1,6 +1,6 @@
 /**
  * The contact book: every e-mail address that came in through the website (retreat sign-ups,
- * newsletter, contact form, reviews), one row per address. Shared by the Studio (Binnengekomen →
+ * newsletter, contact form, reviews) or was added in the Studio (`contact`), one row per address. Shared by the Studio (Binnengekomen →
  * Contactboek) and the site (sending a newsletter, app/api/mail). No `@/` imports: the Studio imports this too.
  * Needs a token: these documents are private (dotted ids).
  */
@@ -10,10 +10,11 @@ export const CONTACTS_QUERY = `{
   "signup": *[_type == "signup" && defined(email)]{ _id, name, email, phone, lang, "at": submittedAt, "label": retreat->{ "t": ${NL} }.t },
   "message": *[_type == "message" && defined(email)]{ _id, name, email, lang, "at": submittedAt, "label": subject, notify },
   "subscriber": *[_type == "subscriber" && defined(email)]{ _id, name, email, lang, "at": subscribedAt, source, unsubscribed, unsubscribedAt },
-  "review": *[_type == "reviewSubmission" && defined(email)]{ _id, name, email, lang, "at": submittedAt, "label": retreat->{ "t": ${NL} }.t }
+  "review": *[_type == "reviewSubmission" && defined(email)]{ _id, name, email, lang, "at": submittedAt, "label": retreat->{ "t": ${NL} }.t },
+  "contact": *[_type == "contact" && defined(email)]{ _id, name, email, phone, lang, "at": addedAt, "label": notes }
 }`;
 
-export type ContactSource = "signup" | "message" | "subscriber" | "review";
+export type ContactSource = "signup" | "message" | "subscriber" | "review" | "contact";
 type Raw = { _id: string; name?: string; email?: string; phone?: string; lang?: string; at?: string; label?: string; notify?: boolean; source?: string; unsubscribed?: boolean; unsubscribedAt?: string };
 export type ContactsData = Record<ContactSource, Raw[]>;
 
@@ -34,7 +35,7 @@ export type Contact = {
   subscriberId?: string;
 };
 
-export const SOURCE_TITLES: Record<ContactSource, string> = { signup: "Retreat", subscriber: "Nieuwsbrief", message: "Contactformulier", review: "Review" };
+export const SOURCE_TITLES: Record<ContactSource, string> = { signup: "Retreat", subscriber: "Nieuwsbrief", message: "Contactformulier", review: "Review", contact: "Toegevoegd" };
 
 export function contacts(data: ContactsData): Contact[] {
   const map = new Map<string, Contact>();
@@ -66,7 +67,7 @@ export function contacts(data: ContactsData): Contact[] {
 export const AUDIENCES = [
   { value: "subscribers", title: "Nieuwsbrief-abonnees", description: "Schreven zich in via de footer of het contactformulier." },
   { value: "participants", title: "Deelnemers van retreats", description: "Schreven zich ooit in voor een retreat (klanten: mag, met afmeldlink)." },
-  { value: "contacts", title: "Iedereen in het contactboek", description: "Ook wie enkel een bericht of review stuurde. Enkel als ze daar toestemming voor gaven (GDPR)." },
+  { value: "contacts", title: "Iedereen in het contactboek", description: "Ook wie enkel een bericht of review stuurde of met de hand werd toegevoegd. Enkel als ze daar toestemming voor gaven (GDPR)." },
 ] as const;
 export type Audience = (typeof AUDIENCES)[number]["value"];
 

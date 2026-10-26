@@ -5,7 +5,7 @@ import { presentationTool } from "sanity/presentation";
 import { structureTool } from "sanity/structure";
 import { internationalizedArray } from "sanity-plugin-internationalized-array";
 import { apiVersion, defaultLanguage, languages } from "../sanity/site.config";
-import { FIXED_TYPES, FORM_TYPES, schemaTypes, SINGLETONS } from "./schemaTypes";
+import { CONTACT_TYPES, FIXED_TYPES, FORM_TYPES, schemaTypes, SINGLETONS } from "./schemaTypes";
 import { resolve } from "./presentation/resolve";
 import { structure } from "./structure";
 import { defaultDocumentNode } from "./structure/views";
@@ -64,7 +64,7 @@ export default defineConfig({
   schema: {
     types: schemaTypes,
     // singletons and form submissions can't be created from "New document"
-    templates: (prev) => prev.filter((t) => !singletons.has(t.schemaType) && !formTypes.has(t.schemaType)),
+    templates: (prev) => prev.filter((t) => !singletons.has(t.schemaType) && !formTypes.has(t.schemaType) && !CONTACT_TYPES.includes(t.schemaType)),
   },
 
   document: {

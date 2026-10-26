@@ -8,6 +8,7 @@ import { signupForm } from "./documents/signup-form";
 import { confirmationMail } from "./documents/confirmation-mail";
 import { newsletter } from "./documents/newsletter";
 import { subscriber } from "./documents/subscriber";
+import { contact } from "./documents/contact";
 import { studio } from "./documents/studio";
 import { testimonial } from "./documents/testimonial";
 import { yogaClass } from "./documents/yoga-class";
@@ -37,6 +38,9 @@ export const FIXED_TYPES = [legalPage.name];
 /** Only the website creates these (private dotted ids): hidden from "New document". */
 export const FORM_TYPES = [signup.name, message.name, subscriber.name, reviewSubmission.name];
 
+/** Only made in Binnengekomen → Contactboek (private dotted ids): hidden from "New document" too. */
+export const CONTACT_TYPES: string[] = [contact.name];
+
 export const schemaTypes = [
   // objects
   simpleBlockContent,
@@ -57,6 +61,7 @@ export const schemaTypes = [
   signup,
   message,
   subscriber,
+  contact,
   // singletons
   settings,
   navigation,
