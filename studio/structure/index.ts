@@ -270,20 +270,6 @@ export const structure: StructureResolver = (S) =>
               ),
             ]),
         ),
-      S.listItem()
-        .id("lessons")
-        .title("Lessen")
-        .icon(ActivityIcon)
-        .child(
-          S.list()
-            .title("Lessen")
-            .items([
-              singleton(S, "lessonsPage", "Lessen-pagina", ActivityIcon),
-              S.divider(),
-              S.documentTypeListItem("yogaClass").title("Stijlen"),
-              S.documentTypeListItem("studio").title("Studio's"),
-            ]),
-        ),
       S.documentTypeListItem("testimonial").title("Testimonials"),
       // every photo as tiles with search, filters, upload and AI; a photo opens large with its fields (components/MediaBank.tsx)
       S.listItem()
@@ -301,6 +287,21 @@ export const structure: StructureResolver = (S) =>
       S.divider().title("Pagina's"),
       singleton(S, "settings", "Algemeen", CogIcon),
       singleton(S, "homePage", "Home", HomeIcon),
+      // the page + its styles and studios
+      S.listItem()
+        .id("lessons")
+        .title("Lessen")
+        .icon(ActivityIcon)
+        .child(
+          S.list()
+            .title("Lessen")
+            .items([
+              singleton(S, "lessonsPage", "Lessen-pagina", ActivityIcon),
+              S.divider(),
+              S.documentTypeListItem("yogaClass").title("Stijlen"),
+              S.documentTypeListItem("studio").title("Studio's"),
+            ]),
+        ),
       // the page + everyone on it (Rita & Philippe, collaborators)
       S.listItem()
         .id("about")
