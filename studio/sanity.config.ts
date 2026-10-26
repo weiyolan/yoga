@@ -14,7 +14,7 @@ import { altTextAction, translateAction } from "./actions/ai";
 import { reviewLinkAction } from "./actions/review-link";
 import { confirmationMailAction } from "./actions/confirmation-mail";
 import { newBadge } from "./actions/badges";
-import { I18nTabsInput, I18nTabsItem } from "./components/I18nTabs";
+import { I18nTabsField, I18nTabsInput, I18nTabsItem } from "./components/I18nTabs";
 
 
 const singletons = new Set<string>([...SINGLETONS, ...FIXED_TYPES]);
@@ -57,7 +57,7 @@ export default defineConfig({
   ],
 
   // NL | EN tabs on every localized field (one language at a time; the others are only hidden)
-  form: { components: { input: I18nTabsInput, item: I18nTabsItem } },
+  form: { components: { field: I18nTabsField, input: I18nTabsInput, item: I18nTabsItem } },
 
   schema: {
     types: schemaTypes,
