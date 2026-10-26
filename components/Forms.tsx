@@ -5,6 +5,7 @@ import { useActionState, useEffect, useRef, useState, type KeyboardEvent } from 
 import { sendContact, sendReview, signup, subscribe, type FormState } from "@/app/actions/forms";
 import { getDictionary } from "@/lib/dictionary";
 import { href } from "@/lib/routes";
+import { answerText, fieldName, otherName, qName, questionSteps, visibleKeys, type FormQuestion } from "@/lib/signup-form";
 import type { Lang } from "@/sanity/site.config";
 import { Select } from "./Select";
 
@@ -121,66 +122,79 @@ export type SignupFormDef = {
   room: boolean | null;
   diet: boolean | null;
   message: boolean | null;
-  questions: { _key: string; label: string | null; help: string | null; type: string | null; options: string[] | null; required: boolean | null }[] | null;
+  intro?: string | null;
+  intent?: { info: boolean | null; later: boolean | null; question: string | null } | null;
+  questions: FormQuestion[] | null;
 } | null;
 
-type StepKey = "about" | "retreat" | "wishes" | "confirm";
+type Intent = "signup" | "info" | "later";
 
 /**
  * Retreat sign-up (its own page: /retreats/<slug>/inschrijven): stored in Sanity → Inschrijvingen.
  * Always one person. Which standard fields show and the extra questions come from the retreat's
- * sign-up form (Studio → Inschrijfformulieren). One question group at a time (Typeform-like) with a
- * progress bar; every step stays in the DOM, so the whole form is posted at once and refilled after a
- * failed submit. `full`: waiting list.
+ * sign-up form (Studio → Inschrijfformulieren): every “Nieuwe stap” there is a step here, questions can
+ * depend on the one before (lib/signup-form.ts). One step at a time (Typeform-like) with a progress bar;
+ * every step stays in the DOM, so the whole form is posted at once and refilled after a failed submit
+ * (steps off the chosen path and hidden questions are disabled: not validated, not sent). The form can
+ * also offer “not now” (more info / keep me posted): then only name, e-mail and one question. `full`: waiting list.
  */
 export function SignupForm({ lang, retreatId, rooms, form, texts, full = false }: { lang: Lang; retreatId: string; rooms: string[]; form: SignupFormDef; texts?: Texts & { terms?: string | null }; full?: boolean }) {
   const t = getDictionary(lang).signup;
   const [state, action, pending] = useActionState(signup, idle);
   useNotify(state);
+  const v = state.values ?? {};
   const [step, setStep] = useState(0);
   const [dir, setDir] = useState<"fwd" | "back">("fwd");
   const [summary, setSummary] = useState<[string, string][]>([]);
+  const [vals, setVals] = useState<Record<string, string>>(v);
+  const intents: Intent[] = ["signup", ...(form?.intent?.info ? ["info" as const] : []), ...(form?.intent?.later ? ["later" as const] : [])];
+  const [intent, setIntent] = useState<Intent>((intents as string[]).includes(v.intent) ? (v.intent as Intent) : "signup");
   const formEl = useRef<HTMLFormElement>(null);
   const moved = useRef(false);
 
-  const roomOptions = form?.room === false ? [] : rooms.filter(Boolean);
   const questions = (form?.questions ?? []).filter((q) => q.label);
+  const placed = (type: string) => questions.some((q) => q.type === type);
+  const roomOptions = rooms.filter(Boolean);
+  // room / diet as a question of their own (own place + title), else the standard fields
+  const standardRoom = form?.room !== false && !placed("room") && roomOptions.length > 0;
+  const standardDiet = form?.diet !== false && !placed("diet");
   const askPhone = form?.phone !== false;
-  const askDiet = form?.diet !== false;
   const askMessage = form?.message !== false;
-  const steps: StepKey[] = ["about", ...(roomOptions.length || questions.length ? ["retreat" as const] : []), ...(askDiet || askMessage ? ["wishes" as const] : []), "confirm"];
-  const stepOf = (k: StepKey) => steps.indexOf(k);
+  const groups = questionSteps(questions).filter((g) => g.questions.some((q) => q.type !== "room" || roomOptions.length));
+  if (standardRoom && !groups.length) groups.push({ key: "questions", title: null, help: null, questions: [] });
+  const shown = visibleKeys(questions, (name) => vals[name] ?? "");
+
+  // a step whose questions are all hidden (e.g. freediving experience for “yoga only”) is skipped
+  const active = groups.filter((g, i) => (i === 0 && standardRoom) || g.questions.some((q) => shown.has(q._key)));
+  const signupSteps = ["about", ...active.map((g) => g.key), ...(standardDiet || askMessage ? ["wishes"] : []), "confirm"];
+  const steps = intent === "signup" ? signupSteps : ["about", "later"];
+  const stepOf = (k: string) => steps.indexOf(k);
+  const titleOf = (k: string) => groups.find((g) => g.key === k)?.title || (k in t.steps ? t.steps[k as keyof typeof t.steps] : t.steps.retreat);
 
   // Server said "invalid": go back to the first step with a missing or wrong answer.
   useEffect(() => {
     if (state.status !== "invalid") return;
-    const v = state.values ?? {};
-    const missing = questions.some((q) => q.required && !v[`q.${q._key}`]?.trim());
-    const bad: StepKey = !v.name || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v.email ?? "") ? "about" : missing ? "retreat" : "confirm";
+    const missing = active.find((g) => g.questions.some((q) => q.required && shown.has(q._key) && !v[fieldName(q)]?.trim()));
+    const bad = !v.name || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v.email ?? "") ? "about" : missing ? missing.key : steps[steps.length - 1];
     setStep(Math.max(stepOf(bad), 0));
   }, [state]);
 
   // Focus the first field of a new step (not on page load).
   useEffect(() => {
     if (!moved.current) return;
-    formEl.current?.querySelector<HTMLElement>(`[data-step="${step}"] :is(input:not([type=hidden]), textarea, button[role=combobox], [role=combobox])`)?.focus({ preventScroll: true });
+    formEl.current?.querySelector<HTMLElement>(`[data-step="${step}"] :is(input:not([type=hidden]):not(:disabled), textarea:not(:disabled), button[role=combobox], [role=combobox])`)?.focus({ preventScroll: true });
   }, [step]);
 
   if (state.status === "sent")
     return (
       <p className="form-done" role="status">
-        {full ? t.waitlistSent : texts?.thanks || t.sent}
+        {intent === "later" ? t.laterSent : intent === "info" ? t.infoSent : full ? t.waitlistSent : texts?.thanks || t.sent}
       </p>
     );
 
   const total = steps.length;
   const last = step === total - 1;
-  const answer = (data: FormData, q: (typeof questions)[number]) => {
-    const v = String(data.get(`q.${q._key}`) ?? "");
-    if (q.type === "yesno") return v === "yes" ? t.yes : v === "no" ? t.no : "";
-    if (q.type === "choice") return v ? (q.options ?? []).filter(Boolean)[Number(v)] ?? "" : "";
-    return v;
-  };
+  const words = { yes: t.yes, no: t.no, other: t.other };
 
   const go = (to: number) => {
     const el = formEl.current;
@@ -189,18 +203,21 @@ export function SignupForm({ lang, retreatId, rooms, form, texts, full = false }
       // validate the current step only
       for (const f of el.querySelectorAll<HTMLInputElement>(`[data-step="${step}"] :is(input, textarea)`)) if (!f.checkValidity()) return void f.reportValidity();
     }
-    if (to === total - 1) {
+    if (intent === "signup" && to === total - 1) {
       const data = new FormData(el);
+      const get = (k: string) => String(data.get(k) ?? "");
       const rows: [string, string][] = [
-        [t.name, String(data.get("name") ?? "")],
-        [t.email, String(data.get("email") ?? "")],
-        [t.phone, String(data.get("phone") ?? "")],
-        [t.room, roomOptions.length ? String(data.get("room") ?? "") : ""],
-        ...questions.map((q) => [q.label ?? "", answer(data, q)] as [string, string]),
-        [t.diet, String(data.get("diet") ?? "")],
-        [t.message, String(data.get("message") ?? "")],
+        [t.name, get("name")],
+        [t.email, get("email")],
+        [t.phone, get("phone")],
+        [t.room, standardRoom ? get("room") : ""],
+        ...questions
+          .filter((q) => q.type !== "section" && shown.has(q._key))
+          .map((q) => [q.label ?? "", q.type === "room" || q.type === "diet" ? get(fieldName(q)) : answerText(q, get(qName(q)), get(otherName(q)), words)] as [string, string]),
+        [t.diet, standardDiet ? get("diet") : ""],
+        [t.message, get("message")],
       ];
-      setSummary(rows.filter(([, v]) => v.trim()));
+      setSummary(rows.filter(([, val]) => val.trim()));
     }
     moved.current = true;
     setDir(to > step ? "fwd" : "back");
@@ -216,32 +233,118 @@ export function SignupForm({ lang, retreatId, rooms, form, texts, full = false }
     go(step + 1);
   };
 
-  const at = (k: StepKey) => {
+  // every step is rendered; the ones off the current path are disabled (not validated, not posted)
+  const at = (k: string) => {
     const n = stepOf(k);
-    return { "data-step": n, hidden: step !== n, className: `form step${step === n ? " on" : ""}` };
+    return { "data-step": n >= 0 ? n : undefined, hidden: step !== n, disabled: n < 0, className: `form step${step === n ? " on" : ""}` };
   };
-  const v = state.values ?? {};
   const legalLink = (route: "terms" | "cancellation") => (
     <Link href={href(lang, route)} target="_blank">
       {getDictionary(lang).legal.titles[route].toLowerCase()}
     </Link>
   );
+  const roomSelect = (label: string, help?: string | null) => (
+    <div className="field full">
+      <Select label={label} name="room" defaultValue={v.room} options={roomOptions.map((r) => ({ value: r, label: r }))} />
+      {help ? <small className="muted">{help}</small> : null}
+    </div>
+  );
+
+  const question = (q: FormQuestion) => {
+    const name = qName(q);
+    const id = `s-q-${q._key}`;
+    const help = q.help ? (
+      <small className="muted" id={`${id}-help`}>
+        {q.help}
+      </small>
+    ) : null;
+    const label = `${q.label}${q.required ? " *" : ""}`;
+    if (q.type === "room") return roomOptions.length ? roomSelect(q.label ?? t.room, q.help) : null;
+    if (q.type === "diet")
+      return (
+        <div className="field full">
+          <label htmlFor="s-diet">{q.label}</label>
+          <input id="s-diet" name="diet" defaultValue={v.diet} required={!!q.required} aria-describedby={q.help ? `${id}-help` : undefined} />
+          {help}
+        </div>
+      );
+    if (q.type === "yesno" || q.type === "choice") {
+      const opts = q.type === "yesno" ? [["yes", t.yes], ["no", t.no]] : (q.options ?? []).filter(Boolean).map((o, i) => [String(i), o]);
+      return (
+        <fieldset className="field full choices" aria-describedby={q.help ? `${id}-help` : undefined}>
+          <legend className="select-label">{label}</legend>
+          {help}
+          <div className={`row${q.type === "choice" && opts.length > 2 ? " stack" : ""}`}>
+            {opts.map(([value, text]) => (
+              <label key={value} className="check">
+                <input type="radio" name={name} value={value} defaultChecked={v[name] === value} required={!!q.required} /> {text}
+              </label>
+            ))}
+            {q.type === "choice" && q.other ? (
+              <label className="check other">
+                <input type="radio" name={name} value="other" defaultChecked={v[name] === "other"} required={!!q.required} /> {t.other}:
+                <input name={otherName(q)} defaultValue={v[otherName(q)]} placeholder={t.otherPlaceholder} aria-label={`${q.label}: ${t.other}`}
+                  // typing here picks “Andere”
+                  onFocus={(e) => {
+                    const radio = e.currentTarget.parentElement?.querySelector<HTMLInputElement>("input[type=radio]");
+                    if (radio && !radio.checked) radio.click();
+                  }}
+                />
+              </label>
+            ) : null}
+          </div>
+        </fieldset>
+      );
+    }
+    return (
+      <div className="field full">
+        <label htmlFor={id}>{label}</label>
+        {q.type === "textarea" ? (
+          <textarea id={id} name={name} defaultValue={v[name]} required={!!q.required} aria-describedby={q.help ? `${id}-help` : undefined} />
+        ) : (
+          <input id={id} name={name} defaultValue={v[name]} required={!!q.required} aria-describedby={q.help ? `${id}-help` : undefined} />
+        )}
+        {help}
+      </div>
+    );
+  };
 
   return (
-    <form className="stepper" style={{ marginTop: 32 }} action={action} ref={formEl} onKeyDown={onKeyDown} data-dir={dir}>
+    <form
+      className="stepper"
+      style={{ marginTop: 32 }}
+      action={action}
+      ref={formEl}
+      onKeyDown={onKeyDown}
+      onChange={(e) => setVals(Object.fromEntries([...new FormData(e.currentTarget)].map(([k, x]) => [k, String(x)])))}
+      data-dir={dir}
+    >
       <input type="hidden" name="retreat" value={retreatId} />
       <input type="hidden" name="lang" value={lang} />
-      {full ? <p className="form-note">{t.waitlist}</p> : null}
+      {form?.intro ? <p className="form-intro">{form.intro}</p> : null}
+      {full && intent === "signup" ? <p className="form-note">{t.waitlist}</p> : null}
 
       <div className="progress" aria-hidden="true">
         <span style={{ width: `${((step + 1) / total) * 100}%` }} />
       </div>
       <p className="progress-label" aria-live="polite">
-        <b>{t.step(step + 1, total)}</b> · {t.steps[steps[step]]}
+        <b>{t.step(step + 1, total)}</b> · {titleOf(steps[step])}
       </p>
 
       <fieldset {...at("about")}>
         <legend className="visually-hidden">{t.steps.about}</legend>
+        {intents.length > 1 ? (
+          <fieldset className="field full choices">
+            <legend className="select-label">{t.intent}</legend>
+            <div className="row stack">
+              {intents.map((i) => (
+                <label key={i} className="check">
+                  <input type="radio" name="intent" value={i} checked={intent === i} onChange={() => setIntent(i)} /> {t.intents[i]}
+                </label>
+              ))}
+            </div>
+          </fieldset>
+        ) : null}
         <div className="field full">
           <label htmlFor="s-name">{t.name}</label>
           <input id="s-name" name="name" defaultValue={v.name} required autoComplete="name" />
@@ -258,58 +361,23 @@ export function SignupForm({ lang, retreatId, rooms, form, texts, full = false }
         ) : null}
       </fieldset>
 
-      {stepOf("retreat") >= 0 ? (
-        <fieldset {...at("retreat")}>
-          <legend className="visually-hidden">{t.steps.retreat}</legend>
-          {roomOptions.length ? (
-            <div className="field full">
-              <Select label={t.room} name="room" defaultValue={v.room} options={roomOptions.map((r) => ({ value: r, label: r }))} />
-            </div>
-          ) : null}
-          {questions.map((q) => {
-            const name = `q.${q._key}`;
-            const id = `s-q-${q._key}`;
-            const help = q.help ? (
-              <small className="muted" id={`${id}-help`}>
-                {q.help}
-              </small>
-            ) : null;
-            const label = `${q.label}${q.required ? " *" : ""}`;
-            if (q.type === "yesno" || q.type === "choice") {
-              const opts = q.type === "yesno" ? [["yes", t.yes], ["no", t.no]] : (q.options ?? []).filter(Boolean).map((o, i) => [String(i), o]);
-              return (
-                <fieldset key={q._key} className="field full choices" aria-describedby={q.help ? `${id}-help` : undefined}>
-                  <legend className="select-label">{label}</legend>
-                  {help}
-                  <div className="row">
-                    {opts.map(([value, text]) => (
-                      <label key={value} className="check">
-                        <input type="radio" name={name} value={value} defaultChecked={v[name] === value} required={!!q.required} /> {text}
-                      </label>
-                    ))}
-                  </div>
-                </fieldset>
-              );
-            }
-            return (
-              <div key={q._key} className="field full">
-                <label htmlFor={id}>{label}</label>
-                {q.type === "textarea" ? (
-                  <textarea id={id} name={name} defaultValue={v[name]} required={!!q.required} aria-describedby={q.help ? `${id}-help` : undefined} />
-                ) : (
-                  <input id={id} name={name} defaultValue={v[name]} required={!!q.required} aria-describedby={q.help ? `${id}-help` : undefined} />
-                )}
-                {help}
-              </div>
-            );
-          })}
+      {groups.map((g, gi) => (
+        <fieldset key={g.key} {...at(g.key)}>
+          <legend className="visually-hidden">{titleOf(g.key)}</legend>
+          {g.help ? <p className="muted full step-help">{g.help}</p> : null}
+          {gi === 0 && standardRoom ? roomSelect(t.room) : null}
+          {g.questions.map((q) => (
+            <fieldset key={q._key} className="q-wrap" hidden={!shown.has(q._key)} disabled={!shown.has(q._key)}>
+              {question(q)}
+            </fieldset>
+          ))}
         </fieldset>
-      ) : null}
+      ))}
 
-      {stepOf("wishes") >= 0 ? (
+      {signupSteps.includes("wishes") ? (
         <fieldset {...at("wishes")}>
           <legend className="visually-hidden">{t.steps.wishes}</legend>
-          {askDiet ? (
+          {standardDiet ? (
             <div className="field full">
               <label htmlFor="s-diet">{t.diet}</label>
               <input id="s-diet" name="diet" defaultValue={v.diet} />
@@ -329,8 +397,8 @@ export function SignupForm({ lang, retreatId, rooms, form, texts, full = false }
         <div className="full">
           <h3 className="summary-title">{t.summary}</h3>
           <dl className="summary">
-            {summary.map(([k, val]) => (
-              <div key={k}>
+            {summary.map(([k, val], i) => (
+              <div key={`${i}-${k}`}>
                 <dt>{k}</dt>
                 <dd>{val}</dd>
               </div>
@@ -354,6 +422,25 @@ export function SignupForm({ lang, retreatId, rooms, form, texts, full = false }
         </label>
       </fieldset>
 
+      {intents.length > 1 ? (
+        <fieldset {...at("later")}>
+          <legend className="visually-hidden">{t.steps.later}</legend>
+          <div className="field full">
+            <label htmlFor="s-interests">{form?.intent?.question || t.laterQuestion}</label>
+            <textarea id="s-interests" name="interests" defaultValue={v.interests} />
+          </div>
+          <label className="check full">
+            <input type="checkbox" name="consent" defaultChecked={v.consent === "on"} required />
+            <span>
+              {t.laterConsent}{" "}
+              <Link href={href(lang, "privacy")} target="_blank">
+                {getDictionary(lang).privacy.link}
+              </Link>
+            </span>
+          </label>
+        </fieldset>
+      ) : null}
+
       <Honeypot />
       {state.status === "invalid" || state.status === "error" ? (
         <p className="form-msg" role="alert">
@@ -370,7 +457,7 @@ export function SignupForm({ lang, retreatId, rooms, form, texts, full = false }
         )}
         {last ? (
           <button className="btn" disabled={pending}>
-            {pending ? t.sending : full ? t.waitlistSend : t.send}
+            {pending ? t.sending : intent !== "signup" ? t.laterSend : full ? t.waitlistSend : t.send}
           </button>
         ) : (
           <span className="step-next">

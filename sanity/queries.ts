@@ -72,7 +72,12 @@ const FORM = `{
   "room": coalesce(standard.room, true),
   "diet": coalesce(standard.diet, true),
   "message": coalesce(message, true),
-  "questions": questions[]{ _key, "label": ${t("label")}, "help": ${t("help")}, type, "options": ${lines("options")}, required }
+  "intro": ${t("intro")},
+  "intent": { "info": intent.info == true, "later": intent.later == true, "question": ${t("intent.question")} },
+  "questions": questions[]{
+    _key, "label": ${t("label")}, "help": ${t("help")}, type, "options": ${lines("options")}, other, required, showIf,
+    "optionsNl": string::split(coalesce(options[language == "${defaultLanguage}"][0].value, ""), "\\n")
+  }
 }` as const;
 
 /** Mails → Nieuwsbrief-bevestiging (lib/newsletter.ts). */

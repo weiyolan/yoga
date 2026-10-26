@@ -15,7 +15,7 @@ export const subscriber = defineType({
   fields: [
     defineField({ name: "email", title: "E-mail", type: "string", readOnly: true }),
     defineField({ name: "name", title: "Naam", type: "string", readOnly: true }),
-    defineField({ name: "source", title: "Via", type: "string", readOnly: true, options: { list: [{ title: "Footer", value: "footer" }, { title: "Contactformulier", value: "contact" }, { title: "Studio (contactboek)", value: "studio" }, { title: "Afmeldlink", value: "unsubscribe" }] } }),
+    defineField({ name: "source", title: "Via", type: "string", readOnly: true, options: { list: [{ title: "Footer", value: "footer" }, { title: "Contactformulier", value: "contact" }, { title: "Inschrijfformulier (op de hoogte blijven)", value: "signup" }, { title: "Studio (contactboek)", value: "studio" }, { title: "Afmeldlink", value: "unsubscribe" }] } }),
     defineField({ name: "lang", title: "Taal", type: "string", readOnly: true }),
     defineField({ name: "subscribedAt", title: "Ingeschreven op", type: "datetime", readOnly: true }),
     defineField({ name: "unsubscribed", title: "Uitgeschreven", type: "boolean", initialValue: false }),

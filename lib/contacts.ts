@@ -8,7 +8,7 @@
 const NL = `coalesce(title[language == "nl"][0].value, title[0].value)`;
 export const CONTACTS_QUERY = `{
   "signup": *[_type == "signup" && defined(email)]{ _id, name, email, phone, lang, "at": submittedAt, "label": retreat->{ "t": ${NL} }.t },
-  "message": *[_type == "message" && defined(email)]{ _id, name, email, lang, "at": submittedAt, "label": subject, notify },
+  "message": *[_type == "message" && defined(email)]{ _id, name, email, phone, lang, "at": submittedAt, "label": subject, notify },
   "subscriber": *[_type == "subscriber" && defined(email)]{ _id, name, email, lang, "at": subscribedAt, source, unsubscribed, unsubscribedAt },
   "review": *[_type == "reviewSubmission" && defined(email)]{ _id, name, email, lang, "at": submittedAt, "label": retreat->{ "t": ${NL} }.t },
   "contact": *[_type == "contact" && defined(email)]{ _id, name, email, phone, lang, "at": addedAt, "label": notes }

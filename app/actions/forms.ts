@@ -7,6 +7,7 @@ import { dateRange } from "@/lib/format";
 import { mailConfigured, sendMail } from "@/lib/mail";
 import { mailText, type MailContent } from "@/lib/mail-template";
 import { newsletterContent } from "@/lib/newsletter";
+import { answerText, fieldName, otherName, visibleKeys, type FormQuestion } from "@/lib/signup-form";
 import { subscriberId, unsubscribeUrl } from "@/lib/unsubscribe";
 import { isUpcoming, sanityFetch } from "@/sanity/fetch";
 import { LAYOUT_QUERY, NEWSLETTER_MAIL_QUERY, SIGNUP_RETREAT_QUERY } from "@/sanity/queries";
@@ -47,7 +48,7 @@ async function store(doc: { _id: string; _type: string; [key: string]: unknown }
 }
 
 /** One subscriber document per address (re-subscribing just clears "unsubscribed"). */
-const subscriberDoc = (email: string, lang: string, source: "footer" | "contact", name?: string) => ({
+const subscriberDoc = (email: string, lang: string, source: "footer" | "contact" | "signup", name?: string) => ({
   _id: subscriberId(email),
   _type: "subscriber",
   email,
@@ -175,7 +176,7 @@ async function signupInner(data: FormData): Promise<FormState> {
   const message = field(data, "message");
   const consent = data.get("consent") === "on";
   const terms = data.get("terms") === "on";
-  if (!name || !EMAIL.test(email) || !consent || !terms) return { status: "invalid" };
+  if (!name || !EMAIL.test(email) || !consent) return { status: "invalid" };
 
   const id = field(data, "retreat", 100);
   const [retreat, retreatNl] = await Promise.all([
@@ -184,22 +185,34 @@ async function signupInner(data: FormData): Promise<FormState> {
   ]);
   if (!retreat || !retreatNl || !isUpcoming(retreat.endDate)) return { status: "invalid" };
 
-  // Extra questions of the retreat's form: required ones must be answered; stored with the Dutch label.
+  // “Not now” (more info / keep me posted), if the form offers it: a message + newsletter, no sign-up.
+  const intent = field(data, "intent", 10);
+  if ((intent === "info" && retreat.form?.intent?.info) || (intent === "later" && retreat.form?.intent?.later)) return interest(data, intent, retreat, retreatNl.title ?? retreat.title ?? "retreat");
+  if (!terms) return { status: "invalid" };
+
+  // Extra questions of the retreat's form: the ones that show (lib/signup-form.ts) and are required must be
+  // answered; stored with the Dutch label. Room and diet placed as a question keep their own fields.
   const t = getDictionary(lang).signup;
   const tNl = getDictionary("nl").signup;
-  const questions = (retreat.form?.questions ?? []).filter((q) => q.label);
-  const answerOf = (q: (typeof questions)[number], d: typeof t, options: string[]) => {
-    const v = field(data, `q.${q._key}`, 2000);
-    if (q.type === "yesno") return v === "yes" ? d.yes : v === "no" ? d.no : "";
-    if (q.type === "choice") return v && /^\d+$/.test(v) ? (options[Number(v)] ?? "") : "";
-    return v;
-  };
+  const all = (retreat.form?.questions ?? []).filter((q) => q.label);
+  const shown = visibleKeys(all, (name) => field(data, name, 2000));
+  const questions = all.filter((q) => shown.has(q._key) && q.type !== "section");
+  const raw = (q: FormQuestion) => field(data, fieldName(q), 2000);
+  // (a placed room choice isn't enforced: without prices on the retreat there is nothing to pick)
+  if (questions.some((q) => q.required && q.type !== "room" && !raw(q))) return { status: "invalid" };
   const opts = (q?: { options: string[] | null } | null) => (q?.options ?? []).filter(Boolean);
-  if (questions.some((q) => q.required && !answerOf(q, t, opts(q)))) return { status: "invalid" };
-  const answers = questions.map((q) => {
-    const nl = retreatNl.form?.questions?.find((x) => x._key === q._key);
-    return { label: q.label ?? "", labelNl: nl?.label ?? q.label ?? "", answer: answerOf(q, t, opts(q)), answerNl: answerOf(q, tNl, opts(nl).length ? opts(nl) : opts(q)) };
-  });
+  const answers = questions
+    .filter((q) => q.type !== "room" && q.type !== "diet")
+    .map((q) => {
+      const nl = retreatNl.form?.questions?.find((x) => x._key === q._key);
+      const other = field(data, otherName(q), 500);
+      return {
+        label: q.label ?? "",
+        labelNl: nl?.label ?? q.label ?? "",
+        answer: answerText(q, raw(q), other, t),
+        answerNl: answerText(q, raw(q), other, tNl, opts(nl).length ? opts(nl) : opts(q)),
+      };
+    });
 
   const title = retreat.title ?? "retreat";
   const when = dateRange(lang, retreat.startDate, retreat.endDate);
@@ -276,6 +289,44 @@ async function signupInner(data: FormData): Promise<FormState> {
   ];
   for (const r of await Promise.allSettled(mails)) if (r.status === "rejected") console.error("signup: mail", r.reason);
   return { status: "sent", notify: team.notify };
+}
+
+/**
+ * Sign-up form → “Ik twijfel nog: stuur me meer info” / “hou me op de hoogte”: a `message` (Studio →
+ * Contactformulier, subject “Meer info: <retreat>” / “Op de hoogte houden: <retreat>”), a newsletter
+ * subscription (with its confirmation mail) and a mail to the team.
+ */
+async function interest(data: FormData, intent: "info" | "later", retreat: { _id: string }, title: string): Promise<FormState> {
+  const lang = langOf(data);
+  const name = field(data, "name", 200);
+  const email = field(data, "email", 200);
+  const phone = field(data, "phone", 50);
+  const text = field(data, "interests");
+  const subject = `${intent === "info" ? "Meer info" : "Op de hoogte houden"}: ${title}`;
+  const team = toTeam({
+    soort: intent === "info" ? "Meer info" : "Op de hoogte houden",
+    name,
+    email,
+    subject: `Website: ${subject} (${name})`,
+    heading: subject,
+    text: [intent === "info" ? `${name} twijfelt nog en wil graag meer info over ${title}.` : `${name} kan deze keer niet, maar wil op de hoogte blijven.`, text].filter(Boolean).join("\n\n"),
+    rows: [
+      ["Naam", name],
+      ["E-mail", email],
+      ["GSM", phone],
+      ["Taal", lang],
+    ],
+    footnote: "Staat in de Studio → Contactformulier; ingeschreven voor de nieuwsbrief.",
+  });
+  return anyOf(
+    "signup interest",
+    [
+      store({ _id: `message.${randomUUID()}`, _type: "message", status: "new", name, email, phone, subject, message: text, notify: true, retreat: { _type: "reference", _ref: retreat._id }, lang, submittedAt: new Date().toISOString() }),
+      subscribeWithWelcome(subscriberDoc(email, lang, "signup", name)),
+      team.step,
+    ],
+    team.notify,
+  );
 }
 
 /**
