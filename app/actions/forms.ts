@@ -2,7 +2,7 @@
 
 import { createHash, randomUUID } from "node:crypto";
 import { getDictionary } from "@/lib/dictionary";
-import { confirmation } from "@/lib/confirmation";
+import { confirmationContent } from "@/lib/confirmation";
 import { dateRange } from "@/lib/format";
 import { mailConfigured, sendMail } from "@/lib/mail";
 import { mailText, type MailContent } from "@/lib/mail-template";
@@ -205,7 +205,6 @@ async function signupInner(data: FormData): Promise<FormState> {
   }
 
   const autoConfirm = (await sanityFetch({ query: LAYOUT_QUERY, lang }))?.autoConfirm === true;
-  const mail = confirmation(lang, retreat.mail, retreat, name, waitlist);
   const yours: [string, string][] = [
     [t.phone, phone],
     [t.room, room],
@@ -238,7 +237,10 @@ async function signupInner(data: FormData): Promise<FormState> {
     team.step,
     ...(autoConfirm
       ? [
-          sendMail({ to: email, subject: mail.subject, heading: title, photo: retreat.photo, text: mail.text, rows: yours.length ? yours : undefined }).then(() =>
+          (() => {
+            const mail = confirmationContent(lang, retreat.mail, retreat, name, waitlist, yours);
+            return sendMail({ to: email, subject: mail.subject, ...mail.content });
+          })().then(() =>
             writeClient?.patch(doc._id).set({ confirmedAt: new Date().toISOString() }).commit(),
           ),
         ]

@@ -4,22 +4,36 @@ import { SITE_URL, siteOrigin } from "./site";
 
 type Client = ReturnType<typeof useClient>;
 
+/** `sanity dev` (:3333) has no /api: use the live site. */
+const apiOrigin = () => (typeof location !== "undefined" && location.port === "3333" ? SITE_URL : siteOrigin());
+
 /**
- * Calls the site's /api/ai (Gemini). The editor's own credentials create a one-off private
- * ticket document first; the route checks and deletes it (see app/api/ai/route.ts).
+ * Calls one of the site's Studio routes (/api/ai, /api/mail). The editor's own credentials create a
+ * one-off private ticket document first; the route checks and deletes it (lib/studio-ticket.ts).
  */
-export async function ai<T>(client: Client, body: Record<string, unknown>): Promise<T> {
+export async function siteApi<T>(client: Client, path: string, body: Record<string, unknown>): Promise<T> {
   const ticket = `aiTicket.${randomKey(16)}`;
   await client.create({ _id: ticket, _type: "aiTicket" });
-  // `sanity dev` (:3333) has no /api: use the live site
-  const origin = typeof location !== "undefined" && location.port === "3333" ? SITE_URL : siteOrigin();
-  const res = await fetch(`${origin}/api/ai`, { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ ...body, ticket }) });
+  const res = await fetch(`${apiOrigin()}${path}`, { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ ...body, ticket }) });
   const json = (await res.json().catch(() => ({}))) as T & { message?: string };
   if (!res.ok) {
     client.delete(ticket).catch(() => {});
-    throw new Error(json.message || `AI-fout (${res.status})`);
+    throw new Error(json.message || `Fout (${res.status})`);
   }
   return json;
+}
+
+/** Gemini through /api/ai. */
+export const ai = <T>(client: Client, body: Record<string, unknown>) => siteApi<T>(client, "/api/ai", body);
+
+/** Can the site send mail (Resend / SMTP set up)? */
+export async function mailConfigured(): Promise<boolean> {
+  try {
+    const res = await fetch(`${apiOrigin()}/api/mail`);
+    return res.ok && ((await res.json()) as { configured?: boolean }).configured === true;
+  } catch {
+    return false;
+  }
 }
 
 /** `image-<hash>-<w>x<h>-<ext>` → the CDN url. */

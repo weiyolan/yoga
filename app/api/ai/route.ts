@@ -1,34 +1,17 @@
 /**
  * AI helpers for the Studio (✨ actions): POST { task: "alt" | "translate", ticket, … }.
- * Auth: the Studio first creates a private `aiTicket.<uuid>` document with the editor's own
- * credentials (works with cookie and token login); this route only proceeds if that ticket
- * exists and is fresh, then deletes it. So only people who can edit the dataset can use it.
+ * Auth: a one-off Studio ticket (lib/studio-ticket.ts).
  */
 import { NextResponse, type NextRequest } from "next/server";
 import { altText, geminiConfigured, translate } from "@/lib/gemini";
 import { dataset, projectId } from "@/sanity/env";
+import { cors, json, redeemTicket } from "@/lib/studio-ticket";
 import { writeClient } from "@/sanity/write";
 
-const ORIGINS = new Set(["https://yogazentonic.sanity.studio", "http://localhost:3333"]);
-const TTL = 5 * 60_000;
 const IMAGE = new RegExp(`^https://cdn\\.sanity\\.io/images/${projectId}/${dataset}/[\\w-]+\\.(jpg|jpeg|png|webp)(\\?.*)?$`);
-
-function cors(request: NextRequest): Record<string, string> {
-  const origin = request.headers.get("origin");
-  return origin && ORIGINS.has(origin) ? { "access-control-allow-origin": origin, "access-control-allow-methods": "POST", "access-control-allow-headers": "content-type", vary: "origin" } : {};
-}
-const json = (request: NextRequest, body: unknown, status = 200) => NextResponse.json(body, { status, headers: cors(request) });
 
 export function OPTIONS(request: NextRequest) {
   return new NextResponse(null, { status: 204, headers: cors(request) });
-}
-
-async function redeemTicket(id: unknown) {
-  if (!writeClient || typeof id !== "string" || !/^aiTicket\.[\w-]+$/.test(id)) return false;
-  const doc = await writeClient.getDocument(id);
-  if (!doc) return false;
-  await writeClient.delete(id).catch(() => {});
-  return Date.now() - Date.parse(doc._createdAt) < TTL;
 }
 
 export async function POST(request: NextRequest) {

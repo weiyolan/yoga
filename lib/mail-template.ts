@@ -4,8 +4,8 @@
  * The plain-text version is sent alongside it.
  */
 const C = { bg: "#F4F1EC", card: "#FFFFFF", ink: "#1A1917", soft: "#5E5A54", line: "#D8D2C8", ember: "#D4552B", dark: "#0F1A1D" };
-const SERIF = `Georgia, "Times New Roman", serif`;
-const SANS = `-apple-system, "Segoe UI", Helvetica, Arial, sans-serif`;
+const SERIF = `Georgia, 'Times New Roman', serif`;
+const SANS = `-apple-system, 'Segoe UI', Helvetica, Arial, sans-serif`;
 
 const esc = (s: string) => s.replaceAll("&", "&amp;").replaceAll("<", "&lt;").replaceAll(">", "&gt;").replaceAll('"', "&quot;");
 
