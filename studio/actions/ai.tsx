@@ -4,7 +4,7 @@ import { useState } from "react";
 import { useClient, useDocumentOperation, type DocumentActionComponent } from "sanity";
 import { randomKey } from "@sanity/util/content";
 import { apiVersion } from "../../sanity/site.config";
-import { ai, findJobs, imageUrl, patchesFor } from "../lib/ai";
+import { ai, translateJobs, findJobs, imageUrl, patchesFor } from "../lib/ai";
 
 type I18nItem = { _key: string; _type?: string; language?: string; value?: unknown };
 type Doc = Record<string, unknown> & { image?: { asset?: { _ref?: string } }; alt?: I18nItem[] };
@@ -73,10 +73,7 @@ export const translateAction: DocumentActionComponent = ({ id, type, draft, publ
       if (!jobs.length) return;
       setBusy(true);
       try {
-        // one request: flatten every job's texts under "<job index>|<key>"
-        const texts = Object.fromEntries(jobs.flatMap((j, i) => Object.entries(j.texts).map(([k, v]) => [`${i}|${k}`, v])));
-        const { texts: out } = await ai<{ texts: Record<string, string> }>(client, { task: "translate", texts, from: "nl", to: "en" });
-        const results = jobs.map((_, i) => Object.fromEntries(Object.entries(out).filter(([k]) => k.startsWith(`${i}|`)).map(([k, v]) => [k.slice(String(i).length + 1), v])));
+        const results = await translateJobs(client, jobs);
         patch.execute(patchesFor(jobs, results) as never);
         toast.push({ status: "success", title: `${jobs.length} ${jobs.length === 1 ? "veld" : "velden"} vertaald`, description: "Controleer de Engelse teksten en publiceer." });
       } catch (err) {

@@ -85,6 +85,13 @@ export function translatedValue(job: Job, out: Record<string, string>): unknown 
   }));
 }
 
+/** Translates every job's texts in one request; one result map per job (same order). */
+export async function translateJobs(client: Client, jobs: Job[], from = "nl", to = "en"): Promise<Record<string, string>[]> {
+  const texts = Object.fromEntries(jobs.flatMap((j, i) => Object.entries(j.texts).map(([k, v]) => [`${i}|${k}`, v])));
+  const { texts: out } = await ai<{ texts: Record<string, string> }>(client, { task: "translate", texts, from, to });
+  return jobs.map((_, i) => Object.fromEntries(Object.entries(out).filter(([k]) => k.startsWith(`${i}|`)).map(([k, v]) => [k.slice(String(i).length + 1), v])));
+}
+
 /** Patch operations (for useDocumentOperation().patch) that write the translations. */
 export function patchesFor(jobs: Job[], results: Record<string, string>[], to = "en") {
   return jobs.map((job, i) => {

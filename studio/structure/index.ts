@@ -11,6 +11,7 @@ import { LockIcon } from "@sanity/icons/Lock";
 import { SparklesIcon } from "@sanity/icons/Sparkles";
 import { StarIcon } from "@sanity/icons/Star";
 import { ThListIcon } from "@sanity/icons/ThList";
+import { TranslateIcon } from "@sanity/icons/Translate";
 import { HomeIcon } from "@sanity/icons/Home";
 import { ImagesIcon } from "@sanity/icons/Images";
 import { BellIcon } from "@sanity/icons/Bell";
@@ -21,6 +22,7 @@ import { WarningOutlineIcon } from "@sanity/icons/WarningOutline";
 import type { ComponentType } from "react";
 import type { StructureBuilder, StructureResolver } from "sanity/structure";
 import { BulkAltText } from "../components/BulkAltText";
+import { BulkTranslate } from "../components/BulkTranslate";
 import { Help } from "../components/Help";
 import { Placeholders } from "../components/Placeholders";
 import { countBadgeIcon } from "../components/CountBadgeIcon";
@@ -56,6 +58,7 @@ export const structure: StructureResolver = (S) =>
     .title("Website")
     .items([
       S.listItem().id("help").title("Zo werkt het").icon(HelpCircleIcon).child(S.component(Help).id("help").title("Zo werkt het")),
+      S.listItem().id("translate").title("Vertalen (AI)").icon(TranslateIcon).child(S.component(BulkTranslate).id("translate").title("Vertalen NL → EN (AI)")),
       S.listItem().id("todo").title("Nog in te vullen [ ]").icon(WarningOutlineIcon).child(S.component(Placeholders).id("todo").title("Nog in te vullen")),
 
       /* ---- 1. inbox: what comes in ---- */

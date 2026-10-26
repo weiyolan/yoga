@@ -19,7 +19,7 @@ export function Help() {
           Kan je niets wijzigen? Kijk of je een concept bewerkt (niet een oudere versie uit de geschiedenis) en herlaad de pagina.
         </Text>
         <Text size={1} muted>
-          Inschrijvingen, berichten en reviews komen binnen via de website. Hun status wijzig je op het tabblad Overzicht. Teksten in het Engels zijn optioneel: leeg = de Nederlandse tekst (of gebruik Vertaal NL → EN).
+          Inschrijvingen, berichten en reviews komen binnen via de website. Hun status wijzig je op het tabblad Overzicht. Teksten in het Engels zijn optioneel: leeg = de Nederlandse tekst. Elk tweetalig veld heeft tabs NL | EN (een • = nog leeg) en een knop Vertaal; alles in één keer: Vertalen (AI) in het menu.
         </Text>
         <Text size={1} muted>
           Tekst tussen [haken], zoals [IBAN], moet nog ingevuld worden: dat veld krijgt een gele waarschuwing, en “Nog in te vullen [ ]” in het menu toont alle plaatsen.

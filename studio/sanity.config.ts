@@ -14,6 +14,7 @@ import { altTextAction, translateAction } from "./actions/ai";
 import { reviewLinkAction } from "./actions/review-link";
 import { confirmationMailAction } from "./actions/confirmation-mail";
 import { newBadge } from "./actions/badges";
+import { I18nTabsInput, I18nTabsItem } from "./components/I18nTabs";
 
 
 const singletons = new Set<string>([...SINGLETONS, ...FIXED_TYPES]);
@@ -47,12 +48,16 @@ export default defineConfig({
       languages: languages.map(({ id, title }) => ({ id, title })),
       defaultLanguages: [defaultLanguage],
       fieldTypes: ["string", defineField({ name: "text", type: "text", rows: 3 }), "simpleBlockContent"],
-      buttonLocations: ["field"],
+      // adding a language: the tabs (components/I18nTabs.tsx) have their own button
+      buttonLocations: [],
       languageDisplay: "titleOnly",
     }),
     nlNLLocale(),
     visionTool({ defaultApiVersion: apiVersion }),
   ],
+
+  // NL | EN tabs on every localized field (one language at a time; the others are only hidden)
+  form: { components: { input: I18nTabsInput, item: I18nTabsItem } },
 
   schema: {
     types: schemaTypes,
