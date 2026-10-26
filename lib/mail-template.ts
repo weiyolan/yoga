@@ -3,20 +3,40 @@
  * the ember ampersand, optional photo). Table layout + inline styles: what mail clients understand.
  * The plain-text version is sent alongside it.
  */
-const C = { bg: "#F4F1EC", card: "#FFFFFF", ink: "#1A1917", soft: "#5E5A54", line: "#D8D2C8", ember: "#D4552B", dark: "#0F1A1D" };
+const C = {
+  bg: "#F4F1EC",
+  card: "#FFFFFF",
+  ink: "#1A1917",
+  soft: "#5E5A54",
+  line: "#D8D2C8",
+  ember: "#D4552B",
+  dark: "#0F1A1D",
+};
 const SERIF = `Georgia, 'Times New Roman', serif`;
 const SANS = `-apple-system, 'Segoe UI', Helvetica, Arial, sans-serif`;
 
-const esc = (s: string) => s.replaceAll("&", "&amp;").replaceAll("<", "&lt;").replaceAll(">", "&gt;").replaceAll('"', "&quot;");
+const esc = (s: string) =>
+  s
+    .replaceAll("&", "&amp;")
+    .replaceAll("<", "&lt;")
+    .replaceAll(">", "&gt;")
+    .replaceAll('"', "&quot;");
 
 /** Plain text → paragraphs (blank line) and line breaks; bare URLs and e-mail addresses become links. */
 function paragraphs(text: string) {
   const link = (s: string) =>
-    s.replace(/(https?:\/\/[^\s<]+)|([\w.+-]+@[\w-]+\.[\w.-]+)/g, (m, url) => `<a href="${url ? m : `mailto:${m}`}" style="color:${C.ember}">${m}</a>`);
+    s.replace(
+      /(https?:\/\/[^\s<]+)|([\w.+-]+@[\w-]+\.[\w.-]+)/g,
+      (m, url) =>
+        `<a href="${url ? m : `mailto:${m}`}" style="color:${C.ember}">${m}</a>`,
+    );
   return text
     .trim()
     .split(/\n{2,}/)
-    .map((p) => `<p style="margin:0 0 16px;font:16px/1.6 ${SANS};color:${C.ink};overflow-wrap:anywhere;word-break:break-word">${link(esc(p)).replaceAll("\n", "<br>")}</p>`)
+    .map(
+      (p) =>
+        `<p style="margin:0 0 16px;font:16px/1.6 ${SANS};color:${C.ink};overflow-wrap:anywhere;word-break:break-word">${link(esc(p)).replaceAll("\n", "<br>")}</p>`,
+    )
     .join("");
 }
 
@@ -31,7 +51,13 @@ export type MailBlock = {
 };
 
 /** A small linked card, e.g. a retreat in a newsletter. */
-export type MailCard = { title: string; meta?: string; url: string; photo?: string | null; more?: string };
+export type MailCard = {
+  title: string;
+  meta?: string;
+  url: string;
+  photo?: string | null;
+  more?: string;
+};
 
 /** Rich text → mail HTML: paragraphs, bullet lists, bold/italic, links. */
 function blocksHtml(blocks: MailBlock[], fill: (s: string) => string) {
@@ -45,7 +71,8 @@ function blocksHtml(blocks: MailBlock[], fill: (s: string) => string) {
           else if (m === "em") h = `<em>${h}</em>`;
           else {
             const href = b.markDefs?.find((d) => d._key === m)?.href;
-            if (href) h = `<a href="${esc(href)}" style="color:${C.ember}">${h}</a>`;
+            if (href)
+              h = `<a href="${esc(href)}" style="color:${C.ember}">${h}</a>`;
           }
         }
         return h;
@@ -58,7 +85,8 @@ function blocksHtml(blocks: MailBlock[], fill: (s: string) => string) {
       list += `<li style="margin:0 0 6px">${inline(b)}</li>`;
       continue;
     }
-    if (list) (out += `<ul style="${P};padding-left:22px">${list}</ul>`), (list = "");
+    if (list)
+      ((out += `<ul style="${P};padding-left:22px">${list}</ul>`), (list = ""));
     out += `<p style="${P}">${inline(b)}</p>`;
   }
   if (list) out += `<ul style="${P};padding-left:22px">${list}</ul>`;
@@ -66,13 +94,18 @@ function blocksHtml(blocks: MailBlock[], fill: (s: string) => string) {
 }
 
 /** Rich text → plain text (links as “text (url)”), for the text version of the mail. */
-export function blocksText(blocks: MailBlock[], fill: (s: string) => string = (s) => s) {
+export function blocksText(
+  blocks: MailBlock[],
+  fill: (s: string) => string = (s) => s,
+) {
   return blocks
     .filter((b) => b._type === "block")
     .map((b) => {
       const t = (b.children ?? [])
         .map((c) => {
-          const href = c.marks?.map((m) => b.markDefs?.find((d) => d._key === m)?.href).find(Boolean);
+          const href = c.marks
+            ?.map((m) => b.markDefs?.find((d) => d._key === m)?.href)
+            .find(Boolean);
           const text = fill(c.text ?? "");
           return href && href !== text ? `${text} (${href})` : text;
         })
@@ -105,23 +138,42 @@ export type MailContent = {
   footnote?: string;
 };
 
-export function mailHtml({ text, heading, photo, rows, footnote, blocks, fill, button, cards, unsubscribe }: MailContent) {
-  const btn = button?.url && button.label
-    ? `<table role="presentation" cellpadding="0" cellspacing="0" style="margin:8px 0 24px"><tr><td style="background:${C.dark};border-radius:999px"><a href="${esc(button.url)}" style="display:inline-block;padding:14px 28px;font:600 15px/1 ${SANS};color:#FFFFFF;text-decoration:none">${esc(button.label)}</a></td></tr></table>`
-    : "";
+export function mailHtml({
+  text,
+  heading,
+  photo,
+  rows,
+  footnote,
+  blocks,
+  fill,
+  button,
+  cards,
+  unsubscribe,
+}: MailContent) {
+  const btn =
+    button?.url && button.label
+      ? `<table role="presentation" cellpadding="0" cellspacing="0" style="margin:8px 0 24px"><tr><td style="background:${C.dark};border-radius:999px"><a href="${esc(button.url)}" style="display:inline-block;padding:14px 28px;font:600 15px/1 ${SANS};color:#FFFFFF;text-decoration:none">${esc(button.label)}</a></td></tr></table>`
+      : "";
   const cardList = cards?.length
     ? cards
         .map(
           (c) =>
-            `<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="margin:0 0 16px;border:1px solid ${C.line}"><tr>${
-              c.photo ? `<td width="38%" style="width:38%;vertical-align:top"><a href="${esc(c.url)}"><img src="${esc(c.photo)}?w=440&h=330&fit=crop&auto=format" width="200" alt="" style="display:block;width:100%;height:auto;border:0"></a></td>` : ""
-            }<td style="padding:14px 16px;vertical-align:middle"><a href="${esc(c.url)}" style="font:400 20px/1.25 ${SERIF};color:${C.ink};text-decoration:none">${esc(c.title)}</a>${
-              c.meta ? `<div style="margin-top:6px;font:13px/1.4 ${SANS};color:${C.soft}">${esc(c.meta)}</div>` : ""
+            `<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="margin:0 0 16px;border:1px solid ${C.line}">${
+              // photo on top, full width, cropped 2:1: always fills its box, in every mail app (no side-by-side cell to stretch)
+              c.photo
+                ? `<tr><td><a href="${esc(c.url)}"><img src="${esc(c.photo)}?w=1072&h=536&fit=crop&auto=format" width="536" alt="" style="display:block;width:100%;height:auto;border:0"></a></td></tr>`
+                : ""
+            }<tr><td style="padding:16px 18px 18px"><a href="${esc(c.url)}" style="font:400 20px/1.25 ${SERIF};color:${C.ink};text-decoration:none">${esc(c.title)}</a>${
+              c.meta
+                ? `<div style="margin-top:6px;font:13px/1.4 ${SANS};color:${C.soft}">${esc(c.meta)}</div>`
+                : ""
             }<div style="margin-top:10px"><a href="${esc(c.url)}" style="font:600 13px/1 ${SANS};color:${C.ember};text-decoration:none">${esc(c.more ?? "")} →</a></div></td></tr></table>`,
         )
         .join("")
     : "";
-  const img = photo ? `<tr><td><img src="${esc(photo)}?w=1200&h=600&fit=crop&auto=format" width="600" alt="" style="display:block;width:100%;height:auto;border:0"></td></tr>` : "";
+  const img = photo
+    ? `<tr><td><img src="${esc(photo)}?w=1200&h=600&fit=crop&auto=format" width="600" alt="" style="display:block;width:100%;height:auto;border:0"></td></tr>`
+    : "";
   const table = rows?.length
     ? `<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="margin:8px 0 16px;border-top:1px solid ${C.line}">${rows
         .map(
@@ -149,11 +201,26 @@ ${table}
 }
 
 /** The plain-text twin: text + rows as "Label: value" lines. */
-export function mailText({ text, rows, footnote, button, cards, unsubscribe }: MailContent) {
+export function mailText({
+  text,
+  rows,
+  footnote,
+  button,
+  cards,
+  unsubscribe,
+}: MailContent) {
   return [
     text.trim(),
     button?.url && button.label ? `${button.label}: ${button.url}` : "",
-    cards?.length ? cards.map((c) => [c.title, c.meta, c.url].filter(Boolean).join("\n")).join("\n\n") : "",
+    cards?.length
+      ? cards
+          .map((c) => [c.title, c.meta, c.url].filter(Boolean).join("\n"))
+          .join("\n\n")
+      : "",
     unsubscribe ? `${unsubscribe.label}: ${unsubscribe.url}` : "",
-    rows?.length ? rows.map(([k, v]) => `${k}: ${v || "-"}`).join("\n") : "", footnote ?? ""].filter(Boolean).join("\n\n");
+    rows?.length ? rows.map(([k, v]) => `${k}: ${v || "-"}`).join("\n") : "",
+    footnote ?? "",
+  ]
+    .filter(Boolean)
+    .join("\n\n");
 }

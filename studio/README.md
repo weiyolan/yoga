@@ -126,7 +126,7 @@ The seed creates three retreats:
 
 It also adds Rita, Philippe and Michèle, 4 styles, 3 studios, the weekly schedule, one testimonial, all pages and 24 photos.
 
-Photos get a title, place and categories but **no alt text**. That is deliberate: they appear under *Fotobank → Te doen: zonder alt-tekst*, where Philou & Tita describe them properly and set the hotspot.
+Photos get a title, place and categories but **no alt text**. That is deliberate: they appear in the *Fotobank* under the filter *Zonder alt-tekst* (or use *Alt-teksten aanvullen (AI)* there), where Philou & Tita describe them properly and set the hotspot.
 
 Placeholders in `[brackets]` are texts the client still has to write.
 

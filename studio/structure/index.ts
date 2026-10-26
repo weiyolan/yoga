@@ -7,7 +7,6 @@ import { ControlsIcon } from "@sanity/icons/Controls";
 import { MenuIcon } from "@sanity/icons/Menu";
 import { HelpCircleIcon } from "@sanity/icons/HelpCircle";
 import { LockIcon } from "@sanity/icons/Lock";
-import { SparklesIcon } from "@sanity/icons/Sparkles";
 import { StarIcon } from "@sanity/icons/Star";
 import { ThListIcon } from "@sanity/icons/ThList";
 import { TranslateIcon } from "@sanity/icons/Translate";
@@ -22,7 +21,7 @@ import { UsersIcon } from "@sanity/icons/Users";
 import { WarningOutlineIcon } from "@sanity/icons/WarningOutline";
 import type { ComponentType } from "react";
 import type { StructureBuilder, StructureResolver } from "sanity/structure";
-import { BulkAltText } from "../components/BulkAltText";
+import { MediaBank } from "../components/MediaBank";
 import { BulkTranslate } from "../components/BulkTranslate";
 import { ContactBook } from "../components/ContactBook";
 import { Help } from "../components/Help";
@@ -33,8 +32,7 @@ import { RetreatList, RETREATS_PAGE_ID } from "../components/RetreatList";
 import { statusList } from "../components/StatusList";
 import { documentNode } from "./views";
 import { MESSAGE_STATUSES } from "../schemaTypes/documents/message";
-import { apiVersion, defaultLanguage } from "../../sanity/site.config";
-import { MEDIA_CATEGORIES } from "../schemaTypes/documents/media-item";
+import { apiVersion } from "../../sanity/site.config";
 import { LEGAL_PAGES } from "../schemaTypes/singletons/legal-page";
 
 function singleton(
@@ -287,63 +285,16 @@ export const structure: StructureResolver = (S) =>
             ]),
         ),
       S.documentTypeListItem("testimonial").title("Testimonials"),
+      // every photo as tiles with search, filters, upload and AI; a photo opens large with its fields (components/MediaBank.tsx)
       S.listItem()
         .id("media")
         .title("Fotobank")
         .icon(ImagesIcon)
         .child(
-          S.list()
+          S.component(MediaBank)
+            .id("media")
             .title("Fotobank")
-            .items([
-              S.listItem()
-                .id("media-all")
-                .title("Alle foto's")
-                .icon(ImagesIcon)
-                .child(
-                  S.documentTypeList("mediaItem")
-                    .title("Alle foto's")
-                    .defaultOrdering([
-                      { field: "_createdAt", direction: "desc" },
-                    ]),
-                ),
-              filtered(
-                S,
-                "media-todo",
-                "Te doen: zonder alt-tekst",
-                "mediaItem",
-                `!defined(alt[language == "${defaultLanguage}"][0].value)`,
-                [{ field: "_createdAt", direction: "desc" }],
-              ).icon(WarningOutlineIcon),
-              S.listItem()
-                .id("media-ai")
-                .title("Alt-teksten aanvullen (AI)")
-                .icon(SparklesIcon)
-                .child(
-                  S.component(BulkAltText)
-                    .id("media-ai")
-                    .title("Alt-teksten aanvullen"),
-                ),
-              filtered(
-                S,
-                "media-gallery",
-                "In de gallery",
-                "mediaItem",
-                "showInGallery != false",
-                [{ field: "_createdAt", direction: "desc" }],
-              ),
-              S.divider(),
-              ...MEDIA_CATEGORIES.map((c) =>
-                filtered(
-                  S,
-                  `media-${c.value}`,
-                  c.title,
-                  "mediaItem",
-                  "$category in categories",
-                  [{ field: "_createdAt", direction: "desc" }],
-                  { category: c.value },
-                ),
-              ),
-            ]),
+            .child((id) => S.document().schemaType("mediaItem").documentId(id)),
         ),
 
       /* ---- 3. pages ---- */
