@@ -48,6 +48,8 @@ export function NewsletterForm({ lang, thanks }: { lang: Lang; thanks?: string |
   if (state.status === "sent") return <p className="sub-done" role="status">{thanks || t.subscribed}</p>;
   return (
     <form className="sub" action={action}>
+      <label className="visually-hidden" htmlFor="sub-name">{t.firstName}</label>
+      <input id="sub-name" name="name" type="text" defaultValue={state.values?.name} placeholder={t.firstName} autoComplete="given-name" maxLength={60} className="sub-name" />
       <label className="visually-hidden" htmlFor="sub-email">{t.emailPlaceholder}</label>
       <input id="sub-email" name="email" type="email" defaultValue={state.values?.email} required placeholder={t.emailPlaceholder} autoComplete="email" aria-invalid={state.status === "invalid" || undefined} />
       <input type="hidden" name="lang" value={lang} />

@@ -6,6 +6,7 @@
 import type { Lang } from "../sanity/site.config";
 import { getDictionary } from "./dictionary";
 import { fill } from "./confirmation";
+import { firstName } from "./newsletter";
 import { dateRange } from "./format";
 import { blocksText, type MailBlock, type MailContent } from "./mail-template";
 import { retreatHref, translatePath } from "./routes";
@@ -37,9 +38,9 @@ export type NewsletterIssue = {
   retreats?: { title?: string | null; country?: string | null; startDate?: string | null; endDate?: string | null; slug?: string | null; photo?: string | null }[] | null;
 } | null;
 
-/** `{naam}` in the text → the name (empty if they only gave an e-mail address). `site`: e.g. https://yogazentonic.com */
+/** `{naam}` in the text → their first name (empty if they only gave an e-mail address). `site`: e.g. https://yogazentonic.com */
 export function newsletterIssueContent(lang: Lang, issue: NewsletterIssue, name: string | undefined, unsubscribeUrl: string | null, site: string) {
-  const vars = { naam: name ?? "" };
+  const vars = { naam: firstName(name) };
   // empty name: “Dag {naam},” → “Dag,”, “ga je mee, {naam}?” → “ga je mee?”
   const f = (s: string) => fill(s, vars).replace(/ ,/g, ",").replace(/,\s*(?=[?!.])/g, "");
   const blocks = issue?.body ?? [];

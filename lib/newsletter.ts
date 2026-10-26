@@ -11,11 +11,15 @@ import type { MailContent } from "./mail-template";
 /** `newsletterMail` resolved to one language (sanity/queries.ts NEWSLETTER_MAIL_QUERY). */
 export type NewsletterMail = { subject?: string | null; body?: string | null } | null;
 
-/** `{naam}` (empty if they only gave an e-mail address). */
+/** “Anna Peeters” → “Anna” (newsletters greet by first name). */
+export const firstName = (name?: string | null) => name?.trim().split(/\s+/)[0] ?? "";
+
+/** `{naam}` → their first name (empty if they only gave an e-mail address); the unsubscribe link goes in the small footer. */
 export function newsletterContent(lang: Lang, mail: NewsletterMail, name: string | undefined, unsubscribeUrl: string | null) {
   const t = getDictionary(lang).footer;
-  const vars = { naam: name ?? "" };
-  const body = mail?.body ? fill(mail.body, vars).replace(/ ,/g, ",") : t.mailBody;
-  const content: MailContent = { text: [body, unsubscribeUrl ? t.unsubscribe(unsubscribeUrl) : ""].filter(Boolean).join("\n\n") };
-  return { subject: mail?.subject ? fill(mail.subject, vars) : t.mailSubject, content };
+  const vars = { naam: firstName(name) };
+  const clean = (s: string) => fill(s, vars).replace(/ ,/g, ",").replace(/,\s*(?=[?!.])/g, "");
+  const body = mail?.body ? clean(mail.body) : t.mailBody(vars.naam);
+  const content: MailContent = { text: body, unsubscribe: unsubscribeUrl ? { label: t.unsubscribeLink, url: unsubscribeUrl } : null };
+  return { subject: mail?.subject ? clean(mail.subject) : t.mailSubject, content };
 }

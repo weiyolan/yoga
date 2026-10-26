@@ -20,10 +20,10 @@ export const newsletter = defineType({
   ],
   fields: [
     defineField({ name: "title", title: "Naam", type: "string", group: "content", description: "Intern, bv. “Nieuwe retreats 2027”.", validation: (rule) => rule.required() }),
-    i18nString("subject", { title: "Onderwerp", group: "content", required: true, max: 90, description: "Wat ze in hun inbox zien. Gebruik {naam} voor hun naam." }),
+    i18nString("subject", { title: "Onderwerp", group: "content", required: true, max: 90, description: "Wat ze in hun inbox zien. Gebruik {naam} voor hun voornaam." }),
     mediaField("image", { title: "Foto bovenaan", group: "content", description: "Breed beeld (wordt 2:1 bijgesneden)." }),
     i18nString("heading", { title: "Titel", group: "content", description: "Grote titel boven de tekst. Optioneel." }),
-    i18nBlocks("body", { title: "Tekst", group: "content", required: true, description: "Begin bv. met “Dag {naam},”. Vet, cursief, links en opsommingen kunnen." }),
+    i18nBlocks("body", { title: "Tekst", group: "content", required: true, description: "Begin bv. met “Dag {naam},” (hun voornaam; zonder naam wordt het “Dag,”). Vet, cursief, links en opsommingen kunnen." }),
     defineField({
       name: "retreats",
       title: "Retreats in de kijker",

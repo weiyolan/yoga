@@ -5,6 +5,9 @@
  *  - Reviews: the two existing public reviews get their name and text in [brackets], so they show up in
  *    “Nog in te vullen [ ]” as examples to replace by real reviews (draft; the live site keeps the old text
  *    until you publish).
+ *  - Mails → Nieuwsbrief bevestiging: a text starting with “Dag,” / “Hi,” (the seeded default) starts with
+ *    “Dag {naam},” / “Hi {naam},” instead, so it greets by first name. Directly (published + draft), it's
+ *    only the greeting.
  *
  *   npx sanity exec scripts/content-v4.ts --with-user-token -- --dry   # prints every change
  *   npx sanity exec scripts/content-v4.ts --with-user-token
@@ -70,6 +73,18 @@ async function run() {
       audience: ["subscribers", "participants"],
     });
     log.push(`newsletter “Nieuwe retreats”: create draft (${upcoming.length} retreat cards)`);
+  }
+
+  /* newsletter confirmation: greet by first name */
+  for (const id of ["newsletterMail", "drafts.newsletterMail"]) {
+    const doc = await client.getDocument<{ body?: { _key: string; language?: string; value?: string }[] }>(id);
+    const items = (doc?.body ?? []).filter((i) => /^(Dag|Hi),/.test(i.value ?? ""));
+    if (!items.length) {
+      log.push(`${id}: ${doc ? "greeting already personal (or custom), skipped" : "doesn't exist, skipped"}`);
+      continue;
+    }
+    tx.patch(id, (p) => p.set(Object.fromEntries(items.map((i) => [`body[_key=="${i._key}"].value`, i.value!.replace(/^(Dag|Hi),/, "$1 {naam},")]))));
+    log.push(`${id}: “${items.map((i) => i.value!.split("\n")[0]).join("”, “")}” → with {naam}`);
   }
 
   /* reviews: [brackets] */

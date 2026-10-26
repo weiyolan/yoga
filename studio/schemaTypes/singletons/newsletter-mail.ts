@@ -13,7 +13,7 @@ export const newsletterMail = defineType({
   icon: BellIcon,
   fields: [
     i18nString("subject", { title: "Onderwerp", description: "Leeg = “Je bent ingeschreven voor onze nieuwsbrief”." }),
-    i18nText("body", { title: "Tekst", description: "Gebruik {naam} (leeg als ze enkel hun e-mail gaven). De afmeldlink komt er automatisch onder. Leeg = standaardtekst." }),
+    i18nText("body", { title: "Tekst", description: "Gebruik {naam}: hun voornaam (uit de footer, leeg als ze enkel hun e-mail gaven; “Dag {naam},” wordt dan “Dag,”). De afmeldlink komt automatisch klein onderaan. Leeg = standaardtekst." }),
   ],
   preview: { prepare: () => ({ title: "Nieuwsbrief bevestiging" }) },
 });

@@ -110,7 +110,7 @@ The frontend needs `NEXT_PUBLIC_SANITY_PROJECT_ID` and `NEXT_PUBLIC_SANITY_DATAS
 | `npm run migrate:mails` | one-off: the confirmation mail texts in the old Instellingen → a "Standaard" Bevestigingsmail (published), then unsets them (and the default sign-up link). `-- --dry` first |
 | `npm run migrate:settings` | one-off: moves the old Instellingen fields to Contact (contact & social, contact thanks), Menu & footer, Formulieren → Inschrijving (texts) and Mails → Opties (autoConfirm, notifyEmail, also from Formulieren → Inschrijving); published → published, draft → draft; then unsets them from Algemeen. `-- --dry` first |
 | `npm run content:v3` | one-off drafts: Veelgestelde vragen (first version) + Eifel prices / inbegrepen / programma (from `eiffel.txt`, only where empty). `-- --dry` first |
-| `npm run content:v4` | one-off drafts: an example newsletter “Nieuwe retreats” (upcoming retreats as cards, button to /retreats) if there is none yet, and the existing public reviews with name + text in [brackets] (examples to replace). `-- --dry` first |
+| `npm run content:v4` | one-off drafts: an example newsletter “Nieuwe retreats” (upcoming retreats as cards, button to /retreats) if there is none yet, and the existing public reviews with name + text in [brackets] (examples to replace); the Nieuwsbrief bevestiging greeting “Dag,” → “Dag {naam},”. Safe to run again. `-- --dry` first |
 | `npm run publish:drafts` | publishes every draft (Sanity's publish action, like the Studio button) and lists the `[placeholders]` still in them; draft-only references become normal ones. `-- --dry` to list, `-- --skip-placeholders` to keep drafts with `[..]` as drafts, `-- --only=faqPage,retreat` for some types |
 
 ## Seed content

@@ -42,7 +42,7 @@ async function recipient() {
  */
 async function store(doc: { _id: string; _type: string; [key: string]: unknown }, { once = false } = {}) {
   if (!writeClient) return void console.info(`[${doc._type}:dev] not stored (no SANITY_WRITE_TOKEN)`, doc);
-  if (once) await writeClient.transaction().createIfNotExists(doc).patch(doc._id, (p) => p.set({ unsubscribed: false })).commit();
+  if (once) await writeClient.transaction().createIfNotExists(doc).patch(doc._id, (p) => p.set({ unsubscribed: false, ...(doc.name ? { name: doc.name } : {}) })).commit();
   else await writeClient.create(doc);
 }
 
@@ -146,8 +146,9 @@ async function subscribeInner(data: FormData): Promise<FormState> {
   if (field(data, "website")) return { status: "sent" };
   const email = field(data, "email", 200);
   if (!EMAIL.test(email)) return { status: "invalid" };
-  const team = toTeam({ soort: "Nieuwsbrief", email, subject: "Website: nieuwe inschrijving nieuwsbrief", text: `Graag op de hoogte houden: ${email}` });
-  return anyOf("subscribe", [subscribeWithWelcome(subscriberDoc(email, langOf(data), "footer")), team.step], team.notify);
+  const name = field(data, "name", 60) || undefined;
+  const team = toTeam({ soort: "Nieuwsbrief", name, email, subject: "Website: nieuwe inschrijving nieuwsbrief", text: `Graag op de hoogte houden: ${name ? `${name} ` : ""}${email}` });
+  return anyOf("subscribe", [subscribeWithWelcome(subscriberDoc(email, langOf(data), "footer", name)), team.step], team.notify);
 }
 
 /**
