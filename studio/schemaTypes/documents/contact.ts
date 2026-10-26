@@ -2,7 +2,7 @@ import { BookIcon } from "@sanity/icons/Book";
 import { defineField, defineType } from "sanity";
 
 /**
- * A contact added by hand or by CSV import in Binnengekomen → Contactboek (components/ContactBook.tsx).
+ * A contact added by hand or by CSV import in Contact → Contactboek (components/ContactBook.tsx).
  * `_id` = `contact.<hash of the e-mail>`: private (dotted id), one per address. Whether they get the
  * newsletter is their `subscriber` document, like everyone else.
  */

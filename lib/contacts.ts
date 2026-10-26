@@ -1,6 +1,6 @@
 /**
  * The contact book: every e-mail address that came in through the website (retreat sign-ups,
- * newsletter, contact form, reviews) or was added in the Studio (`contact`), one row per address. Shared by the Studio (Binnengekomen →
+ * newsletter, contact form, reviews) or was added in the Studio (`contact`), one row per address. Shared by the Studio (Contact →
  * Contactboek) and the site (sending a newsletter, app/api/mail). No `@/` imports: the Studio imports this too.
  * Needs a token: these documents are private (dotted ids).
  */

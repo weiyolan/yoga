@@ -275,7 +275,7 @@ function Item({ type, id, at, label }: Contact["items"][number]) {
 }
 
 /**
- * Binnengekomen → Contactboek: every address that came in through the site (lib/contacts.ts), one row
+ * Contact → Contactboek: every address that came in through the site (lib/contacts.ts), one row
  * each, with where it came from. Search, filter, copy the addresses or export to CSV; sign someone on
  * or off for the newsletter by hand. “Toevoegen” / “CSV importeren” add `contact` documents (+ subscriber
  * when asked). Click a row for the documents behind it.
@@ -446,7 +446,7 @@ export function ContactBook() {
         </Card>
       )}
       <Text size={0} muted>
-        {all.length} adressen, één rij per e-mailadres. Nieuwsbrieven gaan nooit naar wie zich afmeldde (Mails → Nieuwsbrieven). CSV importeren: een kolom E-mail, eventueel Naam, GSM, Taal, Nieuwsbrief (ja / afgemeld); ook de CSV van hier.
+        {all.length} adressen, één rij per e-mailadres. Nieuwsbrieven gaan nooit naar wie zich afmeldde (Contact → Nieuwsbrieven). CSV importeren: een kolom E-mail, eventueel Naam, GSM, Taal, Nieuwsbrief (ja / afgemeld); ook de CSV van hier.
       </Text>
       {adding ? <AddDialog onClose={() => setAdding(false)} /> : null}
       {file ? <ImportDialog file={file} known={new Set(all.map((c) => c.email))} onClose={() => setFile(null)} /> : null}

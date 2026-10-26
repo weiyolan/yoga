@@ -28,7 +28,7 @@ export function Help() {
           Bij elke nieuwe inschrijving krijgen jullie een mail. De deelnemer bevestigen: open de inschrijving → Bevestigingsmail. Die gebruikt de tekst uit Mails → Inschrijving bevestiging. Elke mail heeft rechts een voorbeeld (het oog bovenaan).
         </Text>
         <Text size={1} muted>
-          Nieuwsbrief: Mails → Nieuwsbrieven → nieuw. Schrijf, kijk het voorbeeld na, stuur een testmail naar jezelf, publiceer, dan “Nieuwsbrief versturen…”. Wie hem krijgt zie je in Binnengekomen → Contactboek.
+          Nieuwsbrief: Contact → Nieuwsbrieven → +. Schrijf, kijk het voorbeeld rechts na, stuur een testmail naar jezelf, publiceer, dan “Nieuwsbrief versturen…” onderaan. Het paneel rechts toont bij welke stap je bent. Wie hem krijgt zie je in Contact → Contactboek.
         </Text>
       </Stack>
     </Box>

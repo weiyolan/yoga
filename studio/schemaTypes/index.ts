@@ -38,7 +38,7 @@ export const FIXED_TYPES = [legalPage.name];
 /** Only the website creates these (private dotted ids): hidden from "New document". */
 export const FORM_TYPES = [signup.name, message.name, subscriber.name, reviewSubmission.name];
 
-/** Only made in Binnengekomen → Contactboek (private dotted ids): hidden from "New document" too. */
+/** Only made in Contact → Contactboek (private dotted ids): hidden from "New document" too. */
 export const CONTACT_TYPES: string[] = [contact.name];
 
 export const schemaTypes = [

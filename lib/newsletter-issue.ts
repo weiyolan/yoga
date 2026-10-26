@@ -1,5 +1,5 @@
 /**
- * A newsletter (Studio → Mails → Nieuwsbrieven) as an HTML mail: header photo, title, rich text,
+ * A newsletter (Studio → Contact → Nieuwsbrieven) as an HTML mail: header photo, title, rich text,
  * optional button and retreat cards, unsubscribe link at the bottom. Shared by the site (sending,
  * app/api/mail) and the Studio preview. No `@/` imports: the Studio imports this too.
  */

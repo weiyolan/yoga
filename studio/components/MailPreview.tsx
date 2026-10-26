@@ -2,7 +2,7 @@ import { Box, Button, Card, Flex, Select, Stack, Text, TextInput } from "@sanity
 import { useToast } from "@sanity/ui/toast";
 import { useEffect, useMemo, useState } from "react";
 import { EyeOpenIcon } from "@sanity/icons/EyeOpen";
-import { defineDocumentInspector, useClient, useCurrentUser } from "sanity";
+import { defineDocumentInspector, useClient, useCurrentUser, useEditState } from "sanity";
 import { useDocumentPane } from "sanity/structure";
 import { confirmationContent, type ConfirmationMail, type ConfirmationRetreat } from "../../lib/confirmation";
 import { getDictionary } from "../../lib/dictionary";
@@ -202,6 +202,7 @@ function IssuePreview({ doc }: { doc: Doc }) {
   const { subject, content } = newsletterIssueContent(lang, issue, "Anna", `${SITE_URL}/api/unsubscribe?id=…`, SITE_URL);
   return (
     <Stack gap={3}>
+      <Steps id={id} written={!!issue?.subject && !!issue.body?.length} />
       <Flex gap={2}>
         <Select value={lang} onChange={(e) => setLang(e.currentTarget.value as Lang)} fontSize={1} padding={2} style={{ minWidth: 110 }}>
           {languages.map((l) => (
@@ -213,10 +214,48 @@ function IssuePreview({ doc }: { doc: Doc }) {
       </Flex>
       <Rendered subject={subject} html={mailHtml(content)} />
       <Text size={0} muted>
-        Voorbeeld voor “Anna”; iedereen krijgt hem in zijn eigen taal (EN leeg = NL) met een eigen afmeldlink. Versturen: publiceer, dan “Nieuwsbrief versturen” onderaan.
+        Voorbeeld voor “Anna”; iedereen krijgt hem in zijn eigen taal (EN leeg = NL) met een eigen afmeldlink.
       </Text>
       <TestMail send={(to) => siteApi(client, "/api/mail", { task: "test-issue", to, lang, id })} />
     </Stack>
+  );
+}
+
+/** Where this newsletter is in the flow: write → test → publish → send (the send button is the main button at the bottom once published). */
+function Steps({ id, written }: { id: string; written: boolean }) {
+  const { draft, published } = useEditState(id, "newsletter");
+  const sentAt = (published as { sentAt?: string } | null)?.sentAt;
+  const live = !!published && !draft;
+  const steps: { title: string; done: boolean; hint: string }[] = [
+    { title: "Schrijven", done: written, hint: "Onderwerp en tekst invullen (links)." },
+    { title: "Testmail", done: false, hint: "Stuur hem naar jezelf (onderaan dit paneel) en kijk hem na op je gsm." },
+    { title: "Publiceren", done: live, hint: draft && published ? "Je wijzigingen zijn nog niet gepubliceerd: “Publiceren” onderaan." : "“Publiceren” onderaan." },
+    { title: "Versturen", done: !!sentAt, hint: sentAt ? `Verstuurd op ${sentAt.slice(0, 10)}.` : "De knop “Nieuwsbrief versturen…” onderaan: toont het aantal ontvangers, dan bevestigen." },
+  ];
+  // the step to do now (the test mail is a tip, shown together with “Publiceren”)
+  const next = sentAt ? -1 : !written ? 0 : !live ? 2 : 3;
+  return (
+    <Card padding={3} radius={2} border tone={sentAt ? "positive" : "primary"}>
+      <Stack gap={3}>
+        {steps.map((s, i) => (
+          <Flex key={s.title} gap={2} align="flex-start">
+            <Text size={1} weight="semibold" style={{ width: 18 }}>
+              {s.done ? "✓" : `${i + 1}.`}
+            </Text>
+            <Stack gap={2} flex={1}>
+              <Text size={1} weight={i === next ? "semibold" : "regular"} muted={s.done && i !== next}>
+                {s.title}
+              </Text>
+              {i === next || (i === 1 && next === 2) || (i === 3 && sentAt) ? (
+                <Text size={0} muted>
+                  {s.hint}
+                </Text>
+              ) : null}
+            </Stack>
+          </Flex>
+        ))}
+      </Stack>
+    </Card>
   );
 }
 

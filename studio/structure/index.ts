@@ -61,8 +61,8 @@ export const structure: StructureResolver = (S) =>
       S.listItem().id("translate").title("Vertalen (AI)").icon(TranslateIcon).child(S.component(BulkTranslate).id("translate").title("Vertalen NL → EN (AI)")),
       S.listItem().id("todo").title("Nog in te vullen [ ]").icon(WarningOutlineIcon).child(S.component(Placeholders).id("todo").title("Nog in te vullen")),
 
-      /* ---- 1. inbox: what comes in ---- */
-      S.divider().title("Binnengekomen"),
+      /* ---- 1. contact: what comes in from people, and the newsletters going out to them ---- */
+      S.divider().title("Contact"),
       S.listItem()
         .id("signups")
         .title("Inschrijvingen")
@@ -124,6 +124,7 @@ export const structure: StructureResolver = (S) =>
         ),
       // every address from sign-ups, newsletter, contact form and reviews (components/ContactBook.tsx)
       S.listItem().id("contacts").title("Contactboek").icon(BookIcon).child(S.component(ContactBook).id("contacts").title("Contactboek")),
+      S.documentTypeListItem("newsletter").title("Nieuwsbrieven").icon(DocumentTextIcon),
 
       /* ---- 2. main documents ---- */
       S.divider().title("Inhoud"),
@@ -161,8 +162,6 @@ export const structure: StructureResolver = (S) =>
               singleton(S, "mailSettings", "Opties", ControlsIcon),
               S.documentTypeListItem("confirmationMail").title("Inschrijving bevestiging").icon(ComposeIcon),
               singleton(S, "newsletterMail", "Nieuwsbrief bevestiging", BellIcon),
-              S.divider(),
-              S.documentTypeListItem("newsletter").title("Nieuwsbrieven").icon(DocumentTextIcon),
             ]),
         ),
       S.listItem()

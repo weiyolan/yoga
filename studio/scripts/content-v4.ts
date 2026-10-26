@@ -1,6 +1,6 @@
 /**
  * Content v4 → the live dataset, as DRAFTS (Rita & Philippe review and publish):
- *  - Mails → Nieuwsbrieven: an example newsletter “Nieuwe retreats” with every upcoming retreat as a
+ *  - Contact → Nieuwsbrieven: an example newsletter “Nieuwe retreats” with every upcoming retreat as a
  *    card, the first one's photo on top and a button to /retreats. Only if there is no newsletter yet.
  *  - Reviews: the two existing public reviews get their name and text in [brackets], so they show up in
  *    “Nog in te vullen [ ]” as examples to replace by real reviews (draft; the live site keeps the old text
