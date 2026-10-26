@@ -1,14 +1,18 @@
 import { AddIcon } from "@sanity/icons/Add";
 import { CloseIcon } from "@sanity/icons/Close";
 import { EditIcon } from "@sanity/icons/Edit";
+import { RevertIcon } from "@sanity/icons/Revert";
 import { SearchIcon } from "@sanity/icons/Search";
 import { SparklesIcon } from "@sanity/icons/Sparkles";
+import { TrashIcon } from "@sanity/icons/Trash";
+import { UploadIcon } from "@sanity/icons/Upload";
 import {
   Badge,
   Box,
   Button,
   Card,
   Checkbox,
+  Dialog,
   Flex,
   Stack,
   Switch,
@@ -156,6 +160,13 @@ export function MediaBank() {
   }, [items, f, q]);
   const todo = (items ?? []).filter((i) => !altOf(i, "nl"));
   const item = items?.find((i) => i._id === sel) ?? null;
+  // the photo as it was when opened: “Herstellen” puts that back
+  const [orig, setOrig] = useState<Item | null>(null);
+  useEffect(() => {
+    setOrig(items?.find((i) => i._id === sel) ?? null);
+    // only when another photo is opened, not on every change
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [sel]);
 
   const patchLocal = (id: string, set: Partial<Item>) =>
     setItems(
@@ -501,6 +512,22 @@ export function MediaBank() {
               />
               <Text size={1}>Uitgelicht (grotere plek, Home / Instagram)</Text>
             </Flex>
+            <PhotoActions
+              key={`actions-${item._id}`}
+              client={client}
+              item={item}
+              orig={orig}
+              onChange={(set) => patchLocal(item._id, set)}
+              onDeleted={() => {
+                setSel(null);
+                setItems(
+                  (list) => list?.filter((i) => i._id !== item._id) ?? null,
+                );
+              }}
+              onError={(title, err) =>
+                toast.push({ status: "error", title, description: String(err) })
+              }
+            />
             <Box className="media-bank-link">
               <style>{`.media-bank-link a { color: inherit; text-decoration: none; }`}</style>
               <ChildLink childId={item._id}>
@@ -516,6 +543,205 @@ export function MediaBank() {
         </Card>
       ) : null}
     </Flex>
+  );
+}
+
+const FIELDS = ["alt", "categories", "showInGallery", "highlight"] as const;
+const same = (a: Item, b: Item) =>
+  a.ref === b.ref &&
+  FIELDS.every(
+    (k) => JSON.stringify(a[k] ?? null) === JSON.stringify(b[k] ?? null),
+  );
+
+/**
+ * Under a photo: “Herstellen” (back to how it was when you opened it), “Andere foto uploaden” (a new
+ * file in the same Fotobank item: changes everywhere it's used; focus point reset) and “Verwijderen”
+ * (only once nothing uses it any more: Sanity won't delete a photo that is still referenced; the
+ * dialog lists where it's used). The file itself is deleted too when nothing else uses it.
+ */
+function PhotoActions({
+  client,
+  item,
+  orig,
+  onChange,
+  onDeleted,
+  onError,
+}: {
+  client: Client;
+  item: Item;
+  orig: Item | null;
+  onChange: (set: Partial<Item>) => void;
+  onDeleted: () => void;
+  onError: (title: string, err: unknown) => void;
+}) {
+  const file = useRef<HTMLInputElement>(null);
+  const [busy, setBusy] = useState<string | null>(null);
+  const [confirm, setConfirm] = useState<
+    { _id: string; _type: string; title?: string }[] | null
+  >(null);
+  const image = (ref: string) => ({
+    _type: "image",
+    asset: { _type: "reference", _ref: ref },
+  });
+
+  const replace = async (f?: File) => {
+    if (!f) return;
+    setBusy("Uploaden…");
+    try {
+      const asset = await client.assets.upload("image", f, {
+        filename: f.name,
+      });
+      await save(client, item._id, { image: image(asset._id) });
+      onChange({
+        ref: asset._id,
+        url: asset.url,
+        file: f.name,
+        w: asset.metadata?.dimensions?.width,
+        h: asset.metadata?.dimensions?.height,
+      });
+    } catch (err) {
+      onError("Uploaden", err);
+    }
+    if (file.current) file.current.value = "";
+    setBusy(null);
+  };
+
+  const restore = async () => {
+    if (!orig) return;
+    setBusy("Herstellen…");
+    try {
+      const set: Record<string, unknown> = {};
+      for (const k of FIELDS) set[k] = orig[k] ?? null;
+      if (orig.ref && orig.ref !== item.ref) set.image = image(orig.ref);
+      await save(client, item._id, set);
+      onChange(orig);
+    } catch (err) {
+      onError("Herstellen", err);
+    }
+    setBusy(null);
+  };
+
+  const askDelete = async () => {
+    setBusy("Nakijken…");
+    try {
+      setConfirm(
+        await client.fetch(
+          `*[references($id) && _id != $draft]{ _id, _type, "title": coalesce(title[language == "nl"][0].value, title, name, internalTitle) }`,
+          { id: item._id, draft: `drafts.${item._id}` },
+          { perspective: "raw" },
+        ),
+      );
+    } catch (err) {
+      onError("Verwijderen", err);
+    }
+    setBusy(null);
+  };
+
+  const remove = async () => {
+    setBusy("Verwijderen…");
+    try {
+      await client
+        .transaction()
+        .delete(item._id)
+        .delete(`drafts.${item._id}`)
+        .commit();
+      // the file too, unless something else still uses it (then Sanity refuses: fine)
+      if (item.ref) await client.delete(item.ref).catch(() => undefined);
+      setConfirm(null);
+      onDeleted();
+    } catch (err) {
+      onError("Verwijderen", err);
+      setBusy(null);
+    }
+  };
+
+  return (
+    <Stack gap={2}>
+      <Flex gap={2} wrap="wrap">
+        <Button
+          icon={RevertIcon}
+          mode="ghost"
+          text="Herstellen"
+          title="Terug naar hoe de foto was toen je hem opende"
+          disabled={!!busy || !orig || same(orig, item)}
+          onClick={restore}
+        />
+        <Button
+          icon={UploadIcon}
+          mode="ghost"
+          text={busy === "Uploaden…" ? busy : "Andere foto uploaden"}
+          title="Vervangt het bestand overal waar deze foto gebruikt wordt"
+          disabled={!!busy}
+          onClick={() => file.current?.click()}
+        />
+        <Button
+          icon={TrashIcon}
+          mode="ghost"
+          tone="critical"
+          text="Verwijderen"
+          disabled={!!busy}
+          onClick={askDelete}
+        />
+        <input
+          ref={file}
+          type="file"
+          accept="image/*"
+          hidden
+          onChange={(e) => replace(e.currentTarget.files?.[0])}
+        />
+      </Flex>
+      {confirm ? (
+        <Dialog
+          id="media-delete"
+          header="Foto verwijderen"
+          onClose={() => setConfirm(null)}
+          width={1}
+          footer={
+            <Flex padding={3} gap={2} justify="flex-end">
+              <Button
+                mode="bleed"
+                text="Annuleren"
+                onClick={() => setConfirm(null)}
+              />
+              {!confirm.length ? (
+                <Button
+                  tone="critical"
+                  icon={TrashIcon}
+                  text={busy === "Verwijderen…" ? busy : "Verwijderen"}
+                  disabled={!!busy}
+                  onClick={remove}
+                />
+              ) : null}
+            </Flex>
+          }
+        >
+          <Stack gap={3} padding={4}>
+            {confirm.length ? (
+              <>
+                <Text size={1}>
+                  Deze foto wordt nog gebruikt op {confirm.length} plaats
+                  {confirm.length > 1 ? "en" : ""}. Kies daar eerst een andere
+                  foto (of haal hem weg), dan kan je hem verwijderen:
+                </Text>
+                <Stack gap={2}>
+                  {confirm.map((d) => (
+                    <Text key={d._id} size={1} muted>
+                      • {d.title || d._type}
+                      {d._id.startsWith("drafts.") ? " (concept)" : ""}
+                    </Text>
+                  ))}
+                </Stack>
+              </>
+            ) : (
+              <Text size={1}>
+                De foto wordt nergens gebruikt. Definitief verwijderen uit de
+                Fotobank? Dit kan je niet ongedaan maken.
+              </Text>
+            )}
+          </Stack>
+        </Dialog>
+      ) : null}
+    </Stack>
   );
 }
 
