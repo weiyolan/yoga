@@ -10,7 +10,7 @@ import { GALLERY_QUERY } from "@/sanity/queries";
 export async function generateMetadata({ params }: PageProps<"/[lang]/gallery">) {
   const lang = await langParam(params);
   const { page, photos } = await sanityFetch({ query: GALLERY_QUERY, lang });
-  return buildMetadata({ lang, route: "gallery", seo: page?.seo, fallbackTitle: page?.title, fallbackImage: photos[0] });
+  return buildMetadata({ lang, route: "gallery", seo: page?.seo, fallbackTitle: page?.title, fallbackDescription: page?.intro, fallbackImage: photos[0] });
 }
 
 export default async function Gallery({ params }: PageProps<"/[lang]/gallery">) {

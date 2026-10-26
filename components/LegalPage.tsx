@@ -21,7 +21,7 @@ export function legalPage(route: LegalRoute) {
   async function generateMetadata({ params }: Params) {
     const lang = await langParam(params);
     const page = await sanityFetch({ query: LEGAL_QUERY, params: { id: ID[route] }, lang });
-    return buildMetadata({ lang, route, seo: page?.seo, fallbackTitle: page?.title ?? getDictionary(lang).legal.titles[route] });
+    return buildMetadata({ lang, route, seo: page?.seo, fallbackTitle: page?.title ?? getDictionary(lang).legal.titles[route], fallbackDescription: page?.intro });
   }
   async function Page({ params }: Params) {
     const lang = await langParam(params);

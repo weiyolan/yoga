@@ -2,6 +2,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { Paragraphs } from "@/components/RichText";
 import { SectionHead } from "@/components/sections";
+import { JsonLd } from "@/components/JsonLd";
 import { getDictionary } from "@/lib/dictionary";
 import { buildMetadata } from "@/lib/metadata";
 import { href, langParam } from "@/lib/routes";
@@ -11,7 +12,7 @@ import { FAQ_QUERY } from "@/sanity/queries";
 export async function generateMetadata({ params }: PageProps<"/[lang]/faq">) {
   const lang = await langParam(params);
   const page = await sanityFetch({ query: FAQ_QUERY, lang });
-  return buildMetadata({ lang, route: "faq", seo: page?.seo, fallbackTitle: page?.title || getDictionary(lang).faq.title });
+  return buildMetadata({ lang, route: "faq", seo: page?.seo, fallbackTitle: page?.title || getDictionary(lang).faq.title, fallbackDescription: page?.intro });
 }
 
 /** Veelgestelde vragen (Studio → Pagina's → Veelgestelde vragen): fold-out answers per group + FAQPage data for Google. */
@@ -28,7 +29,7 @@ export default async function Faq({ params }: PageProps<"/[lang]/faq">) {
   };
   return (
     <section className="s" style={{ borderTop: 0, paddingTop: 48 }}>
-      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(ld).replaceAll("<", "\\u003c") }} />
+      <JsonLd data={ld} />
       <div className="wrap faq">
         <SectionHead label={t.label} title={page.title || t.title} as="h1" />
         {page.intro ? <p className="muted faq-intro">{page.intro}</p> : null}

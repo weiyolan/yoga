@@ -19,6 +19,7 @@ export async function generateMetadata({
     route: "lessons",
     seo: page?.seo,
     fallbackTitle: page?.hero?.title,
+    fallbackDescription: page?.hero?.subtitle || page?.intro,
     fallbackImage: page?.hero?.photo,
   });
 }

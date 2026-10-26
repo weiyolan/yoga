@@ -13,7 +13,7 @@ html { scroll-behavior: smooth; }
 body { margin: 0; background: var(--bg); color: var(--ink); font: 17px/1.65 var(--sans); -webkit-font-smoothing: antialiased; }
 a { color: inherit; }
 h1, h2, h3, h4, .serif { font-family: var(--serif); font-weight: 400; line-height: 1.05; letter-spacing: -.01em; margin: 0; }
-h1 { font-size: clamp(3.2rem, 8vw, 7rem); }
+h1, .as-h1 { font-size: clamp(3.2rem, 8vw, 7rem); }
 h2 { font-size: clamp(2.4rem, 5vw, 4.2rem); }
 h3 { font-size: 1.6rem; }
 h4 { font-size: 1.3rem; }

@@ -243,6 +243,12 @@ export const SIGNUP_PAGE_QUERY = defineQuery(`*[_type == "retreat" && slug.curre
 
 export const RETREAT_SLUGS_QUERY = defineQuery(`*[_type == "retreat" && defined(slug.current)].slug.current`);
 
+/** Sitemap: when each page last changed (singletons by id, retreats by slug). */
+export const SITEMAP_QUERY = defineQuery(`{
+  "pages": *[_id in ["homePage", "retreatsPage", "lessonsPage", "aboutPage", "galleryPage", "contactPage", "faqPage", "legal-privacy", "legal-terms", "legal-cancellation", "legal-cookies"]]{ _id, _updatedAt },
+  "retreats": *[_type == "retreat" && defined(slug.current)]{ "slug": slug.current, _updatedAt }
+}`);
+
 export const RETREAT_BY_SLUG_QUERY = defineQuery(`*[_type == "retreat" && slug.current == $slug][0]{
   ...${RETREAT_CARD},
   venue,

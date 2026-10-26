@@ -10,7 +10,7 @@ import { CONTACT_QUERY, LAYOUT_QUERY } from "@/sanity/queries";
 export async function generateMetadata({ params }: PageProps<"/[lang]/contact">) {
   const lang = await langParam(params);
   const page = await sanityFetch({ query: CONTACT_QUERY, lang });
-  return buildMetadata({ lang, route: "contact", seo: page?.seo, fallbackTitle: page?.title, fallbackImage: page?.photo });
+  return buildMetadata({ lang, route: "contact", seo: page?.seo, fallbackTitle: page?.title, fallbackDescription: page?.intro, fallbackImage: page?.photo });
 }
 
 export default async function Contact({ params }: PageProps<"/[lang]/contact">) {

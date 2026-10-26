@@ -79,7 +79,9 @@ The Studio lives in `studio/`, an npm workspace: the root `npm install` installs
   - URL segments: `lib/routes.ts`
   - Interface strings (buttons, labels): `lib/dictionary.ts`
   - Languages: `sanity/site.config.ts`
-- **Metadata.** Every page has hreflang alternates, an OG image from the page's SEO (falling back to Settings), and an entry in `/sitemap.xml`.
+- **Metadata.** Every page has a canonical URL, hreflang alternates (+ x-default), its own description (SEO field, else the page's intro, never one shared text), Open Graph / Twitter tags with locale and an image, and an entry in `/sitemap.xml` (with last-modified). `lib/metadata.ts`.
+- **Structured data.** Home: Organization + WebSite; retreat: Event (dates, place, price from, sold out, hosts) + breadcrumbs; FAQ: FAQPage. `lib/jsonld.ts`.
+- **Indexing.** Sign-up and review pages, the Studio and Netlify deploy previews (`CONTEXT` ≠ production) are noindex. Without `NEXT_PUBLIC_SITE_URL` a production build uses Netlify's `URL`, else https://yogazentonic.com.
 
 ## Structure
 

@@ -8,7 +8,7 @@ import { RETREATS_QUERY } from "@/sanity/queries";
 export async function generateMetadata({ params }: PageProps<"/[lang]/retreats">) {
   const lang = await langParam(params);
   const { page } = await sanityFetch({ query: RETREATS_QUERY, lang });
-  return buildMetadata({ lang, route: "retreats", seo: page?.seo, fallbackTitle: page?.hero?.title, fallbackImage: page?.hero?.photo });
+  return buildMetadata({ lang, route: "retreats", seo: page?.seo, fallbackTitle: page?.hero?.title, fallbackDescription: page?.hero?.subtitle, fallbackImage: page?.hero?.photo });
 }
 
 export default async function Retreats({ params }: PageProps<"/[lang]/retreats">) {
