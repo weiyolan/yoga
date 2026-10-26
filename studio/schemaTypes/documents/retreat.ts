@@ -28,16 +28,33 @@ export const retreat = defineType({
   fieldsets: [{ name: "dates", title: "Wanneer", options: { columns: 2 } }],
   fields: [
     /* ---- basis ---- */
-    i18nString("title", { title: "Titel", group: "basics", required: true, max: 60, description: "bv. “Dahab: Yoga & Freediving”." }),
+    i18nString("title", {
+      title: "Titel",
+      group: "basics",
+      required: true,
+      max: 60,
+      description: "bv. “Dahab: Yoga & Freediving”.",
+    }),
     defineField({
       name: "slug",
       title: "Slug (webadres)",
       type: "slug",
       group: "basics",
-      options: { source: (doc) => `${pick(doc.title as never) ?? ""} ${String(doc.startDate ?? "").slice(0, 4)}`, maxLength: 60 },
+      options: {
+        source: (doc) =>
+          `${pick(doc.title as never) ?? ""} ${String(doc.startDate ?? "").slice(0, 4)}`,
+        maxLength: 60,
+      },
       validation: (rule) => rule.required(),
     }),
-    defineField({ name: "startDate", title: "Van", type: "date", group: "basics", fieldset: "dates", validation: (rule) => rule.required() }),
+    defineField({
+      name: "startDate",
+      title: "Van",
+      type: "date",
+      group: "basics",
+      fieldset: "dates",
+      validation: (rule) => rule.required(),
+    }),
     defineField({
       name: "endDate",
       title: "Tot en met",
@@ -47,28 +64,55 @@ export const retreat = defineType({
       validation: (rule) =>
         rule.required().custom((end, ctx) => {
           const start = ctx.document?.startDate as string | undefined;
-          return !start || !end || end >= start ? true : "Einddatum ligt vóór de startdatum";
+          return !start || !end || end >= start
+            ? true
+            : "Einddatum ligt vóór de startdatum";
         }),
     }),
-    i18nString("place", { title: "Plaats", group: "basics", required: true, description: "bv. “Dahab”." }),
+    i18nString("place", {
+      title: "Plaats",
+      group: "basics",
+      required: true,
+      description: "bv. “Dahab”.",
+    }),
     i18nString("country", { title: "Land", group: "basics", required: true }),
-    defineField({ name: "venue", title: "Verblijf", type: "string", group: "basics", description: "bv. “Nour Boutique Hotel”." }),
-    defineField({ name: "capacity", title: "Max. deelnemers", type: "number", group: "basics", validation: (rule) => rule.integer().min(1) }),
+    defineField({
+      name: "venue",
+      title: "Verblijf",
+      type: "string",
+      group: "basics",
+      description: "bv. “Nour Boutique Hotel”.",
+    }),
+    defineField({
+      name: "capacity",
+      title: "Max. deelnemers",
+      type: "number",
+      group: "basics",
+      validation: (rule) => rule.integer().min(1),
+    }),
     defineField({
       name: "booked",
       title: "Geboekt (automatisch)",
       type: "number",
       group: "basics",
       readOnly: true,
-      description: "Aantal bevestigde inschrijvingen (1 inschrijving = 1 persoon). Wordt automatisch bijgewerkt als je in Inschrijvingen een status wijzigt. De site toont “nog x plaatsen” / “volzet” (dan: wachtlijst).",
+      description:
+        "Aantal bevestigde inschrijvingen (1 inschrijving = 1 persoon). Wordt automatisch bijgewerkt als je in Inschrijvingen een status wijzigt. De site toont “nog x plaatsen” / “volzet” (dan: wachtlijst).",
     }),
-    defineField({ name: "priceFrom", title: "Prijs vanaf (€)", type: "number", group: "basics", validation: (rule) => rule.min(0) }),
+    defineField({
+      name: "priceFrom",
+      title: "Prijs vanaf (€)",
+      type: "number",
+      group: "basics",
+      validation: (rule) => rule.min(0),
+    }),
     defineField({
       name: "signupUrl",
       title: "Inschrijflink",
       type: "url",
       group: "basics",
-      description: "Optioneel: externe inschrijflink (bv. een partner). Leeg = het inschrijfformulier op de site.",
+      description:
+        "Optioneel: externe inschrijflink (bv. een partner). Leeg = het inschrijfformulier op de site.",
       validation: (rule) => rule.uri({ scheme: ["https"] }),
     }),
     defineField({
@@ -77,7 +121,8 @@ export const retreat = defineType({
       type: "reference",
       to: [{ type: "signupForm" }],
       group: "basics",
-      description: "Welke vragen het formulier stelt (bv. “Yoga & Freediving”). Leeg = het standaardformulier.",
+      description:
+        "Welke vragen het formulier stelt (bv. “Yoga & Freediving”). Leeg = het standaardformulier.",
     }),
     defineField({
       name: "confirmationMail",
@@ -85,16 +130,42 @@ export const retreat = defineType({
       type: "reference",
       to: [{ type: "confirmationMail" }],
       group: "basics",
-      description: "Welke mail de deelnemer krijgt na het inschrijven. Leeg = de standaardmail.",
+      description:
+        "Welke mail de deelnemer krijgt na het inschrijven. Leeg = de standaardmail.",
     }),
-    mediaField("cardPhoto", { title: "Foto op de kaart", group: "basics", required: true }),
-    defineField({ name: "hero", title: "Openingsbeeld", type: "hero", group: "basics", validation: (rule) => rule.required() }),
-    mediaArrayField("moodPhotos", { title: "Sfeerfoto's", group: "basics", max: 4, description: "3–4 foto's direct onder de opening." }),
+    // Old separate card photo: the cards now use the opening photo (Openingsbeeld → Foto); kept only as a fallback.
+    mediaField("cardPhoto", {
+      title: "Foto op de kaart",
+      group: "basics",
+      hidden: true,
+    }),
+    defineField({
+      name: "hero",
+      title: "Openingsbeeld",
+      type: "hero",
+      group: "basics",
+      validation: (rule) => rule.required(),
+    }),
+    mediaArrayField("moodPhotos", {
+      title: "Sfeerfoto's",
+      group: "basics",
+      max: 4,
+      description: "3–4 foto's direct onder de opening.",
+    }),
 
     /* ---- notendop ---- */
     i18nString("nutshellTitle", { title: "Kop", group: "nutshell", max: 90 }),
-    i18nText("nutshellText", { title: "Intro", group: "nutshell", required: true, max: 400 }),
-    i18nLines("highlights", { title: "Hoogtepunten", group: "nutshell", description: "Max. 5." }),
+    i18nText("nutshellText", {
+      title: "Intro",
+      group: "nutshell",
+      required: true,
+      max: 400,
+    }),
+    i18nLines("highlights", {
+      title: "Hoogtepunten",
+      group: "nutshell",
+      description: "Max. 5.",
+    }),
 
     /* ---- de plek ---- */
     i18nString("placeTitle", { title: "Kop", group: "place" }),
@@ -123,8 +194,17 @@ export const retreat = defineType({
           name: "programmeItem",
           title: "Onderdeel",
           type: "object",
-          fields: [i18nString("title", { title: "Titel", required: true }), i18nText("text", { title: "Tekst", max: 200 })],
-          preview: { select: { title: "title", text: "text" }, prepare: ({ title, text }) => ({ title: pick(title), subtitle: pick(text) }) },
+          fields: [
+            i18nString("title", { title: "Titel", required: true }),
+            i18nText("text", { title: "Tekst", max: 200 }),
+          ],
+          preview: {
+            select: { title: "title", text: "text" },
+            prepare: ({ title, text }) => ({
+              title: pick(title),
+              subtitle: pick(text),
+            }),
+          },
         }),
       ],
       validation: (rule) => rule.max(6).warning("Max. 6 onderdelen"),
@@ -142,10 +222,25 @@ export const retreat = defineType({
           title: "Prijs",
           type: "object",
           fields: [
-            i18nString("label", { title: "Omschrijving", required: true, description: "bv. “Gedeelde kamer (2 pers.)”." }),
-            defineField({ name: "amount", title: "Bedrag (€)", type: "number", validation: (rule) => rule.required().min(0) }),
+            i18nString("label", {
+              title: "Omschrijving",
+              required: true,
+              description: "bv. “Gedeelde kamer (2 pers.)”.",
+            }),
+            defineField({
+              name: "amount",
+              title: "Bedrag (€)",
+              type: "number",
+              validation: (rule) => rule.required().min(0),
+            }),
           ],
-          preview: { select: { label: "label", amount: "amount" }, prepare: ({ label, amount }) => ({ title: pick(label), subtitle: `€ ${amount ?? "…"}` }) },
+          preview: {
+            select: { label: "label", amount: "amount" },
+            prepare: ({ label, amount }) => ({
+              title: pick(label),
+              subtitle: `€ ${amount ?? "…"}`,
+            }),
+          },
         }),
       ],
     }),
@@ -154,14 +249,19 @@ export const retreat = defineType({
       title: "Voorschot (€)",
       type: "number",
       group: "practical",
-      description: "Optioneel: bedrag om de plaats vast te leggen. Komt in de bevestigingsmail als {voorschot} (zie Bevestigingsmails → Betaalgegevens).",
+      description:
+        "Optioneel: bedrag om de plaats vast te leggen. Komt in de bevestigingsmail als {voorschot} (zie Bevestigingsmails → Betaalgegevens).",
       validation: (rule) => rule.min(0),
     }),
     i18nLines("included", { title: "Inbegrepen", group: "practical" }),
     i18nLines("notIncluded", { title: "Niet inbegrepen", group: "practical" }),
 
     /* ---- afsluiter ---- */
-    i18nString("closingTitle", { title: "Kop", group: "closing", description: "bv. “Klaar om te duiken?”." }),
+    i18nString("closingTitle", {
+      title: "Kop",
+      group: "closing",
+      description: "bv. “Klaar om te duiken?”.",
+    }),
     i18nText("closingText", { title: "Tekst", group: "closing", max: 160 }),
     mediaField("closingPhoto", { title: "Slotfoto", group: "closing" }),
 
@@ -172,25 +272,50 @@ export const retreat = defineType({
       type: "number",
       group: ["basics", "recap"],
       description: "Getoond op de kaart en de pagina van voorbije retreats.",
-      hidden: ({ document }) => !document?.endDate || String(document.endDate) >= new Date().toISOString().slice(0, 10),
+      hidden: ({ document }) =>
+        !document?.endDate ||
+        String(document.endDate) >= new Date().toISOString().slice(0, 10),
     }),
     mediaArrayField("recapPhotos", {
       title: "Foto's achteraf",
       group: "recap",
-      description: "Na de retreat: zoveel foto's als je wil (leeg = sfeer- en plekfoto's). Na de einddatum toont de pagina enkel openingsbeeld, notendop, de feiten (plaats, begeleiding, prijs, deelnemers) en deze foto's; Programma, Praktisch en Afsluiter verschijnen alleen bij komende retreats.",
+      description:
+        "Na de retreat: zoveel foto's als je wil (leeg = sfeer- en plekfoto's). Na de einddatum toont de pagina enkel openingsbeeld, notendop, de feiten (plaats, begeleiding, prijs, deelnemers) en deze foto's; Programma, Praktisch en Afsluiter verschijnen alleen bij komende retreats.",
     }),
-    defineField({ name: "seo", title: "SEO & delen", type: "seo", group: "seo" }),
+    defineField({
+      name: "seo",
+      title: "SEO & delen",
+      type: "seo",
+      group: "seo",
+    }),
   ],
   orderings: [
-    { title: "Startdatum (nieuwste)", name: "startDesc", by: [{ field: "startDate", direction: "desc" }] },
-    { title: "Startdatum (eerstvolgende)", name: "startAsc", by: [{ field: "startDate", direction: "asc" }] },
+    {
+      title: "Startdatum (nieuwste)",
+      name: "startDesc",
+      by: [{ field: "startDate", direction: "desc" }],
+    },
+    {
+      title: "Startdatum (eerstvolgende)",
+      name: "startAsc",
+      by: [{ field: "startDate", direction: "asc" }],
+    },
   ],
   preview: {
-    select: { title: "title", place: "place", start: "startDate", end: "endDate", media: "cardPhoto.image" },
-    prepare: ({ title, place, start, end, media }) => ({
+    select: {
+      title: "title",
+      place: "place",
+      start: "startDate",
+      end: "endDate",
+      media: "hero.photo.image",
+      card: "cardPhoto.image",
+    },
+    prepare: ({ title, place, start, end, media, card }) => ({
       title: pick(title) ?? "Nieuwe retreat",
-      subtitle: [start && end ? `${start} → ${end}` : start, pick(place)].filter(Boolean).join(" · "),
-      media,
+      subtitle: [start && end ? `${start} → ${end}` : start, pick(place)]
+        .filter(Boolean)
+        .join(" · "),
+      media: media ?? card,
     }),
   },
 });

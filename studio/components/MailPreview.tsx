@@ -51,7 +51,7 @@ export function MailPreviewPanel({ doc }: { doc: Doc | null | undefined }) {
       .fetch<Retreat[]>(
         `*[_type == "retreat" && !(_id in path("drafts.**"))] | order(startDate desc){
           _id, "title": coalesce(title[language == $lang][0].value, title[language == "nl"][0].value), startDate, endDate, deposit,
-          "photo": cardPhoto->image.asset->url, "mailRef": confirmationMail._ref,
+          "photo": coalesce(hero.photo, cardPhoto)->image.asset->url, "mailRef": confirmationMail._ref,
           "upcoming": dateTime(endDate + "T23:59:59Z") >= dateTime(now())
         }`,
         { lang },

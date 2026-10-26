@@ -134,7 +134,7 @@ export default async function RetreatPage({
           signupUrl:
             upcoming && !external ? signupHref(lang, r.slug) : undefined,
           description: clip(sentences(r.nutshellTitle, r.nutshellText)),
-          images: [imageUrl(r.hero?.photo), imageUrl(r.cardPhoto)],
+          images: [...new Set([imageUrl(r.hero?.photo), imageUrl(r.cardPhoto)])],
         }),
         breadcrumbLd([
           [site, href(lang, "home")],

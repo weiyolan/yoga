@@ -43,7 +43,8 @@ const RETREAT_CARD_FIELDS = `
   booked,
   priceFrom,
   participantCount,
-  "cardPhoto": cardPhoto->${MEDIA}` as const;
+  // one photo per retreat: the opening photo (the old separate card photo only as fallback)
+  "cardPhoto": coalesce(hero.photo, cardPhoto)->${MEDIA}` as const;
 
 const RETREAT_CARD = `{${RETREAT_CARD_FIELDS}
 }` as const;
@@ -226,7 +227,7 @@ export const SIGNUP_RETREAT_QUERY = defineQuery(`*[_type == "retreat" && _id == 
   capacity,
   booked,
   deposit,
-  "photo": cardPhoto->image.asset->url,
+  "photo": coalesce(hero.photo, cardPhoto)->image.asset->url,
   "form": ${RETREAT_FORM},
   "mail": ${RETREAT_MAIL}
 }`);

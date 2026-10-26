@@ -21,7 +21,7 @@ export const NEWSLETTER_ISSUE_QUERY = `*[_id == $id][0]{
   "image": image->image.asset->url,
   "body": ${t("body")},
   "button": { "label": ${t("buttonLabel")}, "url": buttonUrl },
-  "retreats": retreats[]->{ "title": ${t("title")}, "country": ${t("country")}, startDate, endDate, "slug": slug.current, "photo": cardPhoto->image.asset->url }
+  "retreats": retreats[]->{ "title": ${t("title")}, "country": ${t("country")}, startDate, endDate, "slug": slug.current, "photo": coalesce(hero.photo, cardPhoto)->image.asset->url }
 }`;
 
 export type NewsletterIssue = {
