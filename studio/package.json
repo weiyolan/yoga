@@ -14,6 +14,7 @@
     "content:v2": "sanity exec scripts/content-v2.ts --with-user-token --",
     "migrate:mails": "sanity exec scripts/migrate-mails.ts --with-user-token --",
     "content:v3": "sanity exec scripts/content-v3.ts --with-user-token --",
+    "publish:drafts": "sanity exec scripts/publish-drafts.ts --with-user-token --",
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {

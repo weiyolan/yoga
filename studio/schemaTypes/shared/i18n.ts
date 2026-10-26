@@ -1,5 +1,6 @@
 import { defineField, type ConditionalProperty, type Rule } from "sanity";
 import { defaultLanguage, languages } from "../../../sanity/site.config";
+import { placeholders } from "../../lib/placeholders";
 
 /** Shape stored by sanity-plugin-internationalized-array (v5). */
 type I18nItem = { _key: string; language?: string; value?: unknown };
@@ -32,6 +33,16 @@ export function maxChars(rule: Rule, max: number) {
     .warning();
 }
 
+/** Text in [brackets] still has to be filled in (e.g. “[IBAN]”): a yellow warning on that language. */
+export function noPlaceholders(rule: Rule) {
+  return rule
+    .custom((items?: I18nItem[]) => {
+      const marked = (items ?? []).map((i) => ({ i, found: placeholders(i.value) })).filter((x) => x.found.length);
+      return marked.length ? marked.map(({ i, found }) => ({ message: `Nog in te vullen: ${found.join(", ")}`, path: [{ _key: i._key }, "value"] })) : true;
+    })
+    .warning();
+}
+
 type Opts = {
   title?: string;
   description?: string;
@@ -51,6 +62,7 @@ function i18n(type: string) {
       validation: (rule) => [
         ...(required ? [requireDefault(rule)] : []),
         ...(max ? [maxChars(rule, max)] : []),
+        noPlaceholders(rule),
       ],
     });
 }

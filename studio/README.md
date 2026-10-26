@@ -102,6 +102,7 @@ The frontend needs `NEXT_PUBLIC_SANITY_PROJECT_ID` and `NEXT_PUBLIC_SANITY_DATAS
 | `npm run content:v2` | one-off v2 texts (docs/plan.html Part 1, `scripts/v2-content.ts`) as **drafts**, for R&P to review and publish. Run after `migrate:v2`. `-- --dry` first |
 | `npm run migrate:mails` | one-off: the confirmation mail texts in Instellingen → a "Standaard" Bevestigingsmail (published), then unsets them from Instellingen. `-- --dry` first |
 | `npm run content:v3` | one-off drafts: Veelgestelde vragen (first version) + Eifel prices / inbegrepen / programma (from `eiffel.txt`, only where empty). `-- --dry` first |
+| `npm run publish:drafts` | publishes every draft (Sanity's publish action, like the Studio button) and lists the `[placeholders]` still in them; draft-only references become normal ones. `-- --dry` to list, `-- --skip-placeholders` to keep drafts with `[..]` as drafts, `-- --only=faqPage,retreat` for some types |
 
 ## Seed content
 

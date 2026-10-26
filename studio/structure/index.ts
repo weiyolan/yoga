@@ -20,6 +20,7 @@ import type { ComponentType } from "react";
 import type { StructureBuilder, StructureResolver } from "sanity/structure";
 import { BulkAltText } from "../components/BulkAltText";
 import { Help } from "../components/Help";
+import { Placeholders } from "../components/Placeholders";
 import { countBadgeIcon } from "../components/CountBadgeIcon";
 import { SignupTable } from "../components/SignupTable";
 import { apiVersion, defaultLanguage } from "../../sanity/site.config";
@@ -53,6 +54,7 @@ export const structure: StructureResolver = (S) =>
     .title("Website")
     .items([
       S.listItem().id("help").title("Zo werkt het").icon(HelpCircleIcon).child(S.component(Help).id("help").title("Zo werkt het")),
+      S.listItem().id("todo").title("Nog in te vullen [ ]").icon(WarningOutlineIcon).child(S.component(Placeholders).id("todo").title("Nog in te vullen")),
 
       /* ---- 1. inbox: what comes in ---- */
       S.divider().title("Binnengekomen"),
