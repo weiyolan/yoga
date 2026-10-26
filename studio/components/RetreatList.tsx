@@ -16,7 +16,8 @@ const FILTERS: { id: Filter; title: string }[] = [
 ];
 
 /** Same rule as the site: upcoming until the last day is over (a retreat without dates counts as upcoming). */
-const upcoming = (r: Row) => !r.endDate || r.endDate >= new Date().toISOString().slice(0, 10);
+const upcoming = (r: Row) =>
+  !r.endDate || r.endDate >= new Date().toISOString().slice(0, 10);
 export const RETREATS_PAGE_ID = "retreatsPage";
 
 /**
@@ -29,18 +30,23 @@ export function RetreatList() {
   const schema = useSchema();
   const { ChildLink, routerPanesState, groupIndex } = usePaneRouter();
   const [rows, setRows] = useState<Row[] | null>(null);
-  const [filter, setFilter] = useState<Filter>("upcoming");
+  const [filter, setFilter] = useState<Filter>("all");
   const open = routerPanesState[groupIndex + 1]?.[0]?.id;
 
   useEffect(() => {
     const query = `*[_type == "retreat"]{ _id, _type, startDate, endDate }`;
-    const load = () => client.fetch<Row[]>(query, {}, { perspective: "drafts" }).then(setRows, console.error);
+    const load = () =>
+      client
+        .fetch<Row[]>(query, {}, { perspective: "drafts" })
+        .then(setRows, console.error);
     void load();
     let t: ReturnType<typeof setTimeout> | undefined;
-    const sub = client.listen(query, {}, { visibility: "query", includeResult: false }).subscribe(() => {
-      clearTimeout(t);
-      t = setTimeout(load, 400);
-    });
+    const sub = client
+      .listen(query, {}, { visibility: "query", includeResult: false })
+      .subscribe(() => {
+        clearTimeout(t);
+        t = setTimeout(load, 400);
+      });
     return () => {
       clearTimeout(t);
       sub.unsubscribe();
@@ -49,13 +55,26 @@ export function RetreatList() {
 
   const shown = (rows ?? [])
     .filter((r) => filter === "all" || (filter === "upcoming") === upcoming(r))
-    .sort((a, b) => (filter === "upcoming" ? 1 : -1) * (a.startDate ?? "9999").localeCompare(b.startDate ?? "9999"));
+    .sort(
+      (a, b) =>
+        (filter === "upcoming" ? 1 : -1) *
+        (a.startDate ?? "9999").localeCompare(b.startDate ?? "9999"),
+    );
   const type = schema.get("retreat")!;
-  const count = (f: Filter) => (rows ?? []).filter((r) => f === "all" || (f === "upcoming") === upcoming(r)).length;
+  const count = (f: Filter) =>
+    (rows ?? []).filter(
+      (r) => f === "all" || (f === "upcoming") === upcoming(r),
+    ).length;
 
   const row = (id: string, content: React.ReactNode) => (
     <ChildLink key={id} childId={id}>
-      <Card radius={2} padding={1} selected={open === id} pressed={open === id} data-as="a">
+      <Card
+        radius={2}
+        padding={1}
+        selected={open === id}
+        pressed={open === id}
+        data-as="a"
+      >
         {content}
       </Card>
     </ChildLink>
@@ -83,10 +102,23 @@ export function RetreatList() {
         )}
         <Flex gap={1} align="center" paddingX={1}>
           {FILTERS.map((f) => (
-            <Button key={f.id} mode={filter === f.id ? "default" : "bleed"} tone={filter === f.id ? "primary" : "default"} padding={2} fontSize={1} text={`${f.title} (${count(f.id)})`} onClick={() => setFilter(f.id)} />
+            <Button
+              key={f.id}
+              mode={filter === f.id ? "default" : "bleed"}
+              tone={filter === f.id ? "primary" : "default"}
+              padding={2}
+              fontSize={1}
+              text={`${f.title} (${count(f.id)})`}
+              onClick={() => setFilter(f.id)}
+            />
           ))}
           <Box flex={1} />
-          <IntentLink intent="create" params={{ type: "retreat" }} title="Nieuwe retreat" style={{ color: "inherit" }}>
+          <IntentLink
+            intent="create"
+            params={{ type: "retreat" }}
+            title="Nieuwe retreat"
+            style={{ color: "inherit" }}
+          >
             <Button as="span" mode="bleed" icon={AddIcon} padding={2} />
           </IntentLink>
         </Flex>
@@ -103,7 +135,18 @@ export function RetreatList() {
             </Text>
           </Box>
         ) : (
-          <Stack gap={1}>{shown.map((r) => row(r._id, <Preview schemaType={type} value={{ _id: r._id, _type: "retreat" }} layout="default" />))}</Stack>
+          <Stack gap={1}>
+            {shown.map((r) =>
+              row(
+                r._id,
+                <Preview
+                  schemaType={type}
+                  value={{ _id: r._id, _type: "retreat" }}
+                  layout="default"
+                />,
+              ),
+            )}
+          </Stack>
         )}
       </Stack>
     </Box>

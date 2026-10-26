@@ -8,11 +8,15 @@ import { i18nString, i18nText, pick } from "../shared/i18n";
  */
 export const faqPage = defineType({
   name: "faqPage",
-  title: "Veelgestelde vragen",
+  title: "FAQ",
   type: "document",
   icon: HelpCircleIcon,
   fields: [
-    i18nString("title", { title: "Kop", required: true, description: "bv. “Veelgestelde vragen”." }),
+    i18nString("title", {
+      title: "Kop",
+      required: true,
+      description: "bv. “Veelgestelde vragen”.",
+    }),
     i18nText("intro", { title: "Intro (optioneel)", max: 240 }),
     defineField({
       name: "groups",
@@ -24,7 +28,11 @@ export const faqPage = defineType({
           title: "Groep",
           type: "object",
           fields: [
-            i18nString("title", { title: "Titel", required: true, description: "bv. “Retreats”." }),
+            i18nString("title", {
+              title: "Titel",
+              required: true,
+              description: "bv. “Retreats”.",
+            }),
             defineField({
               name: "items",
               title: "Vragen",
@@ -35,22 +43,48 @@ export const faqPage = defineType({
                   title: "Vraag",
                   type: "object",
                   fields: [
-                    i18nString("question", { title: "Vraag", required: true, max: 140 }),
-                    i18nText("answer", { title: "Antwoord", required: true, max: 900, description: "Een lege regel = nieuwe alinea." }),
+                    i18nString("question", {
+                      title: "Vraag",
+                      required: true,
+                      max: 140,
+                    }),
+                    i18nText("answer", {
+                      title: "Antwoord",
+                      required: true,
+                      max: 900,
+                      description: "Een lege regel = nieuwe alinea.",
+                    }),
+                    defineField({
+                      name: "onRetreat",
+                      title: "Ook tonen op de retreatpagina's",
+                      type: "boolean",
+                      initialValue: false,
+                      description:
+                        "Onderaan elke komende retreat (“Goed om te weten”). Niets aangevinkt = de eerste 4 vragen.",
+                    }),
                   ],
-                  preview: { select: { q: "question", a: "answer" }, prepare: ({ q, a }) => ({ title: pick(q) ?? "Vraag", subtitle: pick(a) }) },
+                  preview: {
+                    select: { q: "question", a: "answer", on: "onRetreat" },
+                    prepare: ({ q, a, on }) => ({
+                      title: `${on ? "★ " : ""}${pick(q) ?? "Vraag"}`,
+                      subtitle: pick(a),
+                    }),
+                  },
                 }),
               ],
             }),
           ],
           preview: {
             select: { title: "title", items: "items" },
-            prepare: ({ title, items }) => ({ title: pick(title) ?? "Groep", subtitle: `${(items as unknown[] | undefined)?.length ?? 0} vragen` }),
+            prepare: ({ title, items }) => ({
+              title: pick(title) ?? "Groep",
+              subtitle: `${(items as unknown[] | undefined)?.length ?? 0} vragen`,
+            }),
           },
         }),
       ],
     }),
     defineField({ name: "seo", title: "SEO & delen", type: "seo" }),
   ],
-  preview: { prepare: () => ({ title: "Veelgestelde vragen" }) },
+  preview: { prepare: () => ({ title: "FAQ" }) },
 });

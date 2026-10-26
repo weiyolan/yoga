@@ -26,7 +26,7 @@ export type TopRow = {
 
 /**
  * Contact → Inschrijvingen / Contactformulier: every submission in one list, filtered by status chips
- * (with counts; “Nieuw” first), optionally per retreat, newest first. One level less than separate
+ * (with counts; opens on “Alle”), optionally per retreat, newest first. One level less than separate
  * lists, like Inhoud → Retreats. Follows new submissions live; clicking opens it to the right.
  */
 export function statusList({
@@ -48,7 +48,9 @@ export function statusList({
     const [retreats, setRetreats] = useState<
       { _id: string; title?: string; startDate?: string }[]
     >([]);
-    const [filter, setFilter] = useState(filters[0].id);
+    const [filter, setFilter] = useState(
+      filters.find((x) => x.id === "all")?.id ?? filters[0].id,
+    );
     const [retreat, setRetreat] = useState("");
     const open = routerPanesState[groupIndex + 1]?.[0]?.id;
 

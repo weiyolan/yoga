@@ -158,6 +158,10 @@ button.ph { border: 0; padding: 0; cursor: zoom-in; display: block; }
 .hero .meta { display: flex; gap: 22px; flex-wrap: wrap; font-size: .9rem; opacity: .95; margin: 14px 0 22px; }
 .hero::before { content: ""; position: absolute; inset: 0 0 auto; height: 180px; z-index: 1; background: linear-gradient(rgba(0,0,0,.38), transparent); pointer-events: none; }
 .hero::after { content: ""; position: absolute; inset: 0; background: linear-gradient(transparent 45%, rgba(0,0,0,.35)); pointer-events: none; }
+/* Retreat page closing photo: text in the middle, so a soft dark veil over the whole photo + a halo behind the text */
+.hero.closing::after { background: radial-gradient(ellipse 70% 60% at 50% 50%, rgba(15,26,29,.55), rgba(15,26,29,.25) 70%, rgba(15,26,29,.35)); z-index: 1; }
+.hero.closing .txt { text-shadow: 0 2px 24px rgba(0,0,0,.45); }
+.hero.closing .txt .btn { text-shadow: none; }
 .guide { width: 1px; height: 110px; background: var(--ember); margin: 0 auto; }
 /* the line draws itself downward as it scrolls into view (static where unsupported) */
 @supports (animation-timeline: view()) {
@@ -218,6 +222,7 @@ blockquote { margin: 0 auto; max-width: 30ch; font: clamp(1.6rem, 3vw, 2.4rem)/1
 /* past retreat: nutshell + facts, no booking box */
 /* Veelgestelde vragen */
 .faq { max-width: 860px; }
+.retreat-faq h2 { margin: 10px 0 28px; }
 .faq-intro { margin: -16px 0 36px; }
 .faq-group + .faq-group { margin-top: 48px; }
 .faq-group h2 { font-size: clamp(1.5rem, 3vw, 2rem); margin-bottom: 12px; }
@@ -258,14 +263,19 @@ blockquote { margin: 0 auto; max-width: 30ch; font: clamp(1.6rem, 3vw, 2.4rem)/1
 /* “On this page”: links with a line that fills as you scroll (components/Toc.tsx) */
 .toc { margin-top: 26px; padding-top: 20px; border-top: 1px solid var(--line); }
 .toc-label { display: block; font: 600 .68rem/1 var(--sans); letter-spacing: .16em; text-transform: uppercase; color: var(--ink-soft); margin-bottom: 12px; }
-.toc-body { position: relative; padding-left: 20px; }
-.toc-line { position: absolute; left: 3px; top: 10px; bottom: 10px; width: 2px; height: calc(100% - 20px); overflow: visible; }
-.toc-line line { stroke-width: 2; vector-effect: non-scaling-stroke; } .toc-line .track { stroke: var(--line); } .toc-line .fill { stroke: var(--ember); transition: stroke-dashoffset .15s linear; }
+/* dots centred on a 1px line, 7px from the left; rows 40px high (dot + line ends at 20px) */
+.toc-body { position: relative; padding-left: 26px; --dot-x: 7px; }
+.toc-line { position: absolute; left: calc(var(--dot-x) - .5px); top: 20px; bottom: 20px; width: 1px; height: calc(100% - 40px); overflow: visible; }
+.toc-line line { stroke-width: 1; vector-effect: non-scaling-stroke; } .toc-line .track { stroke: var(--line); } .toc-line .fill { stroke: var(--ember); transition: stroke-dashoffset .2s linear; }
 .toc ol { list-style: none; padding: 0; margin: 0; display: grid; }
 .toc li { position: relative; }
-.toc li::before { content: ""; position: absolute; left: -20px; top: 50%; width: 8px; height: 8px; margin-top: -4px; border-radius: 50%; background: var(--bg); border: 1.5px solid var(--line); transition: background .2s, border-color .2s; }
-.toc li.done::before, .toc li.on::before { border-color: var(--ember); background: var(--ember); }
-.toc a { display: flex; justify-content: space-between; align-items: center; gap: 10px; padding: 8px 0; font-size: .9rem; color: var(--ink-soft); text-decoration: none; transition: color .2s; }
+/* upcoming: small hollow dot · passed: small ember dot · current: ember ring with a dot (the menu button's mark) */
+.toc li::before, .toc li::after { content: ""; position: absolute; left: calc(var(--dot-x) - 26px); top: 20px; border-radius: 50%; transform: translate(-50%, -50%); transition: all .25s var(--ease); }
+.toc li::before { width: 7px; height: 7px; background: var(--bg); box-shadow: inset 0 0 0 1px var(--line); }
+.toc li.done::before { width: 5px; height: 5px; background: var(--ember); box-shadow: none; }
+.toc li.on::before { width: 13px; height: 13px; background: var(--bg); box-shadow: inset 0 0 0 1px var(--ember); }
+.toc li.on::after { width: 4px; height: 4px; background: var(--ember); }
+.toc a { display: flex; justify-content: space-between; align-items: center; gap: 10px; padding: 8px 0; line-height: 24px; font-size: .9rem; color: var(--ink-soft); text-decoration: none; transition: color .2s; }
 .toc a .ic { width: 15px; height: 15px; opacity: .45; transform: translateX(-4px); transition: transform .25s var(--ease), opacity .25s; }
 .toc a:hover, .toc a:focus-visible, .toc li.on a { color: var(--ink); } .toc li.on a { font-weight: 600; }
 .toc a:hover .ic, .toc a:focus-visible .ic, .toc li.on a .ic { opacity: 1; transform: none; color: var(--ember); }

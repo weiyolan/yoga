@@ -277,6 +277,8 @@ export const RETREAT_BY_SLUG_QUERY = defineQuery(`*[_type == "retreat" && slug.c
     count(${SAME_KIND}) > 0 => ${SAME_KIND} | order(submittedAt desc)[0...6]${REVIEW},
     *[_type == "review" && rating >= 4 && !(_id in path("drafts.**"))] | order(submittedAt desc)[0...6]${REVIEW}
   ),
+  // FAQ → questions ticked “Ook tonen op de retreatpagina's” (else the first ones; picked in the page)
+  "faqs": *[_id == "faqPage"][0].groups[].items[]{ _key, onRetreat, "question": ${t("question")}, "answer": ${t("answer")} },
   "labels": *[_id == "retreatsPage"][0]{
     "peopleTitle": ${t("peopleTitle")},
     "programmeTitle": ${t("programmeTitle")},

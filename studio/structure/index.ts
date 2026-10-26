@@ -381,7 +381,7 @@ export const structure: StructureResolver = (S) =>
             ]),
         ),
       singleton(S, "galleryPage", "Gallery", ImagesIcon),
-      singleton(S, "faqPage", "Veelgestelde vragen", HelpCircleIcon),
+      singleton(S, "faqPage", "FAQ", HelpCircleIcon),
       singleton(S, "contactPage", "Contact", EnvelopeIcon),
       singleton(S, "navigation", "Menu & footer", MenuIcon),
 

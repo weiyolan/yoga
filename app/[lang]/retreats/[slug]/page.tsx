@@ -134,7 +134,9 @@ export default async function RetreatPage({
           signupUrl:
             upcoming && !external ? signupHref(lang, r.slug) : undefined,
           description: clip(sentences(r.nutshellTitle, r.nutshellText)),
-          images: [...new Set([imageUrl(r.hero?.photo), imageUrl(r.cardPhoto)])],
+          images: [
+            ...new Set([imageUrl(r.hero?.photo), imageUrl(r.cardPhoto)]),
+          ],
         }),
         breadcrumbLd([
           [site, href(lang, "home")],
@@ -312,6 +314,14 @@ export default async function RetreatPage({
 
   // its own reviews (once there are), else those of earlier editions
   const reviews = r.reviews?.length ? r.reviews : (r.earlierReviews ?? []);
+  // FAQ: the questions ticked for retreat pages, else the first 4
+  const allFaqs = (r.faqs ?? []).filter(
+    (f): f is NonNullable<typeof f> & { question: string; answer: string } =>
+      !!f?.question && !!f.answer,
+  );
+  const faqs = allFaqs.some((f) => f.onRetreat)
+    ? allFaqs.filter((f) => f.onRetreat)
+    : allFaqs.slice(0, 4);
   const toc = [
     [
       "notendop",
@@ -327,6 +337,7 @@ export default async function RetreatPage({
       r.prices?.length || included.length || notIncluded.length,
     ],
     ["reviews", t.toc.reviews, reviews.length],
+    ["vragen", t.toc.faq, faqs.length],
   ] as const;
 
   return (
@@ -563,9 +574,33 @@ export default async function RetreatPage({
         </section>
       ) : null}
 
+      {faqs.length ? (
+        <section className="s" id="vragen">
+          <div className="wrap faq retreat-faq">
+            <span className="label">{t.faqLabel}</span>
+            <h2>{t.faqTitle}</h2>
+            <div className="faq-group">
+              {faqs.map((f) => (
+                <details key={f._key}>
+                  <summary>{f.question}</summary>
+                  <div className="faq-a">
+                    <Paragraphs text={f.answer} />
+                  </div>
+                </details>
+              ))}
+            </div>
+            <p className="faq-more">
+              <Link className="link" href={href(lang, "faq")}>
+                {t.faqAll}
+              </Link>
+            </p>
+          </div>
+        </section>
+      ) : null}
+
       {/* Closing photo + the sign-up button. Keeps the old #inschrijven anchor: it now forwards to the sign-up page. */}
       <section
-        className="hero short"
+        className="hero short closing"
         id="inschrijven"
         style={{ height: "70vh" }}
       >
@@ -598,9 +633,6 @@ export default async function RetreatPage({
             }}
           >
             {signupLink("btn white")}
-            <Link className="btn light" href={href(lang, "contact")}>
-              {t.ask}
-            </Link>
           </div>
         </div>
       </section>
