@@ -127,6 +127,10 @@ export async function buildMetadata({
         .map((l) => OG_LOCALE[l.id]),
       images,
     },
+    // Facebook app id (optional, only for Facebook's own statistics): NEXT_PUBLIC_FB_APP_ID on Netlify
+    ...(process.env.NEXT_PUBLIC_FB_APP_ID
+      ? { facebook: { appId: process.env.NEXT_PUBLIC_FB_APP_ID } }
+      : {}),
     twitter: {
       card: "summary_large_image",
       title: title ?? fullTitle,

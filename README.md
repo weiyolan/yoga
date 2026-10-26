@@ -104,6 +104,7 @@ studio/                  Sanity Studio (schemas, desk structure, seed)
 |---|---|
 | `NEXT_PUBLIC_SANITY_PROJECT_ID`, `NEXT_PUBLIC_SANITY_DATASET` | default `1pbhk0to` / `production` |
 | `NEXT_PUBLIC_SITE_URL` | canonical URLs, sitemap, OG (e.g. `https://yogazentonic.com`) |
+| `NEXT_PUBLIC_FB_APP_ID` | optional: Facebook app id (`fb:app_id`), only for Facebook's own statistics; previews work without it |
 | `SANITY_REVALIDATE_SECRET` | webhook secret |
 | `SMTP_URL` | optional: form mail through a mailbox, e.g. Gmail + app password (see **Team notifications**); without it (and Resend) Netlify Forms notifies the team |
 | `RESEND_API_KEY`, `CONTACT_FROM` | form mail through Resend (`CONTACT_FROM` must be on a domain verified in Resend) |

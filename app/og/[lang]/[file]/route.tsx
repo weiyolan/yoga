@@ -116,7 +116,7 @@ export async function GET(
         ? (p?.title ?? data?.site?.tagline)
         : (p?.seoTitle ?? p?.title ?? eyebrow);
     line = clip(p?.subtitle, 110);
-    if (route === "home") eyebrow = data?.site?.tagline ?? "";
+    if (route === "home") eyebrow = ""; // the title already says it (the tagline just repeated it)
     if (eyebrow === title) eyebrow = "";
     media = p?.share ?? p?.photo;
   }
@@ -173,6 +173,7 @@ export async function GET(
           right: 60,
           display: "flex",
           alignItems: "center",
+          justifyContent: "space-between",
         }}
       >
         <div
@@ -189,6 +190,39 @@ export async function GET(
         >
           Yoga, Zen <span style={{ color: "#E2683F", margin: "0 9px" }}>&</span>{" "}
           Tonic
+        </div>
+        {/* the site's mark (menu button): a ring with an ember dot, on a dark disc so it shows on any photo */}
+        <div
+          style={{
+            width: 64,
+            height: 64,
+            borderRadius: 64,
+            background: "rgba(15,26,29,.5)",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+          }}
+        >
+          <div
+            style={{
+              width: 42,
+              height: 42,
+              borderRadius: 42,
+              border: "2px solid #F4F1EC",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+            }}
+          >
+            <div
+              style={{
+                width: 10,
+                height: 10,
+                borderRadius: 10,
+                background: "#E2683F",
+              }}
+            />
+          </div>
         </div>
       </div>
       <div
