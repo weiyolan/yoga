@@ -24,9 +24,15 @@ const titleOf = (d: Doc) => {
 export function Placeholders() {
   const client = useClient({ apiVersion });
   const [rows, setRows] = useState<Row[] | null>(null);
+  const [scanned, setScanned] = useState(0);
+  const [error, setError] = useState<string | null>(null);
   const load = useCallback(async () => {
     setRows(null);
-    const docs = await client.fetch<Doc[]>(`*[!(_type in $skip) && !(_id in path("*.**") && !(_id in path("drafts.**")))]`, { skip: SKIP }, { perspective: "raw" });
+    setError(null);
+    // Every document incl. drafts; private ids (signup.<uuid>, …) are skipped below.
+    const all = await client.fetch<Doc[]>(`*[!(_type in $skip)]`, { skip: SKIP }, { perspective: "raw" });
+    const docs = all.filter((d) => d._id.startsWith("drafts.") || !d._id.includes("."));
+    setScanned(new Set(docs.map((d) => d._id.replace(/^drafts\./, ""))).size);
     const byId = new Map<string, Doc>();
     for (const d of docs) {
       const id = d._id.replace(/^drafts\./, "");
@@ -39,7 +45,15 @@ export function Placeholders() {
         .sort((a, b) => a.type.localeCompare(b.type) || a.title.localeCompare(b.title)),
     );
   }, [client]);
-  useEffect(() => void load().catch(() => setRows([])), [load]);
+  const run = useCallback(
+    () =>
+      load().catch((err: unknown) => {
+        setError(err instanceof Error ? err.message : String(err));
+        setRows([]);
+      }),
+    [load],
+  );
+  useEffect(() => void run(), [run]);
 
   return (
     <Box padding={4} style={{ maxWidth: 760 }}>
@@ -47,7 +61,17 @@ export function Placeholders() {
         <Text size={1} muted>
           Tekst tussen [haken] moet nog ingevuld worden. In het document zelf staat bij die velden een gele waarschuwing.
         </Text>
-        {rows === null ? <Text size={1} muted>Zoeken…</Text> : !rows.length ? <Text size={1}>Alles ingevuld. 🎉</Text> : null}
+        {error ? (
+          <Card padding={3} radius={2} tone="critical" border>
+            <Text size={1}>Zoeken mislukt: {error}</Text>
+          </Card>
+        ) : rows === null ? (
+          <Text size={1} muted>Zoeken…</Text>
+        ) : (
+          <Text size={1} muted>
+            {scanned} documenten doorzocht{rows.length ? `, ${rows.length} met tekst tussen [haken]:` : ". Alles ingevuld. 🎉"}
+          </Text>
+        )}
         {rows?.map((r) => (
           <Card key={r.id} padding={3} radius={2} border>
             <Stack gap={3}>
@@ -70,7 +94,7 @@ export function Placeholders() {
           </Card>
         ))}
         <Box>
-          <Button mode="ghost" text="Opnieuw zoeken" onClick={() => void load()} />
+          <Button mode="ghost" text="Opnieuw zoeken" onClick={() => void run()} />
         </Box>
       </Stack>
     </Box>
