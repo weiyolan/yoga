@@ -55,14 +55,26 @@ export function isShort(props: FieldProps) {
   return chain.some((n) => SHORT.has(n));
 }
 
-// the field's own layout: a VStack [header (title + “…”), input]; the language items inside an NL | EN field keep theirs
+// the field's own layout: a VStack [header (title | “…” menu), input]. As a grid: title | input | “…”
+// (the header is unwrapped with display: contents). The language items inside an NL | EN field keep theirs.
 const ROW = `.inline-field [data-ui="VStack"]:has(> [data-ui="Flex"] > [data-ui="fieldHeaderContentBox"]):not(.i18n-tab-item *)`;
+const HEAD = `${ROW} > [data-ui="Flex"]:first-child`;
 const CSS = `
 /* the form puts 32px between fields: rows sit closer together */
 .inline-field { container-type: inline-size; margin-block: -10px; }
-${ROW} { display: grid !important; grid-template-columns: minmax(80px, 26%) minmax(0, 1fr); column-gap: 8px; row-gap: 4px; align-items: start; }
-${ROW} > [data-ui="Flex"]:first-child { padding-top: 6px; }
-@container (max-width: 300px) { ${ROW} { grid-template-columns: minmax(0, 1fr); } ${ROW} > [data-ui="Flex"]:first-child { padding-top: 0; } }
+${ROW} { display: grid !important; grid-template-columns: minmax(80px, 26%) minmax(0, 1fr) auto; column-gap: 8px; row-gap: 4px; align-items: start; }
+${HEAD} { display: contents !important; }
+${HEAD} > [data-ui="fieldHeaderContentBox"] { grid-column: 1; grid-row: 1; padding-top: 6px; }
+${HEAD} > :not([data-ui="fieldHeaderContentBox"]) { grid-column: 3; grid-row: 1; padding-top: 4px; position: static !important; inset: auto !important; }
+${ROW} > :not(:first-child) { grid-column: 2; }
+${ROW} > :nth-child(2) { grid-row: 1; }
+@container (max-width: 300px) {
+  ${ROW} { grid-template-columns: minmax(0, 1fr) auto; }
+  ${HEAD} > [data-ui="fieldHeaderContentBox"] { padding-top: 0; }
+  ${HEAD} > :not([data-ui="fieldHeaderContentBox"]) { grid-column: 2; padding-top: 0; }
+  ${ROW} > :not(:first-child) { grid-column: 1 / -1; }
+  ${ROW} > :nth-child(2) { grid-row: 2; }
+}
 `;
 
 /** A small ? next to the title: the help text on hover, or on tap (phone); tap again / elsewhere closes it. */
