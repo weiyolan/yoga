@@ -32,49 +32,60 @@ const QUERY = `{
   "retreats": *[_type == "retreat" && !(_id in path("drafts.**"))] | order(startDate desc) { _id, "title": ${NL}, startDate, capacity, booked }
 }`;
 
-const COLUMNS: { key: keyof Row; title: string; width?: number }[] = [
-  { key: "submittedAt", title: "Datum", width: 110 },
-  { key: "status", title: "Status", width: 110 },
-  { key: "retreat", title: "Retreat", width: 160 },
-  { key: "name", title: "Naam", width: 150 },
-  { key: "email", title: "E-mail", width: 200 },
-  { key: "phone", title: "GSM", width: 130 },
-  { key: "room", title: "Kamer / prijs", width: 160 },
-  { key: "answers", title: "Extra vragen", width: 260 },
-  { key: "diet", title: "Dieet / allergieën", width: 200 },
-  { key: "message", title: "Vragen / opmerkingen", width: 260 },
-  { key: "lang", title: "Taal", width: 60 },
-  { key: "notes", title: "Interne notitie", width: 200 },
-];
-const statusTitle = (s?: string) => SIGNUP_STATUSES.find((x) => x.value === s)?.title ?? "Nieuw";
-const text = (r: Row, key: keyof Row) =>
-  key === "status"
-    ? statusTitle(r.status)
-    : key === "submittedAt"
-      ? (r.submittedAt ?? "").slice(0, 10)
-      : key === "answers"
-        ? (r.answers ?? []).map((a) => `${a.question}: ${a.answer || "-"}`).join(" · ")
-        : String(r[key] ?? "");
+type Col = { id: string; title: string; width?: number; get: (r: Row) => string };
 
-function csv(rows: Row[]) {
-  const esc = (v: string) => (/[",\n;]/.test(v) ? `"${v.replaceAll('"', '""')}"` : v);
-  return [COLUMNS.map((c) => c.title), ...rows.map((r) => COLUMNS.map((c) => text(r, c.key)))].map((line) => line.map(esc).join(";")).join("\r\n");
+const statusTitle = (s?: string) => SIGNUP_STATUSES.find((x) => x.value === s)?.title ?? "Nieuw";
+const field = (key: keyof Row, title: string, width?: number): Col => ({ id: key, title, width, get: (r) => String(r[key] ?? "") });
+/** “Mijn ervaring met yoga …:” → the same label without the trailing colon (one column per question). */
+const label = (q?: string) => (q ?? "").trim().replace(/[:：]+$/, "");
+
+const BEFORE: Col[] = [
+  { id: "submittedAt", title: "Datum", width: 110, get: (r) => (r.submittedAt ?? "").slice(0, 10) },
+  { id: "status", title: "Status", width: 110, get: (r) => statusTitle(r.status) },
+  field("retreat", "Retreat", 160),
+  field("name", "Naam", 150),
+  field("email", "E-mail", 200),
+  field("phone", "GSM", 130),
+  field("room", "Kamer / prijs", 160),
+];
+const AFTER: Col[] = [
+  field("diet", "Dieet / allergieën", 200),
+  field("message", "Vragen / opmerkingen", 260),
+  field("lang", "Taal", 60),
+  field("notes", "Interne notitie", 200),
+];
+
+/** The columns for these rows: the fixed ones, with one column per extra question (in the order of the form) in between. */
+function columns(rows: Row[]): Col[] {
+  const questions: string[] = [];
+  // oldest first, so the form's order wins over later edits
+  for (const r of [...rows].reverse()) for (const a of r.answers ?? []) if (label(a.question) && !questions.includes(label(a.question))) questions.push(label(a.question));
+  return [
+    ...BEFORE,
+    ...questions.map((q) => ({ id: `q:${q}`, title: q, width: 200, get: (r: Row) => r.answers?.find((a) => label(a.question) === q)?.answer ?? "" })),
+    ...AFTER,
+  ];
 }
 
-function TableRow({ row }: { row: Row }) {
+function csv(rows: Row[], cols: Col[]) {
+  const esc = (v: string) => (/[",\n;]/.test(v) ? `"${v.replaceAll('"', '""')}"` : v);
+  return [cols.map((c) => c.title), ...rows.map((r) => cols.map((c) => c.get(r)))].map((line) => line.map(esc).join(";")).join("\r\n");
+}
+
+function TableRow({ row, cols }: { row: Row; cols: Col[] }) {
   const { onClick, href } = useIntentLink({ intent: "edit", params: { id: row._id, type: "signup" } });
   return (
     <tr onClick={onClick} style={{ cursor: "pointer" }} title="Open inschrijving">
-      {COLUMNS.map((c) => (
-        <td key={c.key} style={{ ...cell, maxWidth: c.width, minWidth: c.width }}>
-          {c.key === "status" ? (
+      {cols.map((c) => (
+        <td key={c.id} style={{ ...cell, maxWidth: c.width, minWidth: c.width }}>
+          {c.id === "status" ? (
             <Badge tone={STATUS_TONE[row.status ?? "new"]}>{statusTitle(row.status)}</Badge>
-          ) : c.key === "name" ? (
+          ) : c.id === "name" ? (
             <a href={href} onClick={(e) => e.preventDefault()} style={{ color: "inherit", fontWeight: 600 }}>
               {row.name}
             </a>
           ) : (
-            text(row, c.key)
+            c.get(row) || (c.id.startsWith("q:") ? <span style={{ opacity: 0.4 }}>-</span> : "")
           )}
         </td>
       ))}
@@ -91,7 +102,7 @@ export function SignupTable() {
   const [error, setError] = useState("");
   const [retreat, setRetreat] = useState("");
   const [status, setStatus] = useState("");
-  const [sort, setSort] = useState<{ key: keyof Row; desc: boolean }>({ key: "submittedAt", desc: true });
+  const [sort, setSort] = useState<{ key: string; desc: boolean }>({ key: "submittedAt", desc: true });
 
   useEffect(() => {
     let alive = true;
@@ -104,11 +115,16 @@ export function SignupTable() {
     };
   }, [client]);
 
+  const list = useMemo(
+    () => (data?.signups ?? []).filter((r) => (!retreat || r.retreatId === retreat) && (!status || (r.status ?? "new") === status)),
+    [data, retreat, status],
+  );
+  const cols = useMemo(() => columns(list), [list]);
   const rows = useMemo(() => {
-    const list = (data?.signups ?? []).filter((r) => (!retreat || r.retreatId === retreat) && (!status || (r.status ?? "new") === status));
+    const col = cols.find((c) => c.id === sort.key) ?? cols[0];
     const dir = sort.desc ? -1 : 1;
-    return [...list].sort((a, b) => dir * text(a, sort.key).localeCompare(text(b, sort.key), "nl", { numeric: true }));
-  }, [data, retreat, status, sort]);
+    return [...list].sort((a, b) => dir * col.get(a).localeCompare(col.get(b), "nl", { numeric: true }));
+  }, [list, cols, sort]);
 
   const chosen = data?.retreats.find((r) => r._id === retreat);
   // new sign-ups are one person; old ones can have `persons`
@@ -117,7 +133,7 @@ export function SignupTable() {
   const total = rows.reduce((n, r) => n + people(r), 0);
 
   const download = () => {
-    const blob = new Blob(["﻿" + csv(rows)], { type: "text/csv;charset=utf-8" });
+    const blob = new Blob(["﻿" + csv(rows, cols)], { type: "text/csv;charset=utf-8" });
     const a = document.createElement("a");
     a.href = URL.createObjectURL(blob);
     a.download = `inschrijvingen${chosen?.title ? `-${chosen.title.toLowerCase().replace(/[^a-z0-9]+/g, "-")}` : ""}.csv`;
@@ -175,20 +191,21 @@ export function SignupTable() {
           <table style={{ borderCollapse: "collapse", width: "max-content", minWidth: "100%" }}>
             <thead>
               <tr>
-                {COLUMNS.map((c) => (
+                {cols.map((c) => (
                   <th
-                    key={c.key}
-                    onClick={() => setSort((s) => ({ key: c.key, desc: s.key === c.key ? !s.desc : false }))}
-                    style={{ ...cell, position: "sticky", top: 0, zIndex: 1, background: "var(--card-bg-color)", textAlign: "left", fontWeight: 600, cursor: "pointer", whiteSpace: "nowrap" }}
+                    key={c.id}
+                    title={c.title}
+                    onClick={() => setSort((s) => ({ key: c.id, desc: s.key === c.id ? !s.desc : false }))}
+                    style={{ ...cell, position: "sticky", top: 0, zIndex: 1, background: "var(--card-bg-color)", textAlign: "left", fontWeight: 600, cursor: "pointer", maxWidth: c.width, minWidth: c.width, verticalAlign: "bottom" }}
                   >
-                    {c.title} {sort.key === c.key ? (sort.desc ? "↓" : "↑") : ""}
+                    {c.title} {sort.key === c.id ? (sort.desc ? "↓" : "↑") : ""}
                   </th>
                 ))}
               </tr>
             </thead>
             <tbody>
               {rows.map((r) => (
-                <TableRow key={r._id} row={r} />
+                <TableRow key={r._id} row={r} cols={cols} />
               ))}
             </tbody>
           </table>
