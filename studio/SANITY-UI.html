@@ -1,0 +1,283 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Sanity Studio UX: best practices · Yoga, Zen & Tonic</title><style>
+:root{--bg:#F4F1EC;--card:#fff;--ink:#1A1917;--soft:#5E5A54;--line:#D8D2C8;--ember:#D4552B;--dark:#0F1A1D}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.6 -apple-system,'Segoe UI',Helvetica,Arial,sans-serif}
+header{background:var(--dark);color:#F4F1EC;padding:40px 24px}
+header .in,main{max-width:880px;margin:0 auto}
+header .logo{font:26px/1 Georgia,serif}header .logo em{color:var(--ember)}
+header p{margin:10px 0 0;opacity:.75}
+main{padding:32px 24px 64px}
+main>h1:first-child{display:none}
+h1,h2,h3{font-family:Georgia,'Times New Roman',serif;font-weight:400;line-height:1.25}
+h2{font-size:28px;margin:48px 0 16px;padding-top:24px;border-top:1px solid var(--line)}
+h3{font-size:20px;margin:28px 0 10px}
+hr{display:none}
+a{color:var(--ember)}
+code{font:13.5px/1.4 ui-monospace,SFMono-Regular,Menlo,monospace;background:#ECE7DF;padding:1px 5px;border-radius:4px}
+pre{background:var(--dark);color:#EDE8E0;padding:16px 18px;border-radius:8px;overflow:auto}
+pre code{background:none;padding:0;color:inherit}
+table{width:100%;border-collapse:collapse;background:var(--card);margin:16px 0;font-size:14.5px;border:1px solid var(--line)}
+th,td{text-align:left;vertical-align:top;padding:10px 12px;border-bottom:1px solid var(--line)}
+th{font:600 11px/1.4 -apple-system,'Segoe UI',Helvetica,Arial,sans-serif;letter-spacing:.12em;text-transform:uppercase;color:var(--soft);background:#FAF8F5}
+ol,ul{padding-left:22px}li{margin:4px 0}
+blockquote{margin:0;padding:8px 16px;border-left:3px solid var(--ember);background:var(--card)}
+nav.toc{background:var(--card);border:1px solid var(--line);border-radius:8px;padding:14px 18px;margin:0 0 8px}
+nav.toc b{font:600 11px/1 sans-serif;letter-spacing:.12em;text-transform:uppercase;color:var(--soft)}
+nav.toc ol{margin:8px 0 0}
+@media(max-width:600px){table{display:block;overflow-x:auto}}
+</style></head><body><header><div class="in"><div class="logo">Yoga, Zen <em>&amp;</em> Tonic</div><p>Sanity Studio UX: best practices</p></div></header><main><h1>Sanity Studio UX: best practices</h1>
+<p>What we changed compared with the classic Sanity Studio UI, why, and the pitfalls we ran into.
+The editors (Rita &amp; Philippe) are not technical and often edit on a phone. Every rule below
+comes from something that confused them or took too much room.</p>
+<p>Code references are relative to <code>studio/</code>.</p>
+<hr>
+<nav class="toc"><b>Contents</b><ol><li><a href="#1-principles">Principles</a></li><li><a href="#2-navigation-structure">Navigation (structure)</a></li><li><a href="#3-fields">Fields</a></li><li><a href="#4-documents">Documents</a></li><li><a href="#5-pitfalls-in-sanity-ui-and-the-studio-versions-in-this-repo">Pitfalls in @sanity/ui and the Studio (versions in this repo)</a></li><li><a href="#6-verifying-without-sanity-access">Verifying without Sanity access</a></li></ol></nav><h2 id="1-principles">1. Principles</h2>
+<ol>
+<li><strong>Explain where the value goes.</strong> Every field says where it appears on the site (or in which
+mail, or &quot;intern&quot;) and what it&#39;s for. Not &quot;Titel&quot;, but &quot;the big title on the card and in Google&quot;.</li>
+<li><strong>Help on demand, not in the way.</strong> Help texts sit behind a small ⓘ after the title, so long
+explanations cost no space.</li>
+<li><strong>Dense but readable.</strong> Short fields take one row (title left, input right). Long texts, lists and
+groups keep the full width.</li>
+<li><strong>Keep Sanity&#39;s own behaviour.</strong> Restyle Sanity&#39;s default field (<code>renderDefault</code>) rather than
+rebuilding it, so comments, the &quot;…&quot; menu, validation and change bars keep working.</li>
+<li><strong>Fewer clicks in the navigation.</strong> Put things one level higher when a sub-list only holds one or
+two items.</li>
+<li><strong>Follow the page.</strong> Tabs and overviews follow the order of the page on the site, top to bottom.</li>
+<li><strong>No red for &quot;not done yet&quot;.</strong> Empty is not an error: in progress = blue, done = green. Red is for
+real validation errors.</li>
+<li><strong>Dutch, plain, with examples</strong> (“bv. …”) and the fallback when empty (“Leeg = …”).</li>
+</ol>
+<hr>
+<h2 id="2-navigation-structure">2. Navigation (structure)</h2>
+<table>
+<thead>
+<tr>
+<th>Classic</th>
+<th>Ours</th>
+<th>Where</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>Type list → sub-list → documents (3 panels)</td>
+<td>One panel with the page singleton on top + the documents under a divider</td>
+<td><code>structure/index.ts</code> (Formulieren), <code>components/RetreatList.tsx</code> (Retreats)</td>
+</tr>
+<tr>
+<td>Separate lists for upcoming / past</td>
+<td>One list with filter chips (Komend / Voorbij / Alle)</td>
+<td><code>RetreatList.tsx</code></td>
+</tr>
+<tr>
+<td>Component panes fill the whole width</td>
+<td><code>S.component(...).maxWidth(400)</code> for list-like components</td>
+<td><code>structure/index.ts</code></td>
+</tr>
+<tr>
+<td>Generic &quot;+&quot; offers everything</td>
+<td><code>newDocumentOptions</code> / <code>schema.templates</code> filter out singletons, submissions and fixed docs</td>
+<td><code>sanity.config.ts</code></td>
+</tr>
+<tr>
+<td>Pink initials as workspace icon</td>
+<td>The site icon as <code>icon</code> in <code>defineConfig</code></td>
+<td><code>components/StudioLogo.tsx</code></td>
+</tr>
+</tbody></table>
+<p><strong>A live mixed list (static items + documents).</strong> A child can return an Observable:</p>
+<pre><code class="language-ts">.child(() =&gt; {
+  const client = S.context.getClient({ apiVersion });
+  return client
+    .listen(query, {}, { visibility: &quot;query&quot;, includeResult: false, events: [&quot;welcome&quot;, &quot;mutation&quot;] })
+    .pipe(debounceTime(300), switchMap(() =&gt; client.fetch(query, {}, { perspective: &quot;drafts&quot; })),
+      map((docs) =&gt; S.list().items([singleton(...), S.divider(), ...docs.map(...)])));
+})
+</code></pre>
+<ul>
+<li>Deduplicate drafts (<code>drafts.</code> prefix) and published documents by their published id.</li>
+<li>Add a &quot;+&quot; via <code>.menuItems([S.menuItem().intent({ type: &quot;create&quot;, params: { type } })])</code>.</li>
+<li><code>S.context</code> has no <code>documentStore</code>: use <code>getClient</code>.</li>
+<li>Add <code>rxjs</code> to the Studio&#39;s own dependencies.</li>
+</ul>
+<p><strong>Singletons:</strong> a fixed <code>documentId</code>, no duplicate/delete actions, and kept out of &quot;new document&quot;.</p>
+<hr>
+<h2 id="3-fields">3. Fields</h2>
+<h3>3.1 Help behind a ⓘ (every field)</h3>
+<ul>
+<li>Where: <code>components/InlineFields.tsx</code> (<code>Help</code>), wired in <code>components/I18nTabs.tsx</code> (<code>I18nTabsField</code> = <code>form.components.field</code>).</li>
+<li>How: render the field with <code>renderDefault({ ...props, description: undefined, title: &lt;&gt;{title}&lt;Help text={description}/&gt;&lt;/&gt; })</code>.</li>
+<li>Behaviour: opens on hover (desktop) and on tap (phone); a tap elsewhere closes it (a <code>pointerdown</code> listener on <code>document</code>).</li>
+<li>The tooltip: <code>Popover</code> from <code>@sanity/ui/popover</code>, with a max width of about 320px set on an inner div (setting it on the Popover itself is ignored).</li>
+<li>Every field has a description that answers two questions: <strong>where on the site</strong> and <strong>what for</strong>. Keep examples and &quot;Leeg = …&quot; in it.</li>
+</ul>
+<h3>3.2 One-row fields</h3>
+<ul>
+<li><strong>Which fields:</strong> short ones only: <code>string</code>, <code>number</code>, <code>url</code>, <code>date</code>, <code>slug</code>, <code>reference</code>, and one-line NL | EN.</li>
+<li><strong>Not:</strong> <code>text</code>, booleans, option lists, arrays, objects, or fields with their own <code>components.input</code>. The exception is the NL | EN plugin&#39;s own input, which is allowed.</li>
+<li><strong>Layout:</strong> a CSS grid on Sanity&#39;s own field markup: <code>title+ⓘ | input | &quot;…&quot;</code>. The header is unwrapped with <code>display: contents</code>.<ul>
+<li>The &quot;…&quot; card is <code>position: absolute</code> by default. Make it <code>position: static</code> or it floats away.</li>
+<li>Use <code>align-items: center</code> and a narrow title column (<code>minmax(80px, 26%)</code>).</li>
+<li>A container query (<code>&lt; 300px</code>) stacks the title above the input again.</li>
+<li>A negative <code>margin-block</code> pulls the rows together, because the form puts 32px between fields.</li>
+</ul>
+</li>
+<li><strong>NL | EN fields:</strong> the language tabs and the ✨ translate button move right of the input (the title column is too narrow). They are passed via React context from the field to the input component.</li>
+<li><strong>Switch it off</strong> for part of a form with <code>&lt;InlineFields.Provider value={false}&gt;</code>.</li>
+</ul>
+<h3>3.3 Languages (sanity-plugin-internationalized-array)</h3>
+<ul>
+<li>Show one language at a time with small NL | EN tabs. A dot on a tab means empty; red or amber means an error or warning in that language.</li>
+<li>Hide the other languages with <code>display: none</code>, never by leaving them out of <code>members</code>. Leaving them out broke the add and translate actions.</li>
+<li>One &quot;Vertaal&quot; (✨) button per field, plus a bulk translator.</li>
+<li><strong>Previews:</strong> never select an i18n field raw as <code>title</code>. It is an array, so Sanity logs <em>“The &quot;title&quot; field should be a string…”</em>. Use <code>pick(value)</code> in <code>prepare</code>.<ul>
+<li>This also applies to Presentation <code>defineLocations</code> selects. We removed <code>locations</code> entirely: the &quot;Gebruikt op x pagina&#39;s&quot; banner only took room.</li>
+</ul>
+</li>
+</ul>
+<h3>3.4 Better inputs for common patterns</h3>
+<table>
+<thead>
+<tr>
+<th>Pattern</th>
+<th>Input</th>
+<th>Where</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>Object of on/off options</td>
+<td>One compact list of switches (title + ⓘ) instead of a box per toggle (<code>options.columns</code> made ragged boxes)</td>
+<td><code>FormBuilder.tsx</code> → <code>ToggleListInput</code></td>
+</tr>
+<tr>
+<td>Choosing a type</td>
+<td>Tiles with an icon and a one-line explanation</td>
+<td><code>QuestionTypeInput</code></td>
+</tr>
+<tr>
+<td>“Show only if …”</td>
+<td>Checkboxes of the previous question&#39;s answers instead of free text</td>
+<td><code>ShowIfInput</code></td>
+</tr>
+<tr>
+<td>Status</td>
+<td>Radio buttons that also update the derived counts</td>
+<td><code>StatusInput.tsx</code></td>
+</tr>
+<tr>
+<td>Photo</td>
+<td>A picker from the Fotobank (reuse + reset/delete)</td>
+<td><code>PhotoPicker.tsx</code>, <code>MediaBank.tsx</code></td>
+</tr>
+</tbody></table>
+<p><strong>Unset vs default.</strong> For booleans, show <code>value ?? initialValue</code>, exactly as the site reads it (<code>coalesce(x, true)</code>). Otherwise an untouched toggle looks off while the site treats it as on.</p>
+<hr>
+<h2 id="4-documents">4. Documents</h2>
+<h3>4.1 Large documents (a retreat)</h3>
+<ul>
+<li><strong>Groups:</strong><ul>
+<li>Groups in page order, each with an icon.</li>
+<li><code>default: true</code> on the first one, so the document doesn&#39;t open on &quot;Alle velden&quot;.</li>
+</ul>
+</li>
+<li><strong>Overview on top:</strong> a custom root input (<code>components.input</code> on the document type) shows:<ul>
+<li>a progress bar;</li>
+<li>the page from top to bottom, one tile per group: where it shows on the site, x/y filled, what is still empty, and how many texts have no EN;</li>
+<li>clicking a tile calls <code>props.onFieldGroupSelect(group)</code>;</li>
+<li>collapsible, with the choice stored in <code>localStorage</code>; collapsed, it explains only the open tab.</li>
+<li>Where: <code>components/RetreatOverview.tsx</code>.</li>
+<li>Optional groups (sign-up overrides, SEO) show &quot;standaard&quot; or &quot;aangepast&quot; and don&#39;t count toward the progress.</li>
+</ul>
+</li>
+<li><strong>Fieldsets</strong> (&quot;Wanneer&quot;, &quot;Waar&quot;, &quot;Plaatsen &amp; prijs&quot;) for grouping. Drop <code>columns</code> once fields are one row.</li>
+<li><strong>Derived values</strong> are <code>readOnly</code> (e.g. <code>booked</code>). Add a manual correction field next to them (<code>bookedExtra</code>) and sum the two in GROQ, instead of letting people overwrite the derived number.</li>
+</ul>
+<h3>4.2 Flexible content</h3>
+<ul>
+<li>Replace fixed fields (&quot;retreats + one button&quot;) with an ordered array of block types, for example retreat/lesstijl reference cards, an own card, a button and extra text (newsletter &quot;Onder de tekst&quot;).</li>
+<li>Give each block type a preview with an icon and a subtitle that says what it is.</li>
+<li><strong>Migration path:</strong><ol>
+<li>Keep the old fields with <code>deprecated: { reason }</code> and <code>hidden: ({ value }) =&gt; !value</code>.</li>
+<li>Keep rendering them as a fallback.</li>
+<li>Ship a <code>content:vN</code> script that moves the data.</li>
+</ol>
+</li>
+</ul>
+<h3>4.3 Mails</h3>
+<ul>
+<li>Show the HTML preview as an inspector next to the form, in the language picked in the preview.</li>
+<li>Add a &quot;test mail to yourself&quot; button and a step indicator (write → test → publish → send).</li>
+<li>Mail texts are editable documents with defaults taken from the site dictionary (templates), so the Studio opens prefilled.</li>
+</ul>
+<h3>4.4 Submissions (sign-ups, messages, reviews)</h3>
+<ul>
+<li>A &quot;Nieuw&quot; badge and count badges in the navigation.</li>
+<li>No &quot;duplicate&quot; action, because a copy would get a public id.</li>
+<li>A table view with one column per question, so the same question across forms fills the same column. Export it as CSV.</li>
+</ul>
+<hr>
+<h2 id="5-pitfalls-in-sanity-ui-and-the-studio-versions-in-this-repo">5. Pitfalls in @sanity/ui and the Studio (versions in this repo)</h2>
+<table>
+<thead>
+<tr>
+<th>Pitfall</th>
+<th>Fix</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>Stack space={n}</code> → type error</td>
+<td>This version uses <code>gap</code></td>
+</tr>
+<tr>
+<td><code>Popover</code> not in <code>@sanity/ui</code></td>
+<td><code>import { Popover } from &quot;@sanity/ui/popover&quot;</code>; it has no <code>onClickOutside</code>, so use your own listener</td>
+</tr>
+<tr>
+<td>Icons inside <code>&lt;Text&gt;</code> scale with the text size</td>
+<td>Set the size on the icon itself: <code>style={{ fontSize: 15, width: &quot;1em&quot;, height: &quot;1em&quot; }}</code></td>
+</tr>
+<tr>
+<td><code>all: &quot;unset&quot;</code> on a button removes your margin</td>
+<td>Reset only what you need (<code>appearance</code>, <code>background</code>, <code>border</code>, <code>font</code>) and use padding for the gap</td>
+</tr>
+<tr>
+<td>A colour set on a wrapper of an icon inside <code>Text</code> is ignored</td>
+<td>Set <code>style.color</code> on the icon itself</td>
+</tr>
+<tr>
+<td><code>Card selected</code> turns the whole card blue and hides coloured text</td>
+<td>Use a coloured border for &quot;active&quot; instead</td>
+</tr>
+<tr>
+<td>The field &quot;…&quot; menu jumps to the bottom after a layout change</td>
+<td>It is <code>position: absolute</code> inside the header; set <code>position: static</code></td>
+</tr>
+<tr>
+<td>Every field gets <code>components.input</code> from the i18n plugin</td>
+<td>Don&#39;t treat &quot;has a custom input&quot; as &quot;custom UI&quot; for <code>internationalizedArray*</code></td>
+</tr>
+<tr>
+<td><code>options.columns</code> on objects of booleans gives ragged boxes</td>
+<td>Use a custom list input</td>
+</tr>
+<tr>
+<td><code>ObjectInputProps.onFieldGroupSelect</code></td>
+<td>Takes only <code>(groupName)</code></td>
+</tr>
+<tr>
+<td>Typegen</td>
+<td><code>npm run typegen</code> after schema or query changes; GROQ with an interpolated <code>${CONST}</code> is fine</td>
+</tr>
+</tbody></table>
+<hr>
+<h2 id="6-verifying-without-sanity-access">6. Verifying without Sanity access</h2>
+<ul>
+<li>Build the site with the offline fixture: <code>npm run fixture</code>, then <code>SANITY_FIXTURE=1 npm run build &amp;&amp; npm start</code>. The embedded Studio lives at <code>/studio</code>.</li>
+<li>Drive the embedded Studio with Playwright and mock <code>*.sanity.io</code>:<ul>
+<li>answer <code>/data/query</code> with groq-js over the fixture;</li>
+<li>answer <code>/data/doc</code>, <code>/users/me</code>, the ACL/grants endpoints and <code>/data/listen</code> (a welcome event).</li>
+</ul>
+</li>
+<li>Screenshot at desktop width and at 412px. A phone is where most layout bugs show.</li>
+<li>Before reading the Studio console: preview warnings print the schema type and the offending <code>select</code> (search for &quot;Check the preview config&quot;).</li>
+</ul>
+</main></body></html>
