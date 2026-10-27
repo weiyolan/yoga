@@ -1,4 +1,5 @@
 import { ActivityIcon } from "@sanity/icons/Activity";
+import { AddIcon } from "@sanity/icons/Add";
 import { CalendarIcon } from "@sanity/icons/Calendar";
 import { CogIcon } from "@sanity/icons/Cog";
 import { ClipboardIcon } from "@sanity/icons/Clipboard";
@@ -20,6 +21,7 @@ import { UserIcon } from "@sanity/icons/User";
 import { UsersIcon } from "@sanity/icons/Users";
 import { WarningOutlineIcon } from "@sanity/icons/WarningOutline";
 import type { ComponentType } from "react";
+import { debounceTime, map, switchMap } from "rxjs";
 import type { StructureBuilder, StructureResolver } from "sanity/structure";
 import { MediaBank } from "../components/MediaBank";
 import { RECEIPT_MAILS } from "../schemaTypes/singletons/receipt-mail";
@@ -233,25 +235,34 @@ export const structure: StructureResolver = (S) =>
                 : S.document().schemaType("retreat").documentId(id),
             ),
         ),
+      // the Inschrijving pagina (texts around every form) + every sign-up form, in one panel; follows edits live
       S.listItem()
         .id("forms")
         .title("Formulieren")
         .icon(ClipboardIcon)
-        .child(
-          S.list()
-            .title("Formulieren")
-            .items([
-              singleton(
-                S,
-                "signupSettings",
-                "Inschrijving: teksten",
-                ControlsIcon,
+        .child(() => {
+          const client = S.context.getClient({ apiVersion });
+          const query = `*[_type == "signupForm"]{ _id, name, isDefault }`;
+          return client
+            .listen(query, {}, { visibility: "query", includeResult: false, events: ["welcome", "mutation"] })
+            .pipe(
+              debounceTime(300),
+              switchMap(() => client.fetch<{ _id: string; name?: string; isDefault?: boolean }[]>(query, {}, { perspective: "drafts" })),
+              map((forms) =>
+                S.list()
+                  .id("forms")
+                  .title("Formulieren")
+                  .menuItems([S.menuItem().title("Nieuw formulier").icon(AddIcon).intent({ type: "create", params: { type: "signupForm" } })])
+                  .items([
+                    singleton(S, "signupSettings", "Inschrijving pagina", ControlsIcon),
+                    S.divider().title("Inschrijfformulieren"),
+                    ...[...new Map(forms.map((f) => [f._id.replace(/^drafts\./, ""), f])).entries()]
+                      .sort(([, a], [, b]) => Number(!!b.isDefault) - Number(!!a.isDefault) || (a.name ?? "").localeCompare(b.name ?? ""))
+                      .map(([id]) => S.documentListItem().schemaType("signupForm").id(id)),
+                  ]),
               ),
-              S.documentTypeListItem("signupForm")
-                .title("Inschrijfformulieren")
-                .icon(ClipboardIcon),
-            ]),
-        ),
+            );
+        }),
       S.listItem()
         .id("mails")
         .title("Mails")
