@@ -13,6 +13,7 @@ import { UsersIcon } from "@sanity/icons/Users";
 import { defineArrayMember, defineField, defineType } from "sanity";
 import { i18nLines, i18nString, i18nText, pick } from "../shared/i18n";
 import { mediaArrayField, mediaField } from "../shared/media";
+import { RetreatOverviewInput } from "../../components/RetreatOverview";
 
 /**
  * A retreat. Sections follow the detail page (and the Dahab Facebook event):
@@ -25,6 +26,8 @@ export const retreat = defineType({
   title: "Retreat",
   type: "document",
   icon: CalendarIcon,
+  // on top: the page from top to bottom, what's filled in per part + a progress bar (components/RetreatOverview.tsx)
+  components: { input: RetreatOverviewInput },
   // one tab per part of the page, in page order; it opens on Basis (“Alle velden” = everything at once)
   groups: [
     { name: "basics", title: "Basis", icon: InfoOutlineIcon, default: true },
@@ -42,7 +45,7 @@ export const retreat = defineType({
   fieldsets: [
     { name: "dates", title: "Wanneer", options: { columns: 2 } },
     { name: "where", title: "Waar" },
-    { name: "seats", title: "Plaatsen & prijs", options: { columns: 2 } },
+    { name: "seats", title: "Plaatsen & prijs", description: "Vrije plaatsen op de site = Max. deelnemers − Geboekt − Extra bezet. Niets meer vrij: “volzet” + wachtlijst.", options: { columns: 2 } },
   ],
   fields: [
     /* ---- basis ---- */
@@ -119,7 +122,7 @@ export const retreat = defineType({
       fieldset: "seats",
       readOnly: true,
       description:
-        "Bevestigde inschrijvingen; telt vanzelf mee als je in Inschrijvingen een status wijzigt. Bij max. bereikt: “volzet” + wachtlijst.",
+        "Bevestigde inschrijvingen, telt vanzelf.",
     }),
     defineField({
       name: "bookedExtra",
@@ -128,7 +131,7 @@ export const retreat = defineType({
       group: "basics",
       fieldset: "seats",
       description:
-        "Plaatsen die buiten de site vastliggen (bv. 2 via telefoon): tellen bij Geboekt. Negatief geeft plaatsen vrij. Max. deelnemers blijft hetzelfde.",
+        "Buiten de site vastgelegd (bv. 2 via telefoon). Negatief = plaatsen vrijgeven.",
       validation: (rule) => rule.integer(),
     }),
     defineField({

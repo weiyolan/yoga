@@ -1,4 +1,4 @@
-import { defineDocuments, defineLocations, type PresentationPluginOptions } from "sanity/presentation";
+import { defineDocuments, type PresentationPluginOptions } from "sanity/presentation";
 import { routes } from "../../lib/routes";
 import { LEGAL_PAGES } from "../schemaTypes/singletons/legal-page";
 
@@ -36,19 +36,5 @@ export const resolve: PresentationPluginOptions["resolve"] = {
       { route: `/en/${routes[p.route].en}`, filter: `_id == "${p.id}"` },
     ]),
   ]),
-  locations: {
-    retreat: defineLocations({
-      select: { slug: "slug.current" },
-      resolve: (doc) =>
-        doc?.slug
-          ? {
-              locations: [
-                { title: "Retreatpagina", href: `/retreats/${doc.slug}` },
-                { title: "Retreats", href: "/retreats" },
-                { title: "Home", href: "/" },
-              ],
-            }
-          : null,
-    }),
-  },
+  // no `locations`: the banner “Gebruikt op x pagina's” on top of a retreat only took room
 };
