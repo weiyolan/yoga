@@ -8,6 +8,7 @@ import { insert, set, setIfMissing, useClient, type ArrayOfObjectsInputProps, ty
 import { apiVersion, defaultLanguage, languages } from "../../sanity/site.config";
 import { findJobs, translatedValue, translateJobs } from "../lib/ai";
 import { MAIL_TYPES, OpenMailPreview } from "./MailPreview";
+import { InlineField, isShort, useInlineFields } from "./InlineFields";
 
 /**
  * NL | EN tabs (small, after the field title) on every localized field (sanity-plugin-internationalized-array): one language at a
@@ -28,8 +29,10 @@ const issues = (n?: Node): string[] => [...(n?.validation ?? []).map((v) => v.le
 
 /** form.components.field: the tabs, small, right after the field title; holds the active language. */
 export function I18nTabsField(props: FieldProps) {
-  if (!isArray(props.schemaType.name)) return props.renderDefault(props);
-  return <TabsField {...props} />;
+  // compact documents (a retreat): short fields as one row (components/InlineFields.tsx)
+  const inline = useInlineFields() && isShort(props);
+  if (!isArray(props.schemaType.name)) return inline ? <InlineField props={props} /> : props.renderDefault(props);
+  return <TabsField {...props} inline={inline} />;
 }
 
 /** form.components.input: the plugin's own input + an “add” button when the active language has no item yet. */
@@ -61,7 +64,7 @@ export function I18nTabsItem(props: ItemProps) {
 /** The plugin's “NEDERLANDS” / “ENGLISH” header above each input: the tab already says it. */
 const CSS = `.i18n-tab-item [data-ui="Flex"]:has(> [data-ui="fieldHeaderContentBox"] label[for$=".value"]) { display: none; }`;
 
-function TabsField(props: FieldProps) {
+function TabsField({ inline, ...props }: FieldProps & { inline?: boolean }) {
   const [active, setActive] = useState<string>(defaultLanguage);
   const [busy, setBusy] = useState(false);
   const client = useClient({ apiVersion });
@@ -154,7 +157,7 @@ function TabsField(props: FieldProps) {
   return (
     <ActiveLanguage.Provider value={{ active, setActive }}>
       <style>{CSS}</style>
-      {props.renderDefault({ ...props, title: title as unknown as string })}
+      {inline ? <InlineField props={props} title={title} /> : props.renderDefault({ ...props, title: title as unknown as string })}
     </ActiveLanguage.Provider>
   );
 }

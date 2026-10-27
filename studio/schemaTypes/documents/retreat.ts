@@ -43,9 +43,9 @@ export const retreat = defineType({
     { name: "seo", title: "SEO", icon: SearchIcon },
   ],
   fieldsets: [
-    { name: "dates", title: "Wanneer", options: { columns: 2 } },
+    { name: "dates", title: "Wanneer" },
     { name: "where", title: "Waar" },
-    { name: "seats", title: "Plaatsen & prijs", description: "Vrije plaatsen op de site = Max. deelnemers − Geboekt − Extra bezet. Niets meer vrij: “volzet” + wachtlijst.", options: { columns: 2 } },
+    { name: "seats", title: "Plaatsen & prijs", description: "Vrije plaatsen op de site = Max. deelnemers − Geboekt − Extra bezet. Niets meer vrij: “volzet” + wachtlijst." },
   ],
   fields: [
     /* ---- basis ---- */

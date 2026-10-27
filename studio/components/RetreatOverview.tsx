@@ -5,6 +5,7 @@ import { CircleIcon } from "@sanity/icons/Circle";
 import { Box, Button, Card, Flex, Stack, Text } from "@sanity/ui";
 import { useState } from "react";
 import type { ObjectInputProps } from "sanity";
+import { InlineFields } from "./InlineFields";
 
 type I18n = { language?: string; value?: unknown }[];
 type Kind = "text" | "photo" | "list" | "number";
@@ -186,7 +187,8 @@ export function RetreatOverviewInput(props: ObjectInputProps) {
           ) : null}
         </Stack>
       </Card>
-      {props.renderDefault(props)}
+      {/* short fields as one row: title left, input right (components/InlineFields.tsx) */}
+      <InlineFields.Provider value>{props.renderDefault(props)}</InlineFields.Provider>
     </Stack>
   );
 }
