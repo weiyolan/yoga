@@ -12,6 +12,8 @@ sanity/                  shared with the Next.js app
   image.ts               urlFor(), respects the hotspot
 ```
 
+See also [SANITY-UI.md](SANITY-UI.md): Studio UX best practices (what we changed from the classic UI and why).
+
 ## Content model
 
 | Studio | Type | Notes |
