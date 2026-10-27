@@ -71,9 +71,9 @@ export function Help({ text }: { text: ReactNode }) {
         onMouseLeave={() => setHover(false)}
         onClick={() => setPinned((p) => !p)}
         // same size everywhere (px, not the title's size), raised like a superscript
-        style={{ all: "unset", cursor: "help", display: "inline-flex", alignSelf: "flex-start", fontSize: 18, lineHeight: 0, color: "var(--card-muted-fg-color)", padding: 1, marginLeft: 1, transform: "translateY(-30%)" }}
+        style={{ all: "unset", cursor: "help", display: "inline-flex", alignSelf: "flex-start", fontSize: 15, lineHeight: 0, color: "var(--card-muted-fg-color)", padding: 1, marginLeft: 1, transform: "translateY(-30%)" }}
       >
-        <HelpCircleIcon />
+        <HelpCircleIcon style={{ fontSize: 15, width: "1em", height: "1em" }} />
       </button>
     </Popover>
   );
