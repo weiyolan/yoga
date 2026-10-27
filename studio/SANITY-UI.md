@@ -160,3 +160,52 @@ Code references are relative to `studio/`.
   - answer `/data/doc`, `/users/me`, the ACL/grants endpoints and `/data/listen` (a welcome event).
 - Screenshot at desktop width and at 412px. A phone is where most layout bugs show.
 - Before reading the Studio console: preview warnings print the schema type and the offending `select` (search for "Check the preview config").
+
+---
+
+## 7. Appendix: the NL | EN tabs (code)
+
+![NL | EN tabs: a one-row field (tabs + ✨ right of the input) and a full-width text (tabs after the title)](SANITY-UI-tabs.png)
+
+**How it works** (`components/I18nTabs.tsx`; the plugin is `sanity-plugin-internationalized-array`):
+
+1. **Wiring:** three form-wide components, so every localized field gets tabs without touching any schema:
+   - `field` holds the active language and draws the tabs;
+   - `input` adds an "NL / EN toevoegen" button when the active language has no item yet;
+   - `item` hides the other languages.
+2. **One language at a time:** the items of the other languages get `display: none`. They are never removed from `members`; removing them broke the add and translate actions.
+3. **Tab state:** a dot on a tab means that language is still empty; red or amber means a validation error or warning in that language.
+4. **✨ Vertaal:** fills the English of this one field with an AI translation of the Dutch. On one-row fields, the tabs and ✨ move right of the input via context (`side`).
+5. **Plugin header:** the plugin's own “NEDERLANDS / ENGLISH” header above each input is hidden with CSS, because the tab already says it.
+
+```ts
+// sanity.config.ts
+internationalizedArray({
+  languages: languages.map(({ id, title }) => ({ id, title })),
+  defaultLanguages: [defaultLanguage],
+  fieldTypes: ["string", defineField({ name: "text", type: "text", rows: 3 }), "simpleBlockContent"],
+  buttonLocations: [], // adding a language: the tabs have their own button
+  languageDisplay: "titleOnly",
+}),
+// …
+form: { components: { field: I18nTabsField, input: I18nTabsInput, item: I18nTabsItem } },
+```
+
+```tsx
+// the items of the other languages are only hidden, never left out of `members`
+export function I18nTabsItem(props: ItemProps) {
+  const active = useContext(ActiveLanguage)?.active;
+  const lang = (props.value as Item | undefined)?.language;
+  if (!active || !isItem(props.schemaType.name) || !lang) return props.renderDefault(props);
+  return (
+    <div className="i18n-tab-item" style={lang === active ? undefined : { display: "none" }}>
+      {props.renderDefault(props)}
+    </div>
+  );
+}
+
+// the plugin's “NEDERLANDS” / “ENGLISH” header above each input: the tab already says it
+const CSS = `.i18n-tab-item [data-ui="Flex"]:has(> [data-ui="fieldHeaderContentBox"] label[for$=".value"]) { display: none; }`;
+```
+
+<!-- include: components/I18nTabs.tsx -->
