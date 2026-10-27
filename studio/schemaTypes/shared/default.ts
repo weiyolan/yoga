@@ -14,7 +14,7 @@ export const defaultFields = (type: string, field: string, what: string, group?:
     type: "boolean",
     group,
     initialValue: false,
-    description: `Voor elke retreat zonder eigen ${what}. Zet dit op één document.`,
+    description: `Aan = deze ${what} wordt gebruikt voor elke retreat die bij “Inschrijven” niets gekozen heeft. Zet dit op één document. Zelf niet zichtbaar op de site.`,
     validation: (rule) =>
       rule.custom(async (value, ctx) => {
         if (!value) return true;
@@ -23,5 +23,5 @@ export const defaultFields = (type: string, field: string, what: string, group?:
         return others ? `Er is al een andere standaard ${what}` : true;
       }),
   }),
-  defineField({ name: "usedBy", title: "Gebruikt door", type: "string", group, readOnly: true, components: { input: usedByInput(field) } }),
+  defineField({ name: "usedBy", title: "Gebruikt door", type: "string", group, readOnly: true, description: "Niet op de site: toont welke retreats dit gebruiken, zodat je weet wat er mee verandert als je hier iets aanpast.", components: { input: usedByInput(field) } }),
 ];

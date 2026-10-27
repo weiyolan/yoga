@@ -23,12 +23,12 @@ export const receiptMail = defineType({
   type: "document",
   icon: CheckmarkCircleIcon,
   fields: [
-    i18nString("subject", { title: "Onderwerp", description: "Leeg = standaardonderwerp (zie Voorbeeld). Invulwoorden zoals in de tekst." }),
-    i18nString("heading", { title: "Titel in de mail", description: "Grote titel bovenaan. Leeg = standaard." }),
+    i18nString("subject", { title: "Onderwerp", description: "Onderwerp van deze bevestigingsmail: wat de afzender in de inbox ziet. Invulwoorden zoals in de tekst. Leeg = standaardonderwerp (zie Voorbeeld)." }),
+    i18nString("heading", { title: "Titel in de mail", description: "Grote titel bovenaan in deze bevestigingsmail, boven de tekst. Invulwoorden zoals in de tekst. Leeg = standaard." }),
     i18nText("body", {
       title: "Tekst",
       description:
-        "Invulwoorden: {naam} = hun voornaam · bij een les-aanvraag ook {les} (Yin yoga · Di 19:30 · Studio) en {stijl} (Yin yoga) · bij een review {retreat}. Wat ze stuurden komt er automatisch als tabel onder. Leeg = standaardtekst (zie Voorbeeld).",
+        "De tekst van deze bevestigingsmail, onder de titel. Invulwoorden: {naam} = hun voornaam · bij een les-aanvraag ook {les} (Yin yoga · Di 19:30 · Studio) en {stijl} (Yin yoga) · bij een review {retreat}. Wat ze stuurden komt er automatisch als tabel onder. Leeg = standaardtekst (zie Voorbeeld).",
     }),
   ],
   preview: {

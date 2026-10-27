@@ -20,24 +20,28 @@ export const legalPage = defineType({
   type: "document",
   icon: LockIcon,
   fields: [
-    i18nString("title", { title: "Titel", required: true }),
-    i18nText("intro", { title: "Intro" }),
+    i18nString("title", { title: "Titel", required: true, description: "Grote titel bovenaan deze juridische pagina; ook de paginatitel in Google. De link in de footer heeft een vaste naam." }),
+    i18nText("intro", { title: "Intro", description: "Inleidende tekst onder de titel van deze juridische pagina; ook reserve-omschrijving voor Google." }),
     defineField({
       name: "sections",
       title: "Onderdelen",
       type: "array",
+      description: "De inhoud van deze juridische pagina: blokken met elk een kop en tekst, in deze volgorde.",
       of: [
         defineArrayMember({
           name: "legalSection",
           title: "Onderdeel",
           type: "object",
-          fields: [i18nString("title", { title: "Kop", required: true }), i18nText("text", { title: "Tekst", description: "Lege lijn = nieuwe paragraaf." })],
+          fields: [
+            i18nString("title", { title: "Kop", required: true, description: "Tussentitel van dit onderdeel op de juridische pagina, bv. “Welke gegevens bewaren we?”." }),
+            i18nText("text", { title: "Tekst", description: "De tekst onder de tussentitel van dit onderdeel. Lege lijn = nieuwe paragraaf." }),
+          ],
           preview: { select: { title: "title" }, prepare: ({ title }) => ({ title: pick(title) }) },
         }),
       ],
     }),
-    defineField({ name: "updatedAt", title: "Laatst bijgewerkt", type: "date", options: { dateFormat: "D MMMM YYYY" } }),
-    defineField({ name: "seo", title: "SEO & delen", type: "seo" }),
+    defineField({ name: "updatedAt", title: "Laatst bijgewerkt", type: "date", options: { dateFormat: "D MMMM YYYY" }, description: "Verschijnt onderaan de pagina als “Laatst bijgewerkt op …”. Pas aan als je de tekst wijzigt; leeg = geen datum." }),
+    defineField({ name: "seo", title: "SEO & delen", type: "seo", description: "Niet zichtbaar op de pagina zelf: titel, omschrijving en deelfoto van deze juridische pagina in Google en bij delen." }),
   ],
   preview: {
     select: { title: "title", id: "_id" },

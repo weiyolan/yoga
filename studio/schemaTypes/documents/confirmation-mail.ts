@@ -22,17 +22,17 @@ export const confirmationMail = defineType({
     { name: "waitlist", title: "Wachtlijst" },
   ],
   fields: [
-    defineField({ name: "name", title: "Naam", type: "string", description: "Intern, bv. “Yoga & Freediving”.", group: ALL, validation: (rule) => rule.required() }),
+    defineField({ name: "name", title: "Naam", type: "string", description: "Niet in de mail: om deze bevestigingsmail te kiezen bij een retreat en terug te vinden, bv. “Yoga & Freediving”.", group: ALL, validation: (rule) => rule.required() }),
     ...defaultFields("confirmationMail", "confirmationMail", "bevestigingsmail", ALL),
-    i18nString("subject", { title: "Onderwerp", group: "signup", description: "Gebruik {retreat}. Leeg = “Je inschrijving voor {retreat}”." }),
-    i18nText("body", { title: "Tekst", group: "signup", required: true, description: VARS }),
+    i18nString("subject", { title: "Onderwerp", group: "signup", description: "Onderwerp van de bevestigingsmail na een inschrijving: wat de deelnemer in de inbox ziet. Gebruik {retreat}. Leeg = “Je inschrijving voor {retreat}”." }),
+    i18nText("body", { title: "Tekst", group: "signup", required: true, description: `De tekst van de bevestigingsmail na een inschrijving, onder de foto en titel van de retreat. ${VARS} Hun antwoorden komen er automatisch onder.` }),
     i18nText("payment", {
       title: "Betaalgegevens (optioneel)",
       group: "signup",
-      description: "Blok onder de tekst, enkel als de retreat een voorschot heeft. Gebruik ook {voorschot}, bv. “Schrijf {voorschot} over op BE.. met mededeling {naam} {retreat}.”. Leeg = geen blok.",
+      description: "In de bevestigingsmail: blok onder de tekst, enkel als de retreat een voorschot heeft. Gebruik ook {voorschot}, bv. “Schrijf {voorschot} over op BE.. met mededeling {naam} {retreat}.”. Leeg = geen blok.",
     }),
-    i18nString("waitlistSubject", { title: "Onderwerp", group: "waitlist", description: "Voor wie zich op de wachtlijst zet (retreat volzet). Leeg = “Je staat op de wachtlijst voor {retreat}”." }),
-    i18nText("waitlistBody", { title: "Tekst", group: "waitlist", description: `${VARS} Leeg = standaardtekst.` }),
+    i18nString("waitlistSubject", { title: "Onderwerp", group: "waitlist", description: "Onderwerp van de mail voor wie zich op de wachtlijst zet (retreat volzet): wat ze in de inbox zien. Leeg = “Je staat op de wachtlijst voor {retreat}”." }),
+    i18nText("waitlistBody", { title: "Tekst", group: "waitlist", description: `De tekst van de wachtlijstmail (retreat volzet), onder de foto en titel van de retreat. ${VARS} Leeg = standaardtekst.` }),
   ],
   preview: {
     select: { title: "name", isDefault: "isDefault" },

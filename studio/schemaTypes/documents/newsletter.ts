@@ -16,7 +16,7 @@ const urlField = (description: string) =>
     description,
     validation: (rule) => rule.required().uri({ scheme: ["https", "http", "mailto"], allowRelative: true }),
   });
-const PATH_HINT = "Een pagina van de site als pad, bv. /retreats, /lessen of /contact (dan opent elk zijn eigen taal), of een volledige link.";
+const PATH_HINT = "Waar de lezer van de nieuwsbrief terechtkomt als hij hierop klikt. Een pagina van de site als pad, bv. /retreats, /lessen of /contact (dan opent elk zijn eigen taal), of een volledige link.";
 
 /** One of the blocks under the text: a retreat / lesstijl card, an own card, a button, more text. */
 const BLOCKS = [
@@ -25,6 +25,7 @@ const BLOCKS = [
     title: "Kaart: retreat of lesstijl",
     to: [{ type: "retreat" }, { type: "yogaClass" }],
     options: { disableNew: true },
+    description: "Een kaartje in de nieuwsbrief met foto, titel en “Meer info” van een bestaande retreat (met data en land) of lesstijl. Klikken opent die retreat of de Lessen-pagina.",
   }),
   defineArrayMember({
     name: "newsletterCard",
@@ -32,11 +33,11 @@ const BLOCKS = [
     type: "object",
     icon: ThLargeIcon,
     fields: [
-      mediaField("photo", { title: "Foto", description: "Wordt 2:1 bijgesneden." }),
-      i18nString("title", { title: "Titel", required: true, max: 80 }),
-      i18nText("text", { title: "Tekst", max: 240, description: "Optioneel, één of twee zinnen." }),
+      mediaField("photo", { title: "Foto", description: "Foto bovenaan dit kaartje in de nieuwsbrief. Wordt 2:1 bijgesneden. Optioneel." }),
+      i18nString("title", { title: "Titel", required: true, max: 80, description: "Titel van dit kaartje in de nieuwsbrief, onder de foto. {naam} kan hier ook." }),
+      i18nText("text", { title: "Tekst", max: 240, description: "Korte tekst onder de titel van het kaartje in de nieuwsbrief. Optioneel, één of twee zinnen." }),
       urlField(PATH_HINT),
-      i18nString("more", { title: "Linktekst", description: "Leeg = “Meer info”." }),
+      i18nString("more", { title: "Linktekst", description: "De klikbare tekst onderaan het kaartje in de nieuwsbrief. Leeg = “Meer info”." }),
     ],
     preview: {
       select: { title: "title", url: "url", media: "photo.image" },
@@ -48,7 +49,7 @@ const BLOCKS = [
     title: "Knop",
     type: "object",
     icon: LinkIcon,
-    fields: [i18nString("label", { title: "Tekst", required: true, max: 40, description: "bv. “Bekijk alle retreats”." }), urlField(PATH_HINT)],
+    fields: [i18nString("label", { title: "Tekst", required: true, max: 40, description: "Wat er op de knop in de nieuwsbrief staat, bv. “Bekijk alle retreats”." }), urlField(PATH_HINT)],
     preview: {
       select: { title: "label", url: "url" },
       prepare: ({ title, url }) => ({ title: pick(title) ?? "Knop", subtitle: `Knop · ${url ?? "geen link"}`, media: LinkIcon }),
@@ -59,7 +60,7 @@ const BLOCKS = [
     title: "Tekst",
     type: "object",
     icon: BlockContentIcon,
-    fields: [i18nBlocks("body", { title: "Tekst", required: true, description: "bv. een PS of een tweede onderwerp tussen de kaartjes. {naam} kan hier ook." })],
+    fields: [i18nBlocks("body", { title: "Tekst", required: true, description: "Extra tekst in de nieuwsbrief op deze plek tussen de kaartjes, bv. een PS of een tweede onderwerp. {naam} kan hier ook." })],
     preview: {
       select: { body: "body" },
       prepare: ({ body }) => {
@@ -86,17 +87,17 @@ export const newsletter = defineType({
     { name: "send", title: "Versturen" },
   ],
   fields: [
-    defineField({ name: "title", title: "Naam", type: "string", group: "content", description: "Intern, bv. “Nieuwe retreats 2027”.", validation: (rule) => rule.required() }),
-    i18nString("subject", { title: "Onderwerp", group: "content", required: true, max: 90, description: "Wat ze in hun inbox zien. Gebruik {naam} voor hun voornaam." }),
-    mediaField("image", { title: "Foto bovenaan", group: "content", description: "Breed beeld (wordt 2:1 bijgesneden)." }),
-    i18nString("heading", { title: "Titel", group: "content", description: "Grote titel boven de tekst. Optioneel." }),
-    i18nBlocks("body", { title: "Tekst", group: "content", required: true, description: "Begin bv. met “Dag {naam},” (hun voornaam; zonder naam wordt het “Dag,”). Vet, cursief, links en opsommingen kunnen." }),
+    defineField({ name: "title", title: "Naam", type: "string", group: "content", description: "Niet op de site: enkel om de nieuwsbrief terug te vinden in de Studio, bv. “Nieuwe retreats 2027”. Lezers zien dit niet.", validation: (rule) => rule.required() }),
+    i18nString("subject", { title: "Onderwerp", group: "content", required: true, max: 90, description: "Het onderwerp van de nieuwsbrief-mail: wat ze in hun inbox zien. Gebruik {naam} voor hun voornaam." }),
+    mediaField("image", { title: "Foto bovenaan", group: "content", description: "Brede foto helemaal bovenaan de nieuwsbrief-mail, boven de titel. Wordt 2:1 bijgesneden. Optioneel." }),
+    i18nString("heading", { title: "Titel", group: "content", description: "Grote titel in de nieuwsbrief-mail, onder de foto en boven de tekst. Optioneel." }),
+    i18nBlocks("body", { title: "Tekst", group: "content", required: true, description: "De hoofdtekst van de nieuwsbrief-mail, onder de titel. Begin bv. met “Dag {naam},” (hun voornaam; zonder naam wordt het “Dag,”). Vet, cursief, links en opsommingen kunnen." }),
     defineField({
       name: "blocks",
       title: "Onder de tekst",
       type: "array",
       group: "content",
-      description: "Kaartjes (een retreat, een lesstijl of een eigen kaart met foto en link), knoppen en extra tekst, in deze volgorde. Versleep om te herschikken.",
+      description: "Wat in de nieuwsbrief-mail onder de tekst komt: kaartjes (een retreat, een lesstijl of een eigen kaart met foto en link), knoppen en extra tekst, in deze volgorde. Versleep om te herschikken.",
       of: BLOCKS,
       validation: (rule) => rule.max(12),
     }),
@@ -107,11 +108,12 @@ export const newsletter = defineType({
       type: "array",
       group: "content",
       deprecated: { reason: "Gebruik “Onder de tekst” (run content:v10 of zet ze er zelf in)." },
+      description: "Oud veld: retreatkaartjes onderaan de nieuwsbrief-mail (worden nog meegestuurd). Zet ze liever in “Onder de tekst”.",
       hidden: ({ value }) => !value?.length,
       of: [defineArrayMember({ type: "reference", to: [{ type: "retreat" }], options: { disableNew: true } })],
     }),
-    i18nString("buttonLabel", { title: "Knop: tekst (oud)", group: "content", hidden: ({ value }) => !(value as unknown[] | undefined)?.length }),
-    defineField({ name: "buttonUrl", title: "Knop: link (oud)", type: "url", group: "content", hidden: ({ value }) => !value, validation: (rule) => rule.uri({ scheme: ["https", "http", "mailto"], allowRelative: true }) }),
+    i18nString("buttonLabel", { title: "Knop: tekst (oud)", group: "content", description: "Oud veld: tekst van de knop onderaan de nieuwsbrief-mail (wordt nog meegestuurd). Gebruik liever een “Knop” in “Onder de tekst”.", hidden: ({ value }) => !(value as unknown[] | undefined)?.length }),
+    defineField({ name: "buttonUrl", title: "Knop: link (oud)", type: "url", group: "content", description: "Oud veld: waar de oude knop onderaan de nieuwsbrief-mail naartoe gaat. Gebruik liever een “Knop” in “Onder de tekst”.", hidden: ({ value }) => !value, validation: (rule) => rule.uri({ scheme: ["https", "http", "mailto"], allowRelative: true }) }),
     defineField({
       name: "audience",
       title: "Naar wie",
@@ -120,11 +122,11 @@ export const newsletter = defineType({
       of: [defineArrayMember({ type: "string" })],
       options: { list: AUDIENCES.map(({ value, title }) => ({ value, title })), layout: "grid" },
       initialValue: ["subscribers", "participants"],
-      description: AUDIENCES.map((a) => `${a.title}: ${a.description}`).join(" "),
+      description: `Niet op de site: wie deze nieuwsbrief krijgt als je op “Nieuwsbrief versturen” klikt (wie zich afmeldde nooit). ${AUDIENCES.map((a) => `${a.title}: ${a.description}`).join(" ")}`,
       validation: (rule) => rule.required().min(1),
     }),
-    defineField({ name: "sentAt", title: "Verstuurd op", type: "datetime", group: "send", readOnly: true }),
-    defineField({ name: "sentCount", title: "Aantal ontvangers", type: "number", group: "send", readOnly: true }),
+    defineField({ name: "sentAt", title: "Verstuurd op", type: "datetime", group: "send", readOnly: true, description: "Niet op de site: wordt automatisch ingevuld bij het versturen, zodat je ziet wanneer deze nieuwsbrief vertrok (en hem niet per ongeluk twee keer stuurt)." }),
+    defineField({ name: "sentCount", title: "Aantal ontvangers", type: "number", group: "send", readOnly: true, description: "Niet op de site: wordt automatisch ingevuld bij het versturen, met hoeveel mensen deze nieuwsbrief kregen." }),
   ],
   orderings: [{ title: "Nieuwste eerst", name: "createdDesc", by: [{ field: "_createdAt", direction: "desc" }] }],
   preview: {

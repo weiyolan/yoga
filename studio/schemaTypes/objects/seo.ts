@@ -17,18 +17,18 @@ export const seo = defineType({
       title: "Titel in Google",
       max: 42,
       description:
-        "Kort en concreet, met waar het over gaat (bv. “Yoga & freediving retreat in Dahab”). De site zet er “ · Yoga, Zen & Tonic” achter. Leeg = de paginatitel.",
+        "De titel in Google en in het browsertabblad (en op de deelafbeelding). Kort en concreet, bv. “Yoga & freediving retreat in Dahab”; de site zet er “ · Yoga, Zen & Tonic” achter. Leeg = de paginatitel.",
     }),
     i18nText("description", {
       title: "Beschrijving in Google",
       max: 160,
       description:
-        "120–155 tekens: wat, waar, voor wie, en een reden om te klikken. Elke pagina een eigen tekst. Leeg = de introtekst van de pagina.",
+        "Het tekstje onder de titel in Google en bij gedeelde links. 120–155 tekens: wat, waar, voor wie, en een reden om te klikken. Elke pagina een eigen tekst. Leeg = de introtekst van de pagina.",
     }),
     mediaField("shareImage", {
       title: "Deelafbeelding",
       description:
-        "Voor WhatsApp, Facebook, … (liggend, wordt 1200 × 630). Leeg = openingsfoto.",
+        "De foto die verschijnt als iemand de pagina deelt via WhatsApp, Facebook, … (liggend, wordt 1200 × 630 met de titel erop). Niet zichtbaar op de pagina zelf. Leeg = de openingsfoto.",
     }),
   ],
 });

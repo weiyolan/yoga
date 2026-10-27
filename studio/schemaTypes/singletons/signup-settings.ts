@@ -12,12 +12,12 @@ export const signupSettings = defineType({
   type: "document",
   icon: ControlsIcon,
   fields: [
-    i18nText("signupConsent", { title: "Akkoord gegevens (vinkje)", description: "Naast het vinkje. De link naar de privacyverklaring komt er automatisch achter. Leeg = standaardtekst." }),
+    i18nText("signupConsent", { title: "Akkoord gegevens (vinkje)", description: "Op elk inschrijfformulier van een retreat, in de laatste stap naast het vinkje voor de privacy (verplicht om te versturen). De link naar de privacyverklaring komt er automatisch achter. Leeg = standaardtekst." }),
     i18nText("signupTerms", {
       title: "Akkoord voorwaarden (vinkje)",
-      description: "Tweede vinkje. De links naar de algemene voorwaarden en de annulatievoorwaarden komen er automatisch achter. Leeg = standaardtekst (incl. eigen reisverzekering).",
+      description: "Op elk inschrijfformulier van een retreat, in de laatste stap naast het vinkje voor de voorwaarden (verplicht om in te schrijven). De links naar de algemene voorwaarden en de annulatievoorwaarden komen er automatisch achter. Leeg = standaardtekst (incl. eigen reisverzekering).",
     }),
-    i18nText("signupThanks", { title: "Bedankt-tekst", description: "Getoond na het verzenden. Leeg = standaardtekst." }),
+    i18nText("signupThanks", { title: "Bedankt-tekst", description: "Op de inschrijvingspagina, in de plaats van het formulier zodra iemand zich heeft ingeschreven (niet bij de wachtlijst). Leeg = standaardtekst." }),
   ],
   preview: { prepare: () => ({ title: "Inschrijving pagina" }) },
 });

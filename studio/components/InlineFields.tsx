@@ -1,39 +1,42 @@
-import { ErrorOutlineIcon } from "@sanity/icons/ErrorOutline";
-import { WarningOutlineIcon } from "@sanity/icons/WarningOutline";
 import { HelpCircleIcon } from "@sanity/icons/HelpCircle";
-import { Box, Flex, Text } from "@sanity/ui";
+import { Text } from "@sanity/ui";
 import { Popover } from "@sanity/ui/popover";
 import { createContext, useContext, useEffect, useRef, useState, type ReactNode } from "react";
 import type { FieldProps, SchemaType } from "sanity";
 
 /**
  * Every field: its help text behind a small ? after the title (Help, via I18nTabsField).
- * Compact documents (a retreat): short fields as one row, title + ? on the left, the input on
- * the right; long texts, lists and groups stay full width. On by a provider around the document's
- * form (RetreatOverviewInput); I18nTabsField (form.components.field) does the layout, also for the NL | EN strings.
- * Also on a phone; only a very narrow column (< 300px) puts the title on top again.
+ * Short fields (text line, number, date, link, slug, a picked document, NL | EN line) as one row:
+ * title + ? + the usual “…” menu on the left, the input on the right. Long texts, lists, groups, on/off
+ * and custom inputs stay full width. It's Sanity's own field (renderDefault: comments, “…”, validation,
+ * change bars all stay), only laid out as a grid by CSS. A very narrow column (< 300px) stacks again.
+ * InlineFields (context) = false switches it off for a part of a form.
  */
-export const InlineFields = createContext(false);
+export const InlineFields = createContext(true);
 export const useInlineFields = () => useContext(InlineFields);
 
 const SHORT = new Set(["string", "number", "url", "date", "datetime", "slug", "reference", "internationalizedArrayString"]);
 const names = (t: SchemaType | undefined): string[] => (t ? [t.name, ...names(t.type as SchemaType | undefined)] : []);
 
-/** One line is enough: short text, number, date, link, slug, a picked document (not long text, lists, groups, on/off). */
+/** One line is enough: short text, number, date, link, slug, a picked document (not long text, lists, groups, on/off, own inputs). */
 export function isShort(props: FieldProps) {
   const chain = names(props.schemaType);
   if (props.name === "value" || chain.includes("text") || chain.includes("boolean")) return false;
   const opts = props.schemaType.options as { list?: unknown[] } | undefined;
   if (opts?.list?.length) return false;
+  // own inputs (tiles, checkboxes) need the width; the NL | EN plugin's input is fine
+  if ((props.schemaType.components as { input?: unknown } | undefined)?.input && !chain.includes("internationalizedArrayString")) return false;
   return chain.some((n) => SHORT.has(n));
 }
 
+// the field's own layout: a VStack [header (title + “…”), input]; the language items inside an NL | EN field keep theirs
+const ROW = `.inline-field [data-ui="VStack"]:has(> [data-ui="Flex"] > [data-ui="fieldHeaderContentBox"]):not(.i18n-tab-item *)`;
 const CSS = `
 /* the form puts 32px between fields: rows sit closer together */
 .inline-field { container-type: inline-size; margin-block: -10px; }
-.inline-field > .row { display: grid; grid-template-columns: minmax(92px, 32%) minmax(0, 1fr); gap: 4px 12px; align-items: start; }
-.inline-field > .row > .head { padding-top: 9px; }
-@container (max-width: 300px) { .inline-field > .row { grid-template-columns: minmax(0, 1fr); } .inline-field > .row > .head { padding-top: 0; } }
+${ROW} { display: grid !important; grid-template-columns: minmax(92px, 32%) minmax(0, 1fr); column-gap: 12px; row-gap: 4px; align-items: start; }
+${ROW} > [data-ui="Flex"]:first-child { padding-top: 6px; }
+@container (max-width: 300px) { ${ROW} { grid-template-columns: minmax(0, 1fr); } ${ROW} > [data-ui="Flex"]:first-child { padding-top: 0; } }
 `;
 
 /** A small ? next to the title: the help text on hover, or on tap (phone); tap again / elsewhere closes it. */
@@ -59,9 +62,11 @@ export function Help({ text }: { text: ReactNode }) {
       shadow={2}
       style={{ maxWidth: 300 }}
       content={
-        <Text size={1} muted>
-          {text}
-        </Text>
+        <div style={{ maxWidth: 320 }}>
+          <Text size={1} muted>
+            {text}
+          </Text>
+        </div>
       }
     >
       <button
@@ -72,7 +77,7 @@ export function Help({ text }: { text: ReactNode }) {
         onMouseLeave={() => setHover(false)}
         onClick={() => setPinned((p) => !p)}
         // same size everywhere (px, not the title's size), raised like a superscript
-        style={{ all: "unset", cursor: "help", display: "inline-flex", alignSelf: "flex-start", fontSize: 15, lineHeight: 0, color: "var(--card-muted-fg-color)", padding: 1, marginLeft: 1, transform: "translateY(-30%)" }}
+        style={{ all: "unset", cursor: "help", display: "inline-flex", alignSelf: "flex-start", fontSize: 15, lineHeight: 0, color: "var(--card-muted-fg-color)", padding: 1, marginLeft: 4, transform: "translateY(-30%)" }}
       >
         <HelpCircleIcon style={{ fontSize: 15, width: "1em", height: "1em" }} />
       </button>
@@ -80,31 +85,18 @@ export function Help({ text }: { text: ReactNode }) {
   );
 }
 
-/** title (may hold the NL | EN tabs) + help on the left, input + its errors/warnings on the right */
+/** Sanity's own field, title (may hold the NL | EN tabs) + ? on the left, input on the right. */
 export function InlineField({ props, title }: { props: FieldProps; title?: ReactNode }) {
-  const issues = (props.validation ?? []).filter((v) => v.level === "error" || v.level === "warning");
+  const t = title ?? (
+    <>
+      {props.title}
+      {props.description ? <Help text={props.description} /> : null}
+    </>
+  );
   return (
-    <div className="inline-field" data-testid={`inline-${props.name}`}>
+    <div className="inline-field">
       <style>{CSS}</style>
-      <div className="row">
-        <Flex className="head" align="center" gap={1} wrap="wrap">
-          <Text as="label" size={1} weight="medium">
-            {title ?? props.title}
-          </Text>
-          {/* a custom title (NL | EN tabs) brings its own ? right after the name */}
-          {props.description && !title ? <Help text={props.description} /> : null}
-        </Flex>
-        <Box>
-          {props.children}
-          {issues.map((v, i) => (
-            <Box key={i} marginTop={2}>
-              <Text size={0} style={{ color: v.level === "error" ? "var(--card-badge-critical-fg-color, #e5484d)" : "var(--card-badge-caution-fg-color, #c7a21c)" }}>
-                {v.level === "error" ? <ErrorOutlineIcon /> : <WarningOutlineIcon />} {v.message}
-              </Text>
-            </Box>
-          ))}
-        </Box>
-      </div>
+      {props.renderDefault({ ...props, description: undefined, title: t as unknown as string })}
     </div>
   );
 }

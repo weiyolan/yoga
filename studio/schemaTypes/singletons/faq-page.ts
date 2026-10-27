@@ -15,13 +15,14 @@ export const faqPage = defineType({
     i18nString("title", {
       title: "Kop",
       required: true,
-      description: "bv. “Veelgestelde vragen”.",
+      description: "Grote titel bovenaan de FAQ-pagina; ook de paginatitel in Google als je bij SEO niets invult. bv. “Veelgestelde vragen”.",
     }),
-    i18nText("intro", { title: "Intro (optioneel)", max: 240 }),
+    i18nText("intro", { title: "Intro (optioneel)", max: 240, description: "Korte tekst onder de kop van de FAQ-pagina, boven de vragen; ook reserve-omschrijving voor Google. Leeg = geen intro." }),
     defineField({
       name: "groups",
       title: "Groepen",
       type: "array",
+      description: "De vragen op de FAQ-pagina, per onderwerp gegroepeerd. Sleep om de volgorde op de site te wijzigen.",
       of: [
         defineArrayMember({
           name: "faqGroup",
@@ -31,12 +32,13 @@ export const faqPage = defineType({
             i18nString("title", {
               title: "Titel",
               required: true,
-              description: "bv. “Retreats”.",
+              description: "Tussentitel boven deze groep vragen op de FAQ-pagina (enkel getoond als er meer dan één groep is). bv. “Retreats”.",
             }),
             defineField({
               name: "items",
               title: "Vragen",
               type: "array",
+              description: "De vragen in deze groep, in deze volgorde op de FAQ-pagina.",
               of: [
                 defineArrayMember({
                   name: "faqItem",
@@ -47,12 +49,13 @@ export const faqPage = defineType({
                       title: "Vraag",
                       required: true,
                       max: 140,
+                      description: "De vraag zoals bezoekers ze aanklikken op de FAQ-pagina (en eventueel op de retreatpagina's); Google krijgt ze ook te zien.",
                     }),
                     i18nText("answer", {
                       title: "Antwoord",
                       required: true,
                       max: 900,
-                      description: "Een lege regel = nieuwe alinea.",
+                      description: "Het antwoord dat openklapt onder de vraag op de FAQ-pagina (en eventueel op de retreatpagina's). Een lege regel = nieuwe alinea.",
                     }),
                     defineField({
                       name: "onRetreat",
@@ -60,7 +63,7 @@ export const faqPage = defineType({
                       type: "boolean",
                       initialValue: false,
                       description:
-                        "Onderaan elke komende retreat (“Goed om te weten”). Niets aangevinkt = de eerste 4 vragen.",
+                        "Toont deze vraag ook onderaan elke komende retreatpagina, in “Goed om te weten”. Niets aangevinkt = de eerste 4 vragen.",
                     }),
                   ],
                   preview: {
@@ -84,7 +87,7 @@ export const faqPage = defineType({
         }),
       ],
     }),
-    defineField({ name: "seo", title: "SEO & delen", type: "seo" }),
+    defineField({ name: "seo", title: "SEO & delen", type: "seo", description: "Niet zichtbaar op de pagina zelf: titel, omschrijving en deelfoto van de FAQ-pagina in Google en bij delen via WhatsApp of sociale media." }),
   ],
   preview: { prepare: () => ({ title: "FAQ" }) },
 });

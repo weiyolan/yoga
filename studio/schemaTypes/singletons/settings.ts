@@ -13,9 +13,9 @@ export const settings = defineType({
   type: "document",
   icon: CogIcon,
   fields: [
-    defineField({ name: "siteName", title: "Naam website", type: "string", initialValue: "Yoga, Zen & Tonic", validation: (rule) => rule.required() }),
-    i18nString("tagline", { title: "Slogan", max: 60, description: "Onder het logo in de footer en in zoekresultaten." }),
-    defineField({ name: "seo", title: "Standaard SEO", type: "seo", description: "Fallback voor pagina's zonder eigen SEO." }),
+    defineField({ name: "siteName", title: "Naam website", type: "string", initialValue: "Yoga, Zen & Tonic", description: "Als logo en bij © in de footer, in de titel van het browsertabblad, in Google en op deelafbeeldingen.", validation: (rule) => rule.required() }),
+    i18nString("tagline", { title: "Slogan", max: 60, description: "Korte zin onder het logo in de footer, en in Google en de tabtitel van de homepagina als je geen eigen SEO invult." }),
+    defineField({ name: "seo", title: "Standaard SEO", type: "seo", description: "Niet zichtbaar op de pagina's zelf: titel, omschrijving en deelfoto voor Google en delen, voor elke pagina waar je bij SEO niets invult." }),
   ],
   preview: { prepare: () => ({ title: "Algemeen" }) },
 });

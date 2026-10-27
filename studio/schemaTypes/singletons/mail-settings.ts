@@ -18,13 +18,13 @@ export const mailSettings = defineType({
       type: "boolean",
       initialValue: false,
       description:
-        "Aan = elke deelnemer krijgt meteen de bevestigingsmail van de retreat (Bevestigingsmails). Werkt pas als de site mail kan versturen (Resend, zie README). Uit = je verstuurt ze zelf: open de inschrijving → “Bevestigingsmail”.",
+        "Niet op de site. Aan = wie zich inschrijft voor een retreat, krijgt meteen de bevestigingsmail (Bevestigingsmails); werkt pas met Resend. Uit = je stuurt ze zelf: open de inschrijving → “Bevestigingsmail”.",
     }),
     defineField({
       name: "notifyEmail",
       title: "Meldingen naar",
       type: "string",
-      description: "Wie krijgt een melding bij een nieuwe inschrijving, bericht of review? Ook mail aan contact@yogazentonic.com wordt naar deze adressen doorgestuurd (als dat in Resend is ingesteld, zie README). Meerdere adressen: scheiden met een komma. Leeg = het e-mailadres op de Contact-pagina (Contact & social). Via Netlify Forms (standaard): de adressen stel je in bij Netlify → Notifications.",
+      description: "Niet op de site: wie een melding krijgt bij een nieuwe inschrijving, bericht of review (en mail aan contact@yogazentonic.com, via Resend). Het eerste adres is ook het antwoordadres van de mails. Meerdere: scheiden met een komma. Leeg = het adres op de Contact-pagina. Via Netlify Forms: instellen bij Netlify → Notifications.",
       validation: (rule) =>
         rule.custom((v?: string) => (!v || v.split(",").every((a) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(a.trim())) ? true : "Geen geldig e-mailadres (meerdere: scheiden met een komma)")),
     }),
@@ -33,14 +33,14 @@ export const mailSettings = defineType({
       title: "Nieuwsbrief: bevestigingsmail versturen",
       type: "boolean",
       initialValue: true,
-      description: "Aan = wie zich inschrijft voor de nieuwsbrief krijgt meteen de mail uit Mails → Nieuwsbrief bevestiging, met een afmeldlink.",
+      description: "Niet op de site. Aan = wie zich inschrijft voor de nieuwsbrief (footer of formulier), krijgt meteen de mail uit Mails → Nieuwsbrief bevestiging, met een afmeldlink. Uit = geen mail.",
     }),
     defineField({
       name: "receiptConfirm",
       title: "Berichten: bevestigingsmail versturen",
       type: "boolean",
       initialValue: true,
-      description: "Aan = wie het contactformulier, een les-aanvraag of een review stuurt, krijgt meteen een korte bevestiging (Mails → Bevestiging bericht / les-aanvraag / review).",
+      description: "Niet op de site. Aan = wie het contactformulier, een les-aanvraag of een review stuurt, krijgt meteen een korte bevestiging (Mails → Bevestiging bericht / les-aanvraag / review). Uit = geen mail.",
     }),
   ],
   preview: { prepare: () => ({ title: "Mails: opties" }) },
