@@ -8,7 +8,7 @@ import { insert, set, setIfMissing, useClient, type ArrayOfObjectsInputProps, ty
 import { apiVersion, defaultLanguage, languages } from "../../sanity/site.config";
 import { findJobs, translatedValue, translateJobs } from "../lib/ai";
 import { MAIL_TYPES, OpenMailPreview } from "./MailPreview";
-import { InlineField, isShort, useInlineFields } from "./InlineFields";
+import { Help, InlineField, isShort, useInlineFields } from "./InlineFields";
 
 /**
  * NL | EN tabs (small, after the field title) on every localized field (sanity-plugin-internationalized-array): one language at a
@@ -130,6 +130,7 @@ function TabsField({ inline, ...props }: FieldProps & { inline?: boolean }) {
   const title = (
     <Flex as="span" align="center" gap={2} wrap="wrap" style={{ display: "inline-flex" }}>
       <span>{props.title}</span>
+      {inline && props.description ? <Help text={props.description} /> : null}
       <Card as="span" radius={2} padding={0} tone="transparent" border style={{ display: "inline-flex" }}>
         <Flex as="span" role="tablist" gap={0}>
           {languages.map((l) => tab(l.id))}

@@ -1,11 +1,13 @@
 import { ErrorOutlineIcon } from "@sanity/icons/ErrorOutline";
 import { WarningOutlineIcon } from "@sanity/icons/WarningOutline";
-import { Box, Stack, Text } from "@sanity/ui";
-import { createContext, useContext, type ReactNode } from "react";
+import { HelpCircleIcon } from "@sanity/icons/HelpCircle";
+import { Box, Flex, Text } from "@sanity/ui";
+import { Popover } from "@sanity/ui/popover";
+import { createContext, useContext, useEffect, useRef, useState, type ReactNode } from "react";
 import type { FieldProps, SchemaType } from "sanity";
 
 /**
- * Compact documents (a retreat): short fields as one row, title + help on the left, the input on
+ * Compact documents (a retreat): short fields as one row, title + a ? with the help on the left, the input on
  * the right; long texts, lists and groups stay full width. On by a provider around the document's
  * form (RetreatOverviewInput); I18nTabsField (form.components.field) does the layout, also for the NL | EN strings.
  * Also on a phone; only a very narrow column (< 300px) puts the title on top again.
@@ -33,6 +35,49 @@ const CSS = `
 @container (max-width: 300px) { .inline-field > .row { grid-template-columns: minmax(0, 1fr); } .inline-field > .row > .head { padding-top: 0; } }
 `;
 
+/** A small ? next to the title: the help text on hover, or on tap (phone); tap again / elsewhere closes it. */
+export function Help({ text }: { text: ReactNode }) {
+  const [hover, setHover] = useState(false);
+  const [pinned, setPinned] = useState(false);
+  const ref = useRef<HTMLButtonElement>(null);
+  // a tap elsewhere closes it
+  useEffect(() => {
+    if (!pinned) return;
+    const close = (e: PointerEvent) => !ref.current?.contains(e.target as Node) && setPinned(false);
+    document.addEventListener("pointerdown", close);
+    return () => document.removeEventListener("pointerdown", close);
+  }, [pinned]);
+  return (
+    <Popover
+      open={hover || pinned}
+      portal
+      placement="top"
+      fallbackPlacements={["bottom", "right"]}
+      padding={3}
+      radius={2}
+      shadow={2}
+      style={{ maxWidth: 300 }}
+      content={
+        <Text size={1} muted>
+          {text}
+        </Text>
+      }
+    >
+      <button
+        ref={ref}
+        type="button"
+        aria-label="Uitleg"
+        onMouseEnter={() => setHover(true)}
+        onMouseLeave={() => setHover(false)}
+        onClick={() => setPinned((p) => !p)}
+        style={{ all: "unset", cursor: "help", display: "inline-flex", fontSize: 17, lineHeight: 0, color: "var(--card-muted-fg-color)", padding: 2 }}
+      >
+        <HelpCircleIcon />
+      </button>
+    </Popover>
+  );
+}
+
 /** title (may hold the NL | EN tabs) + help on the left, input + its errors/warnings on the right */
 export function InlineField({ props, title }: { props: FieldProps; title?: ReactNode }) {
   const issues = (props.validation ?? []).filter((v) => v.level === "error" || v.level === "warning");
@@ -40,16 +85,13 @@ export function InlineField({ props, title }: { props: FieldProps; title?: React
     <div className="inline-field" data-testid={`inline-${props.name}`}>
       <style>{CSS}</style>
       <div className="row">
-        <Stack gap={2} className="head">
+        <Flex className="head" align="center" gap={1} wrap="wrap">
           <Text as="label" size={1} weight="medium">
             {title ?? props.title}
           </Text>
-          {props.description ? (
-            <Text size={0} muted>
-              {props.description}
-            </Text>
-          ) : null}
-        </Stack>
+          {/* a custom title (NL | EN tabs) brings its own ? right after the name */}
+          {props.description && !title ? <Help text={props.description} /> : null}
+        </Flex>
         <Box>
           {props.children}
           {issues.map((v, i) => (
