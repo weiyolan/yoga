@@ -60,7 +60,7 @@ const ROW = `.inline-field [data-ui="VStack"]:has(> [data-ui="Flex"] > [data-ui=
 const CSS = `
 /* the form puts 32px between fields: rows sit closer together */
 .inline-field { container-type: inline-size; margin-block: -10px; }
-${ROW} { display: grid !important; grid-template-columns: minmax(92px, 32%) minmax(0, 1fr); column-gap: 12px; row-gap: 4px; align-items: start; }
+${ROW} { display: grid !important; grid-template-columns: minmax(80px, 26%) minmax(0, 1fr); column-gap: 8px; row-gap: 4px; align-items: start; }
 ${ROW} > [data-ui="Flex"]:first-child { padding-top: 6px; }
 @container (max-width: 300px) { ${ROW} { grid-template-columns: minmax(0, 1fr); } ${ROW} > [data-ui="Flex"]:first-child { padding-top: 0; } }
 `;
