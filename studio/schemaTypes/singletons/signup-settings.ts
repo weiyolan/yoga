@@ -3,12 +3,12 @@ import { defineType } from "sanity";
 import { i18nText } from "../shared/i18n";
 
 /**
- * Formulieren → Inschrijving: teksten: the texts around every sign-up form (akkoord, bedankt). Fixed
+ * Pagina's → Inschrijvingspagina: the texts around every sign-up form (akkoord, bedankt). Fixed
  * `_id` "signupSettings". The questions live in Inschrijfformulieren; mails in Mails.
  */
 export const signupSettings = defineType({
   name: "signupSettings",
-  title: "Inschrijving",
+  title: "Inschrijvingspagina",
   type: "document",
   icon: ControlsIcon,
   fields: [
@@ -19,5 +19,5 @@ export const signupSettings = defineType({
     }),
     i18nText("signupThanks", { title: "Bedankt-tekst", description: "Getoond na het verzenden. Leeg = standaardtekst." }),
   ],
-  preview: { prepare: () => ({ title: "Inschrijving: teksten" }) },
+  preview: { prepare: () => ({ title: "Inschrijvingspagina" }) },
 });

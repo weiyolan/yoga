@@ -144,7 +144,7 @@ const CONTACT = `"email": *[_id == "contactPage"][0].email,
 
 /**
  * Header, mobile menu, footer and forms: Algemeen (`settings`) + Contact & social (Contact page) +
- * Menu & footer (`navigation`) + Formulieren → Inschrijving (`signupSettings`) + Mails → Verzending (`mailSettings`).
+ * Menu & footer (`navigation`) + Pagina's → Inschrijvingspagina (`signupSettings`) + Mails → Verzending (`mailSettings`).
  */
 export const LAYOUT_QUERY = defineQuery(`*[_id == "settings"][0]{
   siteName,
