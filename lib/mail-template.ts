@@ -56,6 +56,8 @@ export type MailCard = {
   meta?: string;
   url: string;
   photo?: string | null;
+  /** A short text under the title. */
+  text?: string;
   more?: string;
 };
 
@@ -116,6 +118,9 @@ export function blocksText(
     .replace(/(• [^\n]*)\n\n(?=• )/g, "$1\n");
 }
 
+/** One block under the text of a mail. */
+export type MailSection = { card: MailCard } | { button: { label: string; url: string } } | { blocks: MailBlock[] };
+
 export type MailContent = {
   text: string;
   /** Rich text instead of `text` in the HTML version (`text` stays the plain-text version). */
@@ -126,6 +131,8 @@ export type MailContent = {
   button?: { label: string; url: string } | null;
   /** Linked cards under the text (photo, title, one line). */
   cards?: MailCard[];
+  /** Blocks under the text, in this order (a newsletter): cards, buttons, extra text. Before `cards`/`button`. */
+  sections?: MailSection[];
   /** Small unsubscribe link at the very bottom. */
   unsubscribe?: { label: string; url: string } | null;
   /** Big serif title above the text. */
@@ -148,16 +155,15 @@ export function mailHtml({
   fill,
   button,
   cards,
+  sections,
   unsubscribe,
 }: MailContent) {
-  const btn =
+  const btnHtml = (button: { label: string; url: string } | null | undefined) =>
     button?.url && button.label
       ? `<table role="presentation" cellpadding="0" cellspacing="0" style="margin:8px 0 24px"><tr><td style="background:${C.dark};border-radius:999px"><a href="${esc(button.url)}" style="display:inline-block;padding:14px 28px;font:600 15px/1 ${SANS};color:#FFFFFF;text-decoration:none">${esc(button.label)}</a></td></tr></table>`
       : "";
-  const cardList = cards?.length
-    ? cards
-        .map(
-          (c) =>
+  const btn = btnHtml(button);
+  const cardHtml = (c: MailCard) =>
             `<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="margin:0 0 16px;border:1px solid ${C.line}">${
               // photo on top, full width, cropped 2:1: always fills its box, in every mail app (no side-by-side cell to stretch)
               c.photo
@@ -167,10 +173,11 @@ export function mailHtml({
               c.meta
                 ? `<div style="margin-top:6px;font:13px/1.4 ${SANS};color:${C.soft}">${esc(c.meta)}</div>`
                 : ""
-            }<div style="margin-top:10px"><a href="${esc(c.url)}" style="font:600 13px/1 ${SANS};color:${C.ember};text-decoration:none">${esc(c.more ?? "")} →</a></div></td></tr></table>`,
-        )
-        .join("")
-    : "";
+            }${c.text ? `<div style="margin-top:8px;font:15px/1.5 ${SANS};color:${C.ink}">${esc(c.text)}</div>` : ""}${c.more ? `<div style="margin-top:10px"><a href="${esc(c.url)}" style="font:600 13px/1 ${SANS};color:${C.ember};text-decoration:none">${esc(c.more)} →</a></div>` : ""}</td></tr></table>`;
+  const cardList = (cards ?? []).map(cardHtml).join("");
+  const sectionList = (sections ?? [])
+    .map((s) => ("card" in s ? cardHtml(s.card) : "button" in s ? btnHtml(s.button) : blocksHtml(s.blocks, fill ?? ((x) => x))))
+    .join("");
   const img = photo
     ? `<tr><td><img src="${esc(photo)}?w=1200&h=600&fit=crop&auto=format" width="600" alt="" style="display:block;width:100%;height:auto;border:0"></td></tr>`
     : "";
@@ -192,6 +199,7 @@ ${img}
 <tr><td style="padding:32px 32px 16px">
 ${heading ? `<h1 style="margin:0 0 20px;font:400 30px/1.2 ${SERIF};color:${C.ink}">${esc(heading)}</h1>` : ""}
 ${blocks?.length ? blocksHtml(blocks, fill ?? ((x) => x)) : paragraphs(text)}
+${sectionList}
 ${cardList}
 ${btn}
 ${table}
@@ -207,14 +215,20 @@ export function mailText({
   footnote,
   button,
   cards,
+  sections,
+  fill,
   unsubscribe,
 }: MailContent) {
+  const card = (c: MailCard) => [c.title, c.meta, c.text, c.url].filter(Boolean).join("\n");
   return [
     text.trim(),
+    ...(sections ?? []).map((s) =>
+      "card" in s ? card(s.card) : "button" in s ? `${s.button.label}: ${s.button.url}` : blocksText(s.blocks, fill),
+    ),
     button?.url && button.label ? `${button.label}: ${button.url}` : "",
     cards?.length
       ? cards
-          .map((c) => [c.title, c.meta, c.url].filter(Boolean).join("\n"))
+          .map(card)
           .join("\n\n")
       : "",
     unsubscribe ? `${unsubscribe.label}: ${unsubscribe.url}` : "",

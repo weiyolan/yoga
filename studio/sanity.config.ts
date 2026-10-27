@@ -17,6 +17,7 @@ import { sendNewsletterAction } from "./actions/newsletter";
 import { newBadge } from "./actions/badges";
 import { I18nTabsField, I18nTabsInput, I18nTabsItem } from "./components/I18nTabs";
 import { MAIL_TYPES, mailPreviewInspector } from "./components/MailPreview";
+import { StudioLogo } from "./components/StudioLogo";
 import { receiptTemplates } from "./schemaTypes/singletons/receipt-mail";
 
 
@@ -27,6 +28,7 @@ const singletonActions = new Set(["publish", "discardChanges", "restore"]);
 export default defineConfig({
   name: "default",
   title: "Yoga, Zen & Tonic",
+  icon: StudioLogo,
   projectId: process.env.SANITY_STUDIO_PROJECT_ID || "1pbhk0to",
   dataset: process.env.SANITY_STUDIO_DATASET || "production",
 

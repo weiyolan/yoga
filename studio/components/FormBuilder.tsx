@@ -6,9 +6,9 @@ import { SplitHorizontalIcon } from "@sanity/icons/SplitHorizontal";
 import { StringIcon } from "@sanity/icons/String";
 import { TextIcon } from "@sanity/icons/Text";
 import { ThumbsUpIcon } from "@sanity/icons/ThumbsUp";
-import { Box, Card, Checkbox, Flex, Stack, Text, TextInput } from "@sanity/ui";
+import { Box, Card, Checkbox, Flex, Stack, Switch, Text, TextInput } from "@sanity/ui";
 import type { ComponentType } from "react";
-import { set, unset, useFormValue, type StringInputProps, type TextInputProps } from "sanity";
+import { ObjectInputMember, set, setIfMissing, unset, useFormValue, type FieldMember, type ObjectInputProps, type StringInputProps, type TextInputProps } from "sanity";
 
 /** The question types, with an icon and one line of explanation (Inschrijfformulier → Extra vragen). */
 export const QUESTION_TYPES: { title: string; value: string; icon: ComponentType; hint: string }[] = [
@@ -135,6 +135,47 @@ export function ShowIfInput(props: TextInputProps) {
           />
         </Box>
       )}
+    </Stack>
+  );
+}
+
+/**
+ * An object of on/off options (Standaardvragen, “nog niet inschrijven”) as one compact list of
+ * switches with their explanation next to them, instead of a box per toggle. Unset = the field's
+ * initialValue, as the site reads it. Other fields (e.g. a text) are shown below as usual.
+ */
+export function ToggleListInput(props: ObjectInputProps) {
+  const { members, onChange } = props;
+  const toggles = members.filter((m): m is FieldMember => m.kind === "field" && m.field.schemaType.jsonType === "boolean");
+  const rest = members.filter((m) => !toggles.includes(m as FieldMember));
+  return (
+    <Stack gap={4}>
+      <Card border radius={2} overflow="hidden">
+        {toggles.map((m, i) => {
+          const type = m.field.schemaType;
+          const on = (m.field.value ?? type.initialValue) === true;
+          return (
+            <Card key={m.key} as="label" padding={3} borderTop={i > 0} tone={on ? "positive" : "default"} style={{ cursor: "pointer", display: "block" }}>
+              <Flex gap={3} align="center">
+                <Switch checked={on} readOnly={m.field.readOnly} onChange={() => onChange([setIfMissing({}), set(!on, [m.name])])} />
+                <Stack gap={2} flex={1}>
+                  <Text size={1} weight="medium">
+                    {type.title}
+                  </Text>
+                  {type.description ? (
+                    <Text size={1} muted>
+                      {type.description as string}
+                    </Text>
+                  ) : null}
+                </Stack>
+              </Flex>
+            </Card>
+          );
+        })}
+      </Card>
+      {rest.map((m) => (
+        <ObjectInputMember key={m.key} member={m} renderAnnotation={props.renderAnnotation} renderBlock={props.renderBlock} renderInlineBlock={props.renderInlineBlock} renderField={props.renderField} renderInput={props.renderInput} renderItem={props.renderItem} renderPreview={props.renderPreview} />
+      ))}
     </Stack>
   );
 }

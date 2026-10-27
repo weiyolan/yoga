@@ -538,6 +538,30 @@ export type Newsletter = {
   image?: MediaItemReference;
   heading?: InternationalizedArrayString;
   body?: InternationalizedArraySimpleBlockContent;
+  blocks?: Array<
+    | RetreatReference
+    | YogaClassReference
+    | {
+        photo?: MediaItemReference;
+        title?: InternationalizedArrayString;
+        text?: InternationalizedArrayText;
+        url?: string;
+        more?: InternationalizedArrayString;
+        _type: "newsletterCard";
+        _key: string;
+      }
+    | {
+        label?: InternationalizedArrayString;
+        url?: string;
+        _type: "newsletterButton";
+        _key: string;
+      }
+    | {
+        body?: InternationalizedArraySimpleBlockContent;
+        _type: "newsletterText";
+        _key: string;
+      }
+  >;
   retreats?: Array<
     {
       _key: string;

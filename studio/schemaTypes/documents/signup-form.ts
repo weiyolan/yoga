@@ -2,7 +2,7 @@ import { ClipboardIcon } from "@sanity/icons/Clipboard";
 import { defineArrayMember, defineField, defineType } from "sanity";
 import { defaultFields } from "../shared/default";
 import { i18nLines, i18nString, i18nText, pick } from "../shared/i18n";
-import { QUESTION_TYPES, questionType, QuestionTypeInput, ShowIfInput } from "../../components/FormBuilder";
+import { QUESTION_TYPES, questionType, QuestionTypeInput, ShowIfInput, ToggleListInput } from "../../components/FormBuilder";
 
 export { QUESTION_TYPES } from "../../components/FormBuilder";
 
@@ -28,7 +28,7 @@ export const signupForm = defineType({
       title: "Ook “nog niet inschrijven” aanbieden",
       type: "object",
       description: "Bovenaan: “Hoe wil je verdergaan?”. Wie niet inschrijft, vult enkel naam, e-mail en de vraag hieronder in: komt binnen als bericht (Contactformulier) en wordt ingeschreven voor de nieuwsbrief.",
-      options: { columns: 2 },
+      components: { input: ToggleListInput },
       fields: [
         defineField({ name: "info", title: "“Ik twijfel nog: stuur me meer info”", type: "boolean", initialValue: false }),
         defineField({ name: "later", title: "“Ik kan deze keer niet: hou me op de hoogte”", type: "boolean", initialValue: false }),
@@ -40,7 +40,7 @@ export const signupForm = defineType({
       title: "Standaardvragen",
       type: "object",
       description: "Naam en e-mail worden altijd gevraagd. Kamerkeuze en dieet kan je ook als vraag op een eigen plek zetten (met een eigen titel): dan staan ze daar.",
-      options: { columns: 3 },
+      components: { input: ToggleListInput },
       fields: [
         defineField({ name: "phone", title: "GSM", type: "boolean", initialValue: true }),
         defineField({ name: "room", title: "Kamerkeuze", type: "boolean", initialValue: true, description: "Uit de prijzen van de retreat." }),

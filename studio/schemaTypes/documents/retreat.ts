@@ -1,4 +1,15 @@
 import { CalendarIcon } from "@sanity/icons/Calendar";
+import { ClipboardIcon } from "@sanity/icons/Clipboard";
+import { EditIcon } from "@sanity/icons/Edit";
+import { HeartIcon } from "@sanity/icons/Heart";
+import { ImagesIcon } from "@sanity/icons/Images";
+import { InfoOutlineIcon } from "@sanity/icons/InfoOutline";
+import { PinIcon } from "@sanity/icons/Pin";
+import { SearchIcon } from "@sanity/icons/Search";
+import { StarIcon } from "@sanity/icons/Star";
+import { SunIcon } from "@sanity/icons/Sun";
+import { ThListIcon } from "@sanity/icons/ThList";
+import { UsersIcon } from "@sanity/icons/Users";
 import { defineArrayMember, defineField, defineType } from "sanity";
 import { i18nLines, i18nString, i18nText, pick } from "../shared/i18n";
 import { mediaArrayField, mediaField } from "../shared/media";
@@ -14,18 +25,25 @@ export const retreat = defineType({
   title: "Retreat",
   type: "document",
   icon: CalendarIcon,
+  // one tab per part of the page, in page order; it opens on Basis (“Alle velden” = everything at once)
   groups: [
-    { name: "basics", title: "Basis" },
-    { name: "nutshell", title: "Notendop" },
-    { name: "place", title: "De plek" },
-    { name: "people", title: "De mensen" },
-    { name: "programme", title: "Programma" },
-    { name: "practical", title: "Praktisch" },
-    { name: "closing", title: "Afsluiter" },
-    { name: "recap", title: "Achteraf" },
-    { name: "seo", title: "SEO" },
+    { name: "basics", title: "Basis", icon: InfoOutlineIcon, default: true },
+    { name: "photos", title: "Beelden", icon: ImagesIcon },
+    { name: "nutshell", title: "Notendop", icon: SunIcon },
+    { name: "place", title: "De plek", icon: PinIcon },
+    { name: "people", title: "De mensen", icon: UsersIcon },
+    { name: "programme", title: "Programma", icon: ThListIcon },
+    { name: "practical", title: "Praktisch", icon: ClipboardIcon },
+    { name: "signup", title: "Inschrijven", icon: EditIcon },
+    { name: "closing", title: "Afsluiter", icon: HeartIcon },
+    { name: "recap", title: "Achteraf", icon: StarIcon },
+    { name: "seo", title: "SEO", icon: SearchIcon },
   ],
-  fieldsets: [{ name: "dates", title: "Wanneer", options: { columns: 2 } }],
+  fieldsets: [
+    { name: "dates", title: "Wanneer", options: { columns: 2 } },
+    { name: "where", title: "Waar" },
+    { name: "seats", title: "Plaatsen & prijs", options: { columns: 3 } },
+  ],
   fields: [
     /* ---- basis ---- */
     i18nString("title", {
@@ -72,15 +90,17 @@ export const retreat = defineType({
     i18nString("place", {
       title: "Plaats",
       group: "basics",
+      fieldset: "where",
       required: true,
       description: "bv. “Dahab”.",
     }),
-    i18nString("country", { title: "Land", group: "basics", required: true }),
+    i18nString("country", { title: "Land", group: "basics", fieldset: "where", required: true }),
     defineField({
       name: "venue",
       title: "Verblijf",
       type: "string",
       group: "basics",
+      fieldset: "where",
       description: "bv. “Nour Boutique Hotel”.",
     }),
     defineField({
@@ -88,6 +108,7 @@ export const retreat = defineType({
       title: "Max. deelnemers",
       type: "number",
       group: "basics",
+      fieldset: "seats",
       validation: (rule) => rule.integer().min(1),
     }),
     defineField({
@@ -95,22 +116,24 @@ export const retreat = defineType({
       title: "Geboekt (automatisch)",
       type: "number",
       group: "basics",
+      fieldset: "seats",
       readOnly: true,
       description:
-        "Aantal bevestigde inschrijvingen (1 inschrijving = 1 persoon). Wordt automatisch bijgewerkt als je in Inschrijvingen een status wijzigt. De site toont “nog x plaatsen” / “volzet” (dan: wachtlijst).",
+        "Bevestigde inschrijvingen; telt vanzelf mee als je in Inschrijvingen een status wijzigt. Bij max. bereikt: “volzet” + wachtlijst.",
     }),
     defineField({
       name: "priceFrom",
       title: "Prijs vanaf (€)",
       type: "number",
       group: "basics",
+      fieldset: "seats",
       validation: (rule) => rule.min(0),
     }),
     defineField({
       name: "signupUrl",
       title: "Inschrijflink",
       type: "url",
-      group: "basics",
+      group: "signup",
       description:
         "Optioneel: externe inschrijflink (bv. een partner). Leeg = het inschrijfformulier op de site.",
       validation: (rule) => rule.uri({ scheme: ["https"] }),
@@ -120,7 +143,7 @@ export const retreat = defineType({
       title: "Inschrijfformulier",
       type: "reference",
       to: [{ type: "signupForm" }],
-      group: "basics",
+      group: "signup",
       description:
         "Welke vragen het formulier stelt (bv. “Yoga & Freediving”). Leeg = het standaardformulier.",
     }),
@@ -129,7 +152,7 @@ export const retreat = defineType({
       title: "Bevestigingsmail",
       type: "reference",
       to: [{ type: "confirmationMail" }],
-      group: "basics",
+      group: "signup",
       description:
         "Welke mail de deelnemer krijgt na het inschrijven. Leeg = de standaardmail.",
     }),
@@ -143,12 +166,12 @@ export const retreat = defineType({
       name: "hero",
       title: "Openingsbeeld",
       type: "hero",
-      group: "basics",
+      group: "photos",
       validation: (rule) => rule.required(),
     }),
     mediaArrayField("moodPhotos", {
       title: "Sfeerfoto's",
-      group: "basics",
+      group: "photos",
       max: 4,
       description: "3–4 foto's direct onder de opening.",
     }),
