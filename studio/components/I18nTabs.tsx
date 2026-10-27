@@ -20,7 +20,8 @@ import { Help, InlineField, isShort, useInlineFields } from "./InlineFields";
 type Item = { _key: string; _type: string; language?: string; value?: unknown };
 type Node = { validation?: { level: string }[]; members?: { kind: string; field?: Node; item?: Node }[] };
 
-type Active = { active: string; setActive: (lang: string) => void };
+// side: the ✨ button when the field is one row (it goes right of the input, the title column is too narrow)
+type Active = { active: string; setActive: (lang: string) => void; side?: ReactNode };
 const ActiveLanguage = createContext<Active | null>(null);
 const isArray = (name: string) => name.startsWith("internationalizedArray") && !name.endsWith("Value");
 const isItem = (name: string) => name.startsWith("internationalizedArray") && name.endsWith("Value");
@@ -52,7 +53,14 @@ export function I18nTabsInput(props: InputProps) {
     );
   const ctx = useContext(ActiveLanguage);
   if (!ctx || !isArray(props.schemaType.name)) return props.renderDefault(props);
-  return <TabsInput {...(props as ArrayOfObjectsInputProps)} active={ctx.active} />;
+  const input = <TabsInput {...(props as ArrayOfObjectsInputProps)} active={ctx.active} />;
+  if (!ctx.side) return input;
+  return (
+    <Flex align="flex-start" gap={1}>
+      <Box flex={1}>{input}</Box>
+      <Box paddingTop={2}>{ctx.side}</Box>
+    </Flex>
+  );
 }
 
 /** form.components.item: hides the items of the other languages. */
@@ -133,16 +141,7 @@ function TabsField({ inline, compact, ...props }: FieldProps & { inline?: boolea
     );
   };
 
-  const title = (
-    <Flex as="span" align="center" gap={2} wrap="wrap" style={{ display: "inline-flex" }}>
-      <span>{props.title}</span>
-      {compact && props.description ? <Help text={props.description} /> : null}
-      <Card as="span" radius={2} padding={0} tone="transparent" border style={{ display: "inline-flex" }}>
-        <Flex as="span" role="tablist" gap={0}>
-          {languages.map((l) => tab(l.id))}
-        </Flex>
-      </Card>
-      {canTranslate ? (
+  const ai = canTranslate ? (
         <Button
           as="span"
           mode="bleed"
@@ -157,12 +156,23 @@ function TabsField({ inline, compact, ...props }: FieldProps & { inline?: boolea
           style={busy || readOnly ? { opacity: 0.5, pointerEvents: "none" } : undefined}
           onClick={click(() => void translate())}
         />
-      ) : null}
+  ) : null;
+
+  const title = (
+    <Flex as="span" align="center" gap={2} wrap="wrap" style={{ display: "inline-flex" }}>
+      <span>{props.title}</span>
+      {compact && props.description ? <Help text={props.description} /> : null}
+      <Card as="span" radius={2} padding={0} tone="transparent" border style={{ display: "inline-flex" }}>
+        <Flex as="span" role="tablist" gap={0}>
+          {languages.map((l) => tab(l.id))}
+        </Flex>
+      </Card>
+      {inline ? null : ai}
     </Flex>
   );
 
   return (
-    <ActiveLanguage.Provider value={{ active, setActive }}>
+    <ActiveLanguage.Provider value={{ active, setActive, side: inline ? ai : null }}>
       <style>{CSS}</style>
       {inline ? <InlineField props={props} title={title} /> : props.renderDefault({ ...props, title: title as unknown as string, ...(compact ? { description: undefined } : {}) })}
     </ActiveLanguage.Provider>
