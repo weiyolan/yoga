@@ -79,7 +79,8 @@ function filled(c: Check, d: Record<string, unknown>) {
 const missingEn = (c: Check, d: Record<string, unknown>) => !!c.translate && lang(c.get(d), "nl") && !lang(c.get(d), "en");
 
 const KEY = "retreat-overview-open";
-const EMBER = "#D4552B";
+// in progress = blue, done = green (no red: nothing is wrong, just not filled in yet)
+const BLUE = "#2276fc";
 const GREEN = "#3ab667";
 
 type Status = Section & { done: Check[]; noEn: Check[] };
@@ -93,7 +94,7 @@ function Help({ s }: { s: Status }) {
     <Flex gap={2} align="flex-start">
       <Text size={1}>
         {(() => {
-          const style = { color: full || (s.optional && !empty) ? GREEN : empty ? "var(--card-muted-fg-color)" : EMBER };
+          const style = { color: full || (s.optional && !empty) ? GREEN : empty ? "var(--card-muted-fg-color)" : BLUE };
           return full || (s.optional && !empty) ? <CheckmarkCircleIcon style={style} /> : <CircleIcon style={style} />;
         })()}
       </Text>
@@ -110,7 +111,7 @@ function Help({ s }: { s: Status }) {
         </Text>
         {!s.optional && missing.length && !empty ? (
           <Text size={0}>
-            <span style={{ color: EMBER }}>Nog leeg: {missing.join(", ")}</span>
+            <span style={{ color: BLUE }}>Nog leeg: {missing.join(", ")}</span>
           </Text>
         ) : null}
       </Stack>
@@ -154,7 +155,7 @@ export function RetreatOverviewInput(props: ObjectInputProps) {
                   {noEn ? ` · ${noEn} tekst${noEn > 1 ? "en" : ""} zonder EN` : ""}
                 </Text>
                 <div style={{ height: 6, borderRadius: 3, background: "var(--card-border-color)", overflow: "hidden" }}>
-                  <div style={{ width: `${pct}%`, height: "100%", background: pct === 100 ? GREEN : EMBER, transition: "width .3s" }} />
+                  <div style={{ width: `${pct}%`, height: "100%", background: pct === 100 ? GREEN : BLUE, transition: "width .3s" }} />
                 </div>
               </Stack>
             </Box>
@@ -175,7 +176,7 @@ export function RetreatOverviewInput(props: ObjectInputProps) {
                     radius={2}
                     padding={2}
                     onClick={() => props.onFieldGroupSelect(s.group)}
-                    style={{ textAlign: "left", cursor: "pointer", width: "100%", border: `1px solid ${active === s.group ? "#D4552B" : "transparent"}` }}
+                    style={{ textAlign: "left", cursor: "pointer", width: "100%", border: `1px solid ${active === s.group ? BLUE : "transparent"}` }}
                   >
                     <Help s={s} />
                   </Card>
