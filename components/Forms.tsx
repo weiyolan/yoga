@@ -61,7 +61,7 @@ function useNotify(state: FormState) {
   }, [state.notify]);
 }
 
-/** Editable texts from Studio (Pagina's → Inschrijvingspagina, Contact, Menu & footer) (empty = the dictionary default). */
+/** Editable texts from Studio (Formulieren → Inschrijving, Contact, Menu & footer) (empty = the dictionary default). */
 type Texts = { thanks?: string | null; consent?: string | null };
 
 export function NewsletterForm({

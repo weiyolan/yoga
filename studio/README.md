@@ -19,7 +19,7 @@ sanity/                  shared with the Next.js app
 | Veelgestelde vragen | `faqPage` (singleton) | `/faq`: title, intro, groups of question + answer (fold-out, FAQPage data for Google). Linked from the footer, Contact and the mobile menu. |
 | Algemeen | `settings` (singleton, first of the pages) | site name, slogan, default SEO |
 | Menu & footer | `navigation` (singleton) | the short texts in the header dropdowns, newsletter title + thanks |
-| Pagina's → Inschrijvingspagina | `signupSettings` (singleton) | akkoord/bedankt texts of the sign-up form |
+| Formulieren → Inschrijving: teksten | `signupSettings` (singleton) | akkoord/bedankt texts of the sign-up form |
 | Mails → Opties | `mailSettings` (singleton) | "Bevestigingsmail automatisch versturen", "Meldingen naar", "Nieuwsbrief: bevestigingsmail versturen" |
 | Mails → Nieuwsbrief bevestiging | `newsletterMail` (singleton) | subject + text of the mail after a newsletter sign-up (+ unsubscribe link); preview side panel |
 | Contact → Nieuwsbrieven | `newsletter` | a newsletter to the contact book: subject, header photo, title, rich text, retreat cards, optional button; "Naar wie" (subscribers / retreat participants / everyone). Preview + test mail on the right; publish, then "Nieuwsbrief versturen…" (count, confirm, once). Each person gets it in their language with their own unsubscribe link (also as List-Unsubscribe header) |

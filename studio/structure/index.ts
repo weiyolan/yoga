@@ -233,10 +233,25 @@ export const structure: StructureResolver = (S) =>
                 : S.document().schemaType("retreat").documentId(id),
             ),
         ),
-      S.documentTypeListItem("signupForm")
+      S.listItem()
         .id("forms")
-        .title("Inschrijfformulieren")
-        .icon(ClipboardIcon),
+        .title("Formulieren")
+        .icon(ClipboardIcon)
+        .child(
+          S.list()
+            .title("Formulieren")
+            .items([
+              singleton(
+                S,
+                "signupSettings",
+                "Inschrijving: teksten",
+                ControlsIcon,
+              ),
+              S.documentTypeListItem("signupForm")
+                .title("Inschrijfformulieren")
+                .icon(ClipboardIcon),
+            ]),
+        ),
       S.listItem()
         .id("mails")
         .title("Mails")
@@ -335,7 +350,6 @@ export const structure: StructureResolver = (S) =>
       singleton(S, "galleryPage", "Gallery", ImagesIcon),
       singleton(S, "faqPage", "FAQ", HelpCircleIcon),
       singleton(S, "contactPage", "Contact", EnvelopeIcon),
-      singleton(S, "signupSettings", "Inschrijvingspagina", ControlsIcon),
       singleton(S, "navigation", "Menu & footer", MenuIcon),
 
       /* ---- 4. legal ---- */

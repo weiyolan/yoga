@@ -4,7 +4,7 @@ import { i18nString } from "../shared/i18n";
 
 /**
  * Algemeen: what holds for the whole site. Contact & social → Contact page; menu and footer texts →
- * Menu & footer (`navigation`); sign-up texts → Pagina's → Inschrijvingspagina (`signupSettings`); mail
+ * Menu & footer (`navigation`); sign-up texts → Formulieren → Inschrijving (`signupSettings`); mail
  * settings → Mails → Opties (`mailSettings`). Fixed `_id` "settings" (kept from when this was “Instellingen”).
  */
 export const settings = defineType({
