@@ -2,17 +2,9 @@ import { ClipboardIcon } from "@sanity/icons/Clipboard";
 import { defineArrayMember, defineField, defineType } from "sanity";
 import { defaultFields } from "../shared/default";
 import { i18nLines, i18nString, i18nText, pick } from "../shared/i18n";
+import { QUESTION_TYPES, questionType, QuestionTypeInput, ShowIfInput } from "../../components/FormBuilder";
 
-export const QUESTION_TYPES = [
-  { title: "Korte tekst", value: "text" },
-  { title: "Lange tekst", value: "textarea" },
-  { title: "Ja / nee", value: "yesno" },
-  { title: "Keuze (één)", value: "choice" },
-  { title: "Meerdere keuzes", value: "multi" },
-  { title: "Nieuwe stap (titel)", value: "section" },
-  { title: "Kamerkeuze (uit de prijzen)", value: "room" },
-  { title: "Dieet / allergieën", value: "diet" },
-];
+export { QUESTION_TYPES } from "../../components/FormBuilder";
 
 type Q = { type?: string } | undefined;
 
@@ -66,7 +58,15 @@ export const signupForm = defineType({
           title: "Vraag",
           type: "object",
           fields: [
-            defineField({ name: "type", title: "Soort", type: "string", options: { list: QUESTION_TYPES, layout: "radio", direction: "horizontal" }, initialValue: "text", validation: (rule) => rule.required() }),
+            defineField({
+              name: "type",
+              title: "Soort",
+              type: "string",
+              options: { list: QUESTION_TYPES.map(({ title, value }) => ({ title, value })) },
+              components: { input: QuestionTypeInput },
+              initialValue: "text",
+              validation: (rule) => rule.required(),
+            }),
             i18nString("label", { title: "Vraag (of titel)", required: true, max: 120 }),
             i18nString("help", { title: "Uitleg (optioneel)", max: 300, description: "Kleine tekst onder de vraag (of de titel van de stap)." }),
             i18nLines("options", { title: "Keuzes", hidden: ({ parent }) => !["choice", "multi"].includes((parent as Q)?.type ?? "") }),
@@ -74,19 +74,29 @@ export const signupForm = defineType({
             defineField({ name: "required", title: "Verplicht", type: "boolean", initialValue: false, hidden: ({ parent }) => (parent as Q)?.type === "section" }),
             defineField({
               name: "showIf",
-              title: "Enkel tonen als de vraag ervoor … is",
+              title: "Enkel tonen als de vraag hierboven … is",
               type: "text",
               rows: 2,
-              description: "Optioneel. Eén antwoord per lijn, zoals in de vorige vraag (Nederlands), bv. “Ja” of “Ja, graag” en “Misschien”. Leeg = altijd tonen.",
+              description: "Optioneel: vink de antwoorden aan waarbij deze vraag verschijnt (bv. kamerpartner enkel bij “gedeelde kamer”). Niets aangevinkt = altijd tonen.",
+              components: { input: ShowIfInput },
               hidden: ({ parent }) => (parent as Q)?.type === "section",
             }),
           ],
+          // the list reads like the form: steps as headings, conditional questions indented (↳), an icon per type
           preview: {
-            select: { label: "label", type: "type", required: "required", showIf: "showIf" },
-            prepare: ({ label, type, required, showIf }) => ({
-              title: type === "section" ? `— ${pick(label) ?? "Stap"} —` : (pick(label) ?? "Vraag"),
-              subtitle: [QUESTION_TYPES.find((q) => q.value === type)?.title, required ? "verplicht" : null, showIf ? `enkel als: ${String(showIf).split("\n").join(" / ")}` : null].filter(Boolean).join(" · "),
-            }),
+            select: { label: "label", type: "type", required: "required", showIf: "showIf", options: "options" },
+            prepare: ({ label, type, required, showIf, options }) => {
+              const t = questionType(type);
+              const n = (pick(options) ?? "").split("\n").filter((o: string) => o.trim()).length;
+              return {
+                title: type === "section" ? `STAP · ${(pick(label) ?? "Nieuwe stap").toUpperCase()}` : `${showIf ? "↳ " : ""}${pick(label) ?? "Nieuwe vraag"}${required ? " *" : ""}`,
+                subtitle:
+                  type === "section"
+                    ? "Nieuwe pagina in het formulier"
+                    : [t?.title, n ? `${n} keuzes` : null, showIf ? `enkel als: ${String(showIf).split("\n").join(" / ")}` : null].filter(Boolean).join(" · "),
+                media: t?.icon,
+              };
+            },
           },
         }),
       ],
