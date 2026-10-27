@@ -62,10 +62,10 @@ const HEAD = `${ROW} > [data-ui="Flex"]:first-child`;
 const CSS = `
 /* the form puts 32px between fields: rows sit closer together */
 .inline-field { container-type: inline-size; margin-block: -10px; }
-${ROW} { display: grid !important; grid-template-columns: minmax(80px, 26%) minmax(0, 1fr) auto; column-gap: 8px; row-gap: 4px; align-items: start; }
+${ROW} { display: grid !important; grid-template-columns: minmax(80px, 26%) minmax(0, 1fr) auto; column-gap: 8px; row-gap: 4px; align-items: center; }
 ${HEAD} { display: contents !important; }
-${HEAD} > [data-ui="fieldHeaderContentBox"] { grid-column: 1; grid-row: 1; padding-top: 6px; }
-${HEAD} > :not([data-ui="fieldHeaderContentBox"]) { grid-column: 3; grid-row: 1; padding-top: 4px; position: static !important; inset: auto !important; }
+${HEAD} > [data-ui="fieldHeaderContentBox"] { grid-column: 1; grid-row: 1; }
+${HEAD} > :not([data-ui="fieldHeaderContentBox"]) { grid-column: 3; grid-row: 1; position: static !important; inset: auto !important; }
 ${ROW} > :not(:first-child) { grid-column: 2; }
 ${ROW} > :nth-child(2) { grid-row: 1; }
 @container (max-width: 300px) {
@@ -90,7 +90,6 @@ export function Help({ text }: { text: ReactNode }) {
     document.addEventListener("pointerdown", close);
     return () => document.removeEventListener("pointerdown", close);
   }, [pinned]);
-  // the gap before the ? is padding: Sanity's title text resets margins
   return (
     <>
       <Popover
@@ -130,7 +129,7 @@ export function Help({ text }: { text: ReactNode }) {
             fontSize: 15,
             lineHeight: 0,
             color: "var(--card-muted-fg-color)",
-            padding: "1px 1px 1px 5px",
+            padding: "1px 1px 1px 2px",
           }}
         >
           <HelpCircleIcon

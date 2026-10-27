@@ -56,9 +56,9 @@ export function I18nTabsInput(props: InputProps) {
   const input = <TabsInput {...(props as ArrayOfObjectsInputProps)} active={ctx.active} />;
   if (!ctx.side) return input;
   return (
-    <Flex align="flex-start" gap={1}>
+    <Flex align="center" gap={1}>
       <Box flex={1}>{input}</Box>
-      <Box paddingTop={2} style={{ flex: "none" }}>
+      <Box style={{ flex: "none" }}>
         {ctx.side}
       </Box>
     </Flex>
