@@ -7,7 +7,8 @@ import { createContext, useContext, useEffect, useRef, useState, type ReactNode 
 import type { FieldProps, SchemaType } from "sanity";
 
 /**
- * Compact documents (a retreat): short fields as one row, title + a ? with the help on the left, the input on
+ * Every field: its help text behind a small ? after the title (Help, via I18nTabsField).
+ * Compact documents (a retreat): short fields as one row, title + ? on the left, the input on
  * the right; long texts, lists and groups stay full width. On by a provider around the document's
  * form (RetreatOverviewInput); I18nTabsField (form.components.field) does the layout, also for the NL | EN strings.
  * Also on a phone; only a very narrow column (< 300px) puts the title on top again.

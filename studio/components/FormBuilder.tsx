@@ -8,6 +8,7 @@ import { TextIcon } from "@sanity/icons/Text";
 import { ThumbsUpIcon } from "@sanity/icons/ThumbsUp";
 import { Box, Card, Checkbox, Flex, Stack, Switch, Text, TextInput } from "@sanity/ui";
 import type { ComponentType } from "react";
+import { Help } from "./InlineFields";
 import { ObjectInputMember, set, setIfMissing, unset, useFormValue, type FieldMember, type ObjectInputProps, type StringInputProps, type TextInputProps } from "sanity";
 
 /** The question types, with an icon and one line of explanation (Inschrijfformulier → Extra vragen). */
@@ -161,12 +162,8 @@ export function ToggleListInput(props: ObjectInputProps) {
                 <Stack gap={2} flex={1}>
                   <Text size={1} weight="medium">
                     {type.title}
+                    {type.description ? <Help text={type.description as string} /> : null}
                   </Text>
-                  {type.description ? (
-                    <Text size={1} muted>
-                      {type.description as string}
-                    </Text>
-                  ) : null}
                 </Stack>
               </Flex>
             </Card>

@@ -29,9 +29,10 @@ const issues = (n?: Node): string[] => [...(n?.validation ?? []).map((v) => v.le
 
 /** form.components.field: the tabs, small, right after the field title; holds the active language. */
 export function I18nTabsField(props: FieldProps) {
-  // compact documents (a retreat): short fields as one row, every help text behind a ? (components/InlineFields.tsx)
-  const compact = useInlineFields();
-  const inline = compact && isShort(props);
+  // every help text behind a small ? after the title (components/InlineFields.tsx);
+  // compact documents (a retreat) also put short fields on one row
+  const compact = true;
+  const inline = useInlineFields() && isShort(props);
   if (!isArray(props.schemaType.name)) {
     if (inline) return <InlineField props={props} />;
     if (compact && props.description && props.name !== "value")
