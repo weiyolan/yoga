@@ -62,7 +62,7 @@ export const SignupView: UserViewComponent = ({ document }) => {
   useEffect(() => {
     if (!doc.retreat?._ref) return;
     client
-      .fetch<RetreatInfo>(`*[_id == $id][0]{ _id, "title": coalesce(title[language == "nl"][0].value, title[0].value), startDate, endDate, capacity, booked }`, { id: doc.retreat._ref })
+      .fetch<RetreatInfo>(`*[_id == $id][0]{ _id, "title": coalesce(title[language == "nl"][0].value, title[0].value), startDate, endDate, capacity, "booked": coalesce(booked, 0) + coalesce(bookedExtra, 0) }`, { id: doc.retreat._ref })
       .then(setRetreat, () => {});
   }, [client, doc.retreat?._ref, doc.status]);
 

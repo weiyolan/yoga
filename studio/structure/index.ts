@@ -226,6 +226,7 @@ export const structure: StructureResolver = (S) =>
           S.component(RetreatList)
             .id("retreats")
             .title("Retreats")
+            .maxWidth(400)
             .child((id) =>
               id === RETREATS_PAGE_ID
                 ? S.document()

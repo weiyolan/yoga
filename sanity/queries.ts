@@ -28,8 +28,10 @@ const SEO = `{ "title": ${t("title")}, "description": ${t("description")}, "shar
 /** Same rule as the Studio structure; in components use `isUpcoming()` from ./fetch. */
 const UPCOMING = `dateTime(endDate + "T23:59:59Z") >= dateTime(now())` as const;
 
-/** Every place taken (confirmed sign-ups fill `booked`). */
-const FULL = `coalesce(capacity > 0 && coalesce(booked, 0) >= capacity, false)` as const;
+/** Places taken: confirmed sign-ups (`booked`, kept up to date by the Studio) + the manual correction (`bookedExtra`). */
+const BOOKED = `(coalesce(booked, 0) + coalesce(bookedExtra, 0))` as const;
+/** Every place taken. */
+const FULL = `coalesce(capacity > 0 && ${BOOKED} >= capacity, false)` as const;
 
 const RETREAT_CARD_FIELDS = `
   _id,
@@ -40,7 +42,7 @@ const RETREAT_CARD_FIELDS = `
   "place": ${t("place")},
   "country": ${t("country")},
   capacity,
-  booked,
+  "booked": ${BOOKED},
   priceFrom,
   participantCount,
   // one photo per retreat: the opening photo (the old separate card photo only as fallback)
@@ -229,7 +231,7 @@ export const SIGNUP_RETREAT_QUERY = defineQuery(`*[_type == "retreat" && _id == 
   startDate,
   endDate,
   capacity,
-  booked,
+  "booked": ${BOOKED},
   deposit,
   "photo": coalesce(hero.photo, cardPhoto)->image.asset->url,
   "form": ${RETREAT_FORM},
@@ -397,7 +399,7 @@ export const OG_QUERY = defineQuery(`{
     "country": ${t("country")},
     priceFrom,
     capacity,
-    booked,
+    "booked": ${BOOKED},
     "share": seo.shareImage->${MEDIA},
     "photo": coalesce(hero.photo, cardPhoto)->${MEDIA}
   },

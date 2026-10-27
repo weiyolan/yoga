@@ -38,7 +38,7 @@ export const resolve: PresentationPluginOptions["resolve"] = {
   ]),
   locations: {
     retreat: defineLocations({
-      select: { title: "title", slug: "slug.current" },
+      select: { slug: "slug.current" },
       resolve: (doc) =>
         doc?.slug
           ? {

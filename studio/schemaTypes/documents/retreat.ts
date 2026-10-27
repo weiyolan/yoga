@@ -42,7 +42,7 @@ export const retreat = defineType({
   fieldsets: [
     { name: "dates", title: "Wanneer", options: { columns: 2 } },
     { name: "where", title: "Waar" },
-    { name: "seats", title: "Plaatsen & prijs", options: { columns: 3 } },
+    { name: "seats", title: "Plaatsen & prijs", options: { columns: 2 } },
   ],
   fields: [
     /* ---- basis ---- */
@@ -120,6 +120,16 @@ export const retreat = defineType({
       readOnly: true,
       description:
         "Bevestigde inschrijvingen; telt vanzelf mee als je in Inschrijvingen een status wijzigt. Bij max. bereikt: “volzet” + wachtlijst.",
+    }),
+    defineField({
+      name: "bookedExtra",
+      title: "Extra bezet (manueel)",
+      type: "number",
+      group: "basics",
+      fieldset: "seats",
+      description:
+        "Plaatsen die buiten de site vastliggen (bv. 2 via telefoon): tellen bij Geboekt. Negatief geeft plaatsen vrij. Max. deelnemers blijft hetzelfde.",
+      validation: (rule) => rule.integer(),
     }),
     defineField({
       name: "priceFrom",

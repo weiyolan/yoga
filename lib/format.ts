@@ -29,7 +29,7 @@ export const join = (...xs: (string | null | undefined | false)[]) => xs.filter(
 export const htmlLang = (lang: Lang) => locale[lang];
 
 /** Free places on a retreat (`capacity - booked`), or null when there's no capacity set. */
-export const spotsLeft = (r: { capacity?: number | null; booked?: number | null }) => (r.capacity ? Math.max(r.capacity - (r.booked ?? 0), 0) : null);
+export const spotsLeft = (r: { capacity?: number | null; booked?: number | null }) => (r.capacity ? Math.min(Math.max(r.capacity - (r.booked ?? 0), 0), r.capacity) : null);
 
 /** Always "nog 10 plaatsen" / "nog 1 plaats" / "volzet" (never "max." or "0 van 10"); null without a capacity. */
 export function placesLabel(lang: Lang, r: { capacity?: number | null; booked?: number | null }) {

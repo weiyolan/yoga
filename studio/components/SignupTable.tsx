@@ -29,7 +29,7 @@ type Retreat = { _id: string; title?: string; startDate?: string; capacity?: num
 const NL = `coalesce(title[language == "nl"][0].value, title[0].value)`;
 const QUERY = `{
   "signups": *[_type == "signup"] | order(submittedAt desc) { _id, status, submittedAt, name, email, phone, persons, room, answers, diet, message, lang, notes, "retreatId": retreat._ref, "retreat": retreat->{ "t": ${NL} }.t },
-  "retreats": *[_type == "retreat" && !(_id in path("drafts.**"))] | order(startDate desc) { _id, "title": ${NL}, startDate, capacity, booked }
+  "retreats": *[_type == "retreat" && !(_id in path("drafts.**"))] | order(startDate desc) { _id, "title": ${NL}, startDate, capacity, "booked": coalesce(booked, 0) + coalesce(bookedExtra, 0) }
 }`;
 
 type Col = { id: string; title: string; width?: number; get: (r: Row) => string };
