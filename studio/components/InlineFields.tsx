@@ -70,7 +70,8 @@ export function Help({ text }: { text: ReactNode }) {
         onMouseEnter={() => setHover(true)}
         onMouseLeave={() => setHover(false)}
         onClick={() => setPinned((p) => !p)}
-        style={{ all: "unset", cursor: "help", display: "inline-flex", fontSize: 17, lineHeight: 0, color: "var(--card-muted-fg-color)", padding: 2 }}
+        // same size everywhere (px, not the title's size), raised like a superscript
+        style={{ all: "unset", cursor: "help", display: "inline-flex", alignSelf: "flex-start", fontSize: 18, lineHeight: 0, color: "var(--card-muted-fg-color)", padding: 1, marginLeft: 1, transform: "translateY(-30%)" }}
       >
         <HelpCircleIcon />
       </button>
