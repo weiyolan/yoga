@@ -25,6 +25,7 @@ import {
   qName,
   questionSteps,
   visibleKeys,
+  formValues,
   type FormQuestion,
 } from "@/lib/signup-form";
 import type { Lang } from "@/sanity/site.config";
@@ -471,8 +472,8 @@ export function SignupForm({
         if (!f.checkValidity()) return void f.reportValidity();
     }
     if (intent === "signup" && to === total - 1) {
-      const data = new FormData(el);
-      const get = (k: string) => String(data.get(k) ?? "");
+      const data = formValues(new FormData(el));
+      const get = (k: string) => data[k] ?? "";
       const rows: [string, string][] = [
         [t.name, get("name")],
         [t.email, get("email")],
@@ -566,6 +567,59 @@ export function SignupForm({
           {help}
         </div>
       );
+    if (q.type === "multi") {
+      const opts = (q.options ?? []).filter(Boolean);
+      const ticked = (vals[name] ?? v[name] ?? "").split(",");
+      // required: at least one ticked (the browser checks the first box while none is)
+      const none = !ticked.some(Boolean);
+      return (
+        <fieldset
+          className="field full choices"
+          aria-describedby={q.help ? `${id}-help` : undefined}
+        >
+          <legend className="select-label">{label}</legend>
+          {help}
+          <div className="row stack">
+            {opts.map((text, i) => (
+              <label key={i} className="check">
+                <input
+                  type="checkbox"
+                  name={name}
+                  value={String(i)}
+                  defaultChecked={ticked.includes(String(i))}
+                  required={!!q.required && none && i === 0}
+                />{" "}
+                {text}
+              </label>
+            ))}
+            {q.other ? (
+              <label className="check other">
+                <input
+                  type="checkbox"
+                  name={name}
+                  value="other"
+                  defaultChecked={ticked.includes("other")}
+                />{" "}
+                {t.other}:
+                <input
+                  name={otherName(q)}
+                  defaultValue={v[otherName(q)]}
+                  placeholder={t.otherPlaceholder}
+                  aria-label={`${q.label}: ${t.other}`}
+                  onFocus={(e) => {
+                    const box =
+                      e.currentTarget.parentElement?.querySelector<HTMLInputElement>(
+                        "input[type=checkbox]",
+                      );
+                    if (box && !box.checked) box.click();
+                  }}
+                />
+              </label>
+            ) : null}
+          </div>
+        </fieldset>
+      );
+    }
     if (q.type === "yesno" || q.type === "choice") {
       const opts =
         q.type === "yesno"
@@ -658,13 +712,7 @@ export function SignupForm({
       action={action}
       ref={formEl}
       onKeyDown={onKeyDown}
-      onChange={(e) =>
-        setVals(
-          Object.fromEntries(
-            [...new FormData(e.currentTarget)].map(([k, x]) => [k, String(x)]),
-          ),
-        )
-      }
+      onChange={(e) => setVals(formValues(new FormData(e.currentTarget)))}
       data-dir={dir}
     >
       <input type="hidden" name="retreat" value={retreatId} />

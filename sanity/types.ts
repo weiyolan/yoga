@@ -670,7 +670,14 @@ export type SignupForm = {
   };
   questions?: Array<{
     type?:
-      "text" | "textarea" | "yesno" | "choice" | "section" | "room" | "diet";
+      | "text"
+      | "textarea"
+      | "yesno"
+      | "choice"
+      | "multi"
+      | "section"
+      | "room"
+      | "diet";
     label?: InternationalizedArrayString;
     help?: InternationalizedArrayString;
     options?: InternationalizedArrayText;
@@ -2757,6 +2764,7 @@ export type SIGNUP_RETREAT_QUERY_RESULT = {
       type:
         | "choice"
         | "diet"
+        | "multi"
         | "room"
         | "section"
         | "text"
@@ -2861,6 +2869,7 @@ export type SIGNUP_PAGE_QUERY_RESULT = {
       type:
         | "choice"
         | "diet"
+        | "multi"
         | "room"
         | "section"
         | "text"

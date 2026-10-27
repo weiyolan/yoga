@@ -15,6 +15,7 @@ import {
 import {
   answerText,
   fieldName,
+  formValues,
   otherName,
   visibleKeys,
   type FormQuestion,
@@ -56,10 +57,9 @@ const keep = (data: FormData, state: FormState): FormState =>
     : {
         ...state,
         values: Object.fromEntries(
-          [...data].filter(
-            ([k, v]) =>
-              typeof v === "string" && k !== "website" && !k.startsWith("$"),
-          ) as [string, string][],
+          Object.entries(formValues(data)).filter(
+            ([k]) => k !== "website" && !k.startsWith("$"),
+          ),
         ),
       };
 
@@ -419,11 +419,19 @@ async function signupInner(data: FormData): Promise<FormState> {
   const t = getDictionary(lang).signup;
   const tNl = getDictionary("nl").signup;
   const all = (retreat.form?.questions ?? []).filter((q) => q.label);
-  const shown = visibleKeys(all, (name) => field(data, name, 2000));
+  const sent = formValues(data);
+  const shown = visibleKeys(all, (name) => (sent[name] ?? "").slice(0, 2000));
   const questions = all.filter(
     (q) => shown.has(q._key) && q.type !== "section",
   );
-  const raw = (q: FormQuestion) => field(data, fieldName(q), 2000);
+  const raw = (q: FormQuestion) =>
+    q.type === "multi"
+      ? data
+          .getAll(fieldName(q))
+          .map(String)
+          .filter((x) => /^(\d+|other)$/.test(x))
+          .join(",")
+      : field(data, fieldName(q), 2000);
   // (a placed room choice isn't enforced: without prices on the retreat there is nothing to pick)
   if (questions.some((q) => q.required && q.type !== "room" && !raw(q)))
     return { status: "invalid" };

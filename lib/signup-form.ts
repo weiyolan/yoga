@@ -25,18 +25,29 @@ export const fieldName = (q: FormQuestion) => (q.type === "room" ? "room" : q.ty
 
 const norm = (s: string) => s.trim().toLowerCase();
 
+/** Form values as one string per field; a field sent more than once (“Meerdere keuzes”) → its values joined with “,” (indexes / “other”). */
+export function formValues(data: FormData) {
+  const out: Record<string, string> = {};
+  for (const [k, v] of data) if (typeof v === "string") out[k] = k in out ? `${out[k]},${v}` : v;
+  return out;
+}
+
+const isChoice = (q: FormQuestion) => q.type === "choice" || q.type === "multi";
+
 /** Does the raw value of `prev` match one of the lines of `showIf` (Dutch option texts, “Ja” / “Nee”, “Andere”)? */
 function matches(prev: FormQuestion, raw: string, showIf: string) {
   const wanted = showIf.split("\n").map(norm).filter(Boolean);
   if (!wanted.length) return true;
   if (!raw) return false;
   if (prev.type === "yesno") return wanted.some((w) => (raw === "yes" ? ["ja", "yes"] : ["nee", "no"]).includes(w));
-  if (prev.type === "choice") {
-    if (raw === "other") return wanted.some((w) => ["andere", "anders", "other"].includes(w));
-    const i = Number(raw);
-    const texts = [(prev.optionsNl ?? []).filter(Boolean)[i], (prev.options ?? []).filter(Boolean)[i]].filter(Boolean).map((x) => norm(x!));
-    return wanted.some((w) => texts.includes(w));
-  }
+  if (isChoice(prev))
+    // multi: shown when any of the ticked options matches
+    return raw.split(",").some((one) => {
+      if (one === "other") return wanted.some((w) => ["andere", "anders", "other"].includes(w));
+      const i = Number(one);
+      const texts = [(prev.optionsNl ?? []).filter(Boolean)[i], (prev.options ?? []).filter(Boolean)[i]].filter(Boolean).map((x) => norm(x!));
+      return wanted.some((w) => texts.includes(w));
+    });
   return wanted.some((w) => norm(raw).startsWith(w));
 }
 
@@ -56,12 +67,13 @@ export function visibleKeys(questions: FormQuestion[], get: (name: string) => st
   return shown;
 }
 
-/** What an answer reads as (choice → the option text in that language, yes/no → Ja / Nee, “Andere” → “Andere: <text>”). */
+/** What an answer reads as (choice → the option text in that language, several → joined with “, ”, yes/no → Ja / Nee, “Andere” → “Andere: <text>”). */
 export function answerText(q: FormQuestion, raw: string, otherText: string, words: { yes: string; no: string; other: string }, options = q.options) {
   if (q.type === "yesno") return raw === "yes" ? words.yes : raw === "no" ? words.no : "";
-  if (q.type === "choice") {
-    if (raw === "other") return otherText ? `${words.other}: ${otherText}` : words.other;
-    return raw && /^\d+$/.test(raw) ? ((options ?? []).filter(Boolean)[Number(raw)] ?? "") : "";
+  if (isChoice(q)) {
+    const one = (r: string) =>
+      r === "other" ? (otherText ? `${words.other}: ${otherText}` : words.other) : /^\d+$/.test(r) ? ((options ?? []).filter(Boolean)[Number(r)] ?? "") : "";
+    return raw.split(",").map(one).filter(Boolean).join(", ");
   }
   return raw;
 }

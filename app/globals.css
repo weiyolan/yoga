@@ -372,7 +372,7 @@ select:focus-visible { outline: none; border-bottom-color: var(--ember); }
 @media (max-width: 700px) { .summary div { grid-template-columns: 1fr; gap: 4px; } }
 .choices { border: 0; padding: 0; margin: 0; } .choices small { display: block; margin: -2px 0 10px; } .field small.muted { display: block; margin-top: 6px; font-size: .82rem; }
 .choices .row.stack { flex-direction: column; align-items: flex-start; gap: 10px; }
-.check.other { flex-wrap: wrap; } .check.other input:not([type=radio]) { flex: 1 1 200px; width: auto; height: auto; min-width: 0; border: 0; border-bottom: 1px solid var(--line); padding: 4px 0; background: transparent; font: inherit; }
+.check.other { flex-wrap: wrap; } .check.other input:not([type=radio]):not([type=checkbox]) { flex: 1 1 200px; width: auto; height: auto; min-width: 0; border: 0; border-bottom: 1px solid var(--line); padding: 4px 0; background: transparent; font: inherit; }
 .stepper .q-wrap { display: contents; } .stepper .q-wrap[hidden] { display: none; }
 .step-help { margin: 0; white-space: pre-line; }
 .form-intro { margin: 0; white-space: pre-line; }
