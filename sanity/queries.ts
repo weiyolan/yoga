@@ -84,6 +84,9 @@ const FORM = `{
 /** Mails → Nieuwsbrief-bevestiging (lib/newsletter.ts). */
 export const NEWSLETTER_MAIL_QUERY = defineQuery(`*[_type == "newsletterMail" && _id == "newsletterMail"][0]{ "subject": ${t("subject")}, "body": ${t("body")} }`);
 
+/** A “we got it” mail (Studio → Mails → Bevestiging bericht / les-aanvraag / review): lib/receipt.ts. `$id` = receiptMail-<kind>. */
+export const RECEIPT_MAIL_QUERY = defineQuery(`*[_type == "receiptMail" && _id == $id][0]{ "subject": ${t("subject")}, "heading": ${t("heading")}, "body": ${t("body")} }`);
+
 /** A confirmation mail (Studio → Mails → Inschrijving bevestiging), in the requested language: lib/confirmation.ts. */
 const MAIL = `{
   "subject": ${t("subject")},
@@ -169,7 +172,8 @@ export const LAYOUT_QUERY = defineQuery(`*[_id == "settings"][0]{
   },
   "notifyEmail": *[_id == "mailSettings"][0].notifyEmail,
   "autoConfirm": *[_id == "mailSettings"][0].autoConfirm == true,
-  "newsletterConfirm": *[_id == "mailSettings"][0].newsletterConfirm != false
+  "newsletterConfirm": *[_id == "mailSettings"][0].newsletterConfirm != false,
+  "receiptConfirm": *[_id == "mailSettings"][0].receiptConfirm != false
 }`);
 
 export const SETTINGS_QUERY = defineQuery(`*[_id == "settings"][0]{

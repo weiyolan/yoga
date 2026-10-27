@@ -22,6 +22,8 @@ import { WarningOutlineIcon } from "@sanity/icons/WarningOutline";
 import type { ComponentType } from "react";
 import type { StructureBuilder, StructureResolver } from "sanity/structure";
 import { MediaBank } from "../components/MediaBank";
+import { RECEIPT_MAILS } from "../schemaTypes/singletons/receipt-mail";
+import { CheckmarkCircleIcon } from "@sanity/icons/CheckmarkCircle";
 import { BulkTranslate } from "../components/BulkTranslate";
 import { ContactBook } from "../components/ContactBook";
 import { Help } from "../components/Help";
@@ -267,6 +269,19 @@ export const structure: StructureResolver = (S) =>
                 "newsletterMail",
                 "Nieuwsbrief bevestiging",
                 BellIcon,
+              ),
+              ...RECEIPT_MAILS.map((m) =>
+                S.listItem()
+                  .id(`receiptMail-${m.kind}`)
+                  .title(m.title)
+                  .icon(CheckmarkCircleIcon)
+                  .child(
+                    S.document()
+                      .schemaType("receiptMail")
+                      .documentId(`receiptMail-${m.kind}`)
+                      .initialValueTemplate(`receiptMail-${m.kind}`)
+                      .title(m.title),
+                  ),
               ),
             ]),
         ),

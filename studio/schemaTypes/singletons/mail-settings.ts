@@ -35,6 +35,13 @@ export const mailSettings = defineType({
       initialValue: true,
       description: "Aan = wie zich inschrijft voor de nieuwsbrief krijgt meteen de mail uit Mails → Nieuwsbrief bevestiging, met een afmeldlink.",
     }),
+    defineField({
+      name: "receiptConfirm",
+      title: "Berichten: bevestigingsmail versturen",
+      type: "boolean",
+      initialValue: true,
+      description: "Aan = wie het contactformulier, een les-aanvraag of een review stuurt, krijgt meteen een korte bevestiging (Mails → Bevestiging bericht / les-aanvraag / review).",
+    }),
   ],
   preview: { prepare: () => ({ title: "Mails: opties" }) },
 });

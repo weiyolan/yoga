@@ -17,6 +17,7 @@ import { sendNewsletterAction } from "./actions/newsletter";
 import { newBadge } from "./actions/badges";
 import { I18nTabsField, I18nTabsInput, I18nTabsItem } from "./components/I18nTabs";
 import { MAIL_TYPES, mailPreviewInspector } from "./components/MailPreview";
+import { receiptTemplates } from "./schemaTypes/singletons/receipt-mail";
 
 
 const singletons = new Set<string>([...SINGLETONS, ...FIXED_TYPES]);
@@ -64,10 +65,12 @@ export default defineConfig({
   schema: {
     types: schemaTypes,
     // singletons and form submissions can't be created from "New document"
-    templates: (prev) => prev.filter((t) => !singletons.has(t.schemaType) && !formTypes.has(t.schemaType) && !CONTACT_TYPES.includes(t.schemaType)),
+    // (the Bevestiging mails open prefilled with today's standard text: receiptTemplates, only used by Studio → Mails)
+    templates: (prev) => [...prev.filter((t) => !singletons.has(t.schemaType) && !formTypes.has(t.schemaType) && !CONTACT_TYPES.includes(t.schemaType)), ...receiptTemplates],
   },
 
   document: {
+    newDocumentOptions: (prev) => prev.filter((o) => !o.templateId.startsWith("receiptMail-")),
     // singletons can't be duplicated or deleted
     // form submissions can't be duplicated (a copy would get a public id)
     // sign-ups: “Bevestigingsmail” first (actions/confirmation-mail.tsx)

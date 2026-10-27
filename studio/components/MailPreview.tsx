@@ -8,6 +8,7 @@ import { confirmationContent, type ConfirmationMail, type ConfirmationRetreat } 
 import { getDictionary } from "../../lib/dictionary";
 import { mailHtml } from "../../lib/mail-template";
 import { newsletterContent } from "../../lib/newsletter";
+import { RECEIPT_KINDS, receiptContent, receiptExample, type ReceiptKind } from "../../lib/receipt";
 import { NEWSLETTER_ISSUE_QUERY, newsletterIssueContent, type NewsletterIssue } from "../../lib/newsletter-issue";
 import { apiVersion, defaultLanguage, languages, type Lang } from "../../sanity/site.config";
 import { mailConfigured, siteApi } from "../lib/ai";
@@ -18,15 +19,21 @@ type Doc = { _id: string; _type: string; isDefault?: boolean; [k: string]: unkno
 type Retreat = ConfirmationRetreat & { _id: string; mailRef?: string; upcoming: boolean };
 
 /** Mail documents with a preview: Bevestigingsmail (per retreat), Nieuwsbrief-bevestiging and Nieuwsbrief. */
-export const MAIL_TYPES = ["confirmationMail", "newsletterMail", "newsletter"];
-const FIELDS = ["subject", "body", "payment", "waitlistSubject", "waitlistBody"] as const;
+export const MAIL_TYPES = ["confirmationMail", "newsletterMail", "newsletter", "receiptMail"];
+const FIELDS = ["subject", "heading", "body", "payment", "waitlistSubject", "waitlistBody"] as const;
 
 /** Side panel next to the form (Sanity document inspector): open by default on wide screens; on a phone via the eye button at the top. */
 export function MailPreviewInspector() {
   const { displayed } = useDocumentPane();
   return (
     <Box padding={3} style={{ overflow: "auto", height: "100%" }}>
-      {displayed?._type === "newsletter" ? <IssuePreview doc={displayed as Doc} /> : <MailPreviewPanel doc={displayed as Doc} />}
+      {displayed?._type === "newsletter" ? (
+        <IssuePreview doc={displayed as Doc} />
+      ) : displayed?._type === "receiptMail" ? (
+        <ReceiptPreview doc={displayed as Doc} />
+      ) : (
+        <MailPreviewPanel doc={displayed as Doc} />
+      )}
     </Box>
   );
 }
@@ -117,6 +124,41 @@ export function MailPreviewPanel({ doc }: { doc: Doc | null | undefined }) {
         disabled={!newsletter && !retreatId}
         send={(to) => siteApi(client, "/api/mail", newsletter ? { task: "test-newsletter", to, lang, mail } : { task: "test", to, lang, waitlist, retreatId, mail })}
       />
+    </Stack>
+  );
+}
+
+/** Bevestiging bericht / les-aanvraag / review: the mail for an example person, as you type; test mail to yourself. */
+function ReceiptPreview({ doc }: { doc: Doc | null | undefined }) {
+  const client = useClient({ apiVersion });
+  const [lang, setLang] = useState<Lang>(defaultLanguage);
+  const kind = (RECEIPT_KINDS.find((k) => doc?._id?.endsWith(`receiptMail-${k}`)) ?? "contact") as ReceiptKind;
+  const mail = useMemo(() => {
+    const val = (f: string) => {
+      const items = doc?.[f] as I18n | undefined;
+      const v = items?.find((i) => i.language === lang)?.value || items?.find((i) => i.language === defaultLanguage)?.value;
+      return typeof v === "string" && v.trim() ? v : null;
+    };
+    return { subject: val("subject"), heading: val("heading"), body: val("body") };
+  }, [doc, lang]);
+  const { vars, rows } = receiptExample(lang, kind);
+  const { subject, content } = receiptContent(lang, kind, mail, vars, rows);
+  return (
+    <Stack gap={3}>
+      <Flex gap={2}>
+        <Select value={lang} onChange={(e) => setLang(e.currentTarget.value as Lang)} fontSize={1} padding={2} style={{ minWidth: 110 }}>
+          {languages.map((l) => (
+            <option key={l.id} value={l.id}>
+              {l.title}
+            </option>
+          ))}
+        </Select>
+      </Flex>
+      <Rendered subject={subject} html={mailHtml(content)} />
+      <Text size={0} muted>
+        Voorbeeld voor “Anna”; onderaan staat wat zij stuurde. Lege velden = de standaardtekst die je hier ziet. Aan/uit: Mails → Opties.
+      </Text>
+      <TestMail send={(to) => siteApi(client, "/api/mail", { task: "test-receipt", to, lang, kind, mail })} />
     </Stack>
   );
 }

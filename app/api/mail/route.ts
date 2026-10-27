@@ -5,6 +5,7 @@
  *        → the Bevestigingsmail as it is in the editor (also unpublished changes), with example
  *          answers, to `to` (the editor's own address). Subject starts with “[Test]”.
  *   POST { task: "test-newsletter", to, lang, mail } → the Nieuwsbrief-bevestiging, same idea.
+ *   POST { task: "test-receipt", to, lang, kind, mail } → a Bevestiging bericht / les-aanvraag / review, same idea.
  *   POST { task: "test-issue", to, lang, id } → a Nieuwsbrief as it is now in the editor (draft), same idea.
  *   POST { task: "issue", id, again? } → the published Nieuwsbrief to its audience (lib/contacts.ts), each
  *        in their language with their own unsubscribe link; marks it “Verstuurd op”. Once, unless `again`.
@@ -19,6 +20,7 @@ import { contacts, CONTACTS_QUERY, recipients, type ContactsData } from "@/lib/c
 import { mailConfigured, sendMail, sendMany } from "@/lib/mail";
 import { siteUrl } from "@/lib/metadata";
 import { newsletterContent } from "@/lib/newsletter";
+import { RECEIPT_KINDS, receiptContent, receiptExample } from "@/lib/receipt";
 import { NEWSLETTER_ISSUE_QUERY, newsletterIssueContent, type NewsletterIssue } from "@/lib/newsletter-issue";
 import { subscriberId, unsubscribeUrl } from "@/lib/unsubscribe";
 import { cors, json, redeemTicket } from "@/lib/studio-ticket";
@@ -77,6 +79,18 @@ export async function POST(request: NextRequest) {
       const lang: Lang = body.lang === "en" ? "en" : "nl";
       const m = (body.mail ?? {}) as Record<string, unknown>;
       const { subject, content } = newsletterContent(lang, { subject: str(m.subject), body: str(m.body) }, "Anna", `${siteUrl}/api/unsubscribe?id=voorbeeld`);
+      await sendMail({ to, replyTo, subject: `[Test] ${subject}`, ...content });
+      return json(request, { ok: true });
+    }
+
+    if (body.task === "test-receipt") {
+      const to = str(body.to, 200);
+      if (!to || !EMAIL.test(to)) return json(request, { message: "Geen geldig e-mailadres" }, 400);
+      const lang: Lang = body.lang === "en" ? "en" : "nl";
+      const kind = RECEIPT_KINDS.find((k) => k === body.kind) ?? "contact";
+      const m = (body.mail ?? {}) as Record<string, unknown>;
+      const { vars, rows } = receiptExample(lang, kind);
+      const { subject, content } = receiptContent(lang, kind, { subject: str(m.subject, 300), heading: str(m.heading, 300), body: str(m.body) }, vars, rows);
       await sendMail({ to, replyTo, subject: `[Test] ${subject}`, ...content });
       return json(request, { ok: true });
     }

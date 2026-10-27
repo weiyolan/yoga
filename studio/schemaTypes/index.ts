@@ -28,12 +28,13 @@ import { settings } from "./singletons/settings";
 import { signupSettings } from "./singletons/signup-settings";
 import { mailSettings } from "./singletons/mail-settings";
 import { newsletterMail } from "./singletons/newsletter-mail";
+import { receiptMail } from "./singletons/receipt-mail";
 
 /** Singleton types: one document each, fixed `_id` = type name (see structure/). */
 export const SINGLETONS = [settings, navigation, signupSettings, mailSettings, newsletterMail, homePage, retreatsPage, lessonsPage, aboutPage, galleryPage, faqPage, contactPage].map((t) => t.name);
 
 /** Fixed-id pages that aren't singletons by type: one `legalPage` per legal page (LEGAL_PAGES). */
-export const FIXED_TYPES = [legalPage.name];
+export const FIXED_TYPES = [legalPage.name, receiptMail.name];
 
 /** Only the website creates these (private dotted ids): hidden from "New document". */
 export const FORM_TYPES = [signup.name, message.name, subscriber.name, reviewSubmission.name];
@@ -68,6 +69,7 @@ export const schemaTypes = [
   signupSettings,
   mailSettings,
   newsletterMail,
+  receiptMail,
   homePage,
   retreatsPage,
   lessonsPage,

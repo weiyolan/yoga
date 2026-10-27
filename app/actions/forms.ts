@@ -8,6 +8,11 @@ import { mailConfigured, sendMail } from "@/lib/mail";
 import { mailText, type MailContent } from "@/lib/mail-template";
 import { newsletterContent } from "@/lib/newsletter";
 import {
+  receiptContent,
+  type ReceiptKind,
+  type ReceiptVars,
+} from "@/lib/receipt";
+import {
   answerText,
   fieldName,
   otherName,
@@ -20,8 +25,10 @@ import {
   LAYOUT_QUERY,
   LESSONS_QUERY,
   NEWSLETTER_MAIL_QUERY,
+  RECEIPT_MAIL_QUERY,
   SIGNUP_RETREAT_QUERY,
 } from "@/sanity/queries";
+import type { Lang } from "@/sanity/site.config";
 import { writeClient } from "@/sanity/write";
 
 /** A team notification for Netlify Forms (form “melding”, public/__forms.html): the browser posts it. */
@@ -226,13 +233,32 @@ async function anyOf(
  */
 async function receipt(
   state: FormState,
+  kind: ReceiptKind,
+  lang: Lang,
   to: string,
-  subject: string,
-  content: MailContent,
+  vars: ReceiptVars,
+  rows: [string, string][],
+  photo?: string | null,
 ) {
   if (state.status !== "sent" || !mailConfigured()) return state;
   try {
-    const layout = await sanityFetch({ query: LAYOUT_QUERY });
+    const [layout, mail] = await Promise.all([
+      sanityFetch({ query: LAYOUT_QUERY }),
+      sanityFetch({
+        query: RECEIPT_MAIL_QUERY,
+        params: { id: `receiptMail-${kind}` },
+        lang,
+      }),
+    ]);
+    if (layout?.receiptConfirm === false) return state;
+    const { subject, content } = receiptContent(
+      lang,
+      kind,
+      mail,
+      vars,
+      rows,
+      photo,
+    );
     const replyTo =
       (process.env.CONTACT_TO || layout?.notifyEmail)?.split(",")[0]?.trim() ||
       layout?.email ||
@@ -304,14 +330,10 @@ async function sendContactInner(data: FormData): Promise<FormState> {
     ],
     team,
   );
-  return receipt(state, email, r.contactSubject, {
-    heading: r.contactHeading,
-    text: r.contactBody(name),
-    rows: [
-      ...(subject ? [[r.subject, subject] as [string, string]] : []),
-      [r.yours, message],
-    ],
-  });
+  return receipt(state, "contact", lang, email, { naam: name }, [
+    [r.subject, subject],
+    [r.yours, message],
+  ]);
 }
 
 /** Footer "Hou me op de hoogte": stored as a subscriber (Studio → Contactboek), a confirmation mail to them + a mail to the team. */
@@ -659,16 +681,19 @@ async function sendReviewInner(data: FormData): Promise<FormState> {
     ],
     team,
   );
-  return receipt(state, email, r.reviewSubject, {
-    heading: r.reviewHeading,
-    photo: retreat.photo,
-    text: r.reviewBody(name, retreat.title ?? "retreat"),
-    rows: [
+  return receipt(
+    state,
+    "review",
+    lang,
+    email,
+    { naam: name, retreat: retreat.title ?? "retreat" },
+    [
       [r.retreat, retreat.title ?? ""],
       [r.score, `${"★".repeat(rating)}${"☆".repeat(5 - rating)}`],
       [r.yours, text],
     ],
-  });
+    retreat.photo,
+  );
 }
 
 /**
@@ -773,13 +798,16 @@ async function requestClassInner(data: FormData): Promise<FormState> {
     ],
     team,
   );
-  return receipt(state, email, r.classSubject(slot.style?.name ?? theirs), {
-    heading: r.classHeading,
-    text: r.classBody(name, theirs),
-    rows: [
+  return receipt(
+    state,
+    "class",
+    lang,
+    email,
+    { naam: name, les: theirs, stijl: slot.style?.name ?? undefined },
+    [
       [r.lesson, theirs],
       [r.wish, r.wishes[wishKey] ?? r.wishes.question],
-      ...(message ? [[r.yours, message] as [string, string]] : []),
+      [r.yours, message],
     ],
-  });
+  );
 }
