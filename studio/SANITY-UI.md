@@ -76,6 +76,7 @@ width (on a phone, a whole screen) and makes people lose track of where they are
 - Behaviour: opens on hover (desktop) and on tap (phone); a tap elsewhere closes it (a `pointerdown` listener on `document`).
 - The tooltip: `Popover` from `@sanity/ui/popover`, with a max width of about 320px set on an inner div (setting it on the Popover itself is ignored).
 - Every field has a description that answers two questions: **where on the site** and **what for**. Keep examples and "Leeg = …" in it.
+- Numbers and other odd fields also get the valid range in the description and a matching rule (e.g. a percentage: `Rule.min(0).max(100).integer()`), so a wrong value is caught in the Studio.
 
 ### 3.2 One-row fields
 - **Which fields:** short ones only: `string`, `number`, `url`, `date`, `slug`, `reference`, and one-line NL | EN.
@@ -90,9 +91,11 @@ width (on a phone, a whole screen) and makes people lose track of where they are
 
 ### 3.3 Languages (sanity-plugin-internationalized-array)
 - Show one language at a time with small NL | EN tabs. A dot on a tab means empty; red or amber means an error or warning in that language.
+- **Only the default language is `required`.** Requiring every language blocks publishing until the translation exists, which is red for "not done yet" (principle 7). Use `.warning()` on the others.
 - Hide the other languages with `display: none`, never by leaving them out of `members`. Leaving them out broke the add and translate actions.
 - One "Vertaal" (✨) button per field, plus a bulk translator.
 - **Previews:** never select an i18n field raw as `title`. It is an array, so Sanity logs *“The "title" field should be a string…”*. Use `pick(value)` in `prepare`.
+  - Guard `prepare` against missing values: `new Date(undefined)` throws a `RangeError` on a document without a date, and that breaks the whole list. Return an empty subtitle instead.
   - This also applies to Presentation `defineLocations` selects. We removed `locations` entirely: the "Gebruikt op x pagina's" banner only took room.
 
 ### 3.4 Better inputs for common patterns
@@ -194,27 +197,7 @@ The classic form view (greyed-out read-only fields) is the wrong tool for that.
 | Mails were a black box | A preview of the HTML mail next to the form, a test mail to yourself, and editable texts with the site's defaults | `components/MailPreview.tsx` |
 | Content changes across many documents by hand | Versioned scripts (`npm run content:vN -- --dry`, then for real) and `publish:drafts` (`--only=type`, `--skip-placeholders`). `--dry` prints what they would change first | `scripts/` |
 
-## 7. Blog posts (from the Spiree Studio)
-
-Lessons from the Spiree blog Studio (`spireenext/studio`: a `post` with a localized title and body, a date and a completion %). Apply them to any blog or news type here. Items marked **fix** are things Spiree does not do yet.
-
-1. **One shared rich-text type.** Define the body once (`blockContent`) and reuse it, also inside the per-language wrapper (`localeBlockContent`). Never copy block definitions per field.
-2. **Restrict the editor.** List only the styles (Normal, H2, H3, Quote), lists (bullet) and marks (strong, em, link) the site actually renders. Anything else shows up unstyled. Spiree lists H1 and H4 too: **fix** by dropping what the front end does not style (the page title is already the H1).
-3. **Images in the body:** `type: 'image'` with `options: { hotspot: true }`, so a crop survives other aspect ratios. **Fix:** add a required `alt` field (or take it from the Fotobank); Spiree has none.
-4. **Languages:** one field per language, the default language first, the others behind a collapsible “Translations” fieldset. Fine for a small blog; with many fields use the NL | EN tabs (§3.3).
-5. **Require only the default language.** Spiree marks every language `required`, so a post cannot be published until the translation exists. That is red for “not done yet” (principle 7). **Fix:** `required` on the default language, a yellow warning (`.warning()`) on the others.
-6. **The site needs a fallback too.** Spiree reads `post.title[locale]` and `post.body[locale]` directly: a missing translation crashes the page. Use `coalesce(title[$locale], title.<default>)` in GROQ, or `post.title[locale] ?? post.title.en` in the component.
-7. **Preview:**
-   - select a plain string (`title.en`), never a whole localized object (§3.3);
-   - put the facts an editor scans for in the subtitle (here “80%, 3 Mar 2024”);
-   - guard `prepare`: `new Date(undefined)` throws a `RangeError` on a post that has no date yet, and that breaks the whole list. Return an empty subtitle instead.
-8. **Order is a query decision, not a field.** The blog reads `*[_type == "post"] | order(date)`: add an explicit direction (`order(date desc)` or `asc`) and a tie-breaker (`_createdAt`), and give the document type `orderings` with the same default so the Studio list matches the site.
-9. **Explain the odd field.** “Completion Percentage” means nothing to an editor: add a description with where it shows (next to the date on the timeline) and what range it takes, plus `Rule.min(0).max(100).integer()`.
-10. **No dead fields.** Spiree keeps commented-out `slug`, `author`, `mainImage` and `categories`. Remove them, or if data still exists use `deprecated: { reason }` and `hidden` (§4.2). A slug is needed as soon as a post gets its own URL (`source` from the default title, `maxLength: 96`).
-
----
-
-## 8. Verifying without Sanity access
+## 7. Verifying without Sanity access
 
 - Build the site with the offline fixture: `npm run fixture`, then `SANITY_FIXTURE=1 npm run build && npm start`. The embedded Studio lives at `/studio`.
 - Drive the embedded Studio with Playwright and mock `*.sanity.io`:
@@ -225,7 +208,7 @@ Lessons from the Spiree blog Studio (`spireenext/studio`: a `post` with a locali
 
 ---
 
-## 9. Appendix: the NL | EN tabs (code)
+## 8. Appendix: the NL | EN tabs (code)
 
 ![NL | EN tabs: a one-row field (tabs + ✨ right of the input) and a full-width text (tabs after the title)](SANITY-UI-tabs.png)
 
@@ -274,7 +257,7 @@ const CSS = `.i18n-tab-item [data-ui="Flex"]:has(> [data-ui="fieldHeaderContentB
 
 ---
 
-## 10. Appendix: the one-row field (code)
+## 9. Appendix: the one-row field (code)
 
 ![One-row fields: title + ⓘ left; input, NL | EN, ✨ and the “…” menu right](SANITY-UI-rows.png)
 
