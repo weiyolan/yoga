@@ -162,6 +162,7 @@ export const structure: StructureResolver = (S) =>
           S.component(SignupList)
             .id("signups")
             .title("Inschrijvingen")
+            .maxWidth(400)
             .child((id) =>
               id === "signups-table"
                 ? S.component(SignupTable)
@@ -178,6 +179,7 @@ export const structure: StructureResolver = (S) =>
           S.component(MessageList)
             .id("messages")
             .title("Contactformulier")
+            .maxWidth(400)
             .child((id) =>
               documentNode(S, "message").schemaType("message").documentId(id),
             ),

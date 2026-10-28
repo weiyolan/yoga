@@ -1,3 +1,5 @@
+import { DocumentIcon } from "@sanity/icons/Document";
+import { ThLargeIcon } from "@sanity/icons/ThLarge";
 import { ActivityIcon } from "@sanity/icons/Activity";
 import { defineArrayMember, defineField, defineType } from "sanity";
 import { i18nLines, i18nString, i18nText } from "../shared/i18n";
@@ -10,8 +12,8 @@ export const yogaClass = defineType({
   type: "document",
   icon: ActivityIcon,
   groups: [
-    { name: "tile", title: "Tegel", default: true },
-    { name: "page", title: "Lessen-pagina" },
+    { name: "tile", title: "Tegel", icon: ThLargeIcon, default: true },
+    { name: "page", title: "Lessen-pagina", icon: DocumentIcon },
   ],
   fields: [
     defineField({

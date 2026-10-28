@@ -1,3 +1,4 @@
+import { SplitVerticalIcon } from "@sanity/icons/SplitVertical";
 import { MenuIcon } from "@sanity/icons/Menu";
 import { defineType } from "sanity";
 import { i18nString } from "../shared/i18n";
@@ -9,8 +10,8 @@ export const navigation = defineType({
   type: "document",
   icon: MenuIcon,
   groups: [
-    { name: "menu", title: "Menu" },
-    { name: "footer", title: "Footer" },
+    { name: "menu", title: "Menu", icon: MenuIcon, default: true },
+    { name: "footer", title: "Footer", icon: SplitVerticalIcon },
   ],
   fields: [
     i18nString("menuFounders", { group: "menu", title: "Over ons: naam bij de foto", description: "Naam bij de grote foto in het uitklapmenu Over ons (bovenaan de site). Leeg = “Rita & Philippe”." }),

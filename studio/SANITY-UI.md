@@ -104,7 +104,7 @@ width (on a phone, a whole screen) and makes people lose track of where they are
 | Status | Radio buttons that also update the derived counts | `StatusInput.tsx` |
 | Photo | A picker from the Fotobank (reuse + reset/delete) | `PhotoPicker.tsx`, `MediaBank.tsx` |
 
-**Unset vs default.** For booleans, show `value ?? initialValue`, exactly as the site reads it (`coalesce(x, true)`). Otherwise an untouched toggle looks off while the site treats it as on.
+**Unset vs default.** For booleans, show `value ?? initialValue`, exactly as the site reads it (`coalesce(x, true)`, `!= false`). Otherwise an untouched toggle looks off while the site treats it as on. Done once for every lone on/off in `I18nTabsInput` (`form.components.input`), and in `ToggleListInput` for lists.
 
 ---
 
@@ -174,6 +174,8 @@ The classic form view (greyed-out read-only fields) is the wrong tool for that.
 | Every field gets `components.input` from the i18n plugin | Don't treat "has a custom input" as "custom UI" for `internationalizedArray*` |
 | `options.columns` on objects of booleans gives ragged boxes | Use a custom list input |
 | `ObjectInputProps.onFieldGroupSelect` | Takes only `(groupName)` |
+| A lone boolean ignores the field's `title`/`description` props: `BooleanInput` draws its own header from `schemaType` | Pass a changed `schemaType` (`description: undefined`, title + ⓘ) to `renderDefault` in the input component |
+| Groups without `default: true` open on "Alle velden" | Every document with groups: `default: true` on the first, and an icon on each |
 | The i18n plugin puts a ⊖ next to every language value (only on NL / EN fields, so some fields had one and others not) | It means "remove this language": one tap wiped the NL text the site shows. We hide it with CSS (`.i18n-tab-item > [data-ui="Card"] > [data-ui="Flex"] > :not(:first-child)`); emptying the box does the same on purpose |
 | Typegen | `npm run typegen` after schema or query changes; GROQ with an interpolated `${CONST}` is fine |
 

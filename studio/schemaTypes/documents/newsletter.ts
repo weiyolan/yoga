@@ -1,3 +1,4 @@
+import { EnvelopeIcon } from "@sanity/icons/Envelope";
 import { BlockContentIcon } from "@sanity/icons/BlockContent";
 import { DocumentTextIcon } from "@sanity/icons/DocumentText";
 import { LinkIcon } from "@sanity/icons/Link";
@@ -83,8 +84,8 @@ export const newsletter = defineType({
   type: "document",
   icon: DocumentTextIcon,
   groups: [
-    { name: "content", title: "Inhoud", default: true },
-    { name: "send", title: "Versturen" },
+    { name: "content", title: "Inhoud", icon: DocumentTextIcon, default: true },
+    { name: "send", title: "Versturen", icon: EnvelopeIcon },
   ],
   fields: [
     defineField({ name: "title", title: "Naam", type: "string", group: "content", description: "Niet op de site: enkel om de nieuwsbrief terug te vinden in de Studio, bv. “Nieuwe retreats 2027”. Lezers zien dit niet.", validation: (rule) => rule.required() }),

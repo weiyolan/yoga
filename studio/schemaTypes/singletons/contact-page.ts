@@ -1,3 +1,5 @@
+import { DocumentIcon } from "@sanity/icons/Document";
+import { UsersIcon } from "@sanity/icons/Users";
 import { EnvelopeIcon } from "@sanity/icons/Envelope";
 import { defineField, defineType } from "sanity";
 import { i18nLines, i18nString, i18nText } from "../shared/i18n";
@@ -9,8 +11,8 @@ export const contactPage = defineType({
   type: "document",
   icon: EnvelopeIcon,
   groups: [
-    { name: "page", title: "Pagina" },
-    { name: "contact", title: "Contact & social" },
+    { name: "page", title: "Pagina", icon: DocumentIcon, default: true },
+    { name: "contact", title: "Contact & social", icon: UsersIcon },
   ],
   fields: [
     mediaField("photo", { title: "Foto", required: true, group: "page", description: "De grote foto naast het contactformulier op de Contact-pagina; ook gebruikt als deelfoto als je bij SEO geen andere kiest." }),

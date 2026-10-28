@@ -1,3 +1,6 @@
+import { DocumentIcon } from "@sanity/icons/Document";
+import { SearchIcon } from "@sanity/icons/Search";
+import { ThLargeIcon } from "@sanity/icons/ThLarge";
 import { CalendarIcon } from "@sanity/icons/Calendar";
 import { defineField, defineType } from "sanity";
 import { i18nString, i18nText } from "../shared/i18n";
@@ -8,9 +11,9 @@ export const retreatsPage = defineType({
   type: "document",
   icon: CalendarIcon,
   groups: [
-    { name: "page", title: "Overzicht" },
-    { name: "detail", title: "Retreatpagina's" },
-    { name: "seo", title: "SEO" },
+    { name: "page", title: "Overzicht", icon: ThLargeIcon, default: true },
+    { name: "detail", title: "Retreatpagina's", icon: DocumentIcon },
+    { name: "seo", title: "SEO", icon: SearchIcon },
   ],
   fields: [
     defineField({ name: "hero", title: "Openingsbeeld", type: "hero", group: "page", description: "De grote foto met titel bovenaan de Retreats-pagina. Titel en ondertitel dienen ook als reserve voor Google en het deelvoorbeeld.", validation: (rule) => rule.required() }),

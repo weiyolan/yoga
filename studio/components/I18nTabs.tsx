@@ -44,6 +44,14 @@ export function I18nTabsField(props: FieldProps) {
 
 /** form.components.input: the plugin's own input + an “add” button when the active language has no item yet. */
 export function I18nTabsInput(props: InputProps) {
+  // an untouched on/off with a default shows that default, as the site reads it (`!= false`, `coalesce(x, true)`)
+  // and its help behind the ? too: a lone on/off draws its own title + description from schemaType
+  if (props.schemaType.jsonType === "boolean") {
+    const st = props.schemaType;
+    const value = props.value === undefined && typeof st.initialValue === "boolean" ? st.initialValue : props.value;
+    const schemaType = st.description ? { ...st, description: undefined, title: (<>{st.title}<Help text={st.description} /></>) as unknown as string } : st;
+    return props.renderDefault({ ...props, value, schemaType } as InputProps);
+  }
   if (props.id === "root" && MAIL_TYPES.includes(props.schemaType.name))
     return (
       <>

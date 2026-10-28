@@ -1,3 +1,7 @@
+import { CalendarIcon } from "@sanity/icons/Calendar";
+import { DocumentIcon } from "@sanity/icons/Document";
+import { SearchIcon } from "@sanity/icons/Search";
+import { UserIcon } from "@sanity/icons/User";
 import { ActivityIcon } from "@sanity/icons/Activity";
 import { defineArrayMember, defineField, defineType } from "sanity";
 import { i18nString, i18nText } from "../shared/i18n";
@@ -26,10 +30,10 @@ export const lessonsPage = defineType({
   type: "document",
   icon: ActivityIcon,
   groups: [
-    { name: "content", title: "Inhoud" },
-    { name: "schedule", title: "Weekplanning" },
-    { name: "private", title: "Privéles" },
-    { name: "seo", title: "SEO" },
+    { name: "content", title: "Inhoud", icon: DocumentIcon, default: true },
+    { name: "schedule", title: "Weekplanning", icon: CalendarIcon },
+    { name: "private", title: "Privéles", icon: UserIcon },
+    { name: "seo", title: "SEO", icon: SearchIcon },
   ],
   fields: [
     defineField({ name: "hero", title: "Openingsbeeld", type: "hero", group: "content", description: "De grote foto met titel bovenaan de Lessen-pagina. De titel en ondertitel dienen ook als reserve voor de Google-titel en -beschrijving.", validation: (rule) => rule.required() }),

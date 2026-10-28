@@ -1,3 +1,5 @@
+import { CheckmarkCircleIcon } from "@sanity/icons/CheckmarkCircle";
+import { ClockIcon } from "@sanity/icons/Clock";
 import { ComposeIcon } from "@sanity/icons/Compose";
 import { defineField, defineType } from "sanity";
 import { defaultFields } from "../shared/default";
@@ -18,8 +20,8 @@ export const confirmationMail = defineType({
   type: "document",
   icon: ComposeIcon,
   groups: [
-    { name: "signup", title: "Inschrijving", default: true },
-    { name: "waitlist", title: "Wachtlijst" },
+    { name: "signup", title: "Inschrijving", icon: CheckmarkCircleIcon, default: true },
+    { name: "waitlist", title: "Wachtlijst", icon: ClockIcon },
   ],
   fields: [
     defineField({ name: "name", title: "Naam", type: "string", description: "Niet in de mail: om deze bevestigingsmail te kiezen bij een retreat en terug te vinden, bv. “Yoga & Freediving”.", group: ALL, validation: (rule) => rule.required() }),

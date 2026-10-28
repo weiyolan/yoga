@@ -182,7 +182,7 @@ width (on a phone, a whole screen) and makes people lose track of where they are
 <td><code>PhotoPicker.tsx</code>, <code>MediaBank.tsx</code></td>
 </tr>
 </tbody></table>
-<p><strong>Unset vs default.</strong> For booleans, show <code>value ?? initialValue</code>, exactly as the site reads it (<code>coalesce(x, true)</code>). Otherwise an untouched toggle looks off while the site treats it as on.</p>
+<p><strong>Unset vs default.</strong> For booleans, show <code>value ?? initialValue</code>, exactly as the site reads it (<code>coalesce(x, true)</code>, <code>!= false</code>). Otherwise an untouched toggle looks off while the site treats it as on. Done once for every lone on/off in <code>I18nTabsInput</code> (<code>form.components.input</code>), and in <code>ToggleListInput</code> for lists.</p>
 <hr>
 <h2 id="4-documents">4. Documents</h2>
 <h3>4.1 Large documents (a retreat)</h3>
@@ -323,6 +323,14 @@ The classic form view (greyed-out read-only fields) is the wrong tool for that.<
 <tr>
 <td><code>ObjectInputProps.onFieldGroupSelect</code></td>
 <td>Takes only <code>(groupName)</code></td>
+</tr>
+<tr>
+<td>A lone boolean ignores the field&#39;s <code>title</code>/<code>description</code> props: <code>BooleanInput</code> draws its own header from <code>schemaType</code></td>
+<td>Pass a changed <code>schemaType</code> (<code>description: undefined</code>, title + ⓘ) to <code>renderDefault</code> in the input component</td>
+</tr>
+<tr>
+<td>Groups without <code>default: true</code> open on &quot;Alle velden&quot;</td>
+<td>Every document with groups: <code>default: true</code> on the first, and an icon on each</td>
 </tr>
 <tr>
 <td>The i18n plugin puts a ⊖ next to every language value (only on NL / EN fields, so some fields had one and others not)</td>
@@ -492,6 +500,14 @@ export function I18nTabsField(props: FieldProps) {
 }</p>
 <p>/** form.components.input: the plugin&#39;s own input + an “add” button when the active language has no item yet. */
 export function I18nTabsInput(props: InputProps) {
+  // an untouched on/off with a default shows that default, as the site reads it (<code>!= false</code>, <code>coalesce(x, true)</code>)
+  // and its help behind the ? too: a lone on/off draws its own title + description from schemaType
+  if (props.schemaType.jsonType === &quot;boolean&quot;) {
+    const st = props.schemaType;
+    const value = props.value === undefined &amp;&amp; typeof st.initialValue === &quot;boolean&quot; ? st.initialValue : props.value;
+    const schemaType = st.description ? { ...st, description: undefined, title: (&lt;&gt;{st.title}&lt;Help text={st.description} /&gt;&lt;/&gt;) as unknown as string } : st;
+    return props.renderDefault({ ...props, value, schemaType } as InputProps);
+  }
   if (props.id === &quot;root&quot; &amp;&amp; MAIL_TYPES.includes(props.schemaType.name))
     return (
       &lt;&gt;
