@@ -17,7 +17,6 @@ import { BellIcon } from "@sanity/icons/Bell";
 import { BookIcon } from "@sanity/icons/Book";
 import { DocumentTextIcon } from "@sanity/icons/DocumentText";
 import { EnvelopeIcon } from "@sanity/icons/Envelope";
-import { UserIcon } from "@sanity/icons/User";
 import { UsersIcon } from "@sanity/icons/Users";
 import { WarningOutlineIcon } from "@sanity/icons/WarningOutline";
 import type { ComponentType } from "react";
@@ -36,6 +35,7 @@ import { RetreatList, RETREATS_PAGE_ID } from "../components/RetreatList";
 import { statusList } from "../components/StatusList";
 import { documentNode } from "./views";
 import { MESSAGE_STATUSES } from "../schemaTypes/documents/message";
+import { REVIEW_STATUSES } from "../schemaTypes/documents/review";
 import { apiVersion } from "../../sanity/site.config";
 import { LEGAL_PAGES } from "../schemaTypes/singletons/legal-page";
 
@@ -52,28 +52,52 @@ function singleton(
     .child(S.document().schemaType(type).documentId(type).title(title));
 }
 
-function filtered(
+type Doc = { _id: string; _type: string; name?: string; isDefault?: boolean; kind?: string; orderRank?: number };
+type Part = { title?: string; type: string; match?: (d: Doc) => boolean; sort?: (a: Doc, b: Doc) => number };
+
+const byName = (a: Doc, b: Doc) => (a.name ?? "").localeCompare(b.name ?? "");
+
+/**
+ * One panel = the page (or options) on top + the documents themselves under a heading per kind,
+ * instead of a sub-list per kind (at most two clicks to any document). Follows edits live.
+ */
+function liveList(
   S: StructureBuilder,
   id: string,
   title: string,
-  type: string,
-  filter: string,
-  ordering: { field: string; direction: "asc" | "desc" }[],
-  params = {},
+  top: ReturnType<StructureBuilder["listItem"]>[],
+  parts: Part[],
+  create: { type: string; title: string }[],
 ) {
-  return S.listItem()
-    .id(id)
-    .title(title)
-    .child(
-      S.documentList()
-        .id(id)
-        .title(title)
-        .schemaType(type)
-        .apiVersion(apiVersion)
-        .filter(`_type == $type && ${filter}`)
-        .params({ type, ...params })
-        .defaultOrdering(ordering),
-    );
+  return () => {
+    const client = S.context.getClient({ apiVersion });
+    const types = [...new Set(parts.map((p) => p.type))];
+    const query = `*[_type in $types]{ _id, _type, name, isDefault, kind, orderRank }`;
+    return client
+      .listen(query, { types }, { visibility: "query", includeResult: false, events: ["welcome", "mutation"] })
+      .pipe(
+        debounceTime(300),
+        switchMap(() => client.fetch<Doc[]>(query, { types }, { perspective: "drafts" })),
+        map((all) => {
+          // a draft and its published version are one document
+          const docs = [...new Map(all.map((d) => [d._id.replace(/^drafts\./, ""), { ...d, _id: d._id.replace(/^drafts\./, "") }])).values()];
+          return S.list()
+            .id(id)
+            .title(title)
+            .menuItems(create.map((c) => S.menuItem().title(c.title).icon(AddIcon).intent({ type: "create", params: { type: c.type } })))
+            .items([
+              ...top,
+              ...parts.flatMap((p) => [
+                S.divider().title(p.title ?? ""),
+                ...docs
+                  .filter((d) => d._type === p.type && (!p.match || p.match(d)))
+                  .sort(p.sort ?? byName)
+                  .map((d) => S.documentListItem().schemaType(p.type).id(d._id)),
+              ]),
+            ]);
+        }),
+      );
+  };
 }
 
 /**
@@ -111,6 +135,20 @@ const SignupList = statusList({
       title: "Geannuleerd",
       match: (r) => r.status === "cancelled",
     },
+    { id: "all", title: "Alle", match: () => true },
+  ],
+});
+
+/** Reviews: one list, by status and per retreat. The public copy opens from the review itself (structure/views.tsx). */
+const ReviewList = statusList({
+  type: "reviewSubmission",
+  perRetreat: true,
+  filters: [
+    ...REVIEW_STATUSES.map((st) => ({
+      id: st.value,
+      title: st.title,
+      match: (r: { status?: string }) => (r.status ?? "new") === st.value,
+    })),
     { id: "all", title: "Alle", match: () => true },
   ],
 });
@@ -189,23 +227,13 @@ export const structure: StructureResolver = (S) =>
         .title("Reviews")
         .icon(countBadgeIcon(StarIcon, "reviewSubmission"))
         .child(
-          S.list()
+          S.component(ReviewList)
+            .id("reviews")
             .title("Reviews")
-            .items([
-              filtered(
-                S,
-                "reviews-new",
-                "Nieuw (te keuren)",
-                "reviewSubmission",
-                `status == "new"`,
-                [{ field: "submittedAt", direction: "desc" }],
-              ),
-              S.documentTypeListItem("review").title("Gepubliceerd op de site"),
-              S.divider(),
-              S.documentTypeListItem("reviewSubmission").title(
-                "Alle inzendingen",
-              ),
-            ]),
+            .maxWidth(400)
+            .child((id) =>
+              documentNode(S, "reviewSubmission").schemaType("reviewSubmission").documentId(id),
+            ),
         ),
       // every address from sign-ups, newsletter, contact form and reviews (components/ContactBook.tsx)
       S.listItem()
@@ -243,47 +271,24 @@ export const structure: StructureResolver = (S) =>
         .id("forms")
         .title("Formulieren")
         .icon(ClipboardIcon)
-        .child(() => {
-          const client = S.context.getClient({ apiVersion });
-          const query = `*[_type == "signupForm"]{ _id, name, isDefault }`;
-          return client
-            .listen(query, {}, { visibility: "query", includeResult: false, events: ["welcome", "mutation"] })
-            .pipe(
-              debounceTime(300),
-              switchMap(() => client.fetch<{ _id: string; name?: string; isDefault?: boolean }[]>(query, {}, { perspective: "drafts" })),
-              map((forms) =>
-                S.list()
-                  .id("forms")
-                  .title("Formulieren")
-                  .menuItems([S.menuItem().title("Nieuw formulier").icon(AddIcon).intent({ type: "create", params: { type: "signupForm" } })])
-                  .items([
-                    singleton(S, "signupSettings", "Inschrijving pagina", ControlsIcon),
-                    S.divider().title("Inschrijfformulieren"),
-                    ...[...new Map(forms.map((f) => [f._id.replace(/^drafts\./, ""), f])).entries()]
-                      .sort(([, a], [, b]) => Number(!!b.isDefault) - Number(!!a.isDefault) || (a.name ?? "").localeCompare(b.name ?? ""))
-                      .map(([id]) => S.documentListItem().schemaType("signupForm").id(id)),
-                  ]),
-              ),
-            );
-        }),
+        .child(
+          liveList(S, "forms", "Formulieren", [singleton(S, "signupSettings", "Inschrijving pagina", ControlsIcon)], [
+            // the default form first
+            { title: "Inschrijfformulieren", type: "signupForm", sort: (a, b) => Number(!!b.isDefault) - Number(!!a.isDefault) || byName(a, b) },
+          ], [{ type: "signupForm", title: "Nieuw formulier" }]),
+        ),
       S.listItem()
         .id("mails")
         .title("Mails")
         .icon(ComposeIcon)
         .child(
-          S.list()
-            .title("Mails")
-            .items([
+          liveList(
+            S,
+            "mails",
+            "Mails",
+            [
               singleton(S, "mailSettings", "Opties", ControlsIcon),
-              S.documentTypeListItem("confirmationMail")
-                .title("Inschrijving bevestiging")
-                .icon(ComposeIcon),
-              singleton(
-                S,
-                "newsletterMail",
-                "Nieuwsbrief bevestiging",
-                BellIcon,
-              ),
+              singleton(S, "newsletterMail", "Nieuwsbrief bevestiging", BellIcon),
               ...RECEIPT_MAILS.map((m) =>
                 S.listItem()
                   .id(`receiptMail-${m.kind}`)
@@ -297,7 +302,11 @@ export const structure: StructureResolver = (S) =>
                       .title(m.title),
                   ),
               ),
-            ]),
+            ],
+            // the default mail first
+            [{ title: "Inschrijving bevestiging", type: "confirmationMail", sort: (a, b) => Number(!!b.isDefault) - Number(!!a.isDefault) || byName(a, b) }],
+            [{ type: "confirmationMail", title: "Nieuwe bevestigingsmail" }],
+          ),
         ),
       S.documentTypeListItem("testimonial").title("Testimonials"),
       // every photo as tiles with search, filters, upload and AI; a photo opens large with its fields (components/MediaBank.tsx)
@@ -322,14 +331,21 @@ export const structure: StructureResolver = (S) =>
         .title("Lessen")
         .icon(ActivityIcon)
         .child(
-          S.list()
-            .title("Lessen")
-            .items([
-              singleton(S, "lessonsPage", "Lessen-pagina", ActivityIcon),
-              S.divider(),
-              S.documentTypeListItem("yogaClass").title("Stijlen"),
-              S.documentTypeListItem("studio").title("Studio's"),
-            ]),
+          liveList(
+            S,
+            "lessons",
+            "Lessen",
+            [singleton(S, "lessonsPage", "Lessen-pagina", ActivityIcon)],
+            [
+              // the order of the site
+              { title: "Stijlen", type: "yogaClass", sort: (a, b) => (a.orderRank ?? 1000) - (b.orderRank ?? 1000) || byName(a, b) },
+              { title: "Studio's", type: "studio" },
+            ],
+            [
+              { type: "yogaClass", title: "Nieuwe stijl" },
+              { type: "studio", title: "Nieuwe studio" },
+            ],
+          ),
         ),
       // the page + everyone on it (Rita & Philippe, collaborators)
       S.listItem()
@@ -337,29 +353,18 @@ export const structure: StructureResolver = (S) =>
         .title("Over ons")
         .icon(UsersIcon)
         .child(
-          S.list()
-            .title("Over ons")
-            .items([
-              singleton(S, "aboutPage", "Over ons-pagina", UsersIcon),
-              S.divider().title("Personen"),
-              filtered(
-                S,
-                "people-founders",
-                "Rita & Philippe",
-                "person",
-                `kind == "founder"`,
-                [{ field: "name", direction: "asc" }],
-              ).icon(UserIcon),
-              filtered(
-                S,
-                "people-collaborators",
-                "Samenwerkingen",
-                "person",
-                `coalesce(kind, "collaborator") != "founder"`,
-                [{ field: "name", direction: "asc" }],
-              ).icon(UsersIcon),
-              S.documentTypeListItem("person").title("Alle personen"),
-            ]),
+          liveList(
+            S,
+            "about",
+            "Over ons",
+            [singleton(S, "aboutPage", "Over ons-pagina", UsersIcon)],
+            [
+              { title: "Rita & Philippe", type: "person", match: (d) => d.kind === "founder" },
+              // the order of the site
+              { title: "Samenwerkingen", type: "person", match: (d) => d.kind !== "founder", sort: (a, b) => (a.orderRank ?? 1000) - (b.orderRank ?? 1000) || byName(a, b) },
+            ],
+            [{ type: "person", title: "Nieuwe persoon" }],
+          ),
         ),
       singleton(S, "galleryPage", "Gallery", ImagesIcon),
       singleton(S, "faqPage", "FAQ", HelpCircleIcon),

@@ -1,5 +1,6 @@
 import { StarIcon } from "@sanity/icons/Star";
 import { defineField, defineType } from "sanity";
+import { statusPreview } from "../../components/StatusPreview";
 
 export const REVIEW_STATUSES = [
   { title: "Nieuw", value: "new", tone: "primary" as const },
@@ -27,7 +28,7 @@ export const reviewSubmission = defineType({
     defineField({ name: "name", title: "Naam", description: "Ingevuld op het reviewformulier van de website. Bij “Gepubliceerd” verschijnt deze naam bij de review op de site; de schrijver gaf daar toestemming voor.", type: "string", readOnly: true }),
     defineField({ name: "email", title: "E-mail", description: "Ingevuld op het reviewformulier. Nooit publiek: de gepubliceerde review heeft geen e-mail. De ontvangstbevestiging ging naar dit adres en het komt in het contactboek.", type: "string", readOnly: true }),
     defineField({ name: "rating", title: "Score", description: "Het aantal sterren (1–5) gekozen op het reviewformulier. Verschijnt bij “Gepubliceerd” op de site; enkel reviews met 4★ of meer komen ook op de homepagina.", type: "number", readOnly: true }),
-    defineField({ name: "text", title: "Review", description: "De review zoals geschreven op de website. Bij “Gepubliceerd” verschijnt deze tekst op de site; bijwerken doe je in Reviews → “Gepubliceerd op de site”.", type: "text", rows: 5, readOnly: true }),
+    defineField({ name: "text", title: "Review", description: "De review zoals geschreven op de website. Bij “Gepubliceerd” verschijnt deze tekst op de site; bijwerken doe je met de knop “Tekst op de site aanpassen” in het Overzicht.", type: "text", rows: 5, readOnly: true }),
     defineField({ name: "lang", title: "Taal", description: "De taal van de website (NL of EN) bij het versturen. De ontvangstbevestiging ging in deze taal; het contactboek gebruikt ze ook voor de nieuwsbrief.", type: "string", readOnly: true }),
     defineField({ name: "submittedAt", title: "Verstuurd op", description: "Automatisch: wanneer de review op de website verstuurd werd. Wordt bij publiceren de datum van de review en bepaalt de volgorde “Nieuwste eerst”.", type: "datetime", readOnly: true }),
   ],
@@ -36,9 +37,11 @@ export const reviewSubmission = defineType({
     select: { name: "name", rating: "rating", status: "status", retreat: "retreat.slug.current", at: "submittedAt" },
     prepare: ({ name, rating, status, retreat, at }) => ({
       title: `${name ?? "Review"} ${stars(rating)}`,
-      subtitle: [REVIEW_STATUSES.find((s) => s.value === status)?.title, retreat, at?.slice(0, 10)].filter(Boolean).join(" · "),
+      subtitle: [retreat, at?.slice(0, 10)].filter(Boolean).join(" · "),
+      description: status ?? "new", // → the badge (components/StatusPreview.tsx)
     }),
   },
+  components: { preview: statusPreview(REVIEW_STATUSES) },
 });
 
 /** The public copy of an approved review: shown on the retreat page and the Home page. No e-mail. */

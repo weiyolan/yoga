@@ -31,8 +31,8 @@ Code references are relative to `studio/`.
 
 | Classic | Ours | Where |
 |---|---|---|
-| Type list → sub-list → documents (3 panels) | One panel with the page singleton on top + the documents under a divider | `structure/index.ts` (Formulieren), `components/RetreatList.tsx` (Retreats) |
-| Separate lists for upcoming / past | One list with filter chips (Komend / Voorbij / Alle) | `RetreatList.tsx` |
+| Type list → sub-list → documents (3 panels) | One panel with the page singleton on top + the documents under a heading per kind | `structure/index.ts` `liveList` (Formulieren, Mails, Lessen, Over ons), `components/RetreatList.tsx` (Retreats) |
+| Separate lists for upcoming / past, new / published | One list with filter chips (Komend / Voorbij / Alle; Nieuw / Gepubliceerd / Geweigerd / Alle) | `RetreatList.tsx`, `StatusList.tsx` (Inschrijvingen, Contactformulier, Reviews) |
 | Component panes fill the whole width | `S.component(...).maxWidth(400)` for list-like components | `structure/index.ts` |
 | Generic "+" offers everything | `newDocumentOptions` / `schema.templates` filter out singletons, submissions and fixed docs | `sanity.config.ts` |
 | Pink initials as workspace icon | The site icon as `icon` in `defineConfig` | `components/StudioLogo.tsx` |
@@ -47,7 +47,7 @@ width (on a phone, a whole screen) and makes people lose track of where they are
 - **Keep list panels narrow.** Give them a max width, so the document gets the room.
 - **Mind the cost of a flat list.** A flat list made with `S.documentTypeListItem` directly in the root is not the same as "one level less": it moves the page singleton elsewhere. We tried that and reverted it. The singleton belongs with its documents.
 
-**A live mixed list (static items + documents).** A child can return an Observable:
+**A live mixed list (static items + documents).** `liveList(S, id, title, top, parts, create)` in `structure/index.ts`: `top` = the singletons, `parts` = one heading per document type (with an optional `match` and `sort`, e.g. founders vs collaborators, `orderRank` as on the site), `create` = the "+" menu. Under the hood a child returns an Observable:
 
 ```ts
 .child(() => {
@@ -110,7 +110,7 @@ width (on a phone, a whole screen) and makes people lose track of where they are
 
 ## 4. Documents
 
-### 4.1 Large documents (a retreat)
+### 4.1 Large documents (a retreat, Home)
 - **Groups:**
   - Groups in page order, each with an icon.
   - `default: true` on the first one, so the document doesn't open on "Alle velden".
@@ -119,7 +119,7 @@ width (on a phone, a whole screen) and makes people lose track of where they are
   - the page from top to bottom, one tile per group: where it shows on the site, x/y filled, what is still empty, and how many texts have no EN;
   - clicking a tile calls `props.onFieldGroupSelect(group)`;
   - collapsible, with the choice stored in `localStorage`; collapsed, it explains only the open tab.
-  - Where: `components/RetreatOverview.tsx`.
+  - Where: `components/PageOverview.tsx` (`overviewInput({ label, sections, storageKey })`), used by the retreat and Home.
   - Optional groups (sign-up overrides, SEO) show "standaard" or "aangepast" and don't count toward the progress.
 - **Fieldsets** ("Wanneer", "Waar", "Plaatsen & prijs") for grouping. Drop `columns` once fields are one row.
 - **Derived values** are `readOnly` (e.g. `booked`). Add a manual correction field next to them (`bookedExtra`) and sum the two in GROQ, instead of letting people overwrite the derived number.
@@ -150,7 +150,7 @@ The classic form view (greyed-out read-only fields) is the wrong tool for that.
 | Decide | Status buttons on that card plus an internal note. A sign-up's status also recomputes "Geboekt" on its retreat | `SignupView.tsx`, `lib/booked.ts`, `components/StatusInput.tsx` |
 | Answer | "Bevestigingsmail" is the first action on a sign-up: preview it, then send (the waitlist version when full) | `actions/confirmation-mail.tsx` |
 | Overview / export | Table view with one row per sign-up and one column per question, filter per retreat and status, CSV export. The same question across forms fills the same column (so harmonise labels) | `components/SignupTable.tsx` |
-| Reviews | A review comes in private (with e-mail) as `reviewSubmission`. Setting "Gepubliceerd" copies it without the e-mail to a public `review` (shown on the retreat page, and on Home from 4★). "Geweigerd" or back to "Nieuw" takes the copy offline. A "Reviewlink" action on a retreat gives the link to send to participants | `schemaTypes/documents/review.ts`, `structure/views.ts`, `actions/review-link.tsx` |
+| Reviews | One list with status chips (Nieuw / Gepubliceerd / Geweigerd) and per retreat. A review comes in private (with e-mail) as `reviewSubmission`. Setting "Gepubliceerd" copies it without the e-mail to a public `review` (shown on the retreat page, and on Home from 4★). "Geweigerd" or back to "Nieuw" takes the copy offline. "Tekst op de site aanpassen" on a published one opens the public copy (an `IntentButton`). A "Reviewlink" action on a retreat gives the link to send to participants | `schemaTypes/documents/review.ts`, `structure/views.ts`, `actions/review-link.tsx` |
 
 **Rules:**
 - **No "duplicate" action on submissions.** A copy would get a public id.

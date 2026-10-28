@@ -9,14 +9,14 @@ import type { ObjectInputProps } from "sanity";
 type I18n = { language?: string; value?: unknown }[];
 type Kind = "text" | "photo" | "list" | "number";
 type Check = { label: string; get: (d: Record<string, unknown>) => unknown; kind: Kind; translate?: boolean };
-type Section = { group: string; title: string; where: string; checks: Check[]; optional?: boolean; past?: boolean };
+export type Section = { group: string; title: string; where: string; checks: Check[]; optional?: boolean; past?: boolean };
 
 const at = (path: string) => (d: Record<string, unknown>) => path.split(".").reduce<unknown>((v, k) => (v as Record<string, unknown> | undefined)?.[k], d);
-const t = (label: string, path: string): Check => ({ label, get: at(path), kind: "text", translate: true });
-const photo = (label: string, path: string): Check => ({ label, get: at(path), kind: "photo" });
-const list = (label: string, path: string): Check => ({ label, get: at(path), kind: "list" });
-const num = (label: string, path: string): Check => ({ label, get: at(path), kind: "number" });
-const plain = (label: string, path: string): Check => ({ label, get: at(path), kind: "text" });
+export const t = (label: string, path: string): Check => ({ label, get: at(path), kind: "text", translate: true });
+export const photo = (label: string, path: string): Check => ({ label, get: at(path), kind: "photo" });
+export const list = (label: string, path: string): Check => ({ label, get: at(path), kind: "list" });
+export const num = (label: string, path: string): Check => ({ label, get: at(path), kind: "number" });
+export const plain = (label: string, path: string): Check => ({ label, get: at(path), kind: "text" });
 
 /** The retreat page from top to bottom: which tab fills which part (app/[lang]/retreats/[slug]/page.tsx). */
 const SECTIONS: Section[] = [
@@ -78,7 +78,6 @@ function filled(c: Check, d: Record<string, unknown>) {
 /** A translated field with NL text but no EN (the site then shows the NL text). */
 const missingEn = (c: Check, d: Record<string, unknown>) => !!c.translate && lang(c.get(d), "nl") && !lang(c.get(d), "en");
 
-const KEY = "retreat-overview-open";
 // in progress = blue, done = green (no red: nothing is wrong, just not filled in yet)
 const BLUE = "#2276fc";
 const GREEN = "#3ab667";
@@ -120,73 +119,79 @@ function Help({ s }: { s: Status }) {
 }
 
 /**
- * On top of every retreat: the page from top to bottom, with per part where it shows up on the site,
- * what's filled in (x/y), which texts still lack an English version, and one progress bar.
- * Click a part to open its tab. Optional parts (Inschrijven, SEO) don't count for the progress.
+ * On top of a large document (a retreat, Home): the page from top to bottom, with per part where it shows up
+ * on the site, what's filled in (x/y), which texts still lack an English version, and one progress bar.
+ * Click a part to open its tab. Optional parts (defaults on the site) don't count for the progress.
+ * `past` parts only show once the document's endDate has passed.
  */
-export function RetreatOverviewInput(props: ObjectInputProps) {
-  const doc = (props.value ?? {}) as Record<string, unknown>;
-  const [open, setOpen] = useState(() => localStorage.getItem(KEY) !== "0");
-  const toggle = () => setOpen((o) => (localStorage.setItem(KEY, o ? "0" : "1"), !o));
-  const today = new Date().toISOString().slice(0, 10);
-  const past = typeof doc.endDate === "string" && doc.endDate < today;
-  const sections = SECTIONS.filter((s) => !s.past || past).map((s) => ({
-    ...s,
-    done: s.checks.filter((c) => filled(c, doc)),
-    noEn: s.checks.filter((c) => missingEn(c, doc)),
-  }));
-  const counted = sections.filter((s) => !s.optional);
-  const total = counted.reduce((n, s) => n + s.checks.length, 0);
-  const done = counted.reduce((n, s) => n + s.done.length, 0);
-  const noEn = sections.reduce((n, s) => n + s.noEn.length, 0);
-  const pct = total ? Math.round((done / total) * 100) : 0;
-  const active = props.groups.find((g) => g.selected)?.name;
-  const current = sections.find((s) => s.group === active);
+export function overviewInput({ label, sections: all, storageKey }: { label: string; sections: Section[]; storageKey: string }) {
+  return function OverviewInput(props: ObjectInputProps) {
+    const doc = (props.value ?? {}) as Record<string, unknown>;
+    const [open, setOpen] = useState(() => localStorage.getItem(storageKey) !== "0");
+    const toggle = () => setOpen((o) => (localStorage.setItem(storageKey, o ? "0" : "1"), !o));
+    const today = new Date().toISOString().slice(0, 10);
+    const past = typeof doc.endDate === "string" && doc.endDate < today;
+    const sections = all.filter((s) => !s.past || past).map((s) => ({
+      ...s,
+      done: s.checks.filter((c) => filled(c, doc)),
+      noEn: s.checks.filter((c) => missingEn(c, doc)),
+    }));
+    const counted = sections.filter((s) => !s.optional);
+    const total = counted.reduce((n, s) => n + s.checks.length, 0);
+    const done = counted.reduce((n, s) => n + s.done.length, 0);
+    const noEn = sections.reduce((n, s) => n + s.noEn.length, 0);
+    const pct = total ? Math.round((done / total) * 100) : 0;
+    const active = props.groups.find((g) => g.selected)?.name;
+    const current = sections.find((s) => s.group === active);
 
-  return (
-    <Stack gap={5}>
-      <Card border radius={3} padding={3} tone={pct === 100 ? "positive" : "default"}>
-        <Stack gap={3}>
-          <Flex align="center" gap={3}>
-            <Box flex={1}>
+    return (
+      <Stack gap={5}>
+        <Card border radius={3} padding={3} tone={pct === 100 ? "positive" : "default"}>
+          <Stack gap={3}>
+            <Flex align="center" gap={3}>
+              <Box flex={1}>
+                <Stack gap={2}>
+                  <Text size={1} weight="semibold">
+                    {label} {pct}% ingevuld
+                    {noEn ? ` · ${noEn} tekst${noEn > 1 ? "en" : ""} zonder EN` : ""}
+                  </Text>
+                  <div style={{ height: 6, borderRadius: 3, background: "var(--card-border-color)", overflow: "hidden" }}>
+                    <div style={{ width: `${pct}%`, height: "100%", background: pct === 100 ? GREEN : BLUE, transition: "width .3s" }} />
+                  </div>
+                </Stack>
+              </Box>
+              <Button mode="bleed" fontSize={1} padding={2} icon={open ? ChevronDownIcon : ChevronRightIcon} text={open ? "Verberg" : "Alle delen"} onClick={toggle} />
+            </Flex>
+            {current && !open ? <Help s={current} /> : null}
+            {open ? (
               <Stack gap={2}>
-                <Text size={1} weight="semibold">
-                  Retreatpagina {pct}% ingevuld
-                  {noEn ? ` · ${noEn} tekst${noEn > 1 ? "en" : ""} zonder EN` : ""}
+                <Text size={0} muted>
+                  De pagina van boven naar onder. Klik op een deel om het te openen.
                 </Text>
-                <div style={{ height: 6, borderRadius: 3, background: "var(--card-border-color)", overflow: "hidden" }}>
-                  <div style={{ width: `${pct}%`, height: "100%", background: pct === 100 ? GREEN : BLUE, transition: "width .3s" }} />
+                <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(240px, 1fr))", gap: 4 }}>
+                  {sections.map((s) => (
+                    <Card
+                      key={s.group}
+                      as="button"
+                      type="button"
+                      radius={2}
+                      padding={2}
+                      onClick={() => props.onFieldGroupSelect(s.group)}
+                      style={{ textAlign: "left", cursor: "pointer", width: "100%", border: `1px solid ${active === s.group ? BLUE : "transparent"}` }}
+                    >
+                      <Help s={s} />
+                    </Card>
+                  ))}
                 </div>
               </Stack>
-            </Box>
-            <Button mode="bleed" fontSize={1} padding={2} icon={open ? ChevronDownIcon : ChevronRightIcon} text={open ? "Verberg" : "Alle delen"} onClick={toggle} />
-          </Flex>
-          {current && !open ? <Help s={current} /> : null}
-          {open ? (
-            <Stack gap={2}>
-              <Text size={0} muted>
-                De pagina van boven naar onder. Klik op een deel om het te openen.
-              </Text>
-              <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(240px, 1fr))", gap: 4 }}>
-                {sections.map((s) => (
-                  <Card
-                    key={s.group}
-                    as="button"
-                    type="button"
-                    radius={2}
-                    padding={2}
-                    onClick={() => props.onFieldGroupSelect(s.group)}
-                    style={{ textAlign: "left", cursor: "pointer", width: "100%", border: `1px solid ${active === s.group ? BLUE : "transparent"}` }}
-                  >
-                    <Help s={s} />
-                  </Card>
-                ))}
-              </div>
-            </Stack>
-          ) : null}
-        </Stack>
-      </Card>
-      {props.renderDefault(props)}
-    </Stack>
-  );
+            ) : null}
+          </Stack>
+        </Card>
+        {props.renderDefault(props)}
+      </Stack>
+    );
+  };
 }
+
+/** The retreat page (app/[lang]/retreats/[slug]/page.tsx). */
+export const RetreatOverviewInput = overviewInput({ label: "Retreatpagina", sections: SECTIONS, storageKey: "retreat-overview-open" });

@@ -15,12 +15,14 @@ export type SubmissionViewOptions = {
   rows: { label: string; render: (doc: Doc) => ReactNode }[];
   /** Runs after the status was saved (e.g. publish an approved review). */
   onStatus?: (client: Client, doc: Doc, status: string) => Promise<void>;
+  /** Extra under the status buttons (e.g. a link to the public copy). */
+  extra?: (doc: Doc) => ReactNode;
 };
 
 const date = (iso?: string) => (iso ? new Date(iso).toLocaleString("nl-BE", { dateStyle: "long", timeStyle: "short" }) : "-");
 
 /** Default view of a form submission (message, review): a readable card with status buttons and a note. */
-export function submissionView({ title, statuses, rows, onStatus }: SubmissionViewOptions): UserViewComponent {
+export function submissionView({ title, statuses, rows, onStatus, extra }: SubmissionViewOptions): UserViewComponent {
   return function SubmissionView({ document }) {
     const doc = document.displayed as Doc;
     const client = useClient({ apiVersion });
@@ -69,6 +71,7 @@ export function submissionView({ title, statuses, rows, onStatus }: SubmissionVi
                 <Button key={s.value} text={s.title} tone={s.tone} mode={current.value === s.value ? "default" : "ghost"} disabled={busy} onClick={() => setStatus(s.value)} />
               ))}
             </Flex>
+            {extra?.(doc)}
           </Stack>
           <Card padding={4} radius={3} shadow={1}>
             <Stack gap={5}>

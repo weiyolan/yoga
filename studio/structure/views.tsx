@@ -1,3 +1,6 @@
+import { EditIcon } from "@sanity/icons/Edit";
+import { Box } from "@sanity/ui";
+import { IntentButton } from "sanity";
 import type {
   DefaultDocumentNodeResolver,
   StructureBuilder,
@@ -41,6 +44,13 @@ const ReviewView = submissionView({
     { label: "E-mail (niet publiek)", render: (d) => mail(d.email) },
     { label: "Score", render: (d) => `${d.rating ?? "-"} / 5` },
   ],
+  // the copy on the site: name and text can be tidied there (kept on re-publish)
+  extra: (d) =>
+    d.status === "approved" ? (
+      <Box>
+        <IntentButton intent="edit" params={{ id: publicId(d._id), type: "review" }} icon={EditIcon} mode="ghost" text="Tekst op de site aanpassen" />
+      </Box>
+    ) : null,
   // Gepubliceerd → public copy without e-mail; anything else → offline. Edits on the copy are kept on re-publish.
   onStatus: async (client, d, status) => {
     const id = publicId(d._id);

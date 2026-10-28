@@ -13,7 +13,7 @@ import { UsersIcon } from "@sanity/icons/Users";
 import { defineArrayMember, defineField, defineType } from "sanity";
 import { i18nLines, i18nString, i18nText, pick } from "../shared/i18n";
 import { mediaArrayField, mediaField } from "../shared/media";
-import { RetreatOverviewInput } from "../../components/RetreatOverview";
+import { RetreatOverviewInput } from "../../components/PageOverview";
 
 /**
  * A retreat. Sections follow the detail page (and the Dahab Facebook event):
@@ -26,7 +26,7 @@ export const retreat = defineType({
   title: "Retreat",
   type: "document",
   icon: CalendarIcon,
-  // on top: the page from top to bottom, what's filled in per part + a progress bar (components/RetreatOverview.tsx)
+  // on top: the page from top to bottom, what's filled in per part + a progress bar (components/PageOverview.tsx)
   components: { input: RetreatOverviewInput },
   // one tab per part of the page, in page order; it opens on Basis (“Alle velden” = everything at once)
   groups: [

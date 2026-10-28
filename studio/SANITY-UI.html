@@ -63,13 +63,13 @@ real validation errors.</li>
 </thead>
 <tbody><tr>
 <td>Type list → sub-list → documents (3 panels)</td>
-<td>One panel with the page singleton on top + the documents under a divider</td>
-<td><code>structure/index.ts</code> (Formulieren), <code>components/RetreatList.tsx</code> (Retreats)</td>
+<td>One panel with the page singleton on top + the documents under a heading per kind</td>
+<td><code>structure/index.ts</code> <code>liveList</code> (Formulieren, Mails, Lessen, Over ons), <code>components/RetreatList.tsx</code> (Retreats)</td>
 </tr>
 <tr>
-<td>Separate lists for upcoming / past</td>
-<td>One list with filter chips (Komend / Voorbij / Alle)</td>
-<td><code>RetreatList.tsx</code></td>
+<td>Separate lists for upcoming / past, new / published</td>
+<td>One list with filter chips (Komend / Voorbij / Alle; Nieuw / Gepubliceerd / Geweigerd / Alle)</td>
+<td><code>RetreatList.tsx</code>, <code>StatusList.tsx</code> (Inschrijvingen, Contactformulier, Reviews)</td>
 </tr>
 <tr>
 <td>Component panes fill the whole width</td>
@@ -97,7 +97,7 @@ width (on a phone, a whole screen) and makes people lose track of where they are
 <li><strong>Keep list panels narrow.</strong> Give them a max width, so the document gets the room.</li>
 <li><strong>Mind the cost of a flat list.</strong> A flat list made with <code>S.documentTypeListItem</code> directly in the root is not the same as &quot;one level less&quot;: it moves the page singleton elsewhere. We tried that and reverted it. The singleton belongs with its documents.</li>
 </ul>
-<p><strong>A live mixed list (static items + documents).</strong> A child can return an Observable:</p>
+<p><strong>A live mixed list (static items + documents).</strong> <code>liveList(S, id, title, top, parts, create)</code> in <code>structure/index.ts</code>: <code>top</code> = the singletons, <code>parts</code> = one heading per document type (with an optional <code>match</code> and <code>sort</code>, e.g. founders vs collaborators, <code>orderRank</code> as on the site), <code>create</code> = the &quot;+&quot; menu. Under the hood a child returns an Observable:</p>
 <pre><code class="language-ts">.child(() =&gt; {
   const client = S.context.getClient({ apiVersion });
   return client
@@ -185,7 +185,7 @@ width (on a phone, a whole screen) and makes people lose track of where they are
 <p><strong>Unset vs default.</strong> For booleans, show <code>value ?? initialValue</code>, exactly as the site reads it (<code>coalesce(x, true)</code>, <code>!= false</code>). Otherwise an untouched toggle looks off while the site treats it as on. Done once for every lone on/off in <code>I18nTabsInput</code> (<code>form.components.input</code>), and in <code>ToggleListInput</code> for lists.</p>
 <hr>
 <h2 id="4-documents">4. Documents</h2>
-<h3>4.1 Large documents (a retreat)</h3>
+<h3>4.1 Large documents (a retreat, Home)</h3>
 <ul>
 <li><strong>Groups:</strong><ul>
 <li>Groups in page order, each with an icon.</li>
@@ -197,7 +197,7 @@ width (on a phone, a whole screen) and makes people lose track of where they are
 <li>the page from top to bottom, one tile per group: where it shows on the site, x/y filled, what is still empty, and how many texts have no EN;</li>
 <li>clicking a tile calls <code>props.onFieldGroupSelect(group)</code>;</li>
 <li>collapsible, with the choice stored in <code>localStorage</code>; collapsed, it explains only the open tab.</li>
-<li>Where: <code>components/RetreatOverview.tsx</code>.</li>
+<li>Where: <code>components/PageOverview.tsx</code> (<code>overviewInput({ label, sections, storageKey })</code>), used by the retreat and Home.</li>
 <li>Optional groups (sign-up overrides, SEO) show &quot;standaard&quot; or &quot;aangepast&quot; and don&#39;t count toward the progress.</li>
 </ul>
 </li>
@@ -264,7 +264,7 @@ The classic form view (greyed-out read-only fields) is the wrong tool for that.<
 </tr>
 <tr>
 <td>Reviews</td>
-<td>A review comes in private (with e-mail) as <code>reviewSubmission</code>. Setting &quot;Gepubliceerd&quot; copies it without the e-mail to a public <code>review</code> (shown on the retreat page, and on Home from 4★). &quot;Geweigerd&quot; or back to &quot;Nieuw&quot; takes the copy offline. A &quot;Reviewlink&quot; action on a retreat gives the link to send to participants</td>
+<td>One list with status chips (Nieuw / Gepubliceerd / Geweigerd) and per retreat. A review comes in private (with e-mail) as <code>reviewSubmission</code>. Setting &quot;Gepubliceerd&quot; copies it without the e-mail to a public <code>review</code> (shown on the retreat page, and on Home from 4★). &quot;Geweigerd&quot; or back to &quot;Nieuw&quot; takes the copy offline. &quot;Tekst op de site aanpassen&quot; on a published one opens the public copy (an <code>IntentButton</code>). A &quot;Reviewlink&quot; action on a retreat gives the link to send to participants</td>
 <td><code>schemaTypes/documents/review.ts</code>, <code>structure/views.ts</code>, <code>actions/review-link.tsx</code></td>
 </tr>
 </tbody></table>
