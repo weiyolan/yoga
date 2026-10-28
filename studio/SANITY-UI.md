@@ -37,6 +37,16 @@ Code references are relative to `studio/`.
 | Generic "+" offers everything | `newDocumentOptions` / `schema.templates` filter out singletons, submissions and fixed docs | `sanity.config.ts` |
 | Pink initials as workspace icon | The site icon as `icon` in `defineConfig` | `components/StudioLogo.tsx` |
 
+**Navigation depth: at most two clicks to any document.** The classic structure tends to grow a
+level per idea: "Formulieren" → "Inschrijfformulieren" → the forms → a form. Every extra panel costs
+width (on a phone, a whole screen) and makes people lose track of where they are. Our rules:
+
+- **Group → document.** The first panel holds the groups (Retreats, Formulieren, Mails, …); the second panel holds the documents themselves.
+- **No sub-list with one or two items.** Pull them up: the page singleton goes on top of the document list (Retreats-pagina above the retreats, Inschrijving pagina above the forms), with a divider in between.
+- **No separate lists per state.** Use filter chips in one list instead (Komend / Voorbij / Alle; Nieuw / Bevestigd / …).
+- **Keep list panels narrow.** Give them a max width, so the document gets the room.
+- **Mind the cost of a flat list.** A flat list made with `S.documentTypeListItem` directly in the root is not the same as "one level less": it moves the page singleton elsewhere. We tried that and reverted it. The singleton belongs with its documents.
+
 **A live mixed list (static items + documents).** A child can return an Observable:
 
 ```ts
@@ -128,9 +138,25 @@ Code references are relative to `studio/`.
 - Mail texts are editable documents with defaults taken from the site dictionary (templates), so the Studio opens prefilled.
 
 ### 4.4 Submissions (sign-ups, messages, reviews)
-- A "Nieuw" badge and count badges in the navigation.
-- No "duplicate" action, because a copy would get a public id.
-- A table view with one column per question, so the same question across forms fills the same column. Export it as CSV.
+
+Form submissions are documents people never "write" in the Studio. They read them, decide, and move on.
+The classic form view (greyed-out read-only fields) is the wrong tool for that.
+
+| Need | Ours | Where |
+|---|---|---|
+| See at a glance what's new | Live count bubble on the menu icon ("3" on Inschrijvingen) and a "Nieuw" badge on the document | `components/CountBadgeIcon.tsx`, `actions/badges.ts` |
+| Find one quickly | One list per kind with status chips (with counts, opens on "Alle"), optionally per retreat, newest first. Each row has a coloured status badge: Nieuw = blue, Bevestigd / Beantwoord = green, Wachtlijst = amber, Geannuleerd / Geweigerd = red | `components/StatusList.tsx`, `components/StatusPreview.tsx` |
+| Read it | The default view is a readable card (name, contact, answers as label/value), not form fields | `components/SignupView.tsx`, `components/SubmissionView.tsx` |
+| Decide | Status buttons on that card plus an internal note. A sign-up's status also recomputes "Geboekt" on its retreat | `SignupView.tsx`, `lib/booked.ts`, `components/StatusInput.tsx` |
+| Answer | "Bevestigingsmail" is the first action on a sign-up: preview it, then send (the waitlist version when full) | `actions/confirmation-mail.tsx` |
+| Overview / export | Table view with one row per sign-up and one column per question, filter per retreat and status, CSV export. The same question across forms fills the same column (so harmonise labels) | `components/SignupTable.tsx` |
+| Reviews | A review comes in private (with e-mail) as `reviewSubmission`. Setting "Gepubliceerd" copies it without the e-mail to a public `review` (shown on the retreat page, and on Home from 4★). "Geweigerd" or back to "Nieuw" takes the copy offline. A "Reviewlink" action on a retreat gives the link to send to participants | `schemaTypes/documents/review.ts`, `structure/views.ts`, `actions/review-link.tsx` |
+
+**Rules:**
+- **No "duplicate" action on submissions.** A copy would get a public id.
+- **Not in "new document".** They are only created by the site's forms.
+- **Private ids.** Submissions holding personal data use dotted ids (`signup.<uuid>`), so they are never readable by the public API.
+- **Status values are short words** with fixed colours, the same in the list, on the card and in the table.
 
 ---
 
@@ -148,6 +174,7 @@ Code references are relative to `studio/`.
 | Every field gets `components.input` from the i18n plugin | Don't treat "has a custom input" as "custom UI" for `internationalizedArray*` |
 | `options.columns` on objects of booleans gives ragged boxes | Use a custom list input |
 | `ObjectInputProps.onFieldGroupSelect` | Takes only `(groupName)` |
+| Some fields have a ⊖, others not | The ⊖ is the i18n plugin's "remove this language" button: every NL / EN value is a list item, so it can be removed. Plain fields have no item to remove; you clear them by emptying them. Removing NL also removes the text the site shows |
 | Typegen | `npm run typegen` after schema or query changes; GROQ with an interpolated `${CONST}` is fine |
 
 ---
@@ -209,3 +236,73 @@ const CSS = `.i18n-tab-item [data-ui="Flex"]:has(> [data-ui="fieldHeaderContentB
 ```
 
 <!-- include: components/I18nTabs.tsx -->
+
+---
+
+## 8. Appendix: the one-row field (code)
+
+![One-row fields: title + ⓘ left; input, ⊖, NL | EN, ✨ and the “…” menu right](SANITY-UI-rows.png)
+
+**How it works** (`components/InlineFields.tsx`, called from `I18nTabsField` = `form.components.field`):
+
+1. **Which fields:** `isShort(props)` decides from the schema type chain: `string`, `number`, `url`, `date`, `slug`, `reference` and the one-line NL | EN. It never picks `text`, booleans, option lists, arrays, objects or custom inputs.
+2. **Sanity's own field:** the field is rendered with `props.renderDefault(...)`, with the help moved behind the ⓘ in the title. Comments, the “…” menu, validation and change bars are untouched.
+3. **CSS grid:** turns Sanity's header + input stack into `title | input | “…”`.
+   - The header is unwrapped with `display: contents`.
+   - The “…” card loses its `position: absolute`.
+   - Everything is centred vertically.
+4. **NL | EN fields:** the tabs and ✨ are passed to the input via context (`side`) and drawn right of it.
+5. **Narrow columns:** a container query stacks the title above the input again below 300px.
+
+```ts
+// which fields get one row
+export function isShort(props: FieldProps) {
+  const chain = names(props.schemaType); // e.g. ["title", "internationalizedArrayString", "array"]
+  if (props.name === "value" || chain.includes("text") || chain.includes("boolean")) return false;
+  if ((props.schemaType.options as { list?: unknown[] })?.list?.length) return false;
+  // own inputs (tiles, checkboxes) need the width; the NL | EN plugin's input is fine
+  if (props.schemaType.components?.input && !chain.includes("internationalizedArrayString")) return false;
+  return chain.some((n) => SHORT.has(n));
+}
+
+// Sanity's field markup: VStack [header Flex (fieldHeaderContentBox | “…” Card), input]
+const ROW = `.inline-field [data-ui="VStack"]:has(> [data-ui="Flex"] > [data-ui="fieldHeaderContentBox"]):not(.i18n-tab-item *)`;
+const HEAD = `${ROW} > [data-ui="Flex"]:first-child`;
+const CSS = `
+.inline-field { container-type: inline-size; margin-block: -10px; }
+${ROW} { display: grid !important; grid-template-columns: minmax(80px, 26%) minmax(0, 1fr) auto; column-gap: 8px; align-items: center; }
+${HEAD} { display: contents !important; }
+${HEAD} > [data-ui="fieldHeaderContentBox"] { grid-column: 1; grid-row: 1; }
+${HEAD} > :not([data-ui="fieldHeaderContentBox"]) { grid-column: 3; grid-row: 1; position: static !important; inset: auto !important; }
+${ROW} > :not(:first-child) { grid-column: 2; }
+${ROW} > :nth-child(2) { grid-row: 1; }
+@container (max-width: 300px) { /* title on top again */ }
+`;
+
+export function InlineField({ props, title }: { props: FieldProps; title?: ReactNode }) {
+  const t = title ?? <>{props.title}{props.description ? <Help text={props.description} /> : null}</>;
+  return (
+    <div className="inline-field">
+      <style>{CSS}</style>
+      {props.renderDefault({ ...props, description: undefined, title: t as unknown as string })}
+    </div>
+  );
+}
+```
+
+```tsx
+// I18nTabs.tsx: the field component decides; NL | EN fields pass their tabs + ✨ to the input
+export function I18nTabsField(props: FieldProps) {
+  const inline = useInlineFields() && isShort(props);
+  if (!isArray(props.schemaType.name)) {
+    if (inline) return <InlineField props={props} />;
+    if (props.description && props.name !== "value")
+      return props.renderDefault({ ...props, description: undefined, title: (<>{props.title}<Help text={props.description} /></>) as unknown as string });
+    return props.renderDefault(props);
+  }
+  return <TabsField {...props} inline={inline} compact />;
+}
+```
+
+<!-- include: components/InlineFields.tsx -->
+
