@@ -78,7 +78,10 @@ export function I18nTabsItem(props: ItemProps) {
 }
 
 /** The plugin's “NEDERLANDS” / “ENGLISH” header above each input: the tab already says it. */
-const CSS = `.i18n-tab-item [data-ui="Flex"]:has(> [data-ui="fieldHeaderContentBox"] label[for$=".value"]) { display: none; }`;
+// + the plugin's ⊖ next to each language (“remove this language”): one tap wiped the NL text the site shows;
+//   emptying the box does the same on purpose
+const CSS = `.i18n-tab-item [data-ui="Flex"]:has(> [data-ui="fieldHeaderContentBox"] label[for$=".value"]) { display: none; }
+.i18n-tab-item > [data-ui="Card"] > [data-ui="Flex"] > :not(:first-child) { display: none; }`;
 
 function TabsField({ inline, compact, ...props }: FieldProps & { inline?: boolean; compact?: boolean }) {
   const [active, setActive] = useState<string>(defaultLanguage);

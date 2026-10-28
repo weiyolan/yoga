@@ -174,12 +174,27 @@ The classic form view (greyed-out read-only fields) is the wrong tool for that.
 | Every field gets `components.input` from the i18n plugin | Don't treat "has a custom input" as "custom UI" for `internationalizedArray*` |
 | `options.columns` on objects of booleans gives ragged boxes | Use a custom list input |
 | `ObjectInputProps.onFieldGroupSelect` | Takes only `(groupName)` |
-| Some fields have a ⊖, others not | The ⊖ is the i18n plugin's "remove this language" button: every NL / EN value is a list item, so it can be removed. Plain fields have no item to remove; you clear them by emptying them. Removing NL also removes the text the site shows |
+| The i18n plugin puts a ⊖ next to every language value (only on NL / EN fields, so some fields had one and others not) | It means "remove this language": one tap wiped the NL text the site shows. We hide it with CSS (`.i18n-tab-item > [data-ui="Card"] > [data-ui="Flex"] > :not(:first-child)`); emptying the box does the same on purpose |
 | Typegen | `npm run typegen` after schema or query changes; GROQ with an interpolated `${CONST}` is fine |
 
 ---
 
-## 6. Verifying without Sanity access
+## 6. Other tools that made a difference
+
+| Problem with the classic Studio | Ours | Where |
+|---|---|---|
+| Drafts vs published confused people, and the perspective picker got an account stuck on "Gepubliceerd" | Releases and scheduled drafts are switched off: one flow, edit the draft, then Publiceren. "Zo werkt het" explains it in a few lines | `sanity.config.ts`, `components/Help.tsx` |
+| Placeholder texts like “[IBAN]” went live unnoticed | Validation warns (yellow) on any text in [brackets], and "Nog in te vullen [ ]" lists every document that still has one | `schemaTypes/shared/i18n.ts` (`noPlaceholders`), `components/Placeholders.tsx` |
+| English was always behind | ✨ per field, plus "Vertalen (AI)": every document with Dutch but no English, tick and translate in bulk into the drafts | `components/I18nTabs.tsx`, `components/BulkTranslate.tsx` |
+| Images were uploaded again and again per document, without alt text | One Fotobank (`mediaItem`): tiles with search, filters and upload, and AI alt texts (NL + EN). Fields pick from it. "Andere foto uploaden" replaces a photo everywhere at once; "Verwijderen" only works once nothing uses it, and it lists where the photo is used | `components/MediaBank.tsx`, `components/PhotoPicker.tsx`, `schemaTypes/shared/media.ts` |
+| SEO fields were blind | "SEO & delen" shows the Google snippet per language, with the same fallbacks as the site and length checks | `components/SeoPreview.tsx` |
+| Not clear where a shared document is used | "Gebruikt door" on forms and mails lists the retreats using them (the default one: also the retreats that picked none) | `components/UsedByInput.tsx` |
+| People were scattered over sign-ups, messages and subscribers | "Contactboek": one row per e-mail address with where it came from, newsletter on/off, CSV import and export | `components/ContactBook.tsx` |
+| Editing blind | Live preview (Presentation) with drafts and click-to-edit, without the "Gebruikt op x pagina's" banner | `presentation/resolve.ts` |
+| Mails were a black box | A preview of the HTML mail next to the form, a test mail to yourself, and editable texts with the site's defaults | `components/MailPreview.tsx` |
+| Content changes across many documents by hand | Versioned scripts (`npm run content:vN -- --dry`, then for real) and `publish:drafts` (`--only=type`, `--skip-placeholders`). `--dry` prints what they would change first | `scripts/` |
+
+## 7. Verifying without Sanity access
 
 - Build the site with the offline fixture: `npm run fixture`, then `SANITY_FIXTURE=1 npm run build && npm start`. The embedded Studio lives at `/studio`.
 - Drive the embedded Studio with Playwright and mock `*.sanity.io`:
@@ -190,7 +205,7 @@ The classic form view (greyed-out read-only fields) is the wrong tool for that.
 
 ---
 
-## 7. Appendix: the NL | EN tabs (code)
+## 8. Appendix: the NL | EN tabs (code)
 
 ![NL | EN tabs: a one-row field (tabs + ✨ right of the input) and a full-width text (tabs after the title)](SANITY-UI-tabs.png)
 
@@ -239,9 +254,9 @@ const CSS = `.i18n-tab-item [data-ui="Flex"]:has(> [data-ui="fieldHeaderContentB
 
 ---
 
-## 8. Appendix: the one-row field (code)
+## 9. Appendix: the one-row field (code)
 
-![One-row fields: title + ⓘ left; input, ⊖, NL | EN, ✨ and the “…” menu right](SANITY-UI-rows.png)
+![One-row fields: title + ⓘ left; input, NL | EN, ✨ and the “…” menu right](SANITY-UI-rows.png)
 
 **How it works** (`components/InlineFields.tsx`, called from `I18nTabsField` = `form.components.field`):
 
