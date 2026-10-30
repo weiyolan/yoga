@@ -2,7 +2,9 @@ import { DivingMask, YogaMat } from "@/components/icons";
 import { Photo } from "@/components/Photo";
 import { RichText } from "@/components/RichText";
 import { Hero, SectionHead } from "@/components/sections";
+import { JsonLd } from "@/components/JsonLd";
 import { getDictionary } from "@/lib/dictionary";
+import { peopleLd } from "@/lib/jsonld";
 import { buildMetadata } from "@/lib/metadata";
 import { langParam } from "@/lib/routes";
 import { sanityFetch } from "@/sanity/fetch";
@@ -36,6 +38,7 @@ export default async function About({ params }: PageProps<"/[lang]/over-ons">) {
 
   return (
     <>
+      {page?.founders?.length ? <JsonLd data={peopleLd(page.founders)} /> : null}
       <Hero hero={page?.hero} short />
 
       {page?.founders?.length ? (

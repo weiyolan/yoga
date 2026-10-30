@@ -1,11 +1,13 @@
 /**
- * schema.org data for Google (components/JsonLd.tsx): the organisation (home), a retreat as an Event
- * and breadcrumbs. Only what the page itself shows; empty values are left out.
+ * schema.org data for Google (components/JsonLd.tsx): the organisation and what it offers (every page),
+ * a retreat as an Event, the classes as Services (Lessen), Rita & Philippe (Over ons) and breadcrumbs.
+ * Only what the site itself shows; empty values are left out.
  */
 import { urlFor, type Media } from "@/sanity/image";
 import type { Lang } from "@/sanity/site.config";
 import { isUpcoming } from "@/sanity/fetch";
 import { siteUrl } from "./metadata";
+import { href } from "./routes";
 
 const abs = (path: string) => (/^https?:/.test(path) ? path : siteUrl + path);
 
@@ -36,13 +38,21 @@ type Site =
       phone?: string | null;
       instagram?: string | null;
       facebook?: string | null;
+      founders?: { name: string | null; role?: string | null }[] | null;
     }
   | null
   | undefined;
 
 export const organizationId = `${siteUrl}/#organization`;
 
-/** Home: who we are + the website (name in search results). */
+/** Where Rita & Philippe work: private classes in Mortsel or at home, classes in Antwerp studios. */
+const AREA = ["Antwerpen", "Mortsel"].map((name) => ({ "@type": "City", name }));
+const SERVICES = {
+  nl: [["Yogaretreats", "retreats"], ["Yoga- en Pilateslessen", "lessons"], ["Privéles yoga & Pilates", "private"]],
+  en: [["Yoga retreats", "retreats"], ["Yoga and Pilates classes", "lessons"], ["Private yoga & Pilates class", "private"]],
+} as const;
+
+/** Every page: who we are, what we offer (retreats, classes, private class), where, and the people behind it; + the website. */
 export function organizationLd(lang: Lang, site: Site, name: string) {
   return [
     compact({
@@ -56,6 +66,24 @@ export function organizationLd(lang: Lang, site: Site, name: string) {
       email: site?.email,
       telephone: site?.phone,
       sameAs: [site?.instagram, site?.facebook].filter(Boolean),
+      address: { "@type": "PostalAddress", addressLocality: "Mortsel", addressRegion: "Antwerpen", addressCountry: "BE" },
+      areaServed: AREA,
+      knowsAbout: ["Yoga", "Pilates", lang === "en" ? "Meditation" : "Meditatie", "Freediving", lang === "en" ? "Yoga retreat" : "Yogaretreat"],
+      founder: (site?.founders ?? []).filter((f) => f.name).map((f) => compact({ "@type": "Person", name: f.name, jobTitle: f.role })),
+      hasOfferCatalog: {
+        "@type": "OfferCatalog",
+        name,
+        itemListElement: (SERVICES[lang] ?? SERVICES.nl).map(([n, to]) => ({
+          "@type": "Offer",
+          itemOffered: {
+            "@type": "Service",
+            name: n,
+            url: abs(to === "private" ? href(lang, "lessons", { hash: "prive" }) : href(lang, to)),
+            provider: { "@id": organizationId },
+            areaServed: to === "retreats" ? undefined : AREA,
+          },
+        })),
+      },
     }),
     compact({
       "@context": "https://schema.org",
@@ -68,6 +96,88 @@ export function organizationLd(lang: Lang, site: Site, name: string) {
     }),
   ];
 }
+
+/** Lessen: a Service per style + the private class with its prices. */
+export function lessonsLd(
+  lang: Lang,
+  styles: { name: string | null; slug: string | null; what?: string | null }[],
+  priv?: { title?: string | null; text?: string | null; rates?: { label: string | null; amount: number | null; perPerson: boolean | null }[] | null } | null,
+) {
+  const area = AREA;
+  return [
+    ...styles
+      .filter((s) => s.name)
+      .map((s) =>
+        compact({
+          "@context": "https://schema.org",
+          "@type": "Service",
+          serviceType: lang === "en" ? "Yoga class" : "Yogales",
+          name: s.name,
+          description: s.what,
+          url: abs(href(lang, "lessons", { hash: s.slug ?? undefined })),
+          provider: { "@id": organizationId },
+          areaServed: area,
+        }),
+      ),
+    ...(priv?.title || priv?.text
+      ? [
+          compact({
+            "@context": "https://schema.org",
+            "@type": "Service",
+            serviceType: lang === "en" ? "Private yoga class" : "Privéles yoga",
+            name: priv.title || (lang === "en" ? "Private class" : "Privéles"),
+            description: priv.text,
+            url: abs(href(lang, "lessons", { hash: "prive" })),
+            provider: { "@id": organizationId },
+            areaServed: area,
+            offers: (priv.rates ?? [])
+              .filter((r) => r.amount != null)
+              .map((r) =>
+                compact({
+                  "@type": "Offer",
+                  name: r.label,
+                  priceSpecification: compact({
+                    "@type": "UnitPriceSpecification",
+                    price: r.amount,
+                    priceCurrency: "EUR",
+                    unitText: r.perPerson ? (lang === "en" ? "per person" : "per persoon") : undefined,
+                  }),
+                }),
+              ),
+          }),
+        ]
+      : []),
+  ];
+}
+
+/** Over ons: Rita & Philippe as people who work for the organisation. */
+export function peopleLd(people: { name: string | null; role?: string | null; links?: { url: string | null }[] | null; website?: string | null }[]) {
+  return people
+    .filter((p) => p.name)
+    .map((p) =>
+      compact({
+        "@context": "https://schema.org",
+        "@type": "Person",
+        name: p.name,
+        jobTitle: p.role,
+        worksFor: { "@id": organizationId },
+        sameAs: [p.website, ...(p.links ?? []).map((l) => l.url)].filter(Boolean),
+      }),
+    );
+}
+
+/** Country names as written in the Studio → ISO code for Google. */
+const COUNTRIES: Record<string, string> = {
+  belgie: "BE", belgium: "BE", nederland: "NL", netherlands: "NL", frankrijk: "FR", france: "FR", duitsland: "DE", germany: "DE",
+  luxemburg: "LU", luxembourg: "LU", spanje: "ES", spain: "ES", portugal: "PT", italie: "IT", italy: "IT", griekenland: "GR", greece: "GR",
+  egypte: "EG", egypt: "EG", marokko: "MA", morocco: "MA", turkije: "TR", turkey: "TR", oostenrijk: "AT", austria: "AT", zwitserland: "CH", switzerland: "CH",
+};
+const iso = (country?: string | null) => {
+  const k = (country ?? "").toLowerCase().normalize("NFD").replace(/[^a-z]/g, "");
+  return COUNTRIES[k] ?? country;
+};
+/** “Ardense bossen · Spa” → “Spa” (the town; the full description goes to the place name). */
+const town = (place?: string | null) => place?.split("·").pop()?.trim() || place;
 
 type Retreat = {
   title: string | null;
@@ -91,7 +201,9 @@ export function retreatLd(
     description,
     images,
     name,
+    lang,
   }: {
+    lang?: Lang;
     url: string;
     signupUrl?: string;
     description?: string;
@@ -111,13 +223,15 @@ export function retreatLd(
     eventAttendanceMode: "https://schema.org/OfflineEventAttendanceMode",
     url: abs(url),
     image: images.filter(Boolean),
+    inLanguage: lang,
+    keywords: lang === "en" ? "yoga retreat" : "yogaretreat, yoga retreat",
     location: compact({
       "@type": "Place",
-      name: r.venue || r.place,
+      name: [r.venue, r.place].filter(Boolean).join(", "),
       address: compact({
         "@type": "PostalAddress",
-        addressLocality: r.place,
-        addressCountry: r.country,
+        addressLocality: town(r.place),
+        addressCountry: iso(r.country),
       }),
     }),
     organizer: {
@@ -125,6 +239,7 @@ export function retreatLd(
       "@id": organizationId,
       name,
       url: abs("/"),
+      logo: abs("/icon.svg"),
     },
     performer: (r.hosts ?? [])
       .filter((h) => h.name)

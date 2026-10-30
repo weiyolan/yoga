@@ -130,6 +130,7 @@ export default async function RetreatPage({
       data={[
         retreatLd(r, {
           name: site,
+          lang,
           url: retreatHref(lang, r.slug),
           signupUrl:
             upcoming && !external ? signupHref(lang, r.slug) : undefined,

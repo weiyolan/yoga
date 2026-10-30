@@ -67,7 +67,15 @@ export const retreat = defineType({
         maxLength: 60,
       },
       description: "Het webadres van de retreatpagina: /retreats/<slug>. Klik “Generate” (titel + jaar). Na publicatie liever niet meer wijzigen: gedeelde links werken dan niet meer.",
-      validation: (rule) => rule.required(),
+      validation: (rule) => [
+        rule.required(),
+        // eifel-2026: lower case, with the year (the reviews of an earlier edition match on the first word)
+        rule
+          .custom((v?: { current?: string }) =>
+            !v?.current || /^[a-z0-9]+(-[a-z0-9]+)*-\d{4}$/.test(v.current) ? true : "Liever kleine letters en het jaar achteraan, bv. “rochefort-2027” (klik “Generate”)",
+          )
+          .warning(),
+      ],
     }),
     defineField({
       name: "startDate",

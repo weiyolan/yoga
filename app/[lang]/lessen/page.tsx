@@ -3,7 +3,9 @@ import { Photo } from "@/components/Photo";
 import { Paragraphs } from "@/components/RichText";
 import { Schedule } from "@/components/Schedule";
 import { ClassTiles, Hero, SectionHead } from "@/components/sections";
+import { JsonLd } from "@/components/JsonLd";
 import { getDictionary } from "@/lib/dictionary";
+import { lessonsLd } from "@/lib/jsonld";
 import { euro } from "@/lib/format";
 import { buildMetadata } from "@/lib/metadata";
 import { href, langParam } from "@/lib/routes";
@@ -41,6 +43,7 @@ export default async function Lessons({ params }: PageProps<"/[lang]/lessen">) {
 
   return (
     <>
+      <JsonLd data={lessonsLd(lang, styles, page?.private)} />
       <Hero hero={page?.hero} short />
 
       {/* Always rendered: the menu and the style tiles link to #planning. */}
