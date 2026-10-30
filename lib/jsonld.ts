@@ -4,6 +4,7 @@
  */
 import { urlFor, type Media } from "@/sanity/image";
 import type { Lang } from "@/sanity/site.config";
+import { isUpcoming } from "@/sanity/fetch";
 import { siteUrl } from "./metadata";
 
 const abs = (path: string) => (/^https?:/.test(path) ? path : siteUrl + path);
@@ -128,7 +129,8 @@ export function retreatLd(
     performer: (r.hosts ?? [])
       .filter((h) => h.name)
       .map((h) => ({ "@type": "Person", name: h.name })),
-    offers: r.priceFrom
+    // a past retreat: no price for Google
+    offers: r.priceFrom && isUpcoming(r.endDate)
       ? compact({
           "@type": "Offer",
           price: r.priceFrom,

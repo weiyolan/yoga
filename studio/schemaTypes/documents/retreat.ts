@@ -19,7 +19,7 @@ import { RetreatOverviewInput } from "../../components/PageOverview";
  * A retreat. Sections follow the detail page (and the Dahab Facebook event):
  * notendop · de plek · de mensen · het programma · praktisch · klaar om te duiken?
  * Upcoming vs. past is derived from `endDate`, never stored.
- * Past retreats show hero, notendop, facts and recap photos only (see the group description).
+ * Past retreats show hero, notendop, facts (where, hosts, participants: no price) and recap photos only.
  */
 export const retreat = defineType({
   name: "retreat",
@@ -84,7 +84,7 @@ export const retreat = defineType({
       type: "date",
       group: "basics",
       fieldset: "dates",
-      description: "Laatste dag. Na deze datum wordt de retreat vanzelf “voorbij”: zwart-wit kaart bij voorbije retreats en een kortere terugblik-pagina zonder inschrijven.",
+      description: "Laatste dag. Na deze datum wordt de retreat vanzelf “voorbij”: zwart-wit kaart bij voorbije retreats en een kortere terugblik-pagina zonder inschrijven en zonder prijs.",
       validation: (rule) =>
         rule.required().custom((end, ctx) => {
           const start = ctx.document?.startDate as string | undefined;
@@ -144,7 +144,7 @@ export const retreat = defineType({
       type: "number",
       group: "basics",
       fieldset: "seats",
-      description: "De laagste prijs, als “vanaf € …” bovenaan en in de zijkolom van de retreatpagina, op de kaarten, de inschrijfpagina en de deelafbeelding.",
+      description: "De laagste prijs, als “vanaf € …” bovenaan en in de zijkolom van de retreatpagina, op de kaarten, de inschrijfpagina en de deelafbeelding. Niet getoond bij een voorbije retreat (blijft hier bewaard voor een volgende editie).",
       validation: (rule) => rule.min(0),
     }),
     defineField({
