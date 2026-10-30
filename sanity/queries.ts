@@ -155,7 +155,7 @@ export const LAYOUT_QUERY = defineQuery(`*[_id == "settings"][0]{
   "nextRetreat": *[_type == "retreat" && ${UPCOMING}] | order(startDate asc)[0]${RETREAT_CARD},
   "styles": *[_type == "yogaClass"] | order(orderRank asc){ _id, name, "slug": slug.current, "what": ${t("what")} },
   "studios": *[_type == "studio"] | order(name asc).name,
-  "hasPrivate": defined(*[_id == "lessonsPage"][0].private.title),
+  "hasPrivate": count(*[_id == "lessonsPage" && (defined(private.title) || defined(private.text))]) > 0,
   "galleryCategories": array::unique(*[_type == "mediaItem" && showInGallery != false].categories[]),
   "foundersPhoto": *[_id == "homePage"][0].aboutPhoto->${MEDIA},
   "texts": {
@@ -304,7 +304,11 @@ export const LESSONS_QUERY = defineQuery(`{
     "studiosTitle": ${t("studiosTitle")},
     "scheduleTitle": ${t("scheduleTitle")},
     "scheduleEmpty": ${t("scheduleEmpty")},
-    "private": private{ "title": ${t("title")}, "text": ${t("text")}, "practical": ${t("practical")}, "button": ${t("button")}, "photo": photo->${MEDIA} },
+    "private": private{
+      "title": ${t("title")}, "text": ${t("text")}, "practical": ${t("practical")}, "button": ${t("button")}, "photo": photo->${MEDIA},
+      "ratesTitle": ${t("ratesTitle")}, "rates": rates[defined(amount)]{ _key, "label": ${t("label")}, amount, perPerson },
+      "detailsTitle": ${t("detailsTitle")}, "details": details[]{ _key, "label": ${t("label")}, "text": ${t("text")} }
+    },
     "schedule": schedule[]{
       _key, day, startTime, durationMinutes, "level": coalesce(level, "all"),
       "style": style->{ name, "slug": slug.current, "what": ${t("what")} },

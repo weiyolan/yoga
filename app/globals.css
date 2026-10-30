@@ -299,6 +299,12 @@ blockquote { margin: 0 auto; max-width: 30ch; font: clamp(1.6rem, 3vw, 2.4rem)/1
 .person .obj svg { width: 52%; stroke: var(--ink); fill: none; stroke-width: 1.2; }
 .person:hover .obj, .person:focus .obj { opacity: 0; }
 .collabs { list-style: none; padding: 0; margin: 0; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 40px 48px; } @media (max-width: 1100px) { .collabs { grid-template-columns: repeat(2, minmax(0, 1fr)); } } @media (max-width: 860px) { .collabs { grid-template-columns: 1fr; } }
+/* privéles: price list + practical rows (lessen #prive) */
+.rates-h { margin: 26px 0 8px; font: 500 .72rem/1 var(--sans); letter-spacing: .1em; text-transform: uppercase; color: var(--ink-soft); }
+.rates { list-style: none; padding: 0; margin: 0; border-top: 1px solid var(--line); }
+.rates li { display: flex; justify-content: space-between; align-items: baseline; gap: 16px; padding: 10px 0; border-bottom: 1px solid var(--line); }
+.rates b { font: 400 1.3rem/1.1 var(--serif); white-space: nowrap; }
+.kv { margin: 0; } .kv div { display: grid; grid-template-columns: 90px 1fr; gap: 12px; padding: 6px 0; } .kv dt { color: var(--ink-soft); } .kv dd { margin: 0; }
 .collabs li { display: grid; grid-template-columns: 96px 1fr; gap: 20px; align-items: start; }
 .collabs h3 { font-size: 1.5rem; } .collabs .muted.small { margin: 4px 0 10px; }
 .round { border-radius: 50%; overflow: hidden; }
