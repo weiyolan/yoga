@@ -14,6 +14,7 @@ import {
   Checkbox,
   Dialog,
   Flex,
+  Select,
   Stack,
   Switch,
   Text,
@@ -41,14 +42,16 @@ type Item = {
   categories?: string[];
   showInGallery?: boolean;
   highlight?: boolean;
+  photographer?: { _type: "reference"; _ref: string } | null;
   used: number;
 };
+type Photographer = { _id: string; name?: string };
 type Client = ReturnType<typeof useClient>;
 
 const QUERY = `*[_type == "mediaItem" && !(_id in path("drafts.**"))] | order(_createdAt desc){
   _id, _createdAt, "ref": image.asset._ref, "url": image.asset->url, "file": image.asset->originalFilename,
   "w": image.asset->metadata.dimensions.width, "h": image.asset->metadata.dimensions.height,
-  alt, categories, showInGallery, highlight, "used": count(*[references(^._id) && !(_id in path("drafts.**"))])
+  alt, categories, showInGallery, highlight, photographer, "used": count(*[references(^._id) && !(_id in path("drafts.**"))])
 }`;
 
 const altOf = (i: Item, lang: string) =>
@@ -71,15 +74,20 @@ const FILTERS: { id: string; title: string; match: (i: Item) => boolean }[] = [
   })),
 ];
 
-/** Patch the published photo and, when there is one, its draft (the Fotobank edits apply at once). */
+const PHOTOGRAPHERS = `*[_type == "photographer" && !(_id in path("drafts.**"))] | order(name asc){ _id, name }`;
+
+/** Patch the published photo and, when there is one, its draft (the Fotobank edits apply at once). `null` clears a field. */
 export async function save(
   client: Client,
   id: string,
   set: Record<string, unknown>,
 ) {
-  const tx = client.transaction().patch(id, (p) => p.set(set));
+  const clear = Object.keys(set).filter((k) => set[k] === null);
+  const keep = Object.fromEntries(Object.entries(set).filter(([, v]) => v !== null));
+  const patch = (p: ReturnType<Client["patch"]>) => p.set(keep).unset(clear);
+  const tx = client.transaction().patch(id, patch);
   const draft = await client.getDocument(`drafts.${id}`);
-  if (draft) tx.patch(draft._id, (p) => p.set(set));
+  if (draft) tx.patch(draft._id, patch);
   await tx.commit();
 }
 
@@ -120,6 +128,7 @@ export function MediaBank() {
   const toast = useToast();
   const { ChildLink } = usePaneRouter();
   const [items, setItems] = useState<Item[] | null>(null);
+  const [photographers, setPhotographers] = useState<Photographer[]>([]);
   const [filter, setFilter] = useState("all");
   const [q, setQ] = useState("");
   const [sel, setSel] = useState<string | null>(null);
@@ -127,7 +136,14 @@ export function MediaBank() {
   const upload = useRef<HTMLInputElement>(null);
 
   const load = useCallback(
-    () => client.fetch<Item[]>(QUERY).then(setItems, console.error),
+    () =>
+      Promise.all([client.fetch<Item[]>(QUERY), client.fetch<Photographer[]>(PHOTOGRAPHERS)]).then(
+        ([list, ph]) => {
+          setItems(list);
+          setPhotographers(ph);
+        },
+        console.error,
+      ),
     [client],
   );
   useEffect(() => {
@@ -135,7 +151,7 @@ export function MediaBank() {
     let t: ReturnType<typeof setTimeout> | undefined;
     const sub = client
       .listen(
-        `*[_type == "mediaItem"]`,
+        `*[_type in ["mediaItem", "photographer"]]`,
         {},
         { visibility: "query", includeResult: false },
       )
@@ -494,6 +510,31 @@ export function MediaBank() {
                 ))}
               </Flex>
             </Stack>
+            <Stack gap={2}>
+              <Text size={1} weight="semibold">
+                Fotograaf
+              </Text>
+              <Select
+                fontSize={1}
+                value={item.photographer?._ref ?? ""}
+                onChange={(e) => {
+                  const ref = e.currentTarget.value;
+                  update(item, {
+                    photographer: ref ? { _type: "reference", _ref: ref } : null,
+                  });
+                }}
+              >
+                <option value="">— Niet ingevuld —</option>
+                {photographers.map((p) => (
+                  <option key={p._id} value={p._id}>
+                    {p.name || "(zonder naam)"}
+                  </option>
+                ))}
+              </Select>
+              <Text size={0} muted>
+                Staat klein onder de foto op volledig scherm. Nieuwe fotograaf: Inhoud → Fotografen.
+              </Text>
+            </Stack>
             <Flex as="label" gap={2} align="center">
               <Switch
                 checked={item.showInGallery !== false}
@@ -546,7 +587,7 @@ export function MediaBank() {
   );
 }
 
-const FIELDS = ["alt", "categories", "showInGallery", "highlight"] as const;
+const FIELDS = ["alt", "categories", "showInGallery", "highlight", "photographer"] as const;
 const same = (a: Item, b: Item) =>
   a.ref === b.ref &&
   FIELDS.every(

@@ -1,6 +1,6 @@
 /**
  * schema.org data for Google (components/JsonLd.tsx): the organisation (home), a retreat as an Event
- * and breadcrumbs. Only what the page itself shows (plus the photography contributor); empty values are left out.
+ * breadcrumbs and who took the gallery photos. Only what the page itself shows; empty values are left out.
  */
 import { urlFor, type Media } from "@/sanity/image";
 import type { Lang } from "@/sanity/site.config";
@@ -64,13 +64,6 @@ export function organizationLd(lang: Lang, site: Site, name: string) {
       url: abs("/"),
       inLanguage: lang,
       publisher: { "@id": organizationId },
-      // part of the site's photography is his
-      contributor: {
-        "@type": "Person",
-        name: "Milo Weiler",
-        jobTitle: "Photographer",
-        url: "https://miloweiler.com",
-      },
     }),
   ];
 }
@@ -162,4 +155,26 @@ export function breadcrumbLd(items: [string, string][]) {
       item: abs(path),
     })),
   };
+}
+
+type Credited = { url: string | null; alt: string; photographer: { name: string | null; website: string | null } | null };
+
+/** Gallery photos with a photographer (Fotobank) as ImageObjects, so Google Images credits the maker. */
+export function galleryImagesLd(photos: Credited[]) {
+  return photos
+    .filter((p) => p.url && p.photographer?.name)
+    .map((p) =>
+      compact({
+        "@context": "https://schema.org",
+        "@type": "ImageObject",
+        contentUrl: abs(p.url!),
+        description: p.alt,
+        creditText: p.photographer!.name,
+        creator: compact({
+          "@type": "Person",
+          name: p.photographer!.name,
+          url: p.photographer!.website,
+        }),
+      }),
+    );
 }

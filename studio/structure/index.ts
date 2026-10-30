@@ -320,6 +320,8 @@ export const structure: StructureResolver = (S) =>
             .title("Fotobank")
             .child((id) => S.document().schemaType("mediaItem").documentId(id)),
         ),
+      // who took the photos: picked per photo in the Fotobank
+      S.documentTypeListItem("photographer").title("Fotografen"),
 
       /* ---- 3. pages ---- */
       S.divider().title("Pagina's"),

@@ -12,7 +12,7 @@ export const MEDIA_CATEGORIES = [
 /**
  * Fotobank: every picture on the site lives here once. Hotspot and alt text are filled in
  * once; pages reference the item, so a fix applies everywhere. One short form: the gallery
- * shows no title or place, so a photo only needs its image, alt text (SEO) and categories.
+ * shows no title or place, so a photo only needs its image, alt text (SEO) and categories (+ optionally who took it).
  */
 export const mediaItem = defineType({
   name: "mediaItem",
@@ -42,6 +42,13 @@ export const mediaItem = defineType({
       options: { list: MEDIA_CATEGORIES, layout: "grid" },
       description: "De filterknoppen op de Gallery-pagina (bv. “Natuur”): de foto verschijnt onder elke categorie die je aanvinkt. Helpt je ook zoeken in de Fotobank.",
       validation: (rule) => rule.unique(),
+    }),
+    defineField({
+      name: "photographer",
+      title: "Fotograaf",
+      type: "reference",
+      to: [{ type: "photographer" }],
+      description: "Optioneel: wie de foto nam. De naam (met link naar hun website) staat klein onder de foto op volledig scherm en gaat naar Google. Nog niet in de lijst? Kies “Nieuwe aanmaken”.",
     }),
     defineField({ name: "showInGallery", title: "Tonen in gallery", type: "boolean", initialValue: true, description: "Aan = de foto staat in de mozaïek op de Gallery-pagina. Uit = enkel te gebruiken op andere pagina’s (bv. een portret of logo)." }),
     defineField({ name: "highlight", title: "Uitgelicht", type: "boolean", initialValue: false, description: "Krijgt een grote tegel in de mozaïek op de Gallery-pagina en komt in het Instagram-blok op Home (de 6 nieuwste). Ook reservefoto voor gedeelde links zonder eigen foto." }),

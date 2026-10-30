@@ -189,7 +189,7 @@ const nl = {
     categories: { retreats: "Retreats", lessen: "Lessen", natuur: "Natuur", team: "Team" } as Record<string, string>,
     open: "Foto openen",
   },
-  lightbox: { close: "Sluiten", prev: "Vorige foto", next: "Volgende foto", label: "Foto's op volledig scherm" },
+  lightbox: { close: "Sluiten", prev: "Vorige foto", next: "Volgende foto", label: "Foto's op volledig scherm", photo: "Foto:" },
   contact: {
     label: "Contact",
     name: "Naam",
@@ -491,7 +491,7 @@ const en: Dictionary = {
     categories: { retreats: "Retreats", lessen: "Classes", natuur: "Nature", team: "Team" },
     open: "Open photo",
   },
-  lightbox: { close: "Close", prev: "Previous photo", next: "Next photo", label: "Full-screen photos" },
+  lightbox: { close: "Close", prev: "Previous photo", next: "Next photo", label: "Full-screen photos", photo: "Photo:" },
   contact: {
     label: "Contact",
     name: "Name",

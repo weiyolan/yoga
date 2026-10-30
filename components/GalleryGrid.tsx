@@ -4,7 +4,7 @@
 import { useEffect, useMemo, useState, type ImgHTMLAttributes } from "react";
 import { getDictionary } from "@/lib/dictionary";
 import type { Lang } from "@/sanity/site.config";
-import { Lightbox, LightboxTrigger } from "./Lightbox";
+import { Lightbox, LightboxTrigger, type LightboxItem } from "./Lightbox";
 
 export type GalleryTile = {
   id: string;
@@ -13,6 +13,7 @@ export type GalleryTile = {
   img: ImgHTMLAttributes<HTMLImageElement> | null;
   full: string | null;
   alt: string;
+  credit: LightboxItem["credit"];
 };
 
 /** The wireframe's mosaic rhythm (12 tiles); highlighted photos always get a big tile. */
@@ -47,7 +48,7 @@ export function GalleryGrid({ lang, tiles }: { lang: Lang; tiles: GalleryTile[] 
     history.replaceState(null, "", c ? `#${c}` : location.pathname + location.search);
   };
   const shown = cat ? tiles.filter((p) => p.categories.includes(cat)) : tiles;
-  const items = shown.filter((p) => p.full).map((p) => ({ src: p.full!, alt: p.alt }));
+  const items = shown.filter((p) => p.full).map((p) => ({ src: p.full!, alt: p.alt, credit: p.credit }));
   let n = -1;
 
   return (

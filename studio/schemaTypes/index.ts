@@ -1,5 +1,6 @@
 import { mediaItem } from "./documents/media-item";
 import { person } from "./documents/person";
+import { photographer } from "./documents/photographer";
 import { retreat } from "./documents/retreat";
 import { review, reviewSubmission } from "./documents/review";
 import { message } from "./documents/message";
@@ -49,6 +50,7 @@ export const schemaTypes = [
   seo,
   // documents
   mediaItem,
+  photographer,
   retreat,
   signupForm,
   confirmationMail,

@@ -157,6 +157,7 @@ export default async function RetreatPage({
     const lb: LightboxItem[] = recap.map((m) => ({
       src: fullSrc(m) ?? "",
       alt: m.alt,
+      credit: m.photographer,
     }));
     const price =
       r.priceFrom ??
@@ -287,6 +288,7 @@ export default async function RetreatPage({
   const items: LightboxItem[] = all.map((m) => ({
     src: fullSrc(m) ?? "",
     alt: m.alt,
+    credit: m.photographer,
   }));
   const thumb = (
     m: Media | undefined,

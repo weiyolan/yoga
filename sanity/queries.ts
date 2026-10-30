@@ -18,7 +18,8 @@ const lines = <F extends string>(field: F) => `string::split(coalesce(${field}[l
 const MEDIA = `{
   _id,
   "alt": coalesce(alt[language == $lang][0].value, alt[language == "${defaultLanguage}"][0].value, ""),
-  image { asset->{ _id, url, metadata { lqip, dimensions { width, height, aspectRatio } } }, hotspot, crop }
+  image { asset->{ _id, url, metadata { lqip, dimensions { width, height, aspectRatio } } }, hotspot, crop },
+  "photographer": photographer->{ name, website }
 }` as const;
 
 const HERO = `{ "photo": photo->${MEDIA}, videoUrl, "title": ${t("title")}, "subtitle": ${t("subtitle")} }` as const;
