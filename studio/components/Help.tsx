@@ -19,6 +19,12 @@ export function Help() {
           Kan je niets wijzigen? Kijk of je een concept bewerkt (niet een oudere versie uit de geschiedenis) en herlaad de pagina.
         </Text>
         <Text size={1} muted>
+          Iets toevoegen (een samenwerking, stijl, studio, formulier, mail of retreat): open het menu links, dan het + rechtsboven of de rij “+ Nieuwe …” bovenaan de lijst. Vul in en klik Publiceren.
+        </Text>
+        <Text size={1} muted>
+          Iemand van Over ons halen: open de persoon, zet “Verbergen op Over ons” aan en publiceer (blijft bij oude retreats staan, later terug te zetten). Verwijderen (⋯ → Verwijderen) haalt de persoon overal weg; dat lukt pas als die nergens meer bij “Begeleiding” staat.
+        </Text>
+        <Text size={1} muted>
           Inschrijvingen, berichten en reviews komen binnen via de website. Hun status wijzig je op het tabblad Overzicht. Teksten in het Engels zijn optioneel: leeg = de Nederlandse tekst. Elk tweetalig veld heeft tabs NL | EN (een • = nog leeg) en een knop Vertaal; alles in één keer: Vertalen (AI) in het menu.
         </Text>
         <Text size={1} muted>

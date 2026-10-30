@@ -23,6 +23,7 @@ import type { ComponentType } from "react";
 import { debounceTime, map, switchMap } from "rxjs";
 import type { StructureBuilder, StructureResolver } from "sanity/structure";
 import { MediaBank } from "../components/MediaBank";
+import { createNew } from "../components/CreateNew";
 import { RECEIPT_MAILS } from "../schemaTypes/singletons/receipt-mail";
 import { CheckmarkCircleIcon } from "@sanity/icons/CheckmarkCircle";
 import { BulkTranslate } from "../components/BulkTranslate";
@@ -67,8 +68,19 @@ function liveList(
   title: string,
   top: ReturnType<StructureBuilder["listItem"]>[],
   parts: Part[],
-  create: { type: string; title: string }[],
+  create: { type: string; title: string; template?: string }[],
 ) {
+  const params = (c: (typeof create)[number]) => (c.template ? { type: c.type, template: c.template } : { type: c.type });
+  // a visible + top right (a menu item without showAsAction only shows in the ⋯ menu: Rita & Philippe couldn't find it)
+  // and a “+ Nieuwe …” row on top of the list
+  const menu = create.map((c) => S.menuItem().title(c.title).icon(AddIcon).showAsAction(true).intent({ type: "create", params: params(c) }));
+  const rows = create.map((c) =>
+    S.listItem()
+      .id(`new-${c.template ?? c.type}`)
+      .title(`+ ${c.title}`)
+      .icon(AddIcon)
+      .child(S.component(createNew(c.type, c.title, c.template)).id(`new-${c.template ?? c.type}`).title(c.title)),
+  );
   return () => {
     const client = S.context.getClient({ apiVersion });
     const types = [...new Set(parts.map((p) => p.type))];
@@ -84,9 +96,10 @@ function liveList(
           return S.list()
             .id(id)
             .title(title)
-            .menuItems(create.map((c) => S.menuItem().title(c.title).icon(AddIcon).intent({ type: "create", params: { type: c.type } })))
+            .menuItems(menu)
             .items([
               ...top,
+              ...rows,
               ...parts.flatMap((p) => [
                 S.divider().title(p.title ?? ""),
                 ...docs
@@ -363,7 +376,7 @@ export const structure: StructureResolver = (S) =>
               // the order of the site
               { title: "Samenwerkingen", type: "person", match: (d) => d.kind !== "founder", sort: (a, b) => (a.orderRank ?? 1000) - (b.orderRank ?? 1000) || byName(a, b) },
             ],
-            [{ type: "person", title: "Nieuwe persoon" }],
+            [{ type: "person", title: "Nieuwe samenwerking" }],
           ),
         ),
       singleton(S, "galleryPage", "Gallery", ImagesIcon),
