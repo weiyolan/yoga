@@ -56,10 +56,6 @@ export function Footer({ lang, layout }: { lang: Lang; layout: LAYOUT_QUERY_RESU
               ywdesign.co
             </a>
           </span>
-          {/* SEO credit for the photographer (not all photos are his, so not shown visually) */}
-          <a href="https://miloweiler.com" className="visually-hidden" tabIndex={-1}>
-            Milo Weiler Photography
-          </a>
         </div>
       </div>
     </footer>
