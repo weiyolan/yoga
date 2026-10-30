@@ -9,6 +9,9 @@ import { Nav } from "@/components/Nav";
 import { htmlLang } from "@/lib/format";
 import { siteUrl } from "@/lib/metadata";
 import { sanityFetch } from "@/sanity/fetch";
+import { JsonLd } from "@/components/JsonLd";
+import { getDictionary } from "@/lib/dictionary";
+import { organizationLd } from "@/lib/jsonld";
 import { LAYOUT_QUERY } from "@/sanity/queries";
 import { isLang, languageIds } from "@/sanity/site.config";
 import "../globals.css";
@@ -34,6 +37,8 @@ export default async function RootLayout({ children, params }: LayoutProps<"/[la
   return (
     <html lang={htmlLang(lang)} className={`${serif.variable} ${sans.variable}`}>
       <body>
+        {/* who we are and what we offer, on every page (so an Event's organizer is complete too) */}
+        <JsonLd data={organizationLd(lang, layout, layout?.siteName ?? getDictionary(lang).siteName)} />
         <Nav lang={lang} layout={layout} />
         <main>{children}</main>
         <Footer lang={lang} layout={layout} />

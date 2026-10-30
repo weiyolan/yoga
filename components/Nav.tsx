@@ -159,6 +159,11 @@ export function Nav({ lang, layout, children }: Props) {
           <Link href={href(lang, "lessons", { hash: "planning" })}>
             {t.schedule} <Icon name="arrow" className="" />
           </Link>
+          {layout?.hasPrivate && (
+            <Link href={href(lang, "lessons", { hash: "prive" })}>
+              {t.chips.private} <Icon name="arrow" className="" />
+            </Link>
+          )}
         </div>
       </>
     ),
@@ -206,6 +211,7 @@ export function Nav({ lang, layout, children }: Props) {
         [t.chips.schedule, href(lang, "lessons", { hash: "planning" })],
         ...(layout?.styles ?? []).map((s) => [s.name ?? "", href(lang, "lessons", { hash: s.slug ?? "stijlen" })] as [string, string]),
         [t.chips.studios, href(lang, "lessons", { hash: "studios" })],
+        ...(layout?.hasPrivate ? ([[t.chips.private, href(lang, "lessons", { hash: "prive" })]] as [string, string][]) : []),
       ],
     },
     {

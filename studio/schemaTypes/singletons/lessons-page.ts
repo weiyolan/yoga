@@ -4,7 +4,7 @@ import { SearchIcon } from "@sanity/icons/Search";
 import { UserIcon } from "@sanity/icons/User";
 import { ActivityIcon } from "@sanity/icons/Activity";
 import { defineArrayMember, defineField, defineType } from "sanity";
-import { i18nString, i18nText } from "../shared/i18n";
+import { i18nString, i18nText, pick } from "../shared/i18n";
 import { mediaField } from "../shared/media";
 
 export const WEEKDAYS = [
@@ -96,7 +96,52 @@ export const lessonsPage = defineType({
       fields: [
         i18nString("title", { title: "Kop", description: "Grote titel van het privéles-blok onderaan de Lessen-pagina, bv. “Liever één op één?”. Leeg = “Liever één op één?”." }),
         i18nText("text", { title: "Tekst", max: 300, description: "Tekst onder de kop van het privéles-blok: wat en voor wie, in 1–3 zinnen." }),
-        i18nString("practical", { title: "Praktisch", max: 80, description: "Kleine grijze lijn onder de tekst van het privéles-blok: duur · prijs · locatie, bv. “60 of 90 min · € 70 · Antwerpen”." }),
+        i18nString("practical", { title: "Korte regel", max: 80, description: "Optioneel: kleine grijze lijn onder de tekst van het privéles-blok, bv. “60 min”. De prijzen en de praktische info zet je liever hieronder." }),
+        i18nString("ratesTitle", { title: "Kop prijzen", description: "Kleine kop boven de prijslijst. Leeg = “Prijzen per persoon”." }),
+        defineField({
+          name: "rates",
+          title: "Prijzen",
+          type: "array",
+          description: "Eén regel per formule, in deze volgorde onder de tekst van het privéles-blok, bv. “Duet (2 personen)” · € 45 · per persoon.",
+          of: [
+            defineArrayMember({
+              name: "rate",
+              title: "Prijs",
+              type: "object",
+              fields: [
+                i18nString("label", { title: "Omschrijving", required: true, description: "Links in de prijslijst, bv. “Privéles (1-op-1)”, “Trio (3 personen)”." }),
+                defineField({ name: "amount", title: "Bedrag (€)", type: "number", description: "Rechts in de prijslijst, in euro.", validation: (rule) => rule.required().min(0) }),
+                defineField({ name: "perPerson", title: "Per persoon", type: "boolean", initialValue: false, description: "Aan = “p.p.” achter het bedrag." }),
+              ],
+              preview: {
+                select: { label: "label", amount: "amount", perPerson: "perPerson" },
+                prepare: ({ label, amount, perPerson }) => ({ title: pick(label), subtitle: `€ ${amount ?? "…"}${perPerson ? " p.p." : ""}` }),
+              },
+            }),
+          ],
+        }),
+        i18nString("detailsTitle", { title: "Kop praktisch", description: "Kleine kop boven de praktische regels. Leeg = “Locatie & praktisch”." }),
+        defineField({
+          name: "details",
+          title: "Praktisch",
+          type: "array",
+          description: "Eén regel per onderwerp onder de prijzen, bv. Waar · “In Mortsel of bij jou thuis (binnen 10 km).” en Vervoer · “Vervoersonkosten worden apart verrekend.”",
+          of: [
+            defineArrayMember({
+              name: "detail",
+              title: "Regel",
+              type: "object",
+              fields: [
+                i18nString("label", { title: "Kopje", required: true, description: "Links, kort: bv. “Waar”, “Vervoer”, “Duur”." }),
+                i18nText("text", { title: "Tekst", required: true, max: 200, description: "Rechts naast het kopje." }),
+              ],
+              preview: {
+                select: { label: "label", text: "text" },
+                prepare: ({ label, text }) => ({ title: pick(label), subtitle: pick(text) }),
+              },
+            }),
+          ],
+        }),
         mediaField("photo", { title: "Foto", description: "Foto naast de tekst van het privéles-blok onderaan de Lessen-pagina." }),
         i18nString("button", { title: "Knop", description: "Tekst op de knop in het privéles-blok; die gaat naar het contactformulier. Leeg = “Contacteer Rita”." }),
       ],

@@ -3,7 +3,10 @@ import { Photo } from "@/components/Photo";
 import { Paragraphs } from "@/components/RichText";
 import { Schedule } from "@/components/Schedule";
 import { ClassTiles, Hero, SectionHead } from "@/components/sections";
+import { JsonLd } from "@/components/JsonLd";
 import { getDictionary } from "@/lib/dictionary";
+import { lessonsLd } from "@/lib/jsonld";
+import { euro } from "@/lib/format";
 import { buildMetadata } from "@/lib/metadata";
 import { href, langParam } from "@/lib/routes";
 import { sanityFetch } from "@/sanity/fetch";
@@ -40,6 +43,7 @@ export default async function Lessons({ params }: PageProps<"/[lang]/lessen">) {
 
   return (
     <>
+      <JsonLd data={lessonsLd(lang, styles, page?.private)} />
       <Hero hero={page?.hero} short />
 
       {/* Always rendered: the menu and the style tiles link to #planning. */}
@@ -234,6 +238,32 @@ export default async function Lessons({ params }: PageProps<"/[lang]/lessen">) {
                 ) : null}
                 {page.private.practical ? (
                   <p className="muted small">{page.private.practical}</p>
+                ) : null}
+                {page.private.rates?.length ? (
+                  <>
+                    <h4 className="rates-h">{page.private.ratesTitle || t.ratesTitle}</h4>
+                    <ul className="rates">
+                      {page.private.rates.map((r) => (
+                        <li key={r._key}>
+                          <span>{r.label}</span>
+                          <b>{[euro(lang, r.amount), r.perPerson ? t.perPerson : null].filter(Boolean).join(" ")}</b>
+                        </li>
+                      ))}
+                    </ul>
+                  </>
+                ) : null}
+                {page.private.details?.length ? (
+                  <>
+                    <h4 className="rates-h">{page.private.detailsTitle || t.detailsTitle}</h4>
+                    <dl className="kv">
+                      {page.private.details.map((x) => (
+                        <div key={x._key}>
+                          <dt>{x.label}</dt>
+                          <dd>{x.text}</dd>
+                        </div>
+                      ))}
+                    </dl>
+                  </>
                 ) : null}
                 <Link
                   className="btn"

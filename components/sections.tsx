@@ -235,7 +235,7 @@ type ReviewData = {
 };
 const stars = (n: number) => "★".repeat(n) + "☆".repeat(5 - n);
 
-/** Approved reviews of a retreat: average score + one card per review. */
+/** The testimonials of a retreat: average score (of those with one) + one card each. */
 /** `context`: also which retreat each review is about (reviews of earlier editions on an upcoming retreat). */
 export function ReviewList({
   lang,
@@ -248,30 +248,36 @@ export function ReviewList({
 }) {
   const t = getDictionary(lang).review;
   if (!reviews.length) return null;
-  const avg = reviews.reduce((n, r) => n + (r.rating ?? 0), 0) / reviews.length;
+  // stars and the average only over who gave a score
+  const rated = reviews.filter((r) => r.rating);
+  const avg = rated.reduce((n, r) => n + (r.rating ?? 0), 0) / (rated.length || 1);
   return (
     <>
-      <p className="muted">
-        <span className="rating" aria-hidden="true">
-          {stars(Math.round(avg))}
-        </span>{" "}
-        {t.average(
-          avg.toLocaleString(lang === "en" ? "en-GB" : "nl-BE", {
-            maximumFractionDigits: 1,
-          }),
-          reviews.length,
-        )}
-      </p>
+      {rated.length ? (
+        <p className="muted">
+          <span className="rating" aria-hidden="true">
+            {stars(Math.round(avg))}
+          </span>{" "}
+          {t.average(
+            avg.toLocaleString(lang === "en" ? "en-GB" : "nl-BE", {
+              maximumFractionDigits: 1,
+            }),
+            rated.length,
+          )}
+        </p>
+      ) : null}
       <div className="reviews">
         {reviews.map((r) => (
           <figure key={r._id} className="review">
-            <span
-              className="rating"
-              role="img"
-              aria-label={t.stars(r.rating ?? 0)}
-            >
-              {stars(r.rating ?? 0)}
-            </span>
+            {r.rating ? (
+              <span
+                className="rating"
+                role="img"
+                aria-label={t.stars(r.rating)}
+              >
+                {stars(r.rating)}
+              </span>
+            ) : null}
             <blockquote>{r.text}</blockquote>
             <figcaption>
               {r.name}

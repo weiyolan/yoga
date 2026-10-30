@@ -2,7 +2,7 @@ import { mediaItem } from "./documents/media-item";
 import { person } from "./documents/person";
 import { photographer } from "./documents/photographer";
 import { retreat } from "./documents/retreat";
-import { review, reviewSubmission } from "./documents/review";
+import { reviewSubmission } from "./documents/review";
 import { message } from "./documents/message";
 import { signup } from "./documents/signup";
 import { signupForm } from "./documents/signup-form";
@@ -59,7 +59,6 @@ export const schemaTypes = [
   yogaClass,
   studio,
   testimonial,
-  review,
   reviewSubmission,
   signup,
   message,

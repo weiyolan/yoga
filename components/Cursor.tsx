@@ -3,7 +3,7 @@
 /**
  * Circle-and-dot cursor (design-system signature): fine pointers only, respects reduced motion.
  * The dot follows the pointer; the ring trails behind and settles around it when the pointer rests.
- * The ring inverts what's under it (blend mode); the dot is a sibling so it stays ember.
+ * The ring inverts what's under it (blend mode); the dot is a sibling so it stays ember, with a halo for contrast.
  * Hidden until the first move and whenever the pointer leaves the window or is over a text field.
  * Click: the ring squeezes while pressed and bounces back on release.
  */
@@ -53,10 +53,12 @@ export function Cursor() {
         ry = y;
         seen = true;
       }
-      dot.style.transform = `translate(${x}px,${y}px)`;
+      dot.style.translate = `${x}px ${y}px`;
       if (!frame) frame = requestAnimationFrame(tick);
       const el = e.target as Element;
-      ring.classList.toggle("big", !!el.closest?.(BIG));
+      const big = !!el.closest?.(BIG);
+      ring.classList.toggle("big", big);
+      dot.classList.toggle("big", big);
       show(!el.closest?.(TEXT));
     };
     const out = (e: MouseEvent) => {
@@ -69,10 +71,12 @@ export function Cursor() {
       if (e.pointerType !== "mouse" || e.button !== 0) return;
       ring.classList.remove("bounce");
       ring.classList.add("press");
+      dot.classList.add("press");
     };
     const release = () => {
       if (!ring.classList.contains("press")) return;
       ring.classList.remove("press");
+      dot.classList.remove("press");
       void ring.offsetWidth; // restart the animation on quick double clicks
       ring.classList.add("bounce");
     };

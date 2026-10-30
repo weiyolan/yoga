@@ -1,0 +1,670 @@
+<!doctype html>
+<html lang="nl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Feedback v3: wijzigingen website — Yoga, Zen &amp; Tonic</title>
+<style>
+  :root { --ink:#1f1d1a; --muted:#6b655c; --line:#e3ddd2; --paper:#faf7f2; --card:#fff; --accent:#a8572f; --good:#3d6b45; --bad:#9a3b32; --code:#f2ede4; }
+  * { box-sizing:border-box; }
+  body { margin:0; background:var(--paper); color:var(--ink); font:16px/1.6 -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
+  main { max-width:1040px; margin:0 auto; padding:48px 24px 96px; }
+  h1, h2, h3 { font-family:Georgia, "Times New Roman", serif; font-weight:normal; line-height:1.2; }
+  h1 { font-size:2.5rem; margin:0 0 8px; }
+  h2 { font-size:1.8rem; margin:64px 0 8px; padding-top:24px; border-top:1px solid var(--line); }
+  h3 { font-size:1.2rem; margin:22px 0 6px; }
+  .sub { color:var(--muted); margin:0 0 24px; }
+  a { color:var(--accent); }
+  q, .quote { font-style:italic; color:var(--muted); }
+  blockquote { margin:12px 0; padding:10px 16px; border-left:3px solid var(--accent); background:var(--card); color:var(--muted); font-style:italic; border-radius:0 8px 8px 0; }
+  code { background:var(--code); padding:1px 5px; border-radius:4px; font-size:.88em; }
+  pre { background:#24211d; color:#efe9df; padding:14px 16px; border-radius:8px; overflow:auto; font-size:.82rem; line-height:1.5; }
+  pre code { background:none; padding:0; }
+  ul, ol { padding-left:1.3em; } li { margin:4px 0; }
+  table { width:100%; border-collapse:collapse; background:var(--card); border:1px solid var(--line); font-size:.92rem; margin:12px 0; }
+  th, td { text-align:left; vertical-align:top; padding:9px 12px; border-bottom:1px solid var(--line); }
+  th { background:#f2ede4; font-weight:600; }
+  .card { background:var(--card); border:1px solid var(--line); border-radius:12px; padding:18px 20px; margin:16px 0; }
+  .grid { display:grid; grid-template-columns:repeat(auto-fit, minmax(300px,1fr)); gap:16px; }
+  .grid .card { margin:0; }
+  .tag { display:inline-block; font-size:.72rem; letter-spacing:.06em; text-transform:uppercase; padding:2px 8px; border-radius:99px; margin-right:6px; vertical-align:middle; }
+  .t-code { background:var(--accent); color:#fff; } .t-studio { background:#3d6b45; color:#fff; } .t-q { background:#c9a227; color:#1f1d1a; }
+  .why { border-left:3px solid var(--bad); padding-left:12px; }
+  .files li code { white-space:nowrap; }
+  .muted { color:var(--muted); } .small { font-size:.88rem; }
+  .steps { counter-reset:s; list-style:none; padding:0; }
+  .steps li { counter-increment:s; padding-left:34px; position:relative; margin:8px 0; }
+  .steps li::before { content:counter(s); position:absolute; left:0; top:1px; width:24px; height:24px; border-radius:50%; background:var(--good); color:#fff; font-size:.8rem; display:grid; place-items:center; }
+  /* mat */
+  .mats { display:grid; grid-template-columns:1fr 1fr; gap:16px; }
+  .mat { background:#efe9df; border-radius:10px; aspect-ratio:4/5; display:grid; place-items:center; position:relative; }
+  .mat svg { width:52%; stroke:var(--ink); fill:none; stroke-width:1.2; }
+  .mat span { position:absolute; top:10px; left:12px; font-size:.75rem; text-transform:uppercase; letter-spacing:.08em; color:var(--muted); }
+  /* cursor demo */
+  .demo { position:relative; height:260px; border-radius:12px; overflow:hidden; display:grid; grid-template-columns:1fr 1fr; border:1px solid var(--line); }
+  .demo > div { display:grid; place-items:center; align-content:center; gap:14px; padding:20px; text-align:center; }
+  .demo .light { background:#f4efe7; } .demo .dark { background:#2a2622; color:#efe9df; }
+  .demo .btn { display:inline-block; padding:13px 22px; border-radius:99px; border:1px solid currentColor; text-decoration:none; color:inherit; font-size:.78rem; letter-spacing:.08em; text-transform:uppercase; }
+  .c-dot, .c-ring { position:fixed; top:0; left:0; pointer-events:none; border-radius:50%; z-index:50; opacity:0; transition:opacity .2s; }
+  .c-dot { width:7px; height:7px; margin:-3.5px 0 0 -3.5px; background:#b5603a; transition:opacity .2s, scale .3s cubic-bezier(.2,.7,.2,1); }
+  .c-ring { width:30px; height:30px; margin:-15px 0 0 -15px; border:1px solid #b5603a; transition:opacity .2s, scale .3s cubic-bezier(.2,.7,.2,1), background .3s; }
+  .c-on { opacity:1; }
+  .c-ring.hover { scale:2.6; background:rgba(181,96,58,.08); } .c-dot.hover { scale:0; }
+  .c-ring.white { border-color:#fff; } .c-dot.white { background:#fff; }
+  /* private lessons mockup */
+  .pl { background:#f4efe7; border-radius:12px; padding:28px; display:grid; grid-template-columns:1.1fr 1fr; gap:28px; }
+  .pl h4 { margin:0 0 8px; font:600 .72rem/1 sans-serif; letter-spacing:.1em; text-transform:uppercase; color:var(--muted); }
+  .pl .label { font-size:.72rem; letter-spacing:.1em; text-transform:uppercase; color:var(--accent); }
+  .pl h3 { font-size:1.7rem; margin:6px 0 10px; }
+  .rates { list-style:none; padding:0; margin:0 0 20px; border-top:1px solid var(--line); }
+  .rates li { display:flex; justify-content:space-between; gap:12px; padding:9px 0; border-bottom:1px solid var(--line); margin:0; }
+  .rates b { font-weight:500; font-family:Georgia, serif; font-size:1.1rem; }
+  .kv { margin:0; } .kv div { display:grid; grid-template-columns:80px 1fr; gap:10px; padding:6px 0; } .kv dt { color:var(--muted); } .kv dd { margin:0; }
+  @media (max-width:760px) { .pl, .mats { grid-template-columns:1fr; } }
+  nav.toc { display:flex; flex-wrap:wrap; gap:6px 18px; font-size:.92rem; margin:18px 0 0; }
+  .shots3 { display:grid; grid-template-columns:repeat(3,1fr); gap:12px; margin:12px 0; }
+  .shots3 img { width:100%; display:block; border-radius:8px; border:1px solid var(--line); aspect-ratio:10/7; object-fit:cover; }
+  .shots3 figure { margin:0; } .shots3 figcaption { font-size:.82rem; color:var(--muted); margin-top:6px; }
+  @media (max-width:760px) { .shots3 { grid-template-columns:1fr; } }
+  .tblmock { overflow:auto; } .tblmock table { font-size:.82rem; min-width:860px; } .tblmock td:first-child, .tblmock th:first-child { text-align:center; width:70px; background:#f7f3ec; }
+  .pill { display:inline-block; padding:1px 8px; border-radius:99px; font-size:.72rem; background:#e9e4da; } .pill.ok { background:#dcebd9; color:#2f5a35; } .pill.new { background:#dde6f3; color:#2c4a75; }
+  .bubbles { position:relative; height:520px; border-radius:14px; background:#f4efe7; border:1px solid var(--line); overflow:hidden; touch-action:none; user-select:none; }
+  .bubbles canvas { position:absolute; inset:0; width:100%; height:100%; cursor:grab; }
+  .bubbles canvas.drag { cursor:grabbing; }
+  .bubble-tip { position:absolute; pointer-events:none; background:var(--ink); color:#fff; font-size:.78rem; padding:5px 10px; border-radius:99px; white-space:nowrap; translate:-50% 0; }
+  .bubble-hint { position:absolute; left:14px; bottom:10px; font-size:.72rem; letter-spacing:.08em; text-transform:uppercase; color:var(--muted); }
+  .bubble-card { position:absolute; top:16px; right:16px; bottom:16px; width:min(340px, calc(100% - 32px)); background:#fff; border:1px solid var(--line); border-radius:12px; padding:18px; overflow:auto; box-shadow:0 12px 40px rgba(31,29,26,.12); animation:card-in .35s cubic-bezier(.2,.7,.2,1); }
+  .bubble-card img { width:120px; height:120px; border-radius:50%; object-fit:cover; display:block; margin-bottom:12px; background:#e9e4da; }
+  .bubble-card h3 { margin:0; font-size:1.5rem; } .bubble-card .role { margin:2px 0 10px; } .bubble-card .bio { font-size:.92rem; }
+  .bubble-card .links a { margin-right:14px; }
+  .bubble-x { position:absolute; top:10px; right:10px; width:34px; height:34px; border-radius:50%; border:1px solid var(--line); background:#fff; font-size:1.2rem; cursor:pointer; }
+  @keyframes card-in { from { opacity:0; translate:24px 0; } }
+  .toggle { font:inherit; font-size:.85rem; padding:8px 16px; border-radius:99px; border:1px solid var(--ink); background:var(--ink); color:#fff; cursor:pointer; }
+  .toggle[aria-pressed="false"] { background:#fff; color:var(--ink); }
+  .bubbles { height:640px; }
+  .collabs-mock { list-style:none; padding:20px; margin:0; display:grid; grid-template-columns:1fr 1fr; gap:28px 36px; background:#f4efe7; border:1px solid var(--line); border-radius:14px; }
+  .collabs-mock li { display:grid; grid-template-columns:80px 1fr; gap:16px; margin:0; }
+  .collabs-mock img, .collabs-mock .ini { width:80px; height:80px; border-radius:50%; object-fit:cover; background:#e3d9cb; display:grid; place-items:center; font:1.6rem Georgia, serif; color:var(--muted); }
+  .collabs-mock h3 { margin:0; font-size:1.25rem; } .collabs-mock p { margin:2px 0; font-size:.86rem; }
+  @media (max-width:760px) { .collabs-mock { grid-template-columns:1fr; } }
+  .demo4 { display:grid; grid-template-columns:repeat(4,1fr); height:220px; border-radius:12px; overflow:hidden; border:1px solid var(--line); }
+  .demo4 > div { display:grid; place-items:center; align-content:center; gap:12px; padding:14px; text-align:center; font-size:.78rem; }
+  .demo4 .btn { display:inline-block; padding:12px 18px; border-radius:99px; border:1px solid currentColor; text-decoration:none; color:inherit; font-size:.72rem; letter-spacing:.08em; text-transform:uppercase; }
+  .d-light { background:#f4efe7; color:#1f1d1a; } .d-ember { background:#D4552B; color:#fff; } .d-photo { background:url(client-feedback-v3/img/photo-bg.jpg) center/cover; color:#fff; } .d-dark { background:#0F1A1D; color:#E9E6E0; }
+  .d-ember .btn { background:#b8441f; }
+  @media (max-width:760px) { .demo4 { grid-template-columns:1fr 1fr; height:340px; } }
+  .yc-ring, .yc-dot { position:fixed; top:0; left:0; border-radius:50%; pointer-events:none; z-index:60; opacity:0; transition:opacity .2s; }
+  .yc-ring { width:34px; height:34px; margin:-17px 0 0 -17px; border:1px solid #fff; mix-blend-mode:difference; transition:opacity .2s, width .2s, height .2s, margin .2s; }
+  .yc-ring.big { width:64px; height:64px; margin:-32px 0 0 -32px; }
+  .yc-dot { width:5px; height:5px; margin:-2.5px 0 0 -2.5px; background:#D4552B; }
+  .yc-on { opacity:1; }
+  .halo .yc-dot { width:8px; height:8px; margin:-4px 0 0 -4px; box-shadow:0 0 0 1.5px rgba(255,255,255,.95), 0 1px 6px rgba(15,26,29,.45); transition:opacity .2s, scale .2s; }
+  .halo .yc-dot.big { scale:.75; }
+  details { margin:16px 0; } details summary { cursor:pointer; color:var(--accent); }
+</style>
+</head>
+<body>
+<main>
+  <h1>Feedback v3: wat er moet veranderen</h1>
+  <p class="sub">Yoga, Zen &amp; Tonic · 30 okt 2026 · nagekeken op de live site (yogazentonic.com), de Studio-code (<code>main</code>) en de gepubliceerde Sanity-inhoud.</p>
+
+  <div class="card">
+    <b>Legende</b><br>
+    <span class="tag t-code">code</span> wijziging aan de website/Studio nodig ·
+    <span class="tag t-studio">studio</span> kan vandaag al zelf in de Studio ·
+    <span class="tag t-q">vraag</span> keuze nodig van Rita &amp; Philippe (alle keuzes zijn nu gemaakt)
+  </div>
+
+  <table>
+    <tr><th>#</th><th>Feedback</th><th>Wat</th><th>Soort</th><th>Inschatting</th></tr>
+    <tr><td>1</td><td><a href="#cursor">Pointer beter leesbaar</a></td><td>Onze cursor blijft; stip 5 → 8 px met witte rand + schaduw (halo), zodat hij niet meer verdwijnt op rood/foto</td><td><span class="tag t-code">code</span></td><td>klein (1 u)</td></tr>
+    <tr><td>2</td><td><a href="#samenwerkingen">7 samenwerkingen, Raf &amp; Sol</a></td><td>Geen limiet. Echte oorzaak: het “+” zit verstopt in het ⋯-menu → zichtbare +-knop + rij “+ Nieuwe samenwerking”</td><td><span class="tag t-code">code</span> <span class="tag t-studio">studio</span></td><td>klein (1–2 u)</td></tr>
+    <tr><td>3</td><td><a href="#voorbij">Voorbije retreats zonder prijs</a></td><td>Op de terugblik-pagina enkel Waar, Begeleiding &amp; Deelnemers; prijs ook uit Google-beschrijving &amp; JSON-LD</td><td><span class="tag t-code">code</span></td><td>klein (1–2 u)</td></tr>
+    <tr><td>4</td><td><a href="#testimonials">Testimonials &amp; reviews</a></td><td>Samenvoegen tot één document <b>Testimonial</b> met vinkje “Op Home” + tabel met alle testimonials (vinkje in kolom 1) + migratie</td><td><span class="tag t-code">code</span></td><td>1–1,5 dag</td></tr>
+    <tr><td>5</td><td><a href="#instagram">Foto's Instagram-blok</a></td><td>Nu = de 6 nieuwste “Uitgelichte” foto's. Eigen keuzeveld op Home toevoegen</td><td><span class="tag t-code">code</span></td><td>klein (2–3 u)</td></tr>
+    <tr><td>6</td><td><a href="#mat">Yogamat-symbool</a></td><td>Nieuwe, langwerpige SVG (voorstel hieronder)</td><td><span class="tag t-code">code</span></td><td>klein (1 u)</td></tr>
+    <tr><td>7</td><td><a href="#prive">Tarieven privélessen</a></td><td>Privéles-blok uitbreiden met prijslijst + “Locatie &amp; praktisch”</td><td><span class="tag t-code">code</span></td><td>middel (½ dag)</td></tr>
+    <tr><td>8</td><td><a href="#seo">SEO: retreats, events, yoga-aanbod</a></td><td>Retreats = Event ✓. Ontbreekt: wat Y,Z&amp;T aanbiedt (Service/aanbod, regio, oprichters), JSON-LD op Lessen, landcodes</td><td><span class="tag t-code">code</span> <span class="tag t-studio">studio</span></td><td>½ dag</td></tr>
+    <tr><td>9</td><td><a href="#prive-nav">Privéles in de navigatie</a></td><td>Link “Privéles →” in het Lessen-menu (desktop) + chip (mobiel)</td><td><span class="tag t-code">code</span></td><td>klein (1 u)</td></tr>
+    <tr><td>10</td><td><a href="#samenwerkingen-speels">Samenwerkingen als balanstoren</a></td><td>Portretten als steentoren in evenwicht: wiebelen, stenen verplaatsen, omvallen &amp; heropbouwen, klik = kaart. Schakelaar in de Studio: Balanstoren / Klassiek</td><td><span class="tag t-code">code</span></td><td>1–1,5 dag</td></tr>
+  </table>
+
+  <!-- 1 -->
+  <h2 id="cursor">1 · Pointer: onze cursor houden, maar beter leesbaar</h2>
+  <blockquote>Pointer toch niet ideaal, liefst als het kan zoals bij https://www.sansararesort.com/</blockquote>
+  <p><b>Beslissing</b>: de Sansara-cursor nemen we niet over. Onze cirkel-en-stip blijft (ring die mee-ijlt, groot boven links/foto's, klik-veer). Het echte probleem is <b>leesbaarheid</b>: de stip is klein en verdwijnt op sommige achtergronden.</p>
+
+  <h3>Waarom de stip “verdwijnt”</h3>
+  <p><code>app/globals.css:458-462</code>: de <b>ring</b> heeft <code>mix-blend-mode: difference</code> en past zich dus aan de achtergrond aan (wit op donker, donker op licht). De <b>stip</b> doet dat bewust níet: die is altijd <code>var(--ember)</code> (#D4552B), 5 × 5 px, zonder rand of schaduw. Op een rode/oranje knop, een ember-label of een warme foto (zonsondergang, woestijn) heeft hij dus geen contrast meer. Het kleurwisselen dat je bij de ring ziet, gebeurt bij de stip nooit.</p>
+
+  <h3>Voorstel: grotere stip met halo</h3>
+  <ul>
+    <li><b>Stip 5 → 8 px</b>, nog altijd ember.</li>
+    <li><b>Halo eronder</b>: een witte rand van 1,5 px + een zachte schaduw: <code>box-shadow: 0 0 0 1.5px rgba(255,255,255,.95), 0 1px 6px rgba(15,26,29,.45)</code>. De witte rand geeft contrast op rood en donker, de schaduw op wit en licht. Daardoor lijkt de stip ook iets “boven” de pagina te zweven.</li>
+    <li>Boven links/foto's (ring groot): stip iets kleiner (<code>scale: .75</code>), zodat de ring de aandacht krijgt. Bij klikken: stip kort ×1,3.</li>
+    <li>Ring: ongewijzigd (difference-blend werkt goed), eventueel 1 → 1,25 px dik.</li>
+  </ul>
+
+  <h3>Vergelijk: nu ↔ voorstel</h3>
+  <p class="muted small">Beweeg de muis over de 4 vlakken (desktop). Wissel met de knop.</p>
+  <p><button type="button" class="toggle" id="cur-toggle" aria-pressed="true">Voorstel (met halo)</button></p>
+  <div class="demo4" id="demo">
+    <div class="d-light"><a class="btn" href="#cursor">Ontdek de retreats</a><span>licht</span></div>
+    <div class="d-ember"><a class="btn" href="#cursor">Inschrijven</a><span>ember / rood</span></div>
+    <div class="d-photo"><span>warme foto</span></div>
+    <div class="d-dark"><a class="btn" href="#cursor">Alle retreats</a><span>donker</span></div>
+  </div>
+  <figure style="margin:12px 0"><img src="client-feedback-v3/img/cursor-halo.png" alt="Boven: huidige stip verdwijnt op ember; onder: stip met halo blijft zichtbaar" style="width:100%;border-radius:8px;border:1px solid var(--line)"><figcaption class="muted small">Boven: nu, de ember-stip verdwijnt op de ember-achtergrond (alleen de ring is nog te zien). Onder: voorstel, 8 px met witte rand + schaduw.</figcaption></figure>
+
+  <h3>Wijzigingen <span class="tag t-code">code</span></h3>
+  <ul class="files">
+    <li><code>app/globals.css:460</code> <code>.cursor-dot</code>: <code>width/height: 8px; margin: -4px 0 0 -4px;</code> + de <code>box-shadow</code> hierboven; <code>transition: scale .2s var(--ease)</code>.</li>
+    <li><code>app/globals.css</code>: nieuwe regels <code>.cursor-dot.big { scale: .75 }</code>, <code>.cursor-dot.press { scale: 1.3 }</code>.</li>
+    <li><code>components/Cursor.tsx</code>: de classes <code>big</code>/<code>press</code> ook op de stip zetten (nu enkel op de ring). Verder niets.</li>
+  </ul>
+  <details class="small"><summary>Ter referentie: de Sansara-cursor (niet gekozen)</summary>
+  
+  <p class="muted small">Gemaakt op sansararesort.com (1440 px breed, pop-ups weggehaald). De zwarte pijl is de gewone muispijl; die verschijnt niet in een screenshot, dus heb ik hem op de exacte muispositie ingetekend.</p>
+  <div class="shots3">
+    <figure><img src="client-feedback-v3/img/sans-1-idle.png" alt="Sansara: stip en ring rond de muis in rust"><figcaption><b>In rust</b>: turquoise stip + dunne ring liggen samen rond de punt van de gewone muispijl.</figcaption></figure>
+    <figure><img src="client-feedback-v3/img/sans-2-move.png" alt="Sansara: stip en ring lopen achter tijdens bewegen"><figcaption><b>Tijdens bewegen</b>: de stip loopt een beetje achter, de ring nog meer (0,3 s / 0,7 s) en ze schuiven daarna terug op hun plaats.</figcaption></figure>
+    <figure><img src="client-feedback-v3/img/sans-3-hover.png" alt="Sansara: ring groot en wit boven de knop Book now"><figcaption><b>Boven een knop</b> (“Book now”): de stip verdwijnt, de ring wordt ×3 groter en hier wit (knop heeft class <code>white</code>).</figcaption></figure>
+  </div>
+
+  </details>
+
+  <!-- 2 -->
+  <h2 id="samenwerkingen">2 · Samenwerkingen: 7, met Raf &amp; Sol</h2>
+  <blockquote>Mensen met wie we samenwerkten: kunnen we er 7 hebben? Raf en Sol erbij? Hoe mensen verwijderen indien nodig?</blockquote>
+  <p><b>Ja, er is geen maximum.</b> Over ons toont automatisch elke <em>gepubliceerde</em> Persoon met Soort “Samenwerking” die niet verborgen is (<code>sanity/queries.ts:344</code>).</p>
+  <table>
+    <tr><th>Nu gepubliceerd (live)</th><th>Status</th></tr>
+    <tr><td>Elena, Fatim, Foodie Jive, Mel, Michèle</td><td>zichtbaar</td></tr>
+    <tr><td><b>Sol</b></td><td class="good">staat er al (zichtbaar op Over ons)</td></tr>
+    <tr><td><b>Raf</b></td><td class="bad">bestaat niet als gepubliceerde persoon → nog aanmaken (of een concept staat nog niet op “Publiceren”)</td></tr>
+  </table>
+  <p>Met Raf erbij = 7. <b>Beslist: 3 kolommen op brede schermen</b> (≥ 1100 px), 2 op tablet, 1 op gsm: <code>app/globals.css:301</code> (<code>.collabs</code>) → <code>grid-template-columns: repeat(3, 1fr)</code> + media queries. Geldt voor de klassieke weergave (zie #10).</p>
+  <h3>De echte oorzaak: het “+” staat verstopt <span class="tag t-code">code</span></h3>
+  <p>Het probleem was niet het aantal, maar dat het niet duidelijk was <b>hoe je iemand toevoegt</b>. In de Studio bouwen de panelen <b>Over ons</b>, <b>Lessen</b>, <b>Mails</b> en <b>Formulieren</b> hun lijst zelf op (<code>liveList</code> in <code>studio/structure/index.ts:64-100</code>). De knop “Nieuwe persoon” staat daar als <code>menuItem</code> <b>zonder <code>showAsAction</code></b>. In Sanity (gecontroleerd in de broncode van <code>sanity@6</code>: <code>renderAsButton: item.showAsAction ?? false</code>) betekent dat dat hij niet als knop verschijnt, maar <b>verstopt zit in het ⋯-menu</b> rechtsboven. Bij lijsten zoals “Nieuwsbrieven” staat er wel een zichtbaar <b>+</b>, vandaar de verwarring.</p>
+  <ul class="files">
+    <li><code>studio/structure/index.ts:87</code>: <code>S.menuItem()…showAsAction(true)</code> → in elk van die panelen een zichtbare <b>+</b>-knop met de titel als tooltip (“Nieuwe samenwerking”, “Nieuwe stijl”…). Eén regel, geldt voor alle 4 panelen.</li>
+    <li>Bovenaan de lijst ook een gewone rij <b>“+ Nieuwe samenwerking”</b> (een <code>S.listItem()</code> met <code>AddIcon</code> en een create-intent met beginwaarde Soort = Samenwerking), zodat het ook zonder de knop rechtsboven te vinden is. Zelfde voor “+ Nieuwe stijl”, “+ Nieuwe studio”.</li>
+    <li>Titel “Nieuwe persoon” → <b>“Nieuwe samenwerking”</b> (met beginwaarde <code>kind: "collaborator"</code> via een <code>initialValueTemplate</code>), zodat Rita &amp; Philippe niet per ongeluk een tweede “founder” aanmaken.</li>
+    <li><code>studio/components/Help.tsx</code> (“Zo werkt het”): kort blok “Iets toevoegen = het + bovenaan de lijst”, met een screenshot.</li>
+  </ul>
+
+  <h3>Ontbreekt het “+” ook elders? Controle van het hele Studio-menu</h3>
+  <table>
+    <tr><th>Menu</th><th>Nieuw document maken</th><th>Status</th></tr>
+    <tr><td>Over ons (Samenwerkingen, Rita &amp; Philippe)</td><td>“Nieuwe persoon”</td><td class="bad">verstopt in ⋯</td></tr>
+    <tr><td>Lessen (Stijlen, Studio's)</td><td>“Nieuwe stijl”, “Nieuwe studio”</td><td class="bad">verstopt in ⋯</td></tr>
+    <tr><td>Mails (Bevestigingsmails)</td><td>“Nieuwe bevestigingsmail”</td><td class="bad">verstopt in ⋯</td></tr>
+    <tr><td>Formulieren (Inschrijfformulieren)</td><td>“Nieuw formulier”</td><td class="bad">verstopt in ⋯</td></tr>
+    <tr><td>Retreats</td><td>klein <b>+</b>-icoontje zonder tekst rechts van de filterchips (<code>studio/components/RetreatList.tsx:116-123</code>)</td><td class="muted">zichtbaar, maar makkelijk te missen → knop met tekst “Nieuwe retreat”</td></tr>
+    <tr><td>Nieuwsbrieven, Testimonials</td><td>standaard Sanity-lijst met <b>+</b> bovenaan</td><td class="good">zichtbaar</td></tr>
+    <tr><td>Fotobank</td><td>knop “Foto's uploaden”</td><td class="good">zichtbaar</td></tr>
+    <tr><td>Contactboek</td><td>knoppen “Toevoegen” + “CSV importeren”</td><td class="good">zichtbaar</td></tr>
+    <tr><td>Inschrijvingen, Contactformulier, Reviews</td><td>geen: die komen binnen via de site</td><td class="muted">niet nodig (bij #4: “+ Nieuwe testimonial”)</td></tr>
+    <tr><td>Pagina's (Home, Algemeen, Gallery, FAQ, Contact, Menu &amp; footer), Juridisch</td><td>geen: er bestaat er telkens precies één</td><td class="muted">niet nodig</td></tr>
+  </table>
+  <p>Eén lijn code in <code>liveList</code> lost de 4 rode rijen op. Daarnaast: Retreats een knop met tekst, en overal dezelfde vorm: een <b>+</b>-knop rechtsboven én een rij “+ Nieuwe …” bovenaan de lijst. Het algemene “+ Maken” linksboven in de Studio blijft ook werken, maar toont alle soorten door elkaar; daarom liever vanuit het juiste menu.</p>
+
+  <h3>Raf toevoegen <span class="tag t-studio">studio</span></h3>
+  <ol class="steps">
+    <li>Studio → <b>Over ons</b> → rechtsboven het <b>⋯</b>-menu → <b>Nieuwe persoon</b> (na de fix hierboven: de zichtbare <b>+</b>-knop of de rij “+ Nieuwe samenwerking”).</li>
+    <li>Soort: <b>Samenwerking</b>. Vul <b>Naam</b>, <b>Rol</b> (NL + EN) en <b>Portret</b> in (verplicht), optioneel “Over”, Website, Andere links.</li>
+    <li>Optioneel <b>Volgorde</b>: laag getal = eerst. Leeg = alfabetisch na de genummerde.</li>
+    <li>Klik <b>Publiceren</b> (onderaan rechts). Pas dan staat Raf op de site.</li>
+  </ol>
+
+  <h3>Iemand weghalen <span class="tag t-studio">studio</span></h3>
+  <ul>
+    <li><b>Aanbevolen: “Verbergen op Over ons” aanzetten</b> (schakelaar onderaan de persoon) → Publiceren. De persoon verdwijnt van Over ons, maar blijft als begeleider op oude retreatpagina's staan. Later terugzetten = schakelaar uit.</li>
+    <li><b>Definitief</b>: in de persoon ⋯-menu → <b>Verwijderen</b>. Lukt niet zolang die persoon bij een retreat onder “Begeleiding” staat; de Studio toont dan waar. Eerst daar weghalen.</li>
+  </ul>
+  <p class="muted small">Optioneel <span class="tag t-code">code</span>: de uitleg “Verbergen = weg van Over ons, Verwijderen = overal weg” in “Zo werkt het” (<code>studio/components/Help.tsx</code>) zetten, zodat het niet opnieuw gevraagd wordt.</p>
+
+  <!-- 3 -->
+  <h2 id="voorbij">3 · Voorbije retreats: geen prijs meer (Waar · Begeleiding · Deelnemers)</h2>
+  <blockquote>Bij 'voorbije retreats', willen we enkel de kopjes Waar en Begeleiding op website. Om de prijs er af te krijgen. Liefst vermijden om de prijs weg te doen uit studio, en niet enkel onderaan bij het kopje 'achteraf'.</blockquote>
+  <p>De terugblik-pagina van een voorbije retreat toont nu 4 feiten naast “In een notendop”: <b>Waar · Begeleiding · Prijs (vanaf €…) · Deelnemers</b> (<code>app/[lang]/retreats/[slug]/page.tsx:161-175</code>). De prijs komt uit “Prijs vanaf” of de laagste prijs uit Praktisch.</p>
+  <p class="good"><b>Oplossing in de code, niets weghalen in de Studio</b>: de prijs blijft bewaard (handig als je de retreat opnieuw organiseert), de site toont hem gewoon niet meer zodra de einddatum voorbij is.</p>
+  <h3>Wijzigingen <span class="tag t-code">code</span></h3>
+  <ul class="files">
+    <li><code>app/[lang]/retreats/[slug]/page.tsx:161-175</code>: <code>price</code> en de rij <code>t.price</code> uit <code>facts</code> halen → <code>[t.where, …]</code>, <code>[t.hosts, …]</code>, <code>[t.participants, …]</code>.</li>
+    <li><code>app/[lang]/retreats/[slug]/page.tsx:56-62</code> (<code>generateMetadata</code>): “vanaf € …” enkel in de Google-/deelbeschrijving zetten als de retreat nog komt.</li>
+    <li><code>lib/jsonld.ts:131</code>: geen <code>offers</code> (prijs voor Google) meer voor voorbije retreats.</li>
+    <li>Kaartjes bij “Voorbij” op /retreats en het menu tonen al geen prijs (<code>components/sections.tsx:138-143</code>, enkel “12 deelnemers”) → niets te doen.</li>
+    <li>Studio-uitleg bijwerken: “Prijs vanaf” (<code>studio/schemaTypes/documents/retreat.ts:142-149</code>) → “Niet getoond bij een voorbije retreat”; groepsuitleg bovenaan (<code>:22</code>).</li>
+  </ul>
+  <p><b>Beslist: “Deelnemers” blijft</b> op de terugblik-pagina én op het kaartje bij “Voorbij” (“12 deelnemers”): het zegt iets over de sfeer en is geen prijsinfo. Enkel de prijs verdwijnt.</p>
+  <!-- 4 -->
+  <h2 id="testimonials">4 · Testimonials &amp; reviews → één document “Testimonial”</h2>
+  <blockquote>Ik snap niet goed hoe de 'testimonials' en de 'reviews' werken; Waar kan je die toevoegen in de studio? Ik voeg er toe, maar ze komen niet tevoorschijn.</blockquote>
+  <p><b>Beslissing</b>: reviews en testimonials zijn hetzelfde, één keer via het formulier en één keer met de hand ingevuld. We maken er <b>één soort document</b> van: <b>Testimonial</b>. Per testimonial zet je zelf een vinkje “Op Home”, en er komt een <b>tabel</b> met alle testimonials, met dat vinkje in de eerste kolom.</p>
+
+  <h3>Waarom het nu verwarrend is</h3>
+  <table>
+    <tr><th></th><th>Review (nu)</th><th>Testimonial (nu)</th></tr>
+    <tr><td>Hoe binnen</td><td>Formulier op <code>/retreats/&lt;slug&gt;/review</code> → privé <code>reviewSubmission</code> (met e-mail) → status “Gepubliceerd” maakt een publieke kopie <code>review</code> (<code>studio/structure/views.tsx:38-67</code>)</td><td>Met de hand: Inhoud → Testimonials</td></tr>
+    <tr><td>Waar in Studio</td><td>Contact → Reviews</td><td>Inhoud → Testimonials (los van Reviews)</td></tr>
+    <tr><td>Op Home?</td><td>Vanzelf bij 4★+ (<code>sanity/queries.ts:202</code>), geen keuze</td><td>Enkel als je hem <em>ook</em> kiest in Home → tab Testimonials (<code>home-page.ts:59-67</code>), en dat is nu leeg → “komt niet tevoorschijn”</td></tr>
+    <tr><td>Op retreatpagina?</td><td>Ja</td><td>Nee</td></tr>
+    <tr><td>Sterren / taal</td><td>Score verplicht, 1 taal</td><td>Geen score, NL/EN</td></tr>
+  </table>
+  <p class="why">De testimonial uit de link heet ook nog <b>“[Naam]”</b>, en Hilde staat er twee keer in (als review én als testimonial, bijna dezelfde tekst). De migratie hieronder lost dat mee op.</p>
+
+  <h3>Nieuw model</h3>
+  <div class="grid">
+    <div class="card">
+      <h3 style="margin-top:0">Testimonial <span class="muted small">(publiek, staat op de site)</span></h3>
+      <ul class="small">
+        <li><b>Op Home</b>: schakelaar (formulier: standaard aan bij 4★+, met de hand: standaard aan)</li>
+        <li><b>Op de retreatpagina</b>: schakelaar, standaard aan (enkel als er een retreat gekozen is)</li>
+        <li><b>Naam</b> · <b>Tekst</b> (NL/EN; de andere taal valt terug op het origineel, of vertalen met AI)</li>
+        <li><b>Score</b> 1–5, <em>optioneel</em> (geen score = geen sterren, telt niet mee in het gemiddelde)</li>
+        <li><b>Retreat</b> (optioneel) of <b>Andere context</b> (bv. “Lessen”)</li>
+        <li><b>Bron</b>: “Formulier” / “Zelf toegevoegd” (alleen-lezen)</li>
+        <li><b>Datum</b>, <b>Taal</b>, optioneel <b>Volgorde</b> op Home</li>
+      </ul>
+    </div>
+    <div class="card">
+      <h3 style="margin-top:0">Inzending <span class="muted small">(privé, blijft)</span></h3>
+      <ul class="small">
+        <li>Wat het formulier binnenstuurt, <b>met e-mail</b>. Blijft een apart privé-document (id met punt, <code>reviewSubmission.&lt;uuid&gt;</code>), omdat de dataset publiek leesbaar is: een e-mail mag nooit in een publiek document staan.</li>
+        <li>Status Nieuw / Gepubliceerd / Geweigerd zoals nu. “Gepubliceerd” maakt of herstelt de <b>Testimonial</b> <code>testimonial-&lt;uuid&gt;</code> met Bron = Formulier. Wie zelf iets toevoegt, maakt meteen een Testimonial, zonder inzending.</li>
+        <li>Interne naam <code>reviewSubmission</code> mag blijven (contactboek, revalidate, formulieren werken er al mee); alleen de titel in de Studio wordt “Testimonial (inzending)”.</li>
+      </ul>
+    </div>
+  </div>
+
+  <h3>Studio: menu en tabel</h3>
+  <p>Contact → <b>Testimonials</b> (vervangt “Reviews” én Inhoud → Testimonials). Bovenaan de rij <b>Tabel</b>, daaronder de lijst per status (Nieuwe inzendingen · Op Home · Alle), met de knop <b>+ Nieuwe testimonial</b>.</p>
+  <div class="tblmock">
+    <table>
+      <tr><th>Op Home</th><th>Naam</th><th>Score</th><th>Tekst</th><th>Retreat / context</th><th>Bron</th><th>Status</th><th>Taal</th><th>Datum</th><th>E-mail</th></tr>
+      <tr><td><input type="checkbox" checked aria-label="Op Home"></td><td>Nathalie</td><td>★★★★★</td><td>Ongelooflijk positieve en aangename sfeer. Een week later…</td><td>Eifel 2026</td><td>Formulier</td><td><span class="pill ok">Gepubliceerd</span></td><td>NL</td><td>—</td><td class="muted">n…@…</td></tr>
+      <tr><td><input type="checkbox" checked aria-label="Op Home"></td><td>Hilde</td><td>★★★★★</td><td>Zo genoten van de ongedwongenheid. En de vele mooie…</td><td>Spa 2025</td><td>Formulier</td><td><span class="pill ok">Gepubliceerd</span></td><td>NL</td><td>24 okt 2026</td><td class="muted">h…@…</td></tr>
+      <tr><td><input type="checkbox" aria-label="Op Home"></td><td class="bad">[Naam]</td><td class="muted">—</td><td>Ik kwam voor de yoga en ging naar huis met een nieuwe vriendengroep.</td><td>Spa 2025</td><td>Zelf toegevoegd</td><td><span class="pill">Online</span></td><td>NL/EN</td><td>4 okt 2026</td><td class="muted">—</td></tr>
+      <tr><td><input type="checkbox" disabled aria-label="Op Home"></td><td>(nieuwe inzending)</td><td>★★★★☆</td><td>…</td><td>Eifel 2026</td><td>Formulier</td><td><span class="pill new">Nieuw</span></td><td>NL</td><td>—</td><td class="muted">…</td></tr>
+    </table>
+  </div>
+  <ul class="small">
+    <li><b>Eerste kolom</b>: vinkje “Op Home”, werkt meteen (patch op de Testimonial, de site wordt opnieuw opgebouwd). Grijs zolang een inzending nog niet gepubliceerd is.</li>
+    <li>Klik op een rij → het document openen. Filters: retreat, bron, status, “enkel op Home”. Knop “Exporteer CSV” zoals bij Inschrijvingen. De e-mail is enkel zichtbaar in de Studio.</li>
+    <li>Bouw: nieuw component <code>studio/components/TestimonialTable.tsx</code> naar het voorbeeld van <code>SignupTable.tsx</code> (zelfde Sanity UI, filters, export). Eén query over <code>testimonial</code> + <code>reviewSubmission</code>, gekoppeld via de uuid.</li>
+  </ul>
+
+  <h3>Wijzigingen <span class="tag t-code">code</span></h3>
+  <ul class="files">
+    <li><code>studio/schemaTypes/documents/testimonial.ts</code>: velden <code>showOnHome</code>, <code>showOnRetreat</code>, <code>rating</code> (optioneel), <code>source</code>, <code>lang</code>, <code>date</code>, <code>orderRank</code>; preview met sterren + “Home”-badge; placeholder “[Naam]” blokkeren.</li>
+    <li><code>studio/schemaTypes/documents/review.ts</code>: publiek type <code>review</code> weg; <code>reviewSubmission</code> krijgt titel “Testimonial (inzending)”. <code>studio/schemaTypes/index.ts</code> bijwerken.</li>
+    <li><code>studio/structure/views.tsx:38-67</code>: “Gepubliceerd” maakt een <code>testimonial</code> (<code>testimonial-&lt;uuid&gt;</code>, <code>source: "form"</code>, <code>showOnHome: rating &gt;= 4</code>, tekst in het taalvak van de inzending). Bewerkingen blijven bewaard bij opnieuw publiceren, zoals nu.</li>
+    <li><code>studio/structure/index.ts:224-236</code> + <code>:311</code>: één menu Contact → Testimonials met Tabel bovenaan; los item onder Inhoud weg. Teller-badge blijft op nieuwe inzendingen.</li>
+    <li><code>studio/schemaTypes/singletons/home-page.ts:20,59-67</code>: keuzelijst <code>testimonials</code> weg (enkel de kop blijft), overzicht: “Testimonials met ‘Op Home’ aan”.</li>
+    <li><code>sanity/queries.ts:107-123, 201-202, 280-284</code>: één projectie <code>TESTIMONIAL</code> (naam, tekst, score, context); Home = <code>*[_type=="testimonial" &amp;&amp; showOnHome==true] | order(coalesce(orderRank,1000), date desc)[0...12]</code>; retreatpagina + eerdere edities = <code>showOnRetreat != false</code>.</li>
+    <li><code>app/[lang]/page.tsx:40-50</code>: samenvoegen van twee lijsten weg; <code>components/sections.tsx:229-270</code> (<code>ReviewList</code>): sterren en gemiddelde enkel over wie een score heeft.</li>
+    <li><code>app/api/revalidate/route.ts</code>, <code>lib/receipt.ts</code>, <code>studio/components/Help.tsx</code>, “Nog in te vullen”: namen/uitleg bijwerken; <code>sanity/types.ts</code> opnieuw genereren.</li>
+    <li><b>Migratie</b> <code>studio/scripts/migrate-testimonials.ts</code> (eenmalig, met dry-run): de 2 <code>review</code>-documenten → <code>testimonial-&lt;uuid&gt;</code> (Bron Formulier, Op Home aan); de 2 oude testimonials krijgen Bron “Zelf toegevoegd”; dubbele Hilde samenvoegen (die met score houden); verwijzingen in <code>homePage.testimonials</code> opruimen; daarna de <code>review</code>-documenten weg.</li>
+    <li>De publieke URL <code>/retreats/&lt;slug&gt;/review</code> blijft (er zijn al links verstuurd); het formulier mag als kop “Laat een testimonial achter” krijgen.</li>
+  </ul>
+  <p class="muted small">Inschatting: 1–1,5 dag (schema + migratie + tabel + queries).</p>
+  <p><b>Beslist: op de site Nederlands “Wat deelnemers zeggen”</b>, geen Engels “Reviews” meer. Nu staat er op de retreatpagina een klein label “Reviews” boven de kop “Wat deelnemers zeggen”, en “Reviews” in de inhoudstafel. <code>lib/dictionary.ts:259</code> (<code>review.label</code>) en <code>:113</code> (<code>toc.reviews</code>) → <b>“Wat deelnemers zeggen”</b> (label) en kop bv. <b>“Zo was het voor hen”</b>, of het label weglaten en enkel de kop houden. Op Home is de kop al “Wat deelnemers zeggen”. Het reviewformulier krijgt als kop “Vertel hoe het was”. Engels blijft “What participants say”.</p>
+  <!-- 5 -->
+  <h2 id="instagram">5 · Foto's in het Instagram-blok onderaan Home</h2>
+  <blockquote>Hoe kan ik de foto's wijzigen onderaan bij Instagram sectie?</blockquote>
+  <p><b>Nu</b>: het blok toont automatisch de <b>6 nieuwst geüploade foto's met “Uitgelicht” aan</b> uit de Fotobank (<code>sanity/queries.ts:200</code>). Er staan 16 foto's op Uitgelicht, dus enkel de 6 recentst geüploade komen in beeld. “Uitgelicht” betekent ook: een grote tegel op de Gallery-pagina (<code>studio/schemaTypes/documents/media-item.ts:47</code>).</p>
+  <p><b>Vandaag</b> <span class="tag t-studio">studio</span>: Fotobank → foto openen → “Uitgelicht” aan/uit → Publiceren. Omslachtig (je moet er 10 uitzetten om een oudere foto erin te krijgen, en dat verandert ook de Gallery). Het blok staat ook nergens in de Home-tabs, vandaar dat het niet te vinden is.</p>
+  <h3>Wijzigingen <span class="tag t-code">code</span></h3>
+  <ul class="files">
+    <li><code>studio/schemaTypes/singletons/home-page.ts</code>: nieuwe tab <b>Instagram</b> met veld <b>“Foto's Instagram-blok”</b> (lijst met foto's uit de Fotobank, max. 6, sleepbaar voor de volgorde, met de bestaande foto-kiezer <code>studio/components/PhotoPicker.tsx</code>) + regel in het Home-overzicht (<code>SECTIONS</code>).</li>
+    <li><code>sanity/queries.ts:200</code>: <code>"instagram": coalesce(instagramPhotos[]-&gt;…, *[_type=="mediaItem" &amp;&amp; highlight==true]…[0...6])</code> → eigen keuze, anders zoals nu.</li>
+    <li><code>studio/schemaTypes/documents/media-item.ts:47</code>: uitleg “Uitgelicht” bijwerken (Instagram enkel als Home → Instagram leeg is).</li>
+    <li><code>sanity/types.ts</code> opnieuw genereren (typegen).</li>
+  </ul>
+
+  <!-- 6 -->
+  <h2 id="mat">6 · Yogamat-symbool bij Rita</h2>
+  <blockquote>Grafisch symbooltje bij rita van yoga mat is niet zo stilistisch. Lijkt nog te veel op rol WC papier. Maak langwerpiger en betere SVG.</blockquote>
+  <p>Het symbool staat op Over ons boven Rita's portret (hover toont de foto). Nu: korte, dikke rol (± 1,7 : 1) met grote spiraal en een afgerold stuk ervoor → leest als WC-rol/keukenrol. Voorstel: <b>lange, slanke rol (± 4 : 1)</b>, kleine ovale kop met fijne spiraal, <b>twee banden</b> en een <b>draagriem</b> erover: dat maakt meteen duidelijk dat het een yogamat is.</p>
+  <div class="mats">
+    <div class="mat"><span>Nu</span><svg viewBox="0 0 100 100" aria-hidden="true" stroke-linejoin="round" stroke-linecap="round">
+    
+    <ellipse cx="30" cy="44" rx="8.5" ry="13" />
+    <path d="M30 31 L74 31 A8.5 13 0 0 1 74 57 L30 57" />
+    <path d="M30.5 44.0 30.6 44.2 30.6 44.5 30.5 44.8 30.4 45.0 30.3 45.3 30.1 45.5 29.8 45.6 29.6 45.6 29.3 45.4 29.0 45.2 28.8 44.8 28.6 44.4 28.5 43.8 28.5 43.3 28.6 42.7 28.8 42.1 29.1 41.7 29.5 41.3 30.0 41.1 30.4 41.1 30.9 41.2 31.4 41.6 31.8 42.1 32.1 42.8 32.3 43.6 32.4 44.5 32.3 45.4 32.1 46.3 31.7 47.1 31.2 47.7 30.6 48.1 29.9 48.3 29.2 48.3 28.5 47.9 27.8 47.3 27.3 46.5 26.9 45.4 26.7 44.2 26.7 43.0 26.9 41.7 27.3 40.6 27.9 39.6 28.6 38.8 29.5 38.4 30.4 38.3 31.4 38.5 32.2 39.1 33.0 40.0 33.6 41.2 34.0 42.6 34.2 44.1 34.1 45.7 33.8 47.3 33.2 48.7 32.4 49.8 31.4 50.7" />
+    <path d="M45 31 A8.5 13 0 0 1 45 57" />
+    <path d="M48 31 A8.5 13 0 0 1 48 57" />
+    <path d="M30 57 L22 72 L74 72 L82 57 L74 57" />
+  </svg></div>
+    <div class="mat"><span>Voorstel</span><svg viewBox="0 0 100 56" aria-hidden="true" stroke-linejoin="round" stroke-linecap="round">
+    <ellipse cx="10" cy="36" rx="4.6" ry="11" />
+    <path d="M10 25 H88 A4.6 11 0 0 1 88 47 H10" />
+    <path d="M10 34.9 10.1 34.8 10.2 34.8 10.2 34.8 10.3 34.8 10.4 34.9 10.5 35 10.6 35.1 10.7 35.3 10.8 35.6 10.8 35.8 10.9 36.1 10.9 36.5 10.9 36.8 10.9 37.1 10.8 37.5 10.7 37.8 10.6 38.1 10.5 38.4 10.4 38.7 10.2 38.9 10 39 9.8 39.1 9.6 39.1 9.4 39 9.2 38.8 9.1 38.6 8.9 38.3 8.7 37.9 8.6 37.5 8.5 37 8.4 36.4 8.3 35.8 8.3 35.2 8.4 34.6 8.4 34 8.5 33.4 8.7 32.9 8.9 32.4 9.1 31.9 9.3 31.6 9.6 31.3 9.9 31.1 10.2 31.1 10.5 31.1 10.8 31.3 11.1 31.5 11.4 31.9 11.7 32.4 11.9 33 12.1 33.7 12.3 34.4 12.4 35.2 12.5 36.1 12.5 37 12.4 37.9 12.3 38.7 12.1 39.6 11.9 40.4 11.6 41.1 11.3 41.7 11 42.2 10.6 42.5 10.2 42.8 9.8 42.8 9.3 42.8 8.9 42.5 8.5 42.2 8.1 41.6 7.8 41 7.4 40.2 7.2 39.3 7 38.3 6.8 37.2 6.8 36 6.8 34.9 6.8 33.7 7 32.6 7.2 31.5 7.5 30.5 7.8 29.6 8.2 28.8 8.7 28.2 9.1 27.7 9.7 27.4 10.2 27.3 10.8 27.3 11.3 27.6 11.8 28.1 12.3 28.8 12.8 29.6 13.2 30.6 13.5 31.7 13.8 33 13.9 34.3 14 35.7 14 37.2 14 38.6 13.8 40 13.5 41.4 13.2 42.6 12.8 43.7 12.3 44.7 11.7 45.5 11.1 46.1 10.5 46.5 9.8 46.6 9.2 46.6 8.5 46.2 7.9 45.7 7.3 44.9" />
+    <path d="M24.4 25 A4.6 11 0 0 1 24.4 47 M27.6 25 A4.6 11 0 0 1 27.6 47 M70.4 25 A4.6 11 0 0 1 70.4 47 M73.6 25 A4.6 11 0 0 1 73.6 47" />
+    <path d="M27 25 C38 11 60 11 71 25" />
+    <path d="M29.2 25 C39 14 59 14 68.8 25" />
+  </svg></div>
+  </div>
+  <h3>Wijziging <span class="tag t-code">code</span></h3>
+  <p><code>components/icons.tsx:31-43</code> (<code>YogaMat</code>) vervangen door (zelfde lijnstijl 1,2 px, viewBox iets platter zodat de mat breder in beeld komt):</p>
+  <pre><code>export const YogaMat = () =&gt; (
+  &lt;svg viewBox=&quot;0 0 100 56&quot; aria-hidden=&quot;true&quot; strokeLinejoin=&quot;round&quot; strokeLinecap=&quot;round&quot;&gt;
+    {/* a long rolled-up mat on its side: the spiral end, two straps, a carry strap over the top */}
+    &lt;ellipse cx=&quot;10&quot; cy=&quot;36&quot; rx=&quot;4.6&quot; ry=&quot;11&quot; /&gt;
+    &lt;path d=&quot;M10 25 H88 A4.6 11 0 0 1 88 47 H10&quot; /&gt;
+    &lt;path d=&quot;M10 34.9 10.1 34.8 10.2 34.8 10.2 34.8 10.3 34.8 10.4 34.9 10.5 35 10.6 35.1 10.7 35.3 10.8 35.6 10.8 35.8 10.9 36.1 10.9 36.5 10.9 36.8 10.9 37.1 10.8 37.5 10.7 37.8 10.6 38.1 10.5 38.4 10.4 38.7 10.2 38.9 10 39 9.8 39.1 9.6 39.1 9.4 39 9.2 38.8 9.1 38.6 8.9 38.3 8.7 37.9 8.6 37.5 8.5 37 8.4 36.4 8.3 35.8 8.3 35.2 8.4 34.6 8.4 34 8.5 33.4 8.7 32.9 8.9 32.4 9.1 31.9 9.3 31.6 9.6 31.3 9.9 31.1 10.2 31.1 10.5 31.1 10.8 31.3 11.1 31.5 11.4 31.9 11.7 32.4 11.9 33 12.1 33.7 12.3 34.4 12.4 35.2 12.5 36.1 12.5 37 12.4 37.9 12.3 38.7 12.1 39.6 11.9 40.4 11.6 41.1 11.3 41.7 11 42.2 10.6 42.5 10.2 42.8 9.8 42.8 9.3 42.8 8.9 42.5 8.5 42.2 8.1 41.6 7.8 41 7.4 40.2 7.2 39.3 7 38.3 6.8 37.2 6.8 36 6.8 34.9 6.8 33.7 7 32.6 7.2 31.5 7.5 30.5 7.8 29.6 8.2 28.8 8.7 28.2 9.1 27.7 9.7 27.4 10.2 27.3 10.8 27.3 11.3 27.6 11.8 28.1 12.3 28.8 12.8 29.6 13.2 30.6 13.5 31.7 13.8 33 13.9 34.3 14 35.7 14 37.2 14 38.6 13.8 40 13.5 41.4 13.2 42.6 12.8 43.7 12.3 44.7 11.7 45.5 11.1 46.1 10.5 46.5 9.8 46.6 9.2 46.6 8.5 46.2 7.9 45.7 7.3 44.9&quot; /&gt;
+    &lt;path d=&quot;M24.4 25 A4.6 11 0 0 1 24.4 47 M27.6 25 A4.6 11 0 0 1 27.6 47 M70.4 25 A4.6 11 0 0 1 70.4 47 M73.6 25 A4.6 11 0 0 1 73.6 47&quot; /&gt;
+    &lt;path d=&quot;M27 25 C38 11 60 11 71 25&quot; /&gt;
+    &lt;path d=&quot;M29.2 25 C39 14 59 14 68.8 25&quot; /&gt;
+  &lt;/svg&gt;
+);</code></pre>
+  <p class="muted small">Alternatief <span class="tag t-studio">studio</span>: bij Rita (Over ons → Rita) kan je in het veld <b>Voorwerp</b> een eigen foto zetten (bv. haar opgerolde mat); dan wordt die getoond i.p.v. de tekening.</p>
+
+  <!-- 7 -->
+  <h2 id="prive">7 · Tarieven privélessen</h2>
+  <blockquote>Ik zou nog graag weten hoe ik voor de privelessen al deze info toevoeg: Tarieven Privélessen · Prijzen per persoon (1-op-1 € 75, Duet € 45 p.p., Trio € 35 p.p.) · Locatie &amp; Praktisch (Waar, Vervoer)</blockquote>
+  <p><b>Nu</b>: Studio → Lessen → Lessen-pagina → tab <b>Privéles</b> heeft enkel Kop, Tekst (max. 300 tekens), <b>Praktisch (1 grijze regel, max. 80 tekens)</b>, Foto en Knop (<code>studio/schemaTypes/singletons/lessons-page.ts:89-102</code>). Live staat: “60 min · prijs 70€ · Mortsel of bij jou thuis (prijs is excl. verplaatsingskosten)”. Een prijslijst met 3 regels + Waar/Vervoer past daar niet in → <b>er moeten velden bij</b>.</p>
+
+  <h3>Voorstel: zo ziet het blok eruit</h3>
+  <div class="pl">
+    <div>
+      <span class="label">Privéles</span>
+      <h3>Tarieven privélessen</h3>
+      <p>Wil je persoonlijke begeleiding op maat, alleen of in een klein groepje?</p>
+      <h4>Prijzen per persoon</h4>
+      <ul class="rates">
+        <li><span>Privéles (1-op-1)</span><b>€ 75</b></li>
+        <li><span>Duet (2 personen)</span><b>€ 45 p.p.</b></li>
+        <li><span>Trio (3 personen)</span><b>€ 35 p.p.</b></li>
+      </ul>
+      <h4>Locatie &amp; praktisch</h4>
+      <dl class="kv">
+        <div><dt>Waar</dt><dd>In Mortsel of bij jou thuis (binnen een straal van 10 km).</dd></div>
+        <div><dt>Vervoer</dt><dd>Bij lessen op locatie worden eventuele vervoersonkosten apart verrekend.</dd></div>
+      </dl>
+      <p style="margin-top:18px"><span style="display:inline-block;padding:12px 20px;border-radius:99px;background:var(--ink);color:#fff;font-size:.75rem;letter-spacing:.08em;text-transform:uppercase">Contacteer Rita</span></p>
+    </div>
+    <div style="background:#d9cfc1;border-radius:4px;min-height:260px;display:grid;place-items:center;color:var(--muted);font-size:.85rem">foto (zoals nu)</div>
+  </div>
+
+  <h3>Wijzigingen <span class="tag t-code">code</span></h3>
+  <ul class="files">
+    <li><code>studio/schemaTypes/singletons/lessons-page.ts:89-102</code> (object <code>private</code>) uitbreiden met:
+      <ul>
+        <li><code>ratesTitle</code> (NL/EN, “Prijzen per persoon”)</li>
+        <li><code>rates[]</code>: per regel <b>Omschrijving</b> (NL/EN, bv. “Duet (2 personen)”), <b>Bedrag (€)</b>, schakelaar <b>“per persoon”</b> (→ “p.p.” / “pp”)</li>
+        <li><code>detailsTitle</code> (NL/EN, “Locatie &amp; praktisch”)</li>
+        <li><code>details[]</code>: per regel <b>Kopje</b> (Waar, Vervoer…) + <b>Tekst</b> (NL/EN)</li>
+        <li>het oude veld “Praktisch” blijft als optionele korte regel (bv. “60 min”), of verbergen als het leeg is</li>
+      </ul>
+    </li>
+    <li><code>sanity/queries.ts:306</code>: nieuwe velden mee ophalen (met <code>t()</code> voor NL/EN).</li>
+    <li><code>app/[lang]/lessen/page.tsx:222-254</code>: prijslijst + Waar/Vervoer tonen onder de tekst, zelfde stijl als “Praktisch” op de retreatpagina; bedragen via <code>euro()</code> (<code>lib/format.ts</code>).</li>
+    <li><code>lib/dictionary.ts</code>: standaardkoppen NL/EN (“Prijzen per persoon” / “Prices per person”, “Locatie &amp; praktisch” / “Location &amp; practical”, “p.p.” / “pp”).</li>
+    <li>Optioneel: JSON-LD <code>Offer</code>s voor de privélessen (Google), <code>lib/jsonld.ts</code>.</li>
+    <li><code>sanity/types.ts</code> opnieuw genereren; Lessen-overzicht in de Studio (vinkjes per blok) aanvullen.</li>
+  </ul>
+  <p>Daarna invullen <span class="tag t-studio">studio</span>: Lessen → Lessen-pagina → tab <b>Privéles</b> → Kop “Tarieven privélessen”, Tekst = de introzin, 3 prijsregels, 2 praktische regels → Vertalen (AI) voor EN → Publiceren.</p>
+
+  <!-- 8 -->
+  <h2 id="seo">8 · SEO: begrijpt Google dat dit retreats/events zijn, en dat Yoga, Zen &amp; Tonic yoga aanbiedt?</h2>
+  <p><b>Kort</b>: de retreatpagina's zijn al goed (Google ziet ze als <b>Event</b>). Wat ontbreekt: Google weet nergens <em>wat</em> Yoga, Zen &amp; Tonic doet (yoga, lessen, privéles, regio Antwerpen). Dat staat enkel in de tekst, niet in de gestructureerde data. Gecontroleerd op de live pagina's.</p>
+
+  <h3>Wat al goed zit ✓</h3>
+  <table>
+    <tr><th>Pagina</th><th>Wat Google krijgt</th></tr>
+    <tr><td>Retreatpagina's (komend én voorbij)</td><td>JSON-LD <b>Event</b> (naam, data, plaats + verblijf, organisator = Yoga, Zen &amp; Tonic, begeleiders als <code>performer</code>, foto, prijs + volzet/beschikbaar) + <b>BreadcrumbList</b> (<code>lib/jsonld.ts:73-145</code>). Eigen title &amp; description per retreat, canonical, NL/EN-hreflang, eigen deelafbeelding.</td></tr>
+    <tr><td>Home</td><td><b>Organization</b> + <b>WebSite</b> (naam, logo, e-mail, telefoon, Instagram/Facebook).</td></tr>
+    <tr><td>Sitemap / robots</td><td>Alle pagina's in NL + EN, met hreflang en laatste wijziging; Studio en API uitgesloten.</td></tr>
+    <tr><td>Reviewformulier <code>/retreats/&lt;slug&gt;/review</code></td><td>Terecht <b>noindex</b>: het is enkel een formulier. De reviews zelf staan op de (geïndexeerde) retreatpagina.</td></tr>
+  </table>
+
+  <h3>Wat beter kan <span class="tag t-code">code</span></h3>
+  <table>
+    <tr><th>#</th><th>Probleem</th><th>Oplossing</th><th>Belang</th></tr>
+    <tr><td>a</td><td><b>Geen “wat doen we”</b>: Organization heeft geen aanbod, geen adres/regio, geen oprichters.</td><td><code>organizationLd</code> uitbreiden: <code>knowsAbout</code> (Yoga, Pilates, Meditatie, Freediving), <code>areaServed</code> (Antwerpen, Mortsel), <code>founder</code> (Rita, Philippe als Person), <code>hasOfferCatalog</code> met 3 <b>Service</b>s: “Yogaretreats”, “Yoga- en Pilateslessen”, “Privéles yoga &amp; Pilates”. En deze Organization op <b>elke</b> pagina meesturen (nu enkel Home), zodat de organisator van een Event volledig is.</td><td>hoog</td></tr>
+    <tr><td>b</td><td><b>Lessen-pagina zonder gestructureerde data</b>, H1 is gewoon “Lessen”.</td><td><code>app/[lang]/lessen/page.tsx</code>: JSON-LD <b>Service</b> per stijl (Ashtanga, Vinyasa, Pilates Mat/Reformer, <code>provider</code> = Organization, <code>areaServed</code> Antwerpen) + Service “Privéles” met <b>Offer</b>s (€ 75 / € 45 / € 35 p.p., zie #7). Openingstitel bv. “Yoga- &amp; Pilateslessen in Antwerpen” (in de Studio: Lessen-pagina → Openingsbeeld).</td><td>hoog</td></tr>
+    <tr><td>c</td><td><b>Land als tekst</b>: <code>addressCountry: "Egypte"</code>, <code>"België"</code>; plaats “Ardense bossen · Spa”.</td><td>ISO-code meesturen (<code>EG</code>, <code>BE</code>): veld “Landcode” of een vaste lijst in <code>retreat.ts</code>; <code>addressLocality</code> = enkel de plaats (“Spa”), de omschrijving naar <code>location.name</code>.</td><td>middel</td></tr>
+    <tr><td>d</td><td><b>Event-type te algemeen</b> + geen taal.</td><td>Event blijft het juiste type (er is geen “Retreat” in schema.org), maar voeg <code>about</code>/<code>keywords</code> (“yoga retreat”, “freediving”), <code>inLanguage</code> en <code>organizer.logo</code> toe. Bij voorbije retreats: geen <code>offers</code> (zie #3).</td><td>laag–middel</td></tr>
+    <tr><td>e</td><td><b>Titel ≠ openingstitel</b> bij voorbije retreats: title “Spa: Yoga &amp; Hike”, H1 “Ardennen: Yoga &amp; Spa”.</td><td>Inhoud: in de Studio dezelfde naam gebruiken (retreat → Titel en Openingsbeeld → Titel). Eventueel waarschuwing in de Studio als ze verschillen.</td><td>middel <span class="tag t-studio">studio</span></td></tr>
+    <tr><td>f</td><td><b>Slug “Rochefort”</b> met hoofdletter en zonder jaar (de andere: <code>eifel-2026</code>).</td><td>In de Studio wijzigen naar <code>rochefort-2027</code> (nu het nog niet gedeeld is) + slug-validatie “kleine letters, met jaar”.</td><td>middel <span class="tag t-studio">studio</span></td></tr>
+    <tr><td>g</td><td><b>Over ons</b>: Rita &amp; Philippe niet als Person.</td><td>JSON-LD <b>Person</b> voor beiden (<code>jobTitle</code>, <code>worksFor</code>, <code>sameAs</code> Instagram) op Over ons.</td><td>laag</td></tr>
+    <tr><td>h</td><td><b>Sterren in Google</b>?</td><td>Niet doen: Google toont geen review-sterren voor Events, en reviews die een organisatie over zichzelf op de eigen site zet, komen sinds 2019 ook niet in aanmerking. Een <code>AggregateRating</code> heeft dus geen zin.</td><td>niet nodig</td></tr>
+  </table>
+  <p class="muted small">Daarna controleren met de <a href="https://search.google.com/test/rich-results">Rich Results Test</a> en in Search Console (sitemap indienen, Event-rapport).</p>
+
+  <!-- 9 -->
+  <h2 id="prive-nav">9 · Privéles in de navigatie</h2>
+  <p>Ja, dat is logisch: het blok staat onderaan de Lessen-pagina (<code>#prive</code>) en is nu enkel te vinden door helemaal te scrollen. Twee plaatsen in <code>components/Nav.tsx</code>:</p>
+  <ul class="files">
+    <li><b>Desktop-menu “Lessen”</b> (<code>Nav.tsx:147-162</code>): in de onderste balk naast “📍 studio's” en “Weekplanning →” een derde link <b>“Privéles →”</b> naar <code>href(lang, "lessons", { hash: "prive" })</code>. Alternatief: een 5e kaart naast de stijlen met icoon <code>people</code> en de korte tekst uit de Studio. Voorstel: link in de balk, zodat het raster van 4 stijlen blijft.</li>
+    <li><b>Mobiel menu</b> (<code>Nav.tsx:197-205</code>, <code>subs</code>): chip <b>“Privéles”</b> na “Studio's”.</li>
+    <li>Enkel tonen als het blok bestaat: <code>hasPrivate: defined(*[_id=="lessonsPage"][0].private.title)</code> in <code>SETTINGS_QUERY</code> (<code>sanity/queries.ts</code>), zoals bij de studio's.</li>
+    <li><code>lib/dictionary.ts</code>: <code>chips.private</code> “Privéles” / “Private class”. Optioneel ook in de footer onder Aanbod.</li>
+  </ul>
+
+  <!-- 10 -->
+  <h2 id="samenwerkingen-speels">10 · Samenwerkingen als balanstoren (met schakelaar naar klassiek)</h2>
+  <p>Een knipoog naar yoga: geen losse, willekeurig botsende deeltjes, maar de ronde portretten als een <b>gestapelde steentoren in evenwicht</b> (een cairn, zoals op het strand of bij een tree pose). De interactie gaat dan over <b>balans</b>: aanraken laat de toren wiebelen, er een steen uit trekken laat de rest zakken, te hard duwen laat hem omvallen, en hij bouwt zichzelf rustig weer op. Zo heeft de interactie een betekenis. De <b>klassieke weergave</b> (de huidige lijst) blijft bestaan, en Rita &amp; Philippe kiezen in de Studio welke ze tonen.</p>
+
+  <p><button type="button" class="toggle" id="tower-toggle" aria-pressed="true">Weergave: Balanstoren</button> <span class="muted small">(zelfde schakelaar als in de Studio)</span></p>
+  <div class="bubbles" id="bubbles" aria-label="Prototype samenwerkingen">
+    <canvas></canvas>
+    <div class="bubble-tip" hidden></div>
+    <aside class="bubble-card" hidden>
+      <button class="bubble-x" aria-label="Sluiten">×</button>
+      <img alt="">
+      <div><h3></h3><p class="muted small role"></p><p class="bio"></p><p class="links small"></p></div>
+    </aside>
+    <span class="bubble-hint">hover = wiebelen · sleep een steen eruit/erop · duw hard = omvallen · klik = details</span>
+  </div>
+  <ul class="collabs-mock" id="classic" hidden></ul>
+  <figure style="margin:12px 0"><img src="client-feedback-v3/img/tower-states.png" alt="Balanstoren: rust, wiebelen, steen eruit, omgevallen, heropgebouwd" style="width:100%;border-radius:8px;border:1px solid var(--line)"><figcaption class="muted small">Van links naar rechts: rust · wiebelen na hover · onderste steen eruit getrokken (de rest zakt) · te hard geduwd = omgevallen · vanzelf heropgebouwd.</figcaption></figure>
+
+  <h3>Gedrag</h3>
+  <ul>
+    <li><b>Opbouw</b>: grootste portret onderaan, kleiner naar boven (7 personen: Ø ±150 → 70 px), elke steen iets verschoven en licht overlappend, zodat het een echte, net-niet-perfecte stapel is. De volgorde volgt het Studio-veld <b>Volgorde</b> (laag = onderaan), anders de grootte op alfabet.</li>
+    <li><b>Rust</b>: de toren “ademt”: een heel trage, kleine zwaai (± 0,5°), zoals iemand in balans staat.</li>
+    <li><b>Hover</b>: de steen onder de muis groeit iets en krijgt een ember-rand + label (naam · rol); de muisbeweging geeft de toren een zetje in die richting (hoe hoger je raakt, hoe meer hij zwaait) en hij veert terug.</li>
+    <li><b>Slepen</b>: een steen uit de toren trekken → de stenen erboven zakken en de toren zoekt opnieuw balans. Loslaten boven/naast de toren = op die plaats terugzetten (de volgorde verandert enkel voor de bezoeker); ver weg loslaten = hij rolt terug naar zijn plaats.</li>
+    <li><b>Omvallen</b>: hard duwen of gooien → de toren valt om, de stenen rollen over de bodem, en na ±2 s bouwen ze zichzelf weer op, één voor één van onder naar boven.</li>
+    <li><b>Klik</b> (zonder slepen): kaart met groot portret, naam, rol, bio en links (desktop rechts, mobiel als bottom sheet). Esc/× sluit. Ankers (<code>#elena</code>) openen meteen de juiste kaart.</li>
+    <li><b>Veel mensen</b> (&gt; 8): twee torens naast elkaar. <b>Mobiel</b>: toren geschaald, tikken = kaart, wiebelen met de vinger.</li>
+  </ul>
+
+  <h3>Schakelaar in de Studio <span class="tag t-code">code</span></h3>
+  <ul class="files">
+    <li><code>studio/schemaTypes/singletons/about-page.ts</code> (bij “Samenwerkingen”): veld <b>“Weergave samenwerkingen”</b> (<code>collaboratorsStyle</code>, radio): <b>“Balanstoren (speels)”</b> / <b>“Klassiek (lijst)”</b>, standaard Balanstoren, met uitleg “Klassiek = de vaste lijst met foto, rol, tekst en links”.</li>
+    <li><code>sanity/queries.ts:341-344</code> (<code>ABOUT_QUERY</code>): <code>collaboratorsStyle</code> mee ophalen; <code>sanity/types.ts</code> opnieuw genereren.</li>
+    <li><code>app/[lang]/over-ons/page.tsx:103-140</code>: <code>collaboratorsStyle === "classic"</code> → de huidige <code>&lt;ul className="collabs"&gt;</code> (ongewijzigd); anders <code>&lt;CollabTower people={…} /&gt;</code> + dezelfde lijst als gewone HTML eronder, visueel verborgen (<code>.sr-only</code>), zodat Google en schermlezers alles blijven lezen en het zonder JavaScript gewoon de lijst is.</li>
+    <li><b>Beslist</b>: wie in zijn systeem “minder beweging” aanzet (<code>prefers-reduced-motion</code>), krijgt <b>automatisch de klassieke lijst</b>, ook als in de Studio Balanstoren gekozen is. Gebeurt in CSS/JS aan de kant van de browser: de toren wordt niet geladen en de lijst wordt gewoon zichtbaar.</li>
+  </ul>
+
+  <h3>Bouw <span class="tag t-code">code</span></h3>
+  <ul class="files">
+    <li>Nieuw client-component <code>components/CollabTower.tsx</code>, geen library nodig: elke steen heeft een rustplaats in de toren; de toren draait rond zijn voet met één zwaaihoek (veer + demping), elke steen heeft een eigen kleine veer naar zijn plaats; bij omvallen eenvoudige zwaartekracht + botsingen (cirkel/cirkel, bodem, randen) en daarna één voor één terug naar hun plaats. ± 200 regels, <code>requestAnimationFrame</code>, pauzeert buiten beeld.</li>
+    <li>Portretten als <code>&lt;button&gt;</code>-elementen met <code>transform</code> (geen canvas), zodat Tab, focusring, Enter → kaart, alt-teksten en de cursor (#1, ring groot boven een steen) gewoon werken. Het canvas in het prototype is enkel om het snel te tonen.</li>
+    <li>Kaart: <code>Photo</code> + <code>RichText</code> hergebruiken; stijl naast <code>.collabs</code> in <code>app/globals.css</code>.</li>
+    <li>Inschatting: 1–1,5 dag (toren + omvallen/heropbouw + mobiel + Studio-schakelaar).</li>
+  </ul>
+
+  <h2>Volgorde van uitvoeren</h2>
+  <ol>
+    <li><b>Zelf in de Studio, nu</b>: Raf aanmaken (#2), slug <code>Rochefort</code> → <code>rochefort-2027</code> en titels gelijktrekken (#8e–f).</li>
+    <li><b>Snelle code</b>: zichtbaar “+” in de Studio (#2), cursor-halo (#1), prijs weg bij voorbije retreats (#3), nieuwe yogamat (#6), Privéles in het menu (#9).</li>
+    <li><b>Nieuwe Studio-velden</b>: privélessen (#7), Instagram-keuze (#5).</li>
+    <li><b>Grotere stukken</b>: Testimonials samenvoegen + tabel + migratie (#4), SEO-aanbod/JSON-LD (#8, samen met #7 voor de prijzen), balanstoren + schakelaar (#10).</li>
+  </ol>
+  <p class="muted small"><b>Beslist</b>: #1 onze cursor + halo · #2 3 kolommen · #3 Deelnemers blijft, prijs weg · #4 één “Testimonial”, op de site “Wat deelnemers zeggen” · #10 balanstoren, klassiek via de Studio-schakelaar en automatisch bij “minder beweging”. Geen open vragen meer.</p></main>
+
+<script>
+(() => {
+  const demo = document.getElementById("demo"), btn = document.getElementById("cur-toggle");
+  if (!demo) return;
+  document.body.classList.add("halo");
+  btn.onclick = () => { const on = btn.getAttribute("aria-pressed") !== "true"; btn.setAttribute("aria-pressed", on); btn.textContent = on ? "Voorstel (met halo)" : "Nu (zonder halo)"; document.body.classList.toggle("halo", on); };
+  if (!matchMedia("(pointer: fine)").matches) return;
+  const st = document.createElement("style"); st.textContent = "#demo, #demo * { cursor: none !important; }"; document.head.append(st);
+  const ring = document.createElement("div"), dot = document.createElement("div");
+  ring.className = "yc-ring"; dot.className = "yc-dot"; document.body.append(ring, dot);
+  let x = 0, y = 0, rx = 0, ry = 0, raf = 0, inside = false;
+  const tick = () => { rx += (x - rx) * .16; ry += (y - ry) * .16; ring.style.translate = `${rx}px ${ry}px`; raf = Math.abs(x - rx) + Math.abs(y - ry) > .1 ? requestAnimationFrame(tick) : 0; };
+  demo.addEventListener("mousemove", (e) => {
+    x = e.clientX; y = e.clientY; if (!inside) { rx = x; ry = y; inside = true; }
+    dot.style.transform = `translate(${x}px,${y}px)`;
+    const big = !!e.target.closest(".btn, .d-photo");
+    for (const el of [ring, dot]) { el.classList.add("yc-on"); el.classList.toggle("big", big); }
+    if (!raf) raf = requestAnimationFrame(tick);
+  });
+  const off = () => { inside = false; ring.classList.remove("yc-on"); dot.classList.remove("yc-on"); };
+  demo.addEventListener("mouseleave", off); addEventListener("scroll", off, { passive: true });
+})();
+</script>
+<script>
+(() => {
+  const PEOPLE = [{"bio": "Yoga is een rode draad in Elena's dagelijkse leven. Als gepassioneerde yogadocente deelt ze met veel liefde Vinyasa, Yin en meditatie, waarbij ze anderen uitnodigt om te vertragen, opnieuw te verbinden en te leven met meer aandacht en aanwezigheid.", "img": "https://cdn.sanity.io/images/1pbhk0to/production/6429bfcbef030696abe85735827602fcd12960ea-2048x1367.jpg?w=300&h=300&fit=crop&auto=format", "links": [{"label": "Website", "url": "http://www.elenagontcharova.com/"}, {"label": "Instagram", "url": "https://www.instagram.com/yogametelena/"}], "name": "Elena", "role": "Yin en Vinyasa yoga & meditatie"}, {"bio": "Fatim is een zeer ervaren massagetherapeut die zich continu blijft bijscholen. Ze biedt onder meer klassieke massage, shiatsu, dieptemassage en voetreflexologie aan. Haar doel is een veilige plek te creëren waar iedereen ontspannen en weer in evenwicht naar buiten gaat.", "img": "https://cdn.sanity.io/images/1pbhk0to/production/cf1357862be5e329847d5bdd15bbd441de12aee0-1066x1173.jpg?w=300&h=300&fit=crop&auto=format", "links": [{"label": "Website", "url": "http://anoubis.be/"}], "name": "Fatim", "role": "Massage therapeut"}, {"bio": "Foodie Jive is het culinaire duo Elif en Guy, bekend als cateraars van o.a. De Roma. Met verse ingrediënten en veel creativiteit maken ze heerlijke vegetarische maaltijden die lichaam én smaakpapillen verwennen.", "img": "https://cdn.sanity.io/images/1pbhk0to/production/3a7d6b1e8f3bde6327b75263ac039e1c0d86fea0-3000x2250.jpg?w=300&h=300&fit=crop&auto=format", "links": [{"label": "Facebook", "url": "https://www.facebook.com/foodiejive/?locale=nl_BE"}, {"label": "Instagram", "url": "https://www.instagram.com/foodiejive/"}], "name": "Foodie Jive", "role": "Catering"}, {"bio": "Mel is massagetherapeut met een passie voor rust, aanraking en echte verbinding. Tijdens retreats helpt ze je los te laten en terug in je lichaam te komen met diep ontspannende, herstellende massages. Ze werkt intuïtief en rustig, precies afgestemd op wat jouw lichaam nodig heeft om echt te landen.", "img": "https://cdn.sanity.io/images/1pbhk0to/production/986ef1be942c2f1fdc85fe4c44f2cff300e22143-643x1600.jpg?w=300&h=300&fit=crop&auto=format", "links": [{"label": "Website", "url": "https://unwind-massage.be/"}, {"label": "instagram", "url": "https://www.instagram.com/unwind.massage.by.mel?dlrf=dXBmZWl1aGx0d21o&utm_source=qr"}], "name": "Mel", "role": "Massage therapeut"}, {"bio": "Michèle is freediving-instructeur en oceaanliefhebber die je de schoonheid van de onderwaterwereld laat ontdekken. Didactisch ijzersterk, eindeloos geduldig en met een glimlach van hier tot in Dahab.", "img": "https://cdn.sanity.io/images/1pbhk0to/production/f917ca20943f267ec79df1e3460446aa66753983-1008x1012.jpg?w=300&h=300&fit=crop&auto=format", "links": [{"label": "FACEBOOK", "url": "https://www.facebook.com/michele.fouquet.98/"}, {"label": "INSTAGRAM", "url": "https://www.instagram.com/michelefouquet/"}], "name": "Michèle", "role": "Freedive-instructeur, CMAS & AIDA"}, {"bio": "Yoga-enthousiast met een passie voor yin yoga en meditatie.", "img": "https://cdn.sanity.io/images/1pbhk0to/production/41cf0a4701977a3cdd423d88ceac9b8e9363ec1a-828x807.jpg?w=300&h=300&fit=crop&auto=format", "links": [], "name": "Sol", "role": "Yin yoga & meditatie"}, {"name": "Raf", "role": "(voorbeeld: nog toe te voegen)", "bio": "Zo verschijnt een nieuwe samenwerking zodra die in de Studio gepubliceerd is.", "links": [], "img": null}];
+  const box = document.getElementById("bubbles"), list = document.getElementById("classic"), tog = document.getElementById("tower-toggle");
+  if (!box) return;
+  // classic rendering (the current list on Over ons)
+  list.innerHTML = PEOPLE.map((p) => `<li>${p.img ? `<img src="${p.img}" alt="">` : `<span class="ini">${p.name[0]}</span>`}<div><h3>${p.name}</h3><p class="muted">${p.role}</p><p>${p.bio}</p><p>${(p.links || []).map((l) => `<a href="${l.url}" target="_blank" rel="noopener">${l.label}</a>`).join(" · ")}</p></div></li>`).join("");
+  tog.onclick = () => { const on = tog.getAttribute("aria-pressed") !== "true"; tog.setAttribute("aria-pressed", on); tog.textContent = on ? "Weergave: Balanstoren" : "Weergave: Klassiek"; box.hidden = !on; list.hidden = on; };
+
+  const cv = box.querySelector("canvas"), ctx = cv.getContext("2d");
+  const tip = box.querySelector(".bubble-tip"), card = box.querySelector(".bubble-card");
+  const still = matchMedia("(prefers-reduced-motion: reduce)").matches;
+  let W = 0, H = 0;
+  const resize = () => { const d = devicePixelRatio || 1; W = box.clientWidth; H = box.clientHeight; cv.width = W * d; cv.height = H * d; ctx.setTransform(d, 0, 0, d, 0, 0); };
+  resize(); addEventListener("resize", resize);
+  const scale = Math.min(1, (H - 30) / 690, W / 420);
+  // biggest at the bottom
+  const stones = PEOPLE.map((p, i) => {
+    const img = new Image(); if (p.img) img.src = p.img;
+    return { p, img, r: (75 - i * 6.5) * scale, s: 1, x: 0, y: 0, vx: 0, vy: 0, mode: "tower" };
+  });
+  let order = stones.map((_, i) => i);
+  let th = 0, om = 0, t0 = performance.now(), fallAt = 0;
+  const baseX = () => (W < 640 ? W / 2 : W * .36), baseY = () => H - 6;
+  const slots = () => {
+    const out = []; let y = baseY(), prev = 0;
+    order.forEach((idx, k) => {
+      const r = stones[idx].r;
+      y -= k ? (prev + r) * .86 : r;
+      out.push({ idx, dx: Math.sin(k * 2.3 + .6) * r * .14, dy: y - baseY() });
+      prev = r;
+    });
+    return out;
+  };
+  const target = (sl, k) => { const a = th * (1 + k * .12), c = Math.cos(a), s = Math.sin(a); return [baseX() + sl.dx * c - sl.dy * s, baseY() + sl.dx * s + sl.dy * c]; };
+  slots().forEach((sl, k) => { const [x, y] = target(sl, k); Object.assign(stones[sl.idx], { x, y: y - H, vy: 0 }); }); // drop in from above on load
+
+  let mx = -1e3, my = -1e3, pmx = 0, hover = null, drag = null, moved = 0, last = [], from = 0;
+  const pick = (x, y) => stones.slice().reverse().find((b) => (b.x - x) ** 2 + (b.y - y) ** 2 < (b.r * b.s) ** 2);
+  const pos = (e) => { const r = box.getBoundingClientRect(); return [e.clientX - r.left, e.clientY - r.top]; };
+  const showTip = (b) => { if (!b) return void (tip.hidden = true); tip.hidden = false; tip.textContent = `${b.p.name} · ${b.p.role}`; const below = b.y + b.r * b.s + 10; tip.style.left = b.x + "px"; tip.style.top = (below > H - 36 ? b.y - b.r * b.s - 38 : below) + "px"; };
+  cv.addEventListener("pointermove", (e) => {
+    [mx, my] = pos(e);
+    const dvx = mx - pmx; pmx = mx;
+    if (drag) { moved += Math.hypot(mx - drag.x, my - drag.y); drag.x = mx; drag.y = my; last.push([mx, my, performance.now()]); last = last.slice(-5); }
+    hover = drag || pick(mx, my);
+    // touching the tower gives it a nudge: higher up = more sway
+    if (!drag && hover && hover.mode === "tower" && !still) { const k = order.indexOf(stones.indexOf(hover)); om += dvx * .00012 * (1 + k * .5); }
+    showTip(hover);
+  });
+  cv.addEventListener("pointerleave", () => { mx = my = -1e3; hover = null; tip.hidden = true; });
+  cv.addEventListener("pointerdown", (e) => {
+    const [x, y] = pos(e); drag = pick(x, y); moved = 0; last = [[x, y, performance.now()]];
+    if (!drag) return;
+    cv.setPointerCapture(e.pointerId); cv.classList.add("drag");
+    from = order.indexOf(stones.indexOf(drag));
+    if (from >= 0) order.splice(from, 1);
+    drag.mode = "drag";
+  });
+  cv.addEventListener("pointerup", () => {
+    if (!drag) return;
+    cv.classList.remove("drag");
+    const b = drag, i = stones.indexOf(b); drag = null;
+    if (moved < 6) { if (from >= 0) order.splice(from, 0, i); b.mode = fallAt ? "fall" : "tower"; return open(b.p); }
+    const [a, z] = [last[0], last.at(-1)], dt = Math.max(16, z[2] - a[2]) / 16; b.vx = (z[0] - a[0]) / dt; b.vy = (z[1] - a[1]) / dt;
+    if (fallAt) { b.mode = "fall"; return; }
+    // dropped on/next to the tower: put it in at that height; else back where it was
+    const sl = slots(), near = Math.abs(b.x - baseX()) < 140 * scale;
+    let at = from < 0 ? order.length : from;
+    if (near) { at = sl.findIndex((s, k) => b.y > target(s, k)[1]); if (at < 0) at = order.length; }
+    order.splice(at, 0, i); b.mode = "tower";
+    om += b.vx * .0016; // a throw pushes the tower
+  });
+  const open = (p) => {
+    card.hidden = false;
+    const img = card.querySelector("img"); img.src = p.img || ""; img.alt = p.name; img.style.display = p.img ? "" : "none";
+    card.querySelector("h3").textContent = p.name; card.querySelector(".role").textContent = p.role || "";
+    card.querySelector(".bio").textContent = p.bio || "";
+    card.querySelector(".links").innerHTML = (p.links || []).map((l) => `<a href="${l.url}" target="_blank" rel="noopener">${l.label}</a>`).join("");
+  };
+  card.querySelector(".bubble-x").onclick = () => (card.hidden = true);
+  addEventListener("keydown", (e) => e.key === "Escape" && (card.hidden = true));
+
+  const collide = (list) => {
+    for (let i = 0; i < list.length; i++) for (let j = i + 1; j < list.length; j++) {
+      const a = list[i], b = list[j], dx = b.x - a.x, dy = b.y - a.y, d = Math.hypot(dx, dy) || 1, min = a.r + b.r;
+      if (d >= min) continue;
+      const nx = dx / d, ny = dy / d, o = (min - d) / 2;
+      a.x -= nx * o; a.y -= ny * o; b.x += nx * o; b.y += ny * o;
+      const rel = (b.vx - a.vx) * nx + (b.vy - a.vy) * ny;
+      if (rel < 0) { const imp = -rel * .6; a.vx -= nx * imp; a.vy -= ny * imp; b.vx += nx * imp; b.vy += ny * imp; }
+    }
+  };
+  const step = (now) => {
+    // the tower: one sway angle on a spring, breathing slowly
+    const breathe = still ? 0 : .009 * Math.sin((now - t0) / 1500);
+    om += (breathe - th) * .012 - om * .035; th += om;
+    if (!fallAt && Math.abs(th) > .22) { // too far: it topples
+      fallAt = now;
+      for (const b of stones) if (b.mode === "tower") { b.mode = "fall"; b.vx += th * 14 * (1 + (b.y < H / 2)); }
+    }
+    if (fallAt && now - fallAt > 2200) { // rebuild, stone by stone from the bottom
+      th = om = 0;
+      const k = Math.floor((now - fallAt - 2200) / 220);
+      order.slice(0, k + 1).forEach((i) => stones[i].mode === "fall" && (stones[i].mode = "tower"));
+      if (order.every((i) => stones[i].mode !== "fall")) fallAt = 0;
+    }
+    const sl = slots();
+    sl.forEach((s, k) => {
+      const b = stones[s.idx];
+      b.s += ((b === hover ? 1.08 : 1) - b.s) * .15;
+      if (b.mode !== "tower") return;
+      const [x, y] = target(s, k);
+      b.vx += (x - b.x) * .09 - b.vx * .22; b.vy += (y - b.y) * .09 - b.vy * .22;
+      b.x += b.vx; b.y += b.vy;
+    });
+    const loose = stones.filter((b) => b.mode === "fall");
+    for (const b of loose) {
+      b.vy += .55; b.vx *= .995; b.x += b.vx; b.y += b.vy;
+      if (b.y > H - b.r) { b.y = H - b.r; b.vy *= -.35; b.vx *= .9; }
+      if (b.x < b.r) { b.x = b.r; b.vx = Math.abs(b.vx) * .5; } if (b.x > W - b.r) { b.x = W - b.r; b.vx = -Math.abs(b.vx) * .5; }
+    }
+    for (let n = 0; n < 3; n++) collide(loose);
+  };
+  const draw = () => {
+    ctx.clearRect(0, 0, W, H);
+    // a soft shadow under the tower
+    ctx.fillStyle = "rgba(31,29,26,.08)"; ctx.beginPath(); ctx.ellipse(baseX(), H - 4, 90 * scale, 6, 0, 0, Math.PI * 2); ctx.fill();
+    for (const b of [...stones].sort((a, c) => (a === drag) - (c === drag))) {
+      const r = b.r * b.s;
+      ctx.save(); ctx.beginPath(); ctx.arc(b.x, b.y, r, 0, Math.PI * 2); ctx.closePath();
+      ctx.fillStyle = "#e3d9cb"; ctx.fill(); ctx.clip();
+      if (b.img.complete && b.img.naturalWidth) ctx.drawImage(b.img, b.x - r, b.y - r, 2 * r, 2 * r);
+      else { ctx.fillStyle = "#6b655c"; ctx.font = `${r * .7}px Georgia, serif`; ctx.textAlign = "center"; ctx.textBaseline = "middle"; ctx.fillText(b.p.name[0], b.x, b.y); }
+      ctx.restore();
+      ctx.beginPath(); ctx.arc(b.x, b.y, r, 0, Math.PI * 2);
+      ctx.lineWidth = b === hover ? 2 : 1; ctx.strokeStyle = b === hover ? "#D4552B" : "rgba(31,29,26,.28)"; ctx.stroke();
+    }
+  };
+  let on = true;
+  new IntersectionObserver(([e]) => (on = e.isIntersecting)).observe(box);
+  const loop = (now) => { if (on && !box.hidden) { step(now); draw(); } requestAnimationFrame(loop); };
+  requestAnimationFrame(loop);
+})();
+</script>
+</body>
+</html>

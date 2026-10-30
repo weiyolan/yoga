@@ -9,7 +9,7 @@ import { i18nString, i18nText } from "../shared/i18n";
 export const RECEIPT_MAILS = [
   { kind: "contact", title: "Bevestiging bericht" },
   { kind: "class", title: "Bevestiging les-aanvraag" },
-  { kind: "review", title: "Bevestiging review" },
+  { kind: "review", title: "Bevestiging testimonial" },
 ] as const;
 
 /**

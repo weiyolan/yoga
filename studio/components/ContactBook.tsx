@@ -19,7 +19,7 @@ const FILTERS: { id: string; title: string; test: (c: Contact) => boolean }[] = 
   { id: "subscribed", title: "Nieuwsbrief", test: (c) => c.subscribed },
   { id: "signup", title: "Retreat-deelnemers", test: (c) => c.items.some((i) => i.type === "signup") },
   { id: "message", title: "Contactformulier", test: (c) => c.items.some((i) => i.type === "message") },
-  { id: "review", title: "Reviews", test: (c) => c.items.some((i) => i.type === "review") },
+  { id: "review", title: "Testimonials", test: (c) => c.items.some((i) => i.type === "review") },
   { id: "unsubscribed", title: "Afgemeld", test: (c) => c.unsubscribed },
 ];
 

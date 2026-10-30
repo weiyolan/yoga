@@ -22,6 +22,7 @@
     "content:v8": "sanity exec scripts/content-v8.ts --with-user-token --",
     "content:v9": "sanity exec scripts/content-v9.ts --with-user-token --",
     "content:v10": "sanity exec scripts/content-v10.ts --with-user-token --",
+    "migrate:testimonials": "sanity exec scripts/migrate-testimonials.ts --with-user-token --",
     "publish:drafts": "sanity exec scripts/publish-drafts.ts --with-user-token --",
     "typecheck": "tsc --noEmit"
   },

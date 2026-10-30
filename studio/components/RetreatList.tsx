@@ -119,7 +119,7 @@ export function RetreatList() {
             title="Nieuwe retreat"
             style={{ color: "inherit" }}
           >
-            <Button as="span" mode="bleed" icon={AddIcon} padding={2} />
+            <Button as="span" mode="ghost" tone="primary" icon={AddIcon} text="Nieuwe retreat" padding={2} fontSize={1} />
           </IntentLink>
         </Flex>
         {rows === null ? (

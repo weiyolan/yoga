@@ -1,6 +1,5 @@
 import { Fragment } from "react";
 import Link from "next/link";
-import { JsonLd } from "@/components/JsonLd";
 import { Photo } from "@/components/Photo";
 import {
   ClassTiles,
@@ -11,11 +10,10 @@ import {
 import { Testimonials } from "@/components/Testimonials";
 import { getDictionary } from "@/lib/dictionary";
 import { dateRange, euro, join, placesLabel } from "@/lib/format";
-import { organizationLd } from "@/lib/jsonld";
 import { buildMetadata } from "@/lib/metadata";
 import { href, langParam, retreatHref } from "@/lib/routes";
 import { sanityFetch } from "@/sanity/fetch";
-import { HOME_QUERY, LAYOUT_QUERY, SETTINGS_QUERY } from "@/sanity/queries";
+import { HOME_QUERY, LAYOUT_QUERY } from "@/sanity/queries";
 
 export async function generateMetadata({ params }: PageProps<"/[lang]">) {
   const lang = await langParam(params);
@@ -30,33 +28,20 @@ export async function generateMetadata({ params }: PageProps<"/[lang]">) {
 
 export default async function Home({ params }: PageProps<"/[lang]">) {
   const lang = await langParam(params);
-  const [page, layout, settings] = await Promise.all([
+  const [page, layout] = await Promise.all([
     sanityFetch({ query: HOME_QUERY, lang }),
     sanityFetch({ query: LAYOUT_QUERY, lang }),
-    sanityFetch({ query: SETTINGS_QUERY, lang }),
   ]);
   const d = getDictionary(lang);
   const t = d.home;
-  // Curated testimonials first, then the latest approved reviews (4★+).
-  const quotes = [
-    ...(page?.testimonials ?? []),
-    ...(page?.reviews ?? []).map((r) => ({
-      _id: r._id,
-      quote: r.text,
-      name: r.name,
-      context: r.context,
-      rating: r.rating,
-    })),
-  ].slice(0, 12);
+  // every testimonial with “Op Home” on (Studio → Contact → Testimonials)
+  const quotes = (page?.testimonials ?? []).map((q) => ({ ...q, quote: q.text }));
   const f = page?.featuredRetreat;
   const cards = page?.upcomingRetreats ?? [];
   const handle = layout?.instagram?.match(/instagram\.com\/([^/?#]+)/)?.[1];
 
   return (
     <>
-      <JsonLd
-        data={organizationLd(lang, settings, settings?.siteName ?? d.siteName)}
-      />
       <Hero
         hero={page?.hero}
         actions={

@@ -105,24 +105,19 @@ const RETREAT_MAIL = `coalesce(confirmationMail->${MAIL}, *[_type == "confirmati
 /** The retreat's own form, else the one marked “Standaard” (null = only the built-in fields). */
 const RETREAT_FORM = `coalesce(signupForm->${FORM}, *[_type == "signupForm" && isDefault == true && !(_id in path("drafts.**"))][0]${FORM})` as const;
 
+/** What a participant says (studio/schemaTypes/documents/testimonial.ts): typed in, or made from a form submission (no e-mail). */
 const TESTIMONIAL = `{
-  _id,
-  "quote": ${t("quote")},
-  name,
-  "context": coalesce(${t("context")}, ${t("retreat->title")} + " " + string::split(retreat->startDate, "-")[0])
-}` as const;
-
-/** An approved review (public copy, no e-mail), see studio/structure/views.tsx. */
-/** Reviews of other editions of the same retreat (same first slug word: eifel-2025 → eifel-2026). Inside a retreat projection. */
-const SAME_KIND = `*[_type == "review" && retreat._ref != ^._id && !(_id in path("drafts.**")) && string::split(retreat->slug.current, "-")[0] == string::split(^.slug.current, "-")[0]]` as const;
-
-const REVIEW = `{
   _id,
   name,
   rating,
-  text,
-  "context": ${t("retreat->title")} + " " + string::split(retreat->startDate, "-")[0]
+  "text": ${t("quote")},
+  "context": coalesce(${t("context")}, ${t("retreat->title")} + " " + string::split(retreat->startDate, "-")[0])
 }` as const;
+
+const LIVE = `!(_id in path("drafts.**"))` as const;
+/** Testimonials of other editions of the same retreat (same first slug word: eifel-2025 → eifel-2026). Inside a retreat projection. */
+const SAME_KIND = `*[_type == "testimonial" && ${LIVE} && showOnRetreat != false && defined(retreat) && retreat._ref != ^._id && string::split(retreat->slug.current, "-")[0] == string::split(^.slug.current, "-")[0]]` as const;
+const BY_DATE = `order(coalesce(date, _createdAt) desc)` as const;
 
 /** A yoga style (Lessen tiles, home tiles). */
 const STYLE = `{
@@ -156,6 +151,8 @@ export const LAYOUT_QUERY = defineQuery(`*[_id == "settings"][0]{
   "nextRetreat": *[_type == "retreat" && ${UPCOMING}] | order(startDate asc)[0]${RETREAT_CARD},
   "styles": *[_type == "yogaClass"] | order(orderRank asc){ _id, name, "slug": slug.current, "what": ${t("what")} },
   "studios": *[_type == "studio"] | order(name asc).name,
+  "founders": *[_id == "aboutPage"][0].founders[]->{ name, "role": ${t("role")} },
+  "hasPrivate": count(*[_id == "lessonsPage" && (defined(private.title) || defined(private.text))]) > 0,
   "galleryCategories": array::unique(*[_type == "mediaItem" && showInGallery != false].categories[]),
   "foundersPhoto": *[_id == "homePage"][0].aboutPhoto->${MEDIA},
   "texts": {
@@ -198,9 +195,13 @@ export const HOME_QUERY = defineQuery(`*[_id == "homePage"][0]{
   "upcomingRetreats": *[_type == "retreat" && ${UPCOMING}] | order(startDate asc)[0...3]${RETREAT_CARD},
   "styles": *[_type == "yogaClass"] | order(orderRank asc)${STYLE},
   "studios": *[_type == "studio"] | order(name asc){ _id, name, website },
-  "instagram": *[_type == "mediaItem" && highlight == true] | order(_createdAt desc)[0...6]${MEDIA},
-  "testimonials": testimonials[]->${TESTIMONIAL},
-  "reviews": *[_type == "review" && rating >= 4 && !(_id in path("drafts.**"))] | order(submittedAt desc)[0...12]${REVIEW},
+  // own choice (Home → Instagram), else the 6 newest highlighted photos
+  "instagram": select(
+    count(instagramPhotos) > 0 => instagramPhotos[0...6]->${MEDIA},
+    *[_type == "mediaItem" && highlight == true] | order(_createdAt desc)[0...6]${MEDIA}
+  ),
+  // every testimonial with “Op Home” on: own order first, then the newest
+  "testimonials": *[_type == "testimonial" && ${LIVE} && showOnHome == true] | order(coalesce(orderRank, 1000) asc, coalesce(date, _createdAt) desc)[0...12]${TESTIMONIAL},
   "aboutTitle": ${t("aboutTitle")},
   "aboutText": ${t("aboutText")},
   "introLink": ${t("introLink")},
@@ -278,11 +279,11 @@ export const RETREAT_BY_SLUG_QUERY = defineQuery(`*[_type == "retreat" && slug.c
   "closingText": ${t("closingText")},
   "closingPhoto": closingPhoto->${MEDIA},
   "recapPhotos": recapPhotos[]->${MEDIA},
-  "reviews": *[_type == "review" && retreat._ref == ^._id && !(_id in path("drafts.**"))] | order(submittedAt desc)${REVIEW},
-  // an upcoming retreat has none yet: the reviews of earlier editions (same first slug word: eifel-2025 → eifel-2026), else the best recent ones
+  "reviews": *[_type == "testimonial" && ${LIVE} && retreat._ref == ^._id && showOnRetreat != false] | ${BY_DATE}${TESTIMONIAL},
+  // an upcoming retreat has none yet: the testimonials of earlier editions (same first slug word: eifel-2025 → eifel-2026), else the best recent ones
   "earlierReviews": select(
-    count(${SAME_KIND}) > 0 => ${SAME_KIND} | order(submittedAt desc)[0...6]${REVIEW},
-    *[_type == "review" && rating >= 4 && !(_id in path("drafts.**"))] | order(submittedAt desc)[0...6]${REVIEW}
+    count(${SAME_KIND}) > 0 => ${SAME_KIND} | ${BY_DATE}[0...6]${TESTIMONIAL},
+    *[_type == "testimonial" && ${LIVE} && defined(retreat) && showOnRetreat != false && (rating >= 4 || !defined(rating))] | ${BY_DATE}[0...6]${TESTIMONIAL}
   ),
   // FAQ → questions ticked “Ook tonen op de retreatpagina's” (else the first ones; picked in the page)
   "faqs": *[_id == "faqPage"][0].groups[].items[]{ _key, onRetreat, "question": ${t("question")}, "answer": ${t("answer")} },
@@ -304,7 +305,11 @@ export const LESSONS_QUERY = defineQuery(`{
     "studiosTitle": ${t("studiosTitle")},
     "scheduleTitle": ${t("scheduleTitle")},
     "scheduleEmpty": ${t("scheduleEmpty")},
-    "private": private{ "title": ${t("title")}, "text": ${t("text")}, "practical": ${t("practical")}, "button": ${t("button")}, "photo": photo->${MEDIA} },
+    "private": private{
+      "title": ${t("title")}, "text": ${t("text")}, "practical": ${t("practical")}, "button": ${t("button")}, "photo": photo->${MEDIA},
+      "ratesTitle": ${t("ratesTitle")}, "rates": rates[defined(amount)]{ _key, "label": ${t("label")}, amount, perPerson },
+      "detailsTitle": ${t("detailsTitle")}, "details": details[]{ _key, "label": ${t("label")}, "text": ${t("text")} }
+    },
     "schedule": schedule[]{
       _key, day, startTime, durationMinutes, "level": coalesce(level, "all"),
       "style": style->{ name, "slug": slug.current, "what": ${t("what")} },
@@ -341,6 +346,7 @@ export const ABOUT_QUERY = defineQuery(`*[_id == "aboutPage"][0]{
   principlesVideoUrl,
   "collaboratorsTitle": ${t("collaboratorsTitle")},
   "collaboratorsIntro": ${t("collaboratorsIntro")},
+  "collaboratorsStyle": coalesce(collaboratorsStyle, "tower"),
   // everyone except Rita & Philippe, automatically
   "collaborators": *[_type == "person" && coalesce(kind, "collaborator") != "founder" && !(_id in ^.founders[]._ref) && hidden != true] | order(coalesce(orderRank, 1000) asc, name asc)${PERSON},
   "seo": seo${SEO}

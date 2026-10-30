@@ -48,6 +48,14 @@ export const aboutPage = defineType({
     /* ---- samenwerkingen ---- */
     i18nString("collaboratorsTitle", { title: "Samenwerkingen: kop", description: "Titel van het blok Samenwerkingen onderaan de Over ons-pagina. Leeg = “Onze fijne samenwerkingen”." }),
     i18nText("collaboratorsIntro", { title: "Samenwerkingen: intro", max: 250, description: "Korte inleiding onder de kop Samenwerkingen op de Over ons-pagina. De lijst zelf komt automatisch uit Over ons → Personen." }),
+    defineField({
+      name: "collaboratorsStyle",
+      title: "Weergave samenwerkingen",
+      type: "string",
+      options: { list: [{ title: "Balanstoren (speels)", value: "tower" }, { title: "Klassiek (lijst)", value: "classic" }], layout: "radio", direction: "horizontal" },
+      initialValue: "tower",
+      description: "Balanstoren = de ronde portretten als een steentoren in evenwicht: wiebelen, stenen verplaatsen, klik = de details. Klassiek = de vaste lijst met foto, rol, tekst en links. Wie op zijn toestel “minder beweging” aanzet, krijgt altijd de lijst.",
+    }),
     defineField({ name: "seo", title: "SEO & delen", type: "seo", description: "Niet zichtbaar op de pagina zelf: titel, omschrijving en deelfoto van de Over ons-pagina in Google en bij delen via WhatsApp of sociale media." }),
   ],
   preview: { prepare: () => ({ title: "Over ons" }) },

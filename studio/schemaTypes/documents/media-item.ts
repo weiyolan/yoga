@@ -51,7 +51,7 @@ export const mediaItem = defineType({
       description: "Optioneel: wie de foto nam. De naam (met link naar hun website) staat klein onder de foto op volledig scherm en gaat naar Google. Nog niet in de lijst? Fotobank → Fotografen, of hier “Nieuwe aanmaken”.",
     }),
     defineField({ name: "showInGallery", title: "Tonen in gallery", type: "boolean", initialValue: true, description: "Aan = de foto staat in de mozaïek op de Gallery-pagina. Uit = enkel te gebruiken op andere pagina’s (bv. een portret of logo)." }),
-    defineField({ name: "highlight", title: "Uitgelicht", type: "boolean", initialValue: false, description: "Krijgt een grote tegel in de mozaïek op de Gallery-pagina en komt in het Instagram-blok op Home (de 6 nieuwste). Ook reservefoto voor gedeelde links zonder eigen foto." }),
+    defineField({ name: "highlight", title: "Uitgelicht", type: "boolean", initialValue: false, description: "Krijgt een grote tegel in de mozaïek op de Gallery-pagina en komt in het Instagram-blok op Home (de 6 nieuwste, enkel als Home → Instagram leeg is). Ook reservefoto voor gedeelde links zonder eigen foto." }),
   ],
   orderings: [{ title: "Laatst toegevoegd", name: "createdDesc", by: [{ field: "_createdAt", direction: "desc" }] }],
   preview: {

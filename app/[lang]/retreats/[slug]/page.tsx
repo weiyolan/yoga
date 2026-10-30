@@ -52,11 +52,11 @@ export async function generateMetadata({
 }: PageProps<"/[lang]/retreats/[slug]">) {
   const { lang, slug, retreat } = await load(params);
   if (!retreat) return {};
-  // no SEO description: "22–29 mei 2027 · Dahab, Egypte · vanaf € 1.120. <in a nutshell>"
+  // no SEO description: "22–29 mei 2027 · Dahab, Egypte · vanaf € 1.120. <in a nutshell>" (no price once it's over)
   const facts = [
     dateRange(lang, retreat.startDate, retreat.endDate),
     join(retreat.place, retreat.country),
-    retreat.priceFrom
+    retreat.priceFrom && isUpcoming(retreat.endDate)
       ? `${getDictionary(lang).card.from} ${euro(lang, retreat.priceFrom)}`
       : null,
   ]
@@ -130,6 +130,7 @@ export default async function RetreatPage({
       data={[
         retreatLd(r, {
           name: site,
+          lang,
           url: retreatHref(lang, r.slug),
           signupUrl:
             upcoming && !external ? signupHref(lang, r.slug) : undefined,
@@ -159,16 +160,10 @@ export default async function RetreatPage({
       alt: m.alt,
       credit: m.photographer,
     }));
-    const price =
-      r.priceFrom ??
-      Math.min(...(r.prices ?? []).map((p) => p.amount ?? Infinity));
+    // no price on a look back (it stays in the Studio, for a next edition)
     const facts = [
       [t.where, join(where, r.venue)],
       [t.hosts, names(r.hosts?.map((p) => p.name))],
-      [
-        t.price,
-        Number.isFinite(price) ? `${t.from} ${euro(lang, price)}` : null,
-      ],
       [
         t.participants,
         r.participantCount ??
