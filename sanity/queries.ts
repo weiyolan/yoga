@@ -346,7 +346,6 @@ export const ABOUT_QUERY = defineQuery(`*[_id == "aboutPage"][0]{
   principlesVideoUrl,
   "collaboratorsTitle": ${t("collaboratorsTitle")},
   "collaboratorsIntro": ${t("collaboratorsIntro")},
-  "collaboratorsStyle": coalesce(collaboratorsStyle, "tower"),
   // everyone except Rita & Philippe, automatically
   "collaborators": *[_type == "person" && coalesce(kind, "collaborator") != "founder" && !(_id in ^.founders[]._ref) && hidden != true] | order(coalesce(orderRank, 1000) asc, name asc)${PERSON},
   "seo": seo${SEO}
