@@ -50,7 +50,7 @@ export const homePage = defineType({
       title: "Uitgelichte retreat",
       type: "reference",
       to: [{ type: "retreat" }],
-      description: "Retreat die groot (foto, data, prijs, knop) bovenaan Home onder het openingsbeeld staat. Leeg = automatisch de eerstvolgende retreat die niet volzet is.",
+      description: "Retreat die groot (foto, data, prijs, knop) bovenaan Home onder het openingsbeeld staat. Ook in het menu (Retreats) en achter de knop Inschrijven. Leeg = automatisch de eerstvolgende retreat die niet volzet is. Sneller: de ster in Inhoud → Retreats.",
     }),
     i18nString("introTitle", { group: "intro", title: "Intro: kop", max: 90, description: "Grote titel van het gecentreerde blok “Wie zijn wij” op Home, onder de uitgelichte retreat. Leeg = geen titel." }),
     i18nText("intro", { group: "intro", title: "Intro", required: true, max: 400, description: "Eén paragraaf over Yoga, Zen & Tonic in het gecentreerde introblok op Home. Ook de Google-beschrijving als SEO en ondertitel leeg zijn." }),
