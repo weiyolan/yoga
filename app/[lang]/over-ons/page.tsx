@@ -9,9 +9,7 @@ import { buildMetadata } from "@/lib/metadata";
 import { langParam } from "@/lib/routes";
 import { sanityFetch } from "@/sanity/fetch";
 import { ABOUT_QUERY } from "@/sanity/queries";
-import { urlFor } from "@/sanity/image";
 import type { ABOUT_QUERY_RESULT } from "@/sanity/types";
-import { CollabTower } from "@/components/CollabTower";
 
 export async function generateMetadata({ params }: PageProps<"/[lang]/over-ons">) {
   const lang = await langParam(params);
@@ -35,14 +33,7 @@ function Video({ url }: { url: string }) {
 
 type Person = NonNullable<NonNullable<ABOUT_QUERY_RESULT>["collaborators"]>[number];
 
-/** A square portrait for a tower stone (the hotspot from the Fotobank is kept). */
-const portrait = (m: Person["portrait"]) => {
-  const url = m?.image?.asset?.url;
-  if (!url) return null;
-  return url.startsWith("/") ? url : urlFor(m).width(320).height(320).url();
-};
-
-/** One collaborator: portrait, name, role, bio, links (the classic list, and the card of the tower). */
+/** One collaborator: portrait, name, role, bio, links. */
 function Collaborator({ p, t }: { p: Person; t: ReturnType<typeof getDictionary>["about"] }) {
   const links = [...(p.website ? [{ _key: "web", label: t.website, url: p.website }] : []), ...(p.links ?? [])];
   return (
@@ -160,26 +151,7 @@ export default async function About({ params }: PageProps<"/[lang]/over-ons">) {
                 {page.collaboratorsIntro}
               </p>
             ) : null}
-            {page.collaboratorsStyle === "classic" ? (
-              list
-            ) : (
-              // the tower + the same list for Google, screen readers, “reduce motion” and no JavaScript (app/globals.css .tower-wrap)
-              <div className="tower-wrap">
-                <CollabTower
-                  label={page.collaboratorsTitle || t.collaboratorsTitle}
-                  closeLabel={t.close}
-                  people={page.collaborators.map((p) => ({
-                    key: p._id,
-                    id: anchor(p.name),
-                    name: p.name ?? "",
-                    role: p.role,
-                    img: portrait(p.portrait),
-                    card: <Collaborator p={p} t={t} />,
-                  }))}
-                />
-                {list}
-              </div>
-            )}
+            {list}
           </div>
         </section>
       ) : null}

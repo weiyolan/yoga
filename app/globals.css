@@ -307,28 +307,6 @@ blockquote { margin: 0 auto; max-width: 30ch; font: clamp(1.6rem, 3vw, 2.4rem)/1
 .kv { margin: 0; } .kv div { display: grid; grid-template-columns: 90px 1fr; gap: 12px; padding: 6px 0; } .kv dt { color: var(--ink-soft); } .kv dd { margin: 0; }
 .collabs li { display: grid; grid-template-columns: 96px 1fr; gap: 20px; align-items: start; }
 .collabs h3 { font-size: 1.5rem; } .collabs .muted.small { margin: 4px 0 10px; }
-/* samenwerkingen as a balancing tower (components/CollabTower.tsx). The list stays for Google and screen readers;
-   with “reduce motion” or without JavaScript only the list (visible). */
-.tower { display: none; position: relative; height: clamp(480px, 72vh, 720px); user-select: none; -webkit-user-select: none; }
-@media (prefers-reduced-motion: no-preference) and (scripting: enabled) {
-  .tower-wrap .tower { display: block; }
-  .tower-wrap > .collabs { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
-}
-.tower::after { content: ""; position: absolute; left: 50%; bottom: 0; width: 200px; height: 12px; translate: -50% 0; border-radius: 50%; background: radial-gradient(rgba(26,25,23,.12), transparent 70%); pointer-events: none; }
-@media (min-width: 640px) { .tower::after { left: 36%; } }
-.tower .stone { position: absolute; top: 0; left: 0; padding: 0; border: 1px solid rgba(26,25,23,.28); border-radius: 50%; overflow: hidden; background: var(--bg-2); color: var(--ink-soft); font: 2rem/1 var(--serif); touch-action: none; transition: border-color .2s, box-shadow .2s; }
-.tower:not(.live) .stone { visibility: hidden; }
-.tower .stone img { width: 100%; height: 100%; object-fit: cover; display: block; pointer-events: none; }
-.tower .stone.hot, .tower .stone:focus-visible { border-color: var(--ember); box-shadow: 0 0 0 1px var(--ember); outline: none; }
-.tower.dragging, .tower.dragging .stone { cursor: grabbing; }
-.tower-tip { position: absolute; top: 0; left: 0; z-index: 4; transform: translateX(-50%); padding: 6px 12px; background: var(--ink); color: #fff; font: 500 .72rem/1.2 var(--sans); letter-spacing: .06em; white-space: nowrap; border-radius: 99px; pointer-events: none; }
-.tower-card { position: absolute; z-index: 5; top: 24px; right: 0; width: min(420px, 100%); max-height: calc(100% - 48px); overflow: auto; padding: 28px; background: var(--bg); border: 1px solid var(--line); border-top: 1px solid var(--ink); box-shadow: 0 18px 40px rgba(26,25,23,.12); display: grid; grid-template-columns: 96px 1fr; gap: 20px; align-items: start; }
-.tower-card h3 { font-size: 1.5rem; padding-right: 24px; } .tower-card .muted.small { margin: 4px 0 10px; }
-.tower-x { position: absolute; top: 10px; right: 12px; width: 32px; height: 32px; border: 0; background: none; font-size: 1.6rem; line-height: 1; color: var(--ink-soft); cursor: pointer; }
-.tower-x:hover { color: var(--ink); }
-@media (max-width: 640px) {
-  .tower-card { position: fixed; inset: auto 0 0 0; width: auto; max-height: 75vh; border: 0; border-top: 1px solid var(--ink); grid-template-columns: 72px 1fr; padding: 24px var(--gutter) calc(24px + env(safe-area-inset-bottom)); }
-}
 .round { border-radius: 50%; overflow: hidden; }
 
 /* filters, chips, inputs */
