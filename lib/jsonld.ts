@@ -227,7 +227,7 @@ export function retreatLd(
     keywords: lang === "en" ? "yoga retreat" : "yogaretreat, yoga retreat",
     location: compact({
       "@type": "Place",
-      name: [r.venue, r.place].filter(Boolean).join(", "),
+      name: r.venue || r.place,
       address: compact({
         "@type": "PostalAddress",
         addressLocality: town(r.place),
