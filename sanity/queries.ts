@@ -57,6 +57,21 @@ const RETREAT_FEATURE = `{${RETREAT_CARD_FIELDS},
   "teaser": ${t("nutshellTitle")}
 }` as const;
 
+/**
+ * The featured retreat, the same in the home feature and the header: the one picked on the home page
+ * (featuredRetreat), else the first upcoming one with places left, else the first upcoming one.
+ */
+const FEATURED_FEATURE = `coalesce(
+    *[_id == "homePage"][0].featuredRetreat->${RETREAT_FEATURE},
+    *[_type == "retreat" && ${UPCOMING} && !${FULL}] | order(startDate asc)[0]${RETREAT_FEATURE},
+    *[_type == "retreat" && ${UPCOMING}] | order(startDate asc)[0]${RETREAT_FEATURE}
+  )` as const;
+const FEATURED_CARD = `coalesce(
+    *[_id == "homePage"][0].featuredRetreat->${RETREAT_CARD},
+    *[_type == "retreat" && ${UPCOMING} && !${FULL}] | order(startDate asc)[0]${RETREAT_CARD},
+    *[_type == "retreat" && ${UPCOMING}] | order(startDate asc)[0]${RETREAT_CARD}
+  )` as const;
+
 const PERSON = `{
   _id,
   name,
@@ -148,7 +163,8 @@ export const LAYOUT_QUERY = defineQuery(`*[_id == "settings"][0]{
   siteName,
   "tagline": ${t("tagline")},
   ${CONTACT},
-  "nextRetreat": *[_type == "retreat" && ${UPCOMING}] | order(startDate asc)[0]${RETREAT_CARD},
+  // the home page's featured retreat (menu card, mobile menu, "Inschrijven" button)
+  "nextRetreat": ${FEATURED_CARD},
   "styles": *[_type == "yogaClass"] | order(orderRank asc){ _id, name, "slug": slug.current, "what": ${t("what")} },
   "studios": *[_type == "studio"] | order(name asc).name,
   "founders": *[_id == "aboutPage"][0].founders[]->{ name, "role": ${t("role")} },
@@ -187,11 +203,7 @@ export const HOME_QUERY = defineQuery(`*[_id == "homePage"][0]{
   "hero": hero${HERO},
   "introTitle": ${t("introTitle")},
   "intro": ${t("intro")},
-  "featuredRetreat": coalesce(
-    featuredRetreat->${RETREAT_FEATURE},
-    *[_type == "retreat" && ${UPCOMING} && !${FULL}] | order(startDate asc)[0]${RETREAT_FEATURE},
-    *[_type == "retreat" && ${UPCOMING}] | order(startDate asc)[0]${RETREAT_FEATURE}
-  ),
+  "featuredRetreat": ${FEATURED_FEATURE},
   "upcomingRetreats": *[_type == "retreat" && ${UPCOMING}] | order(startDate asc)[0...3]${RETREAT_CARD},
   "styles": *[_type == "yogaClass"] | order(orderRank asc)${STYLE},
   "studios": *[_type == "studio"] | order(name asc){ _id, name, website },
