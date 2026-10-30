@@ -1,5 +1,6 @@
 import { AddIcon } from "@sanity/icons/Add";
 import { EarthGlobeIcon } from "@sanity/icons/EarthGlobe";
+import { StarFilledIcon } from "@sanity/icons/StarFilled";
 import { Box, Button, Card, Flex, Stack, Text } from "@sanity/ui";
 import { useEffect, useState } from "react";
 import { Preview, useClient, useSchema } from "sanity";
@@ -20,29 +21,47 @@ const upcoming = (r: Row) =>
   !r.endDate || r.endDate >= new Date().toISOString().slice(0, 10);
 export const RETREATS_PAGE_ID = "retreatsPage";
 
+// The featured retreat, same rule as the site (sanity/queries.ts → FEATURED_*): the one picked on
+// Startpagina, else the first upcoming one with places left, else the first upcoming one.
+const UPCOMING = `dateTime(endDate + "T23:59:59Z") >= dateTime(now())`;
+const FULL = `coalesce(capacity > 0 && (coalesce(booked, 0) + coalesce(bookedExtra, 0)) >= capacity, false)`;
+const QUERY = `{
+  "rows": *[_type == "retreat"]{ _id, _type, startDate, endDate },
+  "picked": *[_id == "homePage"][0].featuredRetreat._ref,
+  "auto": coalesce(
+    *[_type == "retreat" && ${UPCOMING} && !${FULL}] | order(startDate asc)[0]._id,
+    *[_type == "retreat" && ${UPCOMING}] | order(startDate asc)[0]._id
+  )
+}`;
+
 /**
  * Inhoud → Retreats: every retreat in one list, filtered by chips (Komend / Voorbij / Alle), with
  * the Retreats page (its texts) on top. One level less than separate lists. Drafts included; the
  * list follows edits live. Clicking opens the document to the right (structure: .child()).
+ * The retreat featured on Home (and in the site's header) has a star.
  */
 export function RetreatList() {
   const client = useClient({ apiVersion });
   const schema = useSchema();
   const { ChildLink, routerPanesState, groupIndex } = usePaneRouter();
   const [rows, setRows] = useState<Row[] | null>(null);
+  const [featured, setFeatured] = useState<{ id: string; picked: boolean } | null>(null);
   const [filter, setFilter] = useState<Filter>("all");
   const open = routerPanesState[groupIndex + 1]?.[0]?.id;
 
   useEffect(() => {
-    const query = `*[_type == "retreat"]{ _id, _type, startDate, endDate }`;
     const load = () =>
       client
-        .fetch<Row[]>(query, {}, { perspective: "drafts" })
-        .then(setRows, console.error);
+        .fetch<{ rows: Row[]; picked: string | null; auto: string | null }>(QUERY, {}, { perspective: "drafts" })
+        .then(({ rows, picked, auto }) => {
+          setRows(rows);
+          const id = picked ?? auto;
+          setFeatured(id ? { id, picked: !!picked } : null);
+        }, console.error);
     void load();
     let t: ReturnType<typeof setTimeout> | undefined;
     const sub = client
-      .listen(query, {}, { visibility: "query", includeResult: false })
+      .listen(`*[_type == "retreat" || _id in ["homePage", "drafts.homePage"]]`, {}, { visibility: "query", includeResult: false })
       .subscribe(() => {
         clearTimeout(t);
         t = setTimeout(load, 400);
@@ -139,11 +158,29 @@ export function RetreatList() {
             {shown.map((r) =>
               row(
                 r._id,
-                <Preview
-                  schemaType={type}
-                  value={{ _id: r._id, _type: "retreat" }}
-                  layout="default"
-                />,
+                <Flex align="center">
+                  <Box flex={1}>
+                    <Preview
+                      schemaType={type}
+                      value={{ _id: r._id, _type: "retreat" }}
+                      layout="default"
+                    />
+                  </Box>
+                  {featured?.id === r._id && (
+                    <Box
+                      paddingX={2}
+                      title={
+                        featured.picked
+                          ? "Uitgelicht op Home en in het menu (Startpagina → Uitgelichte retreat)"
+                          : "Uitgelicht op Home en in het menu (automatisch: eerstvolgende met plaats)"
+                      }
+                    >
+                      <Text size={2} style={{ color: "#D4552B" }}>
+                        <StarFilledIcon aria-label="Uitgelicht" />
+                      </Text>
+                    </Box>
+                  )}
+                </Flex>,
               ),
             )}
           </Stack>
