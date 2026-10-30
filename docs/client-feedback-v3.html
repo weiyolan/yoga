@@ -79,6 +79,28 @@
   .bubble-card .links a { margin-right:14px; }
   .bubble-x { position:absolute; top:10px; right:10px; width:34px; height:34px; border-radius:50%; border:1px solid var(--line); background:#fff; font-size:1.2rem; cursor:pointer; }
   @keyframes card-in { from { opacity:0; translate:24px 0; } }
+  .toggle { font:inherit; font-size:.85rem; padding:8px 16px; border-radius:99px; border:1px solid var(--ink); background:var(--ink); color:#fff; cursor:pointer; }
+  .toggle[aria-pressed="false"] { background:#fff; color:var(--ink); }
+  .bubbles { height:640px; }
+  .collabs-mock { list-style:none; padding:20px; margin:0; display:grid; grid-template-columns:1fr 1fr; gap:28px 36px; background:#f4efe7; border:1px solid var(--line); border-radius:14px; }
+  .collabs-mock li { display:grid; grid-template-columns:80px 1fr; gap:16px; margin:0; }
+  .collabs-mock img, .collabs-mock .ini { width:80px; height:80px; border-radius:50%; object-fit:cover; background:#e3d9cb; display:grid; place-items:center; font:1.6rem Georgia, serif; color:var(--muted); }
+  .collabs-mock h3 { margin:0; font-size:1.25rem; } .collabs-mock p { margin:2px 0; font-size:.86rem; }
+  @media (max-width:760px) { .collabs-mock { grid-template-columns:1fr; } }
+  .demo4 { display:grid; grid-template-columns:repeat(4,1fr); height:220px; border-radius:12px; overflow:hidden; border:1px solid var(--line); }
+  .demo4 > div { display:grid; place-items:center; align-content:center; gap:12px; padding:14px; text-align:center; font-size:.78rem; }
+  .demo4 .btn { display:inline-block; padding:12px 18px; border-radius:99px; border:1px solid currentColor; text-decoration:none; color:inherit; font-size:.72rem; letter-spacing:.08em; text-transform:uppercase; }
+  .d-light { background:#f4efe7; color:#1f1d1a; } .d-ember { background:#D4552B; color:#fff; } .d-photo { background:url(client-feedback-v3/img/photo-bg.jpg) center/cover; color:#fff; } .d-dark { background:#0F1A1D; color:#E9E6E0; }
+  .d-ember .btn { background:#b8441f; }
+  @media (max-width:760px) { .demo4 { grid-template-columns:1fr 1fr; height:340px; } }
+  .yc-ring, .yc-dot { position:fixed; top:0; left:0; border-radius:50%; pointer-events:none; z-index:60; opacity:0; transition:opacity .2s; }
+  .yc-ring { width:34px; height:34px; margin:-17px 0 0 -17px; border:1px solid #fff; mix-blend-mode:difference; transition:opacity .2s, width .2s, height .2s, margin .2s; }
+  .yc-ring.big { width:64px; height:64px; margin:-32px 0 0 -32px; }
+  .yc-dot { width:5px; height:5px; margin:-2.5px 0 0 -2.5px; background:#D4552B; }
+  .yc-on { opacity:1; }
+  .halo .yc-dot { width:8px; height:8px; margin:-4px 0 0 -4px; box-shadow:0 0 0 1.5px rgba(255,255,255,.95), 0 1px 6px rgba(15,26,29,.45); transition:opacity .2s, scale .2s; }
+  .halo .yc-dot.big { scale:.75; }
+  details { margin:16px 0; } details summary { cursor:pointer; color:var(--accent); }
 </style>
 </head>
 <body>
@@ -95,8 +117,8 @@
 
   <table>
     <tr><th>#</th><th>Feedback</th><th>Wat</th><th>Soort</th><th>Inschatting</th></tr>
-    <tr><td>1</td><td><a href="#cursor">Pointer zoals Sansara</a></td><td>Cursor herschrijven: gewone muis blijft, gekleurde stip + volgring met vertraging, ring groeit bij hover</td><td><span class="tag t-code">code</span></td><td>klein (½ dag)</td></tr>
-    <tr><td>2</td><td><a href="#samenwerkingen">7 samenwerkingen, Raf &amp; Sol</a></td><td>Geen limiet in de code. Sol staat er al; Raf moet nog aangemaakt worden. Verbergen kan met een schakelaar</td><td><span class="tag t-studio">studio</span></td><td>geen code</td></tr>
+    <tr><td>1</td><td><a href="#cursor">Pointer beter leesbaar</a></td><td>Onze cursor blijft; stip 5 → 8 px met witte rand + schaduw (halo), zodat hij niet meer verdwijnt op rood/foto</td><td><span class="tag t-code">code</span></td><td>klein (1 u)</td></tr>
+    <tr><td>2</td><td><a href="#samenwerkingen">7 samenwerkingen, Raf &amp; Sol</a></td><td>Geen limiet. Echte oorzaak: het “+” zit verstopt in het ⋯-menu → zichtbare +-knop + rij “+ Nieuwe samenwerking”</td><td><span class="tag t-code">code</span> <span class="tag t-studio">studio</span></td><td>klein (1–2 u)</td></tr>
     <tr><td>3</td><td><a href="#voorbij">Voorbije retreats zonder prijs</a></td><td>Op de terugblik-pagina enkel “Waar” &amp; “Begeleiding”; prijs ook uit Google-beschrijving &amp; JSON-LD</td><td><span class="tag t-code">code</span></td><td>klein (1–2 u)</td></tr>
     <tr><td>4</td><td><a href="#testimonials">Testimonials &amp; reviews</a></td><td>Samenvoegen tot één document <b>Testimonial</b> met vinkje “Op Home” + tabel met alle testimonials (vinkje in kolom 1) + migratie</td><td><span class="tag t-code">code</span></td><td>1–1,5 dag</td></tr>
     <tr><td>5</td><td><a href="#instagram">Foto's Instagram-blok</a></td><td>Nu = de 6 nieuwste “Uitgelichte” foto's. Eigen keuzeveld op Home toevoegen</td><td><span class="tag t-code">code</span></td><td>klein (2–3 u)</td></tr>
@@ -104,27 +126,44 @@
     <tr><td>7</td><td><a href="#prive">Tarieven privélessen</a></td><td>Privéles-blok uitbreiden met prijslijst + “Locatie &amp; praktisch”</td><td><span class="tag t-code">code</span></td><td>middel (½ dag)</td></tr>
     <tr><td>8</td><td><a href="#seo">SEO: retreats, events, yoga-aanbod</a></td><td>Retreats = Event ✓. Ontbreekt: wat Y,Z&amp;T aanbiedt (Service/aanbod, regio, oprichters), JSON-LD op Lessen, landcodes</td><td><span class="tag t-code">code</span> <span class="tag t-studio">studio</span></td><td>½ dag</td></tr>
     <tr><td>9</td><td><a href="#prive-nav">Privéles in de navigatie</a></td><td>Link “Privéles →” in het Lessen-menu (desktop) + chip (mobiel)</td><td><span class="tag t-code">code</span></td><td>klein (1 u)</td></tr>
-    <tr><td>10</td><td><a href="#samenwerkingen-speels">Samenwerkingen speels</a></td><td>Ronde portretten als botsende “deeltjes”: slepen/gooien, hover-label, klik = kaart. Prototype hieronder</td><td><span class="tag t-code">code</span></td><td>1 dag</td></tr>
+    <tr><td>10</td><td><a href="#samenwerkingen-speels">Samenwerkingen als balanstoren</a></td><td>Portretten als steentoren in evenwicht: wiebelen, stenen verplaatsen, omvallen &amp; heropbouwen, klik = kaart. Schakelaar in de Studio: Balanstoren / Klassiek</td><td><span class="tag t-code">code</span></td><td>1–1,5 dag</td></tr>
   </table>
 
   <!-- 1 -->
-  <h2 id="cursor">1 · Pointer zoals bij Sansara</h2>
+  <h2 id="cursor">1 · Pointer: onze cursor houden, maar beter leesbaar</h2>
   <blockquote>Pointer toch niet ideaal, liefst als het kan zoals bij https://www.sansararesort.com/</blockquote>
+  <p><b>Beslissing</b>: de Sansara-cursor nemen we niet over. Onze cirkel-en-stip blijft (ring die mee-ijlt, groot boven links/foto's, klik-veer). Het echte probleem is <b>leesbaarheid</b>: de stip is klein en verdwijnt op sommige achtergronden.</p>
 
-  <h3>Hoe het nu werkt</h3>
-  <p><code>components/Cursor.tsx</code> + <code>app/globals.css:457-468</code>: de gewone muispijl wordt verborgen (<code>cursor: none !important</code>), een kleine stip volgt de muis <em>direct</em>, een witte ring met <code>mix-blend-mode: difference</code> (kleuren omkeren) volgt met vertraging en wordt groter (34 → 64 px) boven links/knoppen/foto's.</p>
-  <p class="why">Waarom dat “niet ideaal” voelt: geen echte muispijl meer (je verliest het gevoel waar je precies klikt), de ring keert de kleuren om (op foto's geeft dat vreemde kleuren), en de stip heeft geen vertraging, dus stip en ring lijken los van elkaar.</p>
+  <h3>Waarom de stip “verdwijnt”</h3>
+  <p><code>app/globals.css:458-462</code>: de <b>ring</b> heeft <code>mix-blend-mode: difference</code> en past zich dus aan de achtergrond aan (wit op donker, donker op licht). De <b>stip</b> doet dat bewust níet: die is altijd <code>var(--ember)</code> (#D4552B), 5 × 5 px, zonder rand of schaduw. Op een rode/oranje knop, een ember-label of een warme foto (zonsondergang, woestijn) heeft hij dus geen contrast meer. Het kleurwisselen dat je bij de ring ziet, gebeurt bij de stip nooit.</p>
 
-  <h3>Hoe het bij Sansara werkt (uit hun code)</h3>
+  <h3>Voorstel: grotere stip met halo</h3>
   <ul>
-    <li><b>Gewone muispijl blijft zichtbaar</b> (nergens <code>cursor:none</code>). De stip + ring zijn een extra laag.</li>
-    <li><b>Stip</b>: effen kleur (hun turquoise <code>#68c6c5</code>), ± 8 px, volgt met <b>0,3 s</b> vertraging.</li>
-    <li><b>Ring</b>: dunne lijn (0,05vw ≈ 1 px) in dezelfde kleur, ± 30 px, volgt met <b>0,7 s</b> vertraging → mooie “sleep”.</li>
-    <li><b>Hover</b> (op knoppen/links met class <code>focuson</code>): stip krimpt weg naar 0, ring schaalt <b>×3</b> (0,3 s). Op een donkere achtergrond wordt alles wit.</li>
-    <li>Enkel vanaf 1200 px breed (niet op tablet/gsm).</li>
+    <li><b>Stip 5 → 8 px</b>, nog altijd ember.</li>
+    <li><b>Halo eronder</b>: een witte rand van 1,5 px + een zachte schaduw: <code>box-shadow: 0 0 0 1.5px rgba(255,255,255,.95), 0 1px 6px rgba(15,26,29,.45)</code>. De witte rand geeft contrast op rood en donker, de schaduw op wit en licht. Daardoor lijkt de stip ook iets “boven” de pagina te zweven.</li>
+    <li>Boven links/foto's (ring groot): stip iets kleiner (<code>scale: .75</code>), zodat de ring de aandacht krijgt. Bij klikken: stip kort ×1,3.</li>
+    <li>Ring: ongewijzigd (difference-blend werkt goed), eventueel 1 → 1,25 px dik.</li>
   </ul>
 
-  <h3>Screenshots van Sansara</h3>
+  <h3>Vergelijk: nu ↔ voorstel</h3>
+  <p class="muted small">Beweeg de muis over de 4 vlakken (desktop). Wissel met de knop.</p>
+  <p><button type="button" class="toggle" id="cur-toggle" aria-pressed="true">Voorstel (met halo)</button></p>
+  <div class="demo4" id="demo">
+    <div class="d-light"><a class="btn" href="#cursor">Ontdek de retreats</a><span>licht</span></div>
+    <div class="d-ember"><a class="btn" href="#cursor">Inschrijven</a><span>ember / rood</span></div>
+    <div class="d-photo"><span>warme foto</span></div>
+    <div class="d-dark"><a class="btn" href="#cursor">Alle retreats</a><span>donker</span></div>
+  </div>
+  <figure style="margin:12px 0"><img src="client-feedback-v3/img/cursor-halo.png" alt="Boven: huidige stip verdwijnt op ember; onder: stip met halo blijft zichtbaar" style="width:100%;border-radius:8px;border:1px solid var(--line)"><figcaption class="muted small">Boven: nu, de ember-stip verdwijnt op de ember-achtergrond (alleen de ring is nog te zien). Onder: voorstel, 8 px met witte rand + schaduw.</figcaption></figure>
+
+  <h3>Wijzigingen <span class="tag t-code">code</span></h3>
+  <ul class="files">
+    <li><code>app/globals.css:460</code> <code>.cursor-dot</code>: <code>width/height: 8px; margin: -4px 0 0 -4px;</code> + de <code>box-shadow</code> hierboven; <code>transition: scale .2s var(--ease)</code>.</li>
+    <li><code>app/globals.css</code>: nieuwe regels <code>.cursor-dot.big { scale: .75 }</code>, <code>.cursor-dot.press { scale: 1.3 }</code>.</li>
+    <li><code>components/Cursor.tsx</code>: de classes <code>big</code>/<code>press</code> ook op de stip zetten (nu enkel op de ring). Verder niets.</li>
+  </ul>
+  <details class="small"><summary>Ter referentie: de Sansara-cursor (niet gekozen)</summary>
+  
   <p class="muted small">Gemaakt op sansararesort.com (1440 px breed, pop-ups weggehaald). De zwarte pijl is de gewone muispijl; die verschijnt niet in een screenshot, dus heb ik hem op de exacte muispositie ingetekend.</p>
   <div class="shots3">
     <figure><img src="client-feedback-v3/img/sans-1-idle.png" alt="Sansara: stip en ring rond de muis in rust"><figcaption><b>In rust</b>: turquoise stip + dunne ring liggen samen rond de punt van de gewone muispijl.</figcaption></figure>
@@ -132,20 +171,7 @@
     <figure><img src="client-feedback-v3/img/sans-3-hover.png" alt="Sansara: ring groot en wit boven de knop Book now"><figcaption><b>Boven een knop</b> (“Book now”): de stip verdwijnt, de ring wordt ×3 groter en hier wit (knop heeft class <code>white</code>).</figcaption></figure>
   </div>
 
-  <h3>Probeer het voorstel</h3>
-  <p class="muted small">Beweeg de muis hieronder (desktop). Stip &amp; ring in onze ember-kleur; links wordt de ring groot, op donker wordt hij wit.</p>
-  <div class="demo" id="demo">
-    <div class="light"><a class="btn" href="#cursor">Ontdek de retreats</a><span class="muted small">lichte achtergrond</span></div>
-    <div class="dark" data-cursor="white"><a class="btn" href="#cursor">Inschrijven</a><span class="small" style="opacity:.7">donkere achtergrond / foto</span></div>
-  </div>
-
-  <h3>Wijzigingen <span class="tag t-code">code</span></h3>
-  <ul class="files">
-    <li><code>app/globals.css:467-468</code>: regels <code>body.has-cursor … { cursor: none !important }</code> weg → gewone muispijl terug.</li>
-    <li><code>app/globals.css:458-466</code>: ring zonder <code>mix-blend-mode</code>, rand <code>1px solid var(--ember)</code>, ± 30 px; stip 7 px in <code>var(--ember)</code>. Hover via <code>scale</code> (ring ×2,6–3, stip → 0) i.p.v. width/height, met <code>transition: scale .3s</code>. Variant <code>.white</code> voor donkere vlakken (hero, slotfoto, footer, lightbox).</li>
-    <li><code>components/Cursor.tsx</code>: ook de stip met vertraging laten volgen (bv. <code>EASE_DOT = .25</code>, <code>EASE_RING = .1</code> per frame ≈ Sansara's 0,3 s / 0,7 s); class <code>big</code> → <code>hover</code> die ook op de stip komt; <code>white</code> zetten als het element onder de muis in een donker vlak zit (<code>[data-cursor=white]</code> of <code>.hero, .closing, .footer, dialog</code>).</li>
-    <li>Media query: enkel <code>(pointer: fine) and (min-width: 1200px)</code>. Klik-“squeeze” mag blijven (subtiel).</li>
-  </ul>
+  </details>
 
   <!-- 2 -->
   <h2 id="samenwerkingen">2 · Samenwerkingen: 7, met Raf &amp; Sol</h2>
@@ -159,9 +185,18 @@
   </table>
   <p>Met Raf erbij = 7. In het raster van 2 kolommen staat de 7e dan alleen op de laatste rij; dat oogt prima. <span class="tag t-q">vraag</span> Liever 3 kolommen op brede schermen? Dan is het één regel in <code>app/globals.css:301</code> (<code>.collabs</code>).</p>
 
+  <h3>De echte oorzaak: het “+” staat verstopt <span class="tag t-code">code</span></h3>
+  <p>Het probleem was niet het aantal, maar dat het niet duidelijk was <b>hoe je iemand toevoegt</b>. In de Studio bouwen de panelen <b>Over ons</b>, <b>Lessen</b>, <b>Mails</b> en <b>Formulieren</b> hun lijst zelf op (<code>liveList</code> in <code>studio/structure/index.ts:64-100</code>). De knop “Nieuwe persoon” staat daar als <code>menuItem</code> <b>zonder <code>showAsAction</code></b>. In Sanity (gecontroleerd in de broncode van <code>sanity@6</code>: <code>renderAsButton: item.showAsAction ?? false</code>) betekent dat dat hij niet als knop verschijnt, maar <b>verstopt zit in het ⋯-menu</b> rechtsboven. Bij lijsten zoals “Nieuwsbrieven” staat er wel een zichtbaar <b>+</b>, vandaar de verwarring.</p>
+  <ul class="files">
+    <li><code>studio/structure/index.ts:87</code>: <code>S.menuItem()…showAsAction(true)</code> → in elk van die panelen een zichtbare <b>+</b>-knop met de titel als tooltip (“Nieuwe samenwerking”, “Nieuwe stijl”…). Eén regel, geldt voor alle 4 panelen.</li>
+    <li>Bovenaan de lijst ook een gewone rij <b>“+ Nieuwe samenwerking”</b> (een <code>S.listItem()</code> met <code>AddIcon</code> en een create-intent met beginwaarde Soort = Samenwerking), zodat het ook zonder de knop rechtsboven te vinden is. Zelfde voor “+ Nieuwe stijl”, “+ Nieuwe studio”.</li>
+    <li>Titel “Nieuwe persoon” → <b>“Nieuwe samenwerking”</b> (met beginwaarde <code>kind: "collaborator"</code> via een <code>initialValueTemplate</code>), zodat Rita &amp; Philippe niet per ongeluk een tweede “founder” aanmaken.</li>
+    <li><code>studio/components/Help.tsx</code> (“Zo werkt het”): kort blok “Iets toevoegen = het + bovenaan de lijst”, met een screenshot.</li>
+  </ul>
+
   <h3>Raf toevoegen <span class="tag t-studio">studio</span></h3>
   <ol class="steps">
-    <li>Studio → <b>Over ons</b> → rechtsboven het <b>+</b>-menu → <b>Nieuwe persoon</b>.</li>
+    <li>Studio → <b>Over ons</b> → rechtsboven het <b>⋯</b>-menu → <b>Nieuwe persoon</b> (na de fix hierboven: de zichtbare <b>+</b>-knop of de rij “+ Nieuwe samenwerking”).</li>
     <li>Soort: <b>Samenwerking</b>. Vul <b>Naam</b>, <b>Rol</b> (NL + EN) en <b>Portret</b> in (verplicht), optioneel “Over”, Website, Andere links.</li>
     <li>Optioneel <b>Volgorde</b>: laag getal = eerst. Leeg = alfabetisch na de genummerde.</li>
     <li>Klik <b>Publiceren</b> (onderaan rechts). Pas dan staat Raf op de site.</li>
@@ -396,9 +431,10 @@
   </ul>
 
   <!-- 10 -->
-  <h2 id="samenwerkingen-speels">10 · Samenwerkingen als speels, interactief blok</h2>
-  <p>Idee: op Over ons worden de ronde portretten “deeltjes” die zacht rondzweven, tegen elkaar en tegen de randen botsen, en waarmee een bezoeker kan spelen (vastpakken, gooien). Hover = reactie, klik = details. <b>Probeer het prototype</b> (echte portretten uit de Studio, Raf als voorbeeld van de 7e):</p>
+  <h2 id="samenwerkingen-speels">10 · Samenwerkingen als balanstoren (met schakelaar naar klassiek)</h2>
+  <p>Een knipoog naar yoga: geen losse, willekeurig botsende deeltjes, maar de ronde portretten als een <b>gestapelde steentoren in evenwicht</b> (een cairn, zoals op het strand of bij een tree pose). De interactie gaat dan over <b>balans</b>: aanraken laat de toren wiebelen, er een steen uit trekken laat de rest zakken, te hard duwen laat hem omvallen, en hij bouwt zichzelf rustig weer op. Zo heeft de interactie een betekenis. De <b>klassieke weergave</b> (de huidige lijst) blijft bestaan, en Rita &amp; Philippe kiezen in de Studio welke ze tonen.</p>
 
+  <p><button type="button" class="toggle" id="tower-toggle" aria-pressed="true">Weergave: Balanstoren</button> <span class="muted small">(zelfde schakelaar als in de Studio)</span></p>
   <div class="bubbles" id="bubbles" aria-label="Prototype samenwerkingen">
     <canvas></canvas>
     <div class="bubble-tip" hidden></div>
@@ -407,103 +443,143 @@
       <img alt="">
       <div><h3></h3><p class="muted small role"></p><p class="bio"></p><p class="links small"></p></div>
     </aside>
-    <span class="bubble-hint">sleep &amp; gooi · hover · klik</span>
+    <span class="bubble-hint">hover = wiebelen · sleep een steen eruit/erop · duw hard = omvallen · klik = details</span>
   </div>
+  <ul class="collabs-mock" id="classic" hidden></ul>
+  <figure style="margin:12px 0"><img src="client-feedback-v3/img/tower-states.png" alt="Balanstoren: rust, wiebelen, steen eruit, omgevallen, heropgebouwd" style="width:100%;border-radius:8px;border:1px solid var(--line)"><figcaption class="muted small">Van links naar rechts: rust · wiebelen na hover · onderste steen eruit getrokken (de rest zakt) · te hard geduwd = omgevallen · vanzelf heropgebouwd.</figcaption></figure>
 
   <h3>Gedrag</h3>
   <ul>
-    <li><b>Rust</b>: de cirkels drijven traag (lichte willekeurige drift, zonder zwaartekracht), botsen zacht en veren terug van de randen. Grootte 96–150 px, iets variërend zodat het organisch oogt.</li>
-    <li><b>Muis</b>: de cursor duwt cirkels in de buurt zacht weg (een “bel” rond de muis). Hover: de cirkel groeit ±12 %, krijgt een ember-rand en een label met naam + rol.</li>
-    <li><b>Spelen</b>: vastpakken en gooien; de snelheid van de muis wordt meegegeven en de wrijving laat hem uitbollen.</li>
-    <li><b>Klik</b> (zonder slepen): een kaart met groot portret, naam, rol, bio en links schuift in (desktop rechts in het blok, mobiel als bottom sheet). Esc of × sluit. Elke samenwerking heeft een eigen anker (<code>#elena</code>), zoals nu, dus links vanuit een retreatpagina openen meteen de juiste kaart.</li>
-    <li><b>Mobiel</b>: kleinere cirkels; met je vinger slepen/gooien en tikken = kaart. Met de telefoon kantelen kan later nog (vraagt toestemming op iOS, dus niet standaard).</li>
+    <li><b>Opbouw</b>: grootste portret onderaan, kleiner naar boven (7 personen: Ø ±150 → 70 px), elke steen iets verschoven en licht overlappend, zodat het een echte, net-niet-perfecte stapel is. De volgorde volgt het Studio-veld <b>Volgorde</b> (laag = onderaan), anders de grootte op alfabet.</li>
+    <li><b>Rust</b>: de toren “ademt”: een heel trage, kleine zwaai (± 0,5°), zoals iemand in balans staat.</li>
+    <li><b>Hover</b>: de steen onder de muis groeit iets en krijgt een ember-rand + label (naam · rol); de muisbeweging geeft de toren een zetje in die richting (hoe hoger je raakt, hoe meer hij zwaait) en hij veert terug.</li>
+    <li><b>Slepen</b>: een steen uit de toren trekken → de stenen erboven zakken en de toren zoekt opnieuw balans. Loslaten boven/naast de toren = op die plaats terugzetten (de volgorde verandert enkel voor de bezoeker); ver weg loslaten = hij rolt terug naar zijn plaats.</li>
+    <li><b>Omvallen</b>: hard duwen of gooien → de toren valt om, de stenen rollen over de bodem, en na ±2 s bouwen ze zichzelf weer op, één voor één van onder naar boven.</li>
+    <li><b>Klik</b> (zonder slepen): kaart met groot portret, naam, rol, bio en links (desktop rechts, mobiel als bottom sheet). Esc/× sluit. Ankers (<code>#elena</code>) openen meteen de juiste kaart.</li>
+    <li><b>Veel mensen</b> (&gt; 8): twee torens naast elkaar. <b>Mobiel</b>: toren geschaald, tikken = kaart, wiebelen met de vinger.</li>
   </ul>
 
-  <h3>Toegankelijkheid &amp; SEO (belangrijk)</h3>
-  <ul>
-    <li>De volledige lijst (naam, rol, bio, links) blijft <b>als gewone HTML</b> op de pagina staan, net als nu. Het speelveld is een laag erbovenop. Google en schermlezers lezen de lijst, en zonder JavaScript zie je de huidige weergave.</li>
-    <li>Toetsenbord: elke cirkel is een <code>&lt;button&gt;</code> (Tab → focusring, Enter → kaart).</li>
-    <li><code>prefers-reduced-motion</code>: geen beweging, de cirkels staan stil in een losse cluster (wel hover + klik).</li>
-    <li>Prestaties: de animatie pauzeert buiten beeld (IntersectionObserver) en als het tabblad verborgen is; de cirkels komen pas tot rust als ze niet meer bewegen.</li>
+  <h3>Schakelaar in de Studio <span class="tag t-code">code</span></h3>
+  <ul class="files">
+    <li><code>studio/schemaTypes/singletons/about-page.ts</code> (bij “Samenwerkingen”): veld <b>“Weergave samenwerkingen”</b> (<code>collaboratorsStyle</code>, radio): <b>“Balanstoren (speels)”</b> / <b>“Klassiek (lijst)”</b>, standaard Balanstoren, met uitleg “Klassiek = de vaste lijst met foto, rol, tekst en links”.</li>
+    <li><code>sanity/queries.ts:341-344</code> (<code>ABOUT_QUERY</code>): <code>collaboratorsStyle</code> mee ophalen; <code>sanity/types.ts</code> opnieuw genereren.</li>
+    <li><code>app/[lang]/over-ons/page.tsx:103-140</code>: <code>collaboratorsStyle === "classic"</code> → de huidige <code>&lt;ul className="collabs"&gt;</code> (ongewijzigd); anders <code>&lt;CollabTower people={…} /&gt;</code> + dezelfde lijst als gewone HTML eronder, visueel verborgen (<code>.sr-only</code>), zodat Google en schermlezers alles blijven lezen en het zonder JavaScript gewoon de lijst is.</li>
+    <li>Automatisch klassiek bij <code>prefers-reduced-motion</code> (of de toren staat stil, zonder wiebelen: <span class="tag t-q">vraag</span> welke van de twee?).</li>
   </ul>
 
   <h3>Bouw <span class="tag t-code">code</span></h3>
   <ul class="files">
-    <li>Nieuw client-component <code>components/CollabField.tsx</code>: eigen kleine physics (± 150 regels: positie/snelheid, cirkel-cirkel-botsing met impuls, randen, wrijving, pointer-afstoting, slepen) op <code>requestAnimationFrame</code>. Geen library nodig (matter.js ≈ 25 kB gzip is overkill voor 7 cirkels). Portretten als <code>&lt;button&gt;</code>-elementen met <code>transform</code> (geen canvas), zodat focus, alt en hover gewoon werken. In het prototype hierboven is het canvas enkel om het snel te tonen.</li>
-    <li><code>app/[lang]/over-ons/page.tsx:103-140</code>: <code>&lt;CollabField people={…} /&gt;</code> boven de bestaande <code>&lt;ul className="collabs"&gt;</code>. De lijst wordt dan visueel verborgen (<code>.sr-only</code>) of blijft zichtbaar als “alle details” eronder. <span class="tag t-q">vraag</span>: welke van de twee?</li>
-    <li>Kaart: hergebruik <code>Photo</code> + <code>RichText</code>; stijl in <code>app/globals.css</code> naast <code>.collabs</code>. Werkt samen met de nieuwe cursor (#1): ring groot boven een cirkel.</li>
-    <li>Studio: niets nieuw. Optioneel veld “Grootte in het speelveld” (S/M/L) per persoon.</li>
-    <li>Inschatting: 1 dag (incl. mobiel en reduced-motion).</li>
+    <li>Nieuw client-component <code>components/CollabTower.tsx</code>, geen library nodig: elke steen heeft een rustplaats in de toren; de toren draait rond zijn voet met één zwaaihoek (veer + demping), elke steen heeft een eigen kleine veer naar zijn plaats; bij omvallen eenvoudige zwaartekracht + botsingen (cirkel/cirkel, bodem, randen) en daarna één voor één terug naar hun plaats. ± 200 regels, <code>requestAnimationFrame</code>, pauzeert buiten beeld.</li>
+    <li>Portretten als <code>&lt;button&gt;</code>-elementen met <code>transform</code> (geen canvas), zodat Tab, focusring, Enter → kaart, alt-teksten en de cursor (#1, ring groot boven een steen) gewoon werken. Het canvas in het prototype is enkel om het snel te tonen.</li>
+    <li>Kaart: <code>Photo</code> + <code>RichText</code> hergebruiken; stijl naast <code>.collabs</code> in <code>app/globals.css</code>.</li>
+    <li>Inschatting: 1–1,5 dag (toren + omvallen/heropbouw + mobiel + Studio-schakelaar).</li>
   </ul>
 
   <h2>Volgorde van uitvoeren</h2>
   <ol>
     <li><b>Zelf in de Studio, nu</b>: Raf aanmaken (#2), slug <code>Rochefort</code> → <code>rochefort-2027</code> en titels gelijktrekken (#8e–f).</li>
-    <li><b>Snelle code</b>: prijs weg bij voorbije retreats (#3), nieuwe yogamat (#6), Privéles in het menu (#9), cursor (#1).</li>
+    <li><b>Snelle code</b>: zichtbaar “+” in de Studio (#2), cursor-halo (#1), prijs weg bij voorbije retreats (#3), nieuwe yogamat (#6), Privéles in het menu (#9).</li>
     <li><b>Nieuwe Studio-velden</b>: privélessen (#7), Instagram-keuze (#5).</li>
-    <li><b>Grotere stukken</b>: Testimonials samenvoegen + tabel + migratie (#4), SEO-aanbod/JSON-LD (#8, samen met #7 voor de prijzen), speels samenwerkingsblok (#10).</li>
+    <li><b>Grotere stukken</b>: Testimonials samenvoegen + tabel + migratie (#4), SEO-aanbod/JSON-LD (#8, samen met #7 voor de prijzen), balanstoren + schakelaar (#10).</li>
   </ol>
-  <p class="muted small">Open vragen: #1 kleur (ember of iets anders)? · #2 3 kolommen? · #3 ook “Deelnemers” weg op de terugblik-pagina (en het kaartje)? · #4 op de site “Reviews” of “Wat deelnemers zeggen”? · #10 de gewone lijst onder het speelveld zichtbaar laten of enkel voor Google/schermlezers?</p>
+  <p class="muted small">Open vragen: #2 3 kolommen? · #3 ook “Deelnemers” weg op de terugblik-pagina (en het kaartje)? · #4 op de site “Reviews” of “Wat deelnemers zeggen”? · #10 bij “minder beweging” (reduced motion): automatisch Klassiek, of een stilstaande toren?</p>
 </main>
 
 <script>
 (() => {
-  const demo = document.getElementById("demo");
-  if (!demo || !matchMedia("(pointer: fine)").matches) return;
-  const dot = document.createElement("div"), ring = document.createElement("div");
-  dot.className = "c-dot"; ring.className = "c-ring"; document.body.append(ring, dot);
-  let x = 0, y = 0, dx = 0, dy = 0, rx = 0, ry = 0, raf = 0, inside = false;
-  const tick = () => {
-    dx += (x - dx) * .25; dy += (y - dy) * .25;   // dot ≈ 0.3 s
-    rx += (x - rx) * .1;  ry += (y - ry) * .1;    // ring ≈ 0.7 s
-    dot.style.translate = `${dx}px ${dy}px`; ring.style.translate = `${rx}px ${ry}px`;
-    raf = Math.abs(x - rx) + Math.abs(y - ry) > .1 ? requestAnimationFrame(tick) : 0;
-  };
+  const demo = document.getElementById("demo"), btn = document.getElementById("cur-toggle");
+  if (!demo) return;
+  document.body.classList.add("halo");
+  btn.onclick = () => { const on = btn.getAttribute("aria-pressed") !== "true"; btn.setAttribute("aria-pressed", on); btn.textContent = on ? "Voorstel (met halo)" : "Nu (zonder halo)"; document.body.classList.toggle("halo", on); };
+  if (!matchMedia("(pointer: fine)").matches) return;
+  const st = document.createElement("style"); st.textContent = "#demo, #demo * { cursor: none !important; }"; document.head.append(st);
+  const ring = document.createElement("div"), dot = document.createElement("div");
+  ring.className = "yc-ring"; dot.className = "yc-dot"; document.body.append(ring, dot);
+  let x = 0, y = 0, rx = 0, ry = 0, raf = 0, inside = false;
+  const tick = () => { rx += (x - rx) * .16; ry += (y - ry) * .16; ring.style.translate = `${rx}px ${ry}px`; raf = Math.abs(x - rx) + Math.abs(y - ry) > .1 ? requestAnimationFrame(tick) : 0; };
   demo.addEventListener("mousemove", (e) => {
-    x = e.clientX; y = e.clientY;
-    if (!inside) { dx = rx = x; dy = ry = y; inside = true; }
-    const t = e.target, hover = !!t.closest("a, button"), white = !!t.closest("[data-cursor=white]");
-    for (const el of [dot, ring]) { el.classList.add("c-on"); el.classList.toggle("hover", hover); el.classList.toggle("white", white); }
+    x = e.clientX; y = e.clientY; if (!inside) { rx = x; ry = y; inside = true; }
+    dot.style.transform = `translate(${x}px,${y}px)`;
+    const big = !!e.target.closest(".btn, .d-photo");
+    for (const el of [ring, dot]) { el.classList.add("yc-on"); el.classList.toggle("big", big); }
     if (!raf) raf = requestAnimationFrame(tick);
   });
-  demo.addEventListener("mouseleave", () => { inside = false; dot.classList.remove("c-on"); ring.classList.remove("c-on"); });
-  document.addEventListener("scroll", () => { dot.classList.remove("c-on"); ring.classList.remove("c-on"); inside = false; }, { passive: true });
+  const off = () => { inside = false; ring.classList.remove("yc-on"); dot.classList.remove("yc-on"); };
+  demo.addEventListener("mouseleave", off); addEventListener("scroll", off, { passive: true });
 })();
 </script>
 <script>
 (() => {
   const PEOPLE = [{"bio": "Yoga is een rode draad in Elena's dagelijkse leven. Als gepassioneerde yogadocente deelt ze met veel liefde Vinyasa, Yin en meditatie, waarbij ze anderen uitnodigt om te vertragen, opnieuw te verbinden en te leven met meer aandacht en aanwezigheid.", "img": "https://cdn.sanity.io/images/1pbhk0to/production/6429bfcbef030696abe85735827602fcd12960ea-2048x1367.jpg?w=300&h=300&fit=crop&auto=format", "links": [{"label": "Website", "url": "http://www.elenagontcharova.com/"}, {"label": "Instagram", "url": "https://www.instagram.com/yogametelena/"}], "name": "Elena", "role": "Yin en Vinyasa yoga & meditatie"}, {"bio": "Fatim is een zeer ervaren massagetherapeut die zich continu blijft bijscholen. Ze biedt onder meer klassieke massage, shiatsu, dieptemassage en voetreflexologie aan. Haar doel is een veilige plek te creëren waar iedereen ontspannen en weer in evenwicht naar buiten gaat.", "img": "https://cdn.sanity.io/images/1pbhk0to/production/cf1357862be5e329847d5bdd15bbd441de12aee0-1066x1173.jpg?w=300&h=300&fit=crop&auto=format", "links": [{"label": "Website", "url": "http://anoubis.be/"}], "name": "Fatim", "role": "Massage therapeut"}, {"bio": "Foodie Jive is het culinaire duo Elif en Guy, bekend als cateraars van o.a. De Roma. Met verse ingrediënten en veel creativiteit maken ze heerlijke vegetarische maaltijden die lichaam én smaakpapillen verwennen.", "img": "https://cdn.sanity.io/images/1pbhk0to/production/3a7d6b1e8f3bde6327b75263ac039e1c0d86fea0-3000x2250.jpg?w=300&h=300&fit=crop&auto=format", "links": [{"label": "Facebook", "url": "https://www.facebook.com/foodiejive/?locale=nl_BE"}, {"label": "Instagram", "url": "https://www.instagram.com/foodiejive/"}], "name": "Foodie Jive", "role": "Catering"}, {"bio": "Mel is massagetherapeut met een passie voor rust, aanraking en echte verbinding. Tijdens retreats helpt ze je los te laten en terug in je lichaam te komen met diep ontspannende, herstellende massages. Ze werkt intuïtief en rustig, precies afgestemd op wat jouw lichaam nodig heeft om echt te landen.", "img": "https://cdn.sanity.io/images/1pbhk0to/production/986ef1be942c2f1fdc85fe4c44f2cff300e22143-643x1600.jpg?w=300&h=300&fit=crop&auto=format", "links": [{"label": "Website", "url": "https://unwind-massage.be/"}, {"label": "instagram", "url": "https://www.instagram.com/unwind.massage.by.mel?dlrf=dXBmZWl1aGx0d21o&utm_source=qr"}], "name": "Mel", "role": "Massage therapeut"}, {"bio": "Michèle is freediving-instructeur en oceaanliefhebber die je de schoonheid van de onderwaterwereld laat ontdekken. Didactisch ijzersterk, eindeloos geduldig en met een glimlach van hier tot in Dahab.", "img": "https://cdn.sanity.io/images/1pbhk0to/production/f917ca20943f267ec79df1e3460446aa66753983-1008x1012.jpg?w=300&h=300&fit=crop&auto=format", "links": [{"label": "FACEBOOK", "url": "https://www.facebook.com/michele.fouquet.98/"}, {"label": "INSTAGRAM", "url": "https://www.instagram.com/michelefouquet/"}], "name": "Michèle", "role": "Freedive-instructeur, CMAS & AIDA"}, {"bio": "Yoga-enthousiast met een passie voor yin yoga en meditatie.", "img": "https://cdn.sanity.io/images/1pbhk0to/production/41cf0a4701977a3cdd423d88ceac9b8e9363ec1a-828x807.jpg?w=300&h=300&fit=crop&auto=format", "links": [], "name": "Sol", "role": "Yin yoga & meditatie"}, {"name": "Raf", "role": "(voorbeeld: nog toe te voegen)", "bio": "Zo verschijnt een nieuwe samenwerking zodra die in de Studio gepubliceerd is.", "links": [], "img": null}];
-  const box = document.getElementById("bubbles");
+  const box = document.getElementById("bubbles"), list = document.getElementById("classic"), tog = document.getElementById("tower-toggle");
   if (!box) return;
+  // classic rendering (the current list on Over ons)
+  list.innerHTML = PEOPLE.map((p) => `<li>${p.img ? `<img src="${p.img}" alt="">` : `<span class="ini">${p.name[0]}</span>`}<div><h3>${p.name}</h3><p class="muted">${p.role}</p><p>${p.bio}</p><p>${(p.links || []).map((l) => `<a href="${l.url}" target="_blank" rel="noopener">${l.label}</a>`).join(" · ")}</p></div></li>`).join("");
+  tog.onclick = () => { const on = tog.getAttribute("aria-pressed") !== "true"; tog.setAttribute("aria-pressed", on); tog.textContent = on ? "Weergave: Balanstoren" : "Weergave: Klassiek"; box.hidden = !on; list.hidden = on; };
+
   const cv = box.querySelector("canvas"), ctx = cv.getContext("2d");
   const tip = box.querySelector(".bubble-tip"), card = box.querySelector(".bubble-card");
   const still = matchMedia("(prefers-reduced-motion: reduce)").matches;
-  let W = 0, H = 0, dpr = 1;
-  const resize = () => { dpr = devicePixelRatio || 1; W = box.clientWidth; H = box.clientHeight; cv.width = W * dpr; cv.height = H * dpr; ctx.setTransform(dpr, 0, 0, dpr, 0, 0); };
+  let W = 0, H = 0;
+  const resize = () => { const d = devicePixelRatio || 1; W = box.clientWidth; H = box.clientHeight; cv.width = W * d; cv.height = H * d; ctx.setTransform(d, 0, 0, d, 0, 0); };
   resize(); addEventListener("resize", resize);
-  const small = W < 600;
-  const balls = PEOPLE.map((p, i) => {
-    const r = (small ? 38 : 52) + ((i * 37) % 5) * (small ? 4 : 6);
+  const scale = Math.min(1, (H - 30) / 690, W / 420);
+  // biggest at the bottom
+  const stones = PEOPLE.map((p, i) => {
     const img = new Image(); if (p.img) img.src = p.img;
-    return { p, img, r, s: 1, x: r + Math.random() * (W - 2 * r), y: r + Math.random() * (H - 2 * r), vx: (Math.random() - .5) * 1.2, vy: (Math.random() - .5) * 1.2 };
+    return { p, img, r: (75 - i * 6.5) * scale, s: 1, x: 0, y: 0, vx: 0, vy: 0, mode: "tower" };
   });
-  let mx = -1e3, my = -1e3, hover = null, drag = null, moved = 0, last = [];
-  const pick = (x, y) => balls.slice().reverse().find((b) => (b.x - x) ** 2 + (b.y - y) ** 2 < (b.r * b.s) ** 2);
+  let order = stones.map((_, i) => i);
+  let th = 0, om = 0, t0 = performance.now(), fallAt = 0;
+  const baseX = () => (W < 640 ? W / 2 : W * .36), baseY = () => H - 6;
+  const slots = () => {
+    const out = []; let y = baseY(), prev = 0;
+    order.forEach((idx, k) => {
+      const r = stones[idx].r;
+      y -= k ? (prev + r) * .86 : r;
+      out.push({ idx, dx: Math.sin(k * 2.3 + .6) * r * .14, dy: y - baseY() });
+      prev = r;
+    });
+    return out;
+  };
+  const target = (sl, k) => { const a = th * (1 + k * .12), c = Math.cos(a), s = Math.sin(a); return [baseX() + sl.dx * c - sl.dy * s, baseY() + sl.dx * s + sl.dy * c]; };
+  slots().forEach((sl, k) => { const [x, y] = target(sl, k); Object.assign(stones[sl.idx], { x, y: y - H, vy: 0 }); }); // drop in from above on load
+
+  let mx = -1e3, my = -1e3, pmx = 0, hover = null, drag = null, moved = 0, last = [], from = 0;
+  const pick = (x, y) => stones.slice().reverse().find((b) => (b.x - x) ** 2 + (b.y - y) ** 2 < (b.r * b.s) ** 2);
   const pos = (e) => { const r = box.getBoundingClientRect(); return [e.clientX - r.left, e.clientY - r.top]; };
+  const showTip = (b) => { if (!b) return void (tip.hidden = true); tip.hidden = false; tip.textContent = `${b.p.name} · ${b.p.role}`; const below = b.y + b.r * b.s + 10; tip.style.left = b.x + "px"; tip.style.top = (below > H - 36 ? b.y - b.r * b.s - 38 : below) + "px"; };
   cv.addEventListener("pointermove", (e) => {
     [mx, my] = pos(e);
+    const dvx = mx - pmx; pmx = mx;
     if (drag) { moved += Math.hypot(mx - drag.x, my - drag.y); drag.x = mx; drag.y = my; last.push([mx, my, performance.now()]); last = last.slice(-5); }
     hover = drag || pick(mx, my);
-    if (hover) { tip.hidden = false; tip.textContent = `${hover.p.name} · ${hover.p.role}`; tip.style.left = hover.x + "px"; const below = hover.y + hover.r * hover.s + 10; tip.style.top = (below > H - 36 ? hover.y - hover.r * hover.s - 38 : below) + "px"; } else tip.hidden = true;
+    // touching the tower gives it a nudge: higher up = more sway
+    if (!drag && hover && hover.mode === "tower" && !still) { const k = order.indexOf(stones.indexOf(hover)); om += dvx * .00012 * (1 + k * .5); }
+    showTip(hover);
   });
   cv.addEventListener("pointerleave", () => { mx = my = -1e3; hover = null; tip.hidden = true; });
-  cv.addEventListener("pointerdown", (e) => { const [x, y] = pos(e); drag = pick(x, y); moved = 0; last = [[x, y, performance.now()]]; if (drag) { cv.setPointerCapture(e.pointerId); cv.classList.add("drag"); } });
+  cv.addEventListener("pointerdown", (e) => {
+    const [x, y] = pos(e); drag = pick(x, y); moved = 0; last = [[x, y, performance.now()]];
+    if (!drag) return;
+    cv.setPointerCapture(e.pointerId); cv.classList.add("drag");
+    from = order.indexOf(stones.indexOf(drag));
+    if (from >= 0) order.splice(from, 1);
+    drag.mode = "drag";
+  });
   cv.addEventListener("pointerup", () => {
     if (!drag) return;
     cv.classList.remove("drag");
-    if (moved < 6) open(drag.p);
-    else if (last.length > 1) { const [a, b] = [last[0], last.at(-1)], dt = Math.max(16, b[2] - a[2]) / 16; drag.vx = (b[0] - a[0]) / dt; drag.vy = (b[1] - a[1]) / dt; }
-    drag = null;
+    const b = drag, i = stones.indexOf(b); drag = null;
+    if (moved < 6) { if (from >= 0) order.splice(from, 0, i); b.mode = fallAt ? "fall" : "tower"; return open(b.p); }
+    const [a, z] = [last[0], last.at(-1)], dt = Math.max(16, z[2] - a[2]) / 16; b.vx = (z[0] - a[0]) / dt; b.vy = (z[1] - a[1]) / dt;
+    if (fallAt) { b.mode = "fall"; return; }
+    // dropped on/next to the tower: put it in at that height; else back where it was
+    const sl = slots(), near = Math.abs(b.x - baseX()) < 140 * scale;
+    let at = from < 0 ? order.length : from;
+    if (near) { at = sl.findIndex((s, k) => b.y > target(s, k)[1]); if (at < 0) at = order.length; }
+    order.splice(at, 0, i); b.mode = "tower";
+    om += b.vx * .0016; // a throw pushes the tower
   });
   const open = (p) => {
     card.hidden = false;
@@ -515,35 +591,52 @@
   card.querySelector(".bubble-x").onclick = () => (card.hidden = true);
   addEventListener("keydown", (e) => e.key === "Escape" && (card.hidden = true));
 
-  const step = () => {
-    for (const b of balls) {
-      b.s += ((b === hover ? 1.12 : 1) - b.s) * .15;
-      if (b === drag) { b.vx = b.vy = 0; continue; }
-      if (!still) { b.vx += (Math.random() - .5) * .03; b.vy += (Math.random() - .5) * .03; }
-      // the pointer pushes nearby bubbles away
-      const dx = b.x - mx, dy = b.y - my, d = Math.hypot(dx, dy), R = b.r * b.s + 60;
-      if (!drag && d < R && d > 0 && b !== hover) { const f = (R - d) / R * .6; b.vx += dx / d * f; b.vy += dy / d * f; }
-      b.vx *= .985; b.vy *= .985;
-      if (still) { b.vx *= .8; b.vy *= .8; }
-      b.x += b.vx; b.y += b.vy;
-      const r = b.r * b.s;
-      if (b.x < r) { b.x = r; b.vx = Math.abs(b.vx) * .8; } if (b.x > W - r) { b.x = W - r; b.vx = -Math.abs(b.vx) * .8; }
-      if (b.y < r) { b.y = r; b.vy = Math.abs(b.vy) * .8; } if (b.y > H - r) { b.y = H - r; b.vy = -Math.abs(b.vy) * .8; }
-    }
-    // circle–circle collisions (equal mass, a little bounce)
-    for (let i = 0; i < balls.length; i++) for (let j = i + 1; j < balls.length; j++) {
-      const a = balls[i], b = balls[j], dx = b.x - a.x, dy = b.y - a.y, d = Math.hypot(dx, dy) || 1, min = a.r * a.s + b.r * b.s + 4;
+  const collide = (list) => {
+    for (let i = 0; i < list.length; i++) for (let j = i + 1; j < list.length; j++) {
+      const a = list[i], b = list[j], dx = b.x - a.x, dy = b.y - a.y, d = Math.hypot(dx, dy) || 1, min = a.r + b.r;
       if (d >= min) continue;
       const nx = dx / d, ny = dy / d, o = (min - d) / 2;
-      const ka = a === drag ? 0 : b === drag ? 2 : 1, kb = 2 - ka;
-      a.x -= nx * o * ka; a.y -= ny * o * ka; b.x += nx * o * kb; b.y += ny * o * kb;
+      a.x -= nx * o; a.y -= ny * o; b.x += nx * o; b.y += ny * o;
       const rel = (b.vx - a.vx) * nx + (b.vy - a.vy) * ny;
-      if (rel < 0) { const imp = -rel * .9; a.vx -= nx * imp * (ka / 2); a.vy -= ny * imp * (ka / 2); b.vx += nx * imp * (kb / 2); b.vy += ny * imp * (kb / 2); }
+      if (rel < 0) { const imp = -rel * .6; a.vx -= nx * imp; a.vy -= ny * imp; b.vx += nx * imp; b.vy += ny * imp; }
     }
+  };
+  const step = (now) => {
+    // the tower: one sway angle on a spring, breathing slowly
+    const breathe = still ? 0 : .009 * Math.sin((now - t0) / 1500);
+    om += (breathe - th) * .012 - om * .035; th += om;
+    if (!fallAt && Math.abs(th) > .22) { // too far: it topples
+      fallAt = now;
+      for (const b of stones) if (b.mode === "tower") { b.mode = "fall"; b.vx += th * 14 * (1 + (b.y < H / 2)); }
+    }
+    if (fallAt && now - fallAt > 2200) { // rebuild, stone by stone from the bottom
+      th = om = 0;
+      const k = Math.floor((now - fallAt - 2200) / 220);
+      order.slice(0, k + 1).forEach((i) => stones[i].mode === "fall" && (stones[i].mode = "tower"));
+      if (order.every((i) => stones[i].mode !== "fall")) fallAt = 0;
+    }
+    const sl = slots();
+    sl.forEach((s, k) => {
+      const b = stones[s.idx];
+      b.s += ((b === hover ? 1.08 : 1) - b.s) * .15;
+      if (b.mode !== "tower") return;
+      const [x, y] = target(s, k);
+      b.vx += (x - b.x) * .09 - b.vx * .22; b.vy += (y - b.y) * .09 - b.vy * .22;
+      b.x += b.vx; b.y += b.vy;
+    });
+    const loose = stones.filter((b) => b.mode === "fall");
+    for (const b of loose) {
+      b.vy += .55; b.vx *= .995; b.x += b.vx; b.y += b.vy;
+      if (b.y > H - b.r) { b.y = H - b.r; b.vy *= -.35; b.vx *= .9; }
+      if (b.x < b.r) { b.x = b.r; b.vx = Math.abs(b.vx) * .5; } if (b.x > W - b.r) { b.x = W - b.r; b.vx = -Math.abs(b.vx) * .5; }
+    }
+    for (let n = 0; n < 3; n++) collide(loose);
   };
   const draw = () => {
     ctx.clearRect(0, 0, W, H);
-    for (const b of balls) {
+    // a soft shadow under the tower
+    ctx.fillStyle = "rgba(31,29,26,.08)"; ctx.beginPath(); ctx.ellipse(baseX(), H - 4, 90 * scale, 6, 0, 0, Math.PI * 2); ctx.fill();
+    for (const b of [...stones].sort((a, c) => (a === drag) - (c === drag))) {
       const r = b.r * b.s;
       ctx.save(); ctx.beginPath(); ctx.arc(b.x, b.y, r, 0, Math.PI * 2); ctx.closePath();
       ctx.fillStyle = "#e3d9cb"; ctx.fill(); ctx.clip();
@@ -551,13 +644,13 @@
       else { ctx.fillStyle = "#6b655c"; ctx.font = `${r * .7}px Georgia, serif`; ctx.textAlign = "center"; ctx.textBaseline = "middle"; ctx.fillText(b.p.name[0], b.x, b.y); }
       ctx.restore();
       ctx.beginPath(); ctx.arc(b.x, b.y, r, 0, Math.PI * 2);
-      ctx.lineWidth = b === hover ? 2 : 1; ctx.strokeStyle = b === hover ? "#b5603a" : "rgba(31,29,26,.25)"; ctx.stroke();
+      ctx.lineWidth = b === hover ? 2 : 1; ctx.strokeStyle = b === hover ? "#D4552B" : "rgba(31,29,26,.28)"; ctx.stroke();
     }
   };
   let on = true;
   new IntersectionObserver(([e]) => (on = e.isIntersecting)).observe(box);
-  const loop = () => { if (on) { step(); draw(); } requestAnimationFrame(loop); };
-  loop();
+  const loop = (now) => { if (on && !box.hidden) { step(now); draw(); } requestAnimationFrame(loop); };
+  requestAnimationFrame(loop);
 })();
 </script>
 </body>
