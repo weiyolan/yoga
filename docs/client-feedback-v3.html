@@ -112,14 +112,14 @@
     <b>Legende</b><br>
     <span class="tag t-code">code</span> wijziging aan de website/Studio nodig ·
     <span class="tag t-studio">studio</span> kan vandaag al zelf in de Studio ·
-    <span class="tag t-q">vraag</span> keuze nodig van Rita &amp; Philippe
+    <span class="tag t-q">vraag</span> keuze nodig van Rita &amp; Philippe (alle keuzes zijn nu gemaakt)
   </div>
 
   <table>
     <tr><th>#</th><th>Feedback</th><th>Wat</th><th>Soort</th><th>Inschatting</th></tr>
     <tr><td>1</td><td><a href="#cursor">Pointer beter leesbaar</a></td><td>Onze cursor blijft; stip 5 → 8 px met witte rand + schaduw (halo), zodat hij niet meer verdwijnt op rood/foto</td><td><span class="tag t-code">code</span></td><td>klein (1 u)</td></tr>
     <tr><td>2</td><td><a href="#samenwerkingen">7 samenwerkingen, Raf &amp; Sol</a></td><td>Geen limiet. Echte oorzaak: het “+” zit verstopt in het ⋯-menu → zichtbare +-knop + rij “+ Nieuwe samenwerking”</td><td><span class="tag t-code">code</span> <span class="tag t-studio">studio</span></td><td>klein (1–2 u)</td></tr>
-    <tr><td>3</td><td><a href="#voorbij">Voorbije retreats zonder prijs</a></td><td>Op de terugblik-pagina enkel “Waar” &amp; “Begeleiding”; prijs ook uit Google-beschrijving &amp; JSON-LD</td><td><span class="tag t-code">code</span></td><td>klein (1–2 u)</td></tr>
+    <tr><td>3</td><td><a href="#voorbij">Voorbije retreats zonder prijs</a></td><td>Op de terugblik-pagina enkel Waar, Begeleiding &amp; Deelnemers; prijs ook uit Google-beschrijving &amp; JSON-LD</td><td><span class="tag t-code">code</span></td><td>klein (1–2 u)</td></tr>
     <tr><td>4</td><td><a href="#testimonials">Testimonials &amp; reviews</a></td><td>Samenvoegen tot één document <b>Testimonial</b> met vinkje “Op Home” + tabel met alle testimonials (vinkje in kolom 1) + migratie</td><td><span class="tag t-code">code</span></td><td>1–1,5 dag</td></tr>
     <tr><td>5</td><td><a href="#instagram">Foto's Instagram-blok</a></td><td>Nu = de 6 nieuwste “Uitgelichte” foto's. Eigen keuzeveld op Home toevoegen</td><td><span class="tag t-code">code</span></td><td>klein (2–3 u)</td></tr>
     <tr><td>6</td><td><a href="#mat">Yogamat-symbool</a></td><td>Nieuwe, langwerpige SVG (voorstel hieronder)</td><td><span class="tag t-code">code</span></td><td>klein (1 u)</td></tr>
@@ -183,8 +183,7 @@
     <tr><td><b>Sol</b></td><td class="good">staat er al (zichtbaar op Over ons)</td></tr>
     <tr><td><b>Raf</b></td><td class="bad">bestaat niet als gepubliceerde persoon → nog aanmaken (of een concept staat nog niet op “Publiceren”)</td></tr>
   </table>
-  <p>Met Raf erbij = 7. In het raster van 2 kolommen staat de 7e dan alleen op de laatste rij; dat oogt prima. <span class="tag t-q">vraag</span> Liever 3 kolommen op brede schermen? Dan is het één regel in <code>app/globals.css:301</code> (<code>.collabs</code>).</p>
-
+  <p>Met Raf erbij = 7. <b>Beslist: 3 kolommen op brede schermen</b> (≥ 1100 px), 2 op tablet, 1 op gsm: <code>app/globals.css:301</code> (<code>.collabs</code>) → <code>grid-template-columns: repeat(3, 1fr)</code> + media queries. Geldt voor de klassieke weergave (zie #10).</p>
   <h3>De echte oorzaak: het “+” staat verstopt <span class="tag t-code">code</span></h3>
   <p>Het probleem was niet het aantal, maar dat het niet duidelijk was <b>hoe je iemand toevoegt</b>. In de Studio bouwen de panelen <b>Over ons</b>, <b>Lessen</b>, <b>Mails</b> en <b>Formulieren</b> hun lijst zelf op (<code>liveList</code> in <code>studio/structure/index.ts:64-100</code>). De knop “Nieuwe persoon” staat daar als <code>menuItem</code> <b>zonder <code>showAsAction</code></b>. In Sanity (gecontroleerd in de broncode van <code>sanity@6</code>: <code>renderAsButton: item.showAsAction ?? false</code>) betekent dat dat hij niet als knop verschijnt, maar <b>verstopt zit in het ⋯-menu</b> rechtsboven. Bij lijsten zoals “Nieuwsbrieven” staat er wel een zichtbaar <b>+</b>, vandaar de verwarring.</p>
   <ul class="files">
@@ -193,6 +192,22 @@
     <li>Titel “Nieuwe persoon” → <b>“Nieuwe samenwerking”</b> (met beginwaarde <code>kind: "collaborator"</code> via een <code>initialValueTemplate</code>), zodat Rita &amp; Philippe niet per ongeluk een tweede “founder” aanmaken.</li>
     <li><code>studio/components/Help.tsx</code> (“Zo werkt het”): kort blok “Iets toevoegen = het + bovenaan de lijst”, met een screenshot.</li>
   </ul>
+
+  <h3>Ontbreekt het “+” ook elders? Controle van het hele Studio-menu</h3>
+  <table>
+    <tr><th>Menu</th><th>Nieuw document maken</th><th>Status</th></tr>
+    <tr><td>Over ons (Samenwerkingen, Rita &amp; Philippe)</td><td>“Nieuwe persoon”</td><td class="bad">verstopt in ⋯</td></tr>
+    <tr><td>Lessen (Stijlen, Studio's)</td><td>“Nieuwe stijl”, “Nieuwe studio”</td><td class="bad">verstopt in ⋯</td></tr>
+    <tr><td>Mails (Bevestigingsmails)</td><td>“Nieuwe bevestigingsmail”</td><td class="bad">verstopt in ⋯</td></tr>
+    <tr><td>Formulieren (Inschrijfformulieren)</td><td>“Nieuw formulier”</td><td class="bad">verstopt in ⋯</td></tr>
+    <tr><td>Retreats</td><td>klein <b>+</b>-icoontje zonder tekst rechts van de filterchips (<code>studio/components/RetreatList.tsx:116-123</code>)</td><td class="muted">zichtbaar, maar makkelijk te missen → knop met tekst “Nieuwe retreat”</td></tr>
+    <tr><td>Nieuwsbrieven, Testimonials</td><td>standaard Sanity-lijst met <b>+</b> bovenaan</td><td class="good">zichtbaar</td></tr>
+    <tr><td>Fotobank</td><td>knop “Foto's uploaden”</td><td class="good">zichtbaar</td></tr>
+    <tr><td>Contactboek</td><td>knoppen “Toevoegen” + “CSV importeren”</td><td class="good">zichtbaar</td></tr>
+    <tr><td>Inschrijvingen, Contactformulier, Reviews</td><td>geen: die komen binnen via de site</td><td class="muted">niet nodig (bij #4: “+ Nieuwe testimonial”)</td></tr>
+    <tr><td>Pagina's (Home, Algemeen, Gallery, FAQ, Contact, Menu &amp; footer), Juridisch</td><td>geen: er bestaat er telkens precies één</td><td class="muted">niet nodig</td></tr>
+  </table>
+  <p>Eén lijn code in <code>liveList</code> lost de 4 rode rijen op. Daarnaast: Retreats een knop met tekst, en overal dezelfde vorm: een <b>+</b>-knop rechtsboven én een rij “+ Nieuwe …” bovenaan de lijst. Het algemene “+ Maken” linksboven in de Studio blijft ook werken, maar toont alle soorten door elkaar; daarom liever vanuit het juiste menu.</p>
 
   <h3>Raf toevoegen <span class="tag t-studio">studio</span></h3>
   <ol class="steps">
@@ -210,20 +225,19 @@
   <p class="muted small">Optioneel <span class="tag t-code">code</span>: de uitleg “Verbergen = weg van Over ons, Verwijderen = overal weg” in “Zo werkt het” (<code>studio/components/Help.tsx</code>) zetten, zodat het niet opnieuw gevraagd wordt.</p>
 
   <!-- 3 -->
-  <h2 id="voorbij">3 · Voorbije retreats: enkel Waar &amp; Begeleiding</h2>
+  <h2 id="voorbij">3 · Voorbije retreats: geen prijs meer (Waar · Begeleiding · Deelnemers)</h2>
   <blockquote>Bij 'voorbije retreats', willen we enkel de kopjes Waar en Begeleiding op website. Om de prijs er af te krijgen. Liefst vermijden om de prijs weg te doen uit studio, en niet enkel onderaan bij het kopje 'achteraf'.</blockquote>
   <p>De terugblik-pagina van een voorbije retreat toont nu 4 feiten naast “In een notendop”: <b>Waar · Begeleiding · Prijs (vanaf €…) · Deelnemers</b> (<code>app/[lang]/retreats/[slug]/page.tsx:161-175</code>). De prijs komt uit “Prijs vanaf” of de laagste prijs uit Praktisch.</p>
   <p class="good"><b>Oplossing in de code, niets weghalen in de Studio</b>: de prijs blijft bewaard (handig als je de retreat opnieuw organiseert), de site toont hem gewoon niet meer zodra de einddatum voorbij is.</p>
   <h3>Wijzigingen <span class="tag t-code">code</span></h3>
   <ul class="files">
-    <li><code>app/[lang]/retreats/[slug]/page.tsx:161-175</code>: <code>price</code> en de rijen <code>t.price</code> + <code>t.participants</code> uit <code>facts</code> halen → enkel <code>[t.where, …]</code> en <code>[t.hosts, …]</code>.</li>
+    <li><code>app/[lang]/retreats/[slug]/page.tsx:161-175</code>: <code>price</code> en de rij <code>t.price</code> uit <code>facts</code> halen → <code>[t.where, …]</code>, <code>[t.hosts, …]</code>, <code>[t.participants, …]</code>.</li>
     <li><code>app/[lang]/retreats/[slug]/page.tsx:56-62</code> (<code>generateMetadata</code>): “vanaf € …” enkel in de Google-/deelbeschrijving zetten als de retreat nog komt.</li>
     <li><code>lib/jsonld.ts:131</code>: geen <code>offers</code> (prijs voor Google) meer voor voorbije retreats.</li>
     <li>Kaartjes bij “Voorbij” op /retreats en het menu tonen al geen prijs (<code>components/sections.tsx:138-143</code>, enkel “12 deelnemers”) → niets te doen.</li>
-    <li>Studio-uitleg bijwerken: “Prijs vanaf” (<code>studio/schemaTypes/documents/retreat.ts:142-149</code>) + “Aantal deelnemers” (<code>:316-325</code>) → “Niet getoond bij een voorbije retreat”; groepsuitleg bovenaan (<code>:22</code>).</li>
+    <li>Studio-uitleg bijwerken: “Prijs vanaf” (<code>studio/schemaTypes/documents/retreat.ts:142-149</code>) → “Niet getoond bij een voorbije retreat”; groepsuitleg bovenaan (<code>:22</code>).</li>
   </ul>
-  <p><span class="tag t-q">vraag</span> “Enkel Waar en Begeleiding” = ook <b>Deelnemers</b> weg op de terugblik-pagina? Zo gelezen in het voorstel hierboven. Op het kaartje bij “Voorbij” blijft “12 deelnemers” staan, tenzij jullie dat ook weg willen.</p>
-
+  <p><b>Beslist: “Deelnemers” blijft</b> op de terugblik-pagina én op het kaartje bij “Voorbij” (“12 deelnemers”): het zegt iets over de sfeer en is geen prijsinfo. Enkel de prijs verdwijnt.</p>
   <!-- 4 -->
   <h2 id="testimonials">4 · Testimonials &amp; reviews → één document “Testimonial”</h2>
   <blockquote>Ik snap niet goed hoe de 'testimonials' en de 'reviews' werken; Waar kan je die toevoegen in de studio? Ik voeg er toe, maar ze komen niet tevoorschijn.</blockquote>
@@ -294,8 +308,8 @@
     <li><b>Migratie</b> <code>studio/scripts/migrate-testimonials.ts</code> (eenmalig, met dry-run): de 2 <code>review</code>-documenten → <code>testimonial-&lt;uuid&gt;</code> (Bron Formulier, Op Home aan); de 2 oude testimonials krijgen Bron “Zelf toegevoegd”; dubbele Hilde samenvoegen (die met score houden); verwijzingen in <code>homePage.testimonials</code> opruimen; daarna de <code>review</code>-documenten weg.</li>
     <li>De publieke URL <code>/retreats/&lt;slug&gt;/review</code> blijft (er zijn al links verstuurd); het formulier mag als kop “Laat een testimonial achter” krijgen.</li>
   </ul>
-  <p class="muted small">Inschatting: 1–1,5 dag (schema + migratie + tabel + queries). <span class="tag t-q">vraag</span> Op de site het woord “Reviews” (blok op de retreatpagina) houden of ook “Wat deelnemers zeggen” noemen?</p>
-
+  <p class="muted small">Inschatting: 1–1,5 dag (schema + migratie + tabel + queries).</p>
+  <p><b>Beslist: op de site Nederlands “Wat deelnemers zeggen”</b>, geen Engels “Reviews” meer. Nu staat er op de retreatpagina een klein label “Reviews” boven de kop “Wat deelnemers zeggen”, en “Reviews” in de inhoudstafel. <code>lib/dictionary.ts:259</code> (<code>review.label</code>) en <code>:113</code> (<code>toc.reviews</code>) → <b>“Wat deelnemers zeggen”</b> (label) en kop bv. <b>“Zo was het voor hen”</b>, of het label weglaten en enkel de kop houden. Op Home is de kop al “Wat deelnemers zeggen”. Het reviewformulier krijgt als kop “Vertel hoe het was”. Engels blijft “What participants say”.</p>
   <!-- 5 -->
   <h2 id="instagram">5 · Foto's in het Instagram-blok onderaan Home</h2>
   <blockquote>Hoe kan ik de foto's wijzigen onderaan bij Instagram sectie?</blockquote>
@@ -464,7 +478,7 @@
     <li><code>studio/schemaTypes/singletons/about-page.ts</code> (bij “Samenwerkingen”): veld <b>“Weergave samenwerkingen”</b> (<code>collaboratorsStyle</code>, radio): <b>“Balanstoren (speels)”</b> / <b>“Klassiek (lijst)”</b>, standaard Balanstoren, met uitleg “Klassiek = de vaste lijst met foto, rol, tekst en links”.</li>
     <li><code>sanity/queries.ts:341-344</code> (<code>ABOUT_QUERY</code>): <code>collaboratorsStyle</code> mee ophalen; <code>sanity/types.ts</code> opnieuw genereren.</li>
     <li><code>app/[lang]/over-ons/page.tsx:103-140</code>: <code>collaboratorsStyle === "classic"</code> → de huidige <code>&lt;ul className="collabs"&gt;</code> (ongewijzigd); anders <code>&lt;CollabTower people={…} /&gt;</code> + dezelfde lijst als gewone HTML eronder, visueel verborgen (<code>.sr-only</code>), zodat Google en schermlezers alles blijven lezen en het zonder JavaScript gewoon de lijst is.</li>
-    <li>Automatisch klassiek bij <code>prefers-reduced-motion</code> (of de toren staat stil, zonder wiebelen: <span class="tag t-q">vraag</span> welke van de twee?).</li>
+    <li><b>Beslist</b>: wie in zijn systeem “minder beweging” aanzet (<code>prefers-reduced-motion</code>), krijgt <b>automatisch de klassieke lijst</b>, ook als in de Studio Balanstoren gekozen is. Gebeurt in CSS/JS aan de kant van de browser: de toren wordt niet geladen en de lijst wordt gewoon zichtbaar.</li>
   </ul>
 
   <h3>Bouw <span class="tag t-code">code</span></h3>
@@ -482,8 +496,7 @@
     <li><b>Nieuwe Studio-velden</b>: privélessen (#7), Instagram-keuze (#5).</li>
     <li><b>Grotere stukken</b>: Testimonials samenvoegen + tabel + migratie (#4), SEO-aanbod/JSON-LD (#8, samen met #7 voor de prijzen), balanstoren + schakelaar (#10).</li>
   </ol>
-  <p class="muted small">Open vragen: #2 3 kolommen? · #3 ook “Deelnemers” weg op de terugblik-pagina (en het kaartje)? · #4 op de site “Reviews” of “Wat deelnemers zeggen”? · #10 bij “minder beweging” (reduced motion): automatisch Klassiek, of een stilstaande toren?</p>
-</main>
+  <p class="muted small"><b>Beslist</b>: #1 onze cursor + halo · #2 3 kolommen · #3 Deelnemers blijft, prijs weg · #4 één “Testimonial”, op de site “Wat deelnemers zeggen” · #10 balanstoren, klassiek via de Studio-schakelaar en automatisch bij “minder beweging”. Geen open vragen meer.</p></main>
 
 <script>
 (() => {
