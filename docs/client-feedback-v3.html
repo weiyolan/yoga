@@ -62,6 +62,23 @@
   .kv { margin:0; } .kv div { display:grid; grid-template-columns:80px 1fr; gap:10px; padding:6px 0; } .kv dt { color:var(--muted); } .kv dd { margin:0; }
   @media (max-width:760px) { .pl, .mats { grid-template-columns:1fr; } }
   nav.toc { display:flex; flex-wrap:wrap; gap:6px 18px; font-size:.92rem; margin:18px 0 0; }
+  .shots3 { display:grid; grid-template-columns:repeat(3,1fr); gap:12px; margin:12px 0; }
+  .shots3 img { width:100%; display:block; border-radius:8px; border:1px solid var(--line); aspect-ratio:10/7; object-fit:cover; }
+  .shots3 figure { margin:0; } .shots3 figcaption { font-size:.82rem; color:var(--muted); margin-top:6px; }
+  @media (max-width:760px) { .shots3 { grid-template-columns:1fr; } }
+  .tblmock { overflow:auto; } .tblmock table { font-size:.82rem; min-width:860px; } .tblmock td:first-child, .tblmock th:first-child { text-align:center; width:70px; background:#f7f3ec; }
+  .pill { display:inline-block; padding:1px 8px; border-radius:99px; font-size:.72rem; background:#e9e4da; } .pill.ok { background:#dcebd9; color:#2f5a35; } .pill.new { background:#dde6f3; color:#2c4a75; }
+  .bubbles { position:relative; height:520px; border-radius:14px; background:#f4efe7; border:1px solid var(--line); overflow:hidden; touch-action:none; user-select:none; }
+  .bubbles canvas { position:absolute; inset:0; width:100%; height:100%; cursor:grab; }
+  .bubbles canvas.drag { cursor:grabbing; }
+  .bubble-tip { position:absolute; pointer-events:none; background:var(--ink); color:#fff; font-size:.78rem; padding:5px 10px; border-radius:99px; white-space:nowrap; translate:-50% 0; }
+  .bubble-hint { position:absolute; left:14px; bottom:10px; font-size:.72rem; letter-spacing:.08em; text-transform:uppercase; color:var(--muted); }
+  .bubble-card { position:absolute; top:16px; right:16px; bottom:16px; width:min(340px, calc(100% - 32px)); background:#fff; border:1px solid var(--line); border-radius:12px; padding:18px; overflow:auto; box-shadow:0 12px 40px rgba(31,29,26,.12); animation:card-in .35s cubic-bezier(.2,.7,.2,1); }
+  .bubble-card img { width:120px; height:120px; border-radius:50%; object-fit:cover; display:block; margin-bottom:12px; background:#e9e4da; }
+  .bubble-card h3 { margin:0; font-size:1.5rem; } .bubble-card .role { margin:2px 0 10px; } .bubble-card .bio { font-size:.92rem; }
+  .bubble-card .links a { margin-right:14px; }
+  .bubble-x { position:absolute; top:10px; right:10px; width:34px; height:34px; border-radius:50%; border:1px solid var(--line); background:#fff; font-size:1.2rem; cursor:pointer; }
+  @keyframes card-in { from { opacity:0; translate:24px 0; } }
 </style>
 </head>
 <body>
@@ -81,10 +98,13 @@
     <tr><td>1</td><td><a href="#cursor">Pointer zoals Sansara</a></td><td>Cursor herschrijven: gewone muis blijft, gekleurde stip + volgring met vertraging, ring groeit bij hover</td><td><span class="tag t-code">code</span></td><td>klein (½ dag)</td></tr>
     <tr><td>2</td><td><a href="#samenwerkingen">7 samenwerkingen, Raf &amp; Sol</a></td><td>Geen limiet in de code. Sol staat er al; Raf moet nog aangemaakt worden. Verbergen kan met een schakelaar</td><td><span class="tag t-studio">studio</span></td><td>geen code</td></tr>
     <tr><td>3</td><td><a href="#voorbij">Voorbije retreats zonder prijs</a></td><td>Op de terugblik-pagina enkel “Waar” &amp; “Begeleiding”; prijs ook uit Google-beschrijving &amp; JSON-LD</td><td><span class="tag t-code">code</span></td><td>klein (1–2 u)</td></tr>
-    <tr><td>4</td><td><a href="#testimonials">Testimonials &amp; reviews</a></td><td>Testimonials verschijnen enkel als je ze op Home kiest → automatisch tonen + samen in één menu</td><td><span class="tag t-studio">studio</span> <span class="tag t-code">code</span></td><td>klein–middel (½ dag)</td></tr>
+    <tr><td>4</td><td><a href="#testimonials">Testimonials &amp; reviews</a></td><td>Samenvoegen tot één document <b>Testimonial</b> met vinkje “Op Home” + tabel met alle testimonials (vinkje in kolom 1) + migratie</td><td><span class="tag t-code">code</span></td><td>1–1,5 dag</td></tr>
     <tr><td>5</td><td><a href="#instagram">Foto's Instagram-blok</a></td><td>Nu = de 6 nieuwste “Uitgelichte” foto's. Eigen keuzeveld op Home toevoegen</td><td><span class="tag t-code">code</span></td><td>klein (2–3 u)</td></tr>
     <tr><td>6</td><td><a href="#mat">Yogamat-symbool</a></td><td>Nieuwe, langwerpige SVG (voorstel hieronder)</td><td><span class="tag t-code">code</span></td><td>klein (1 u)</td></tr>
     <tr><td>7</td><td><a href="#prive">Tarieven privélessen</a></td><td>Privéles-blok uitbreiden met prijslijst + “Locatie &amp; praktisch”</td><td><span class="tag t-code">code</span></td><td>middel (½ dag)</td></tr>
+    <tr><td>8</td><td><a href="#seo">SEO: retreats, events, yoga-aanbod</a></td><td>Retreats = Event ✓. Ontbreekt: wat Y,Z&amp;T aanbiedt (Service/aanbod, regio, oprichters), JSON-LD op Lessen, landcodes</td><td><span class="tag t-code">code</span> <span class="tag t-studio">studio</span></td><td>½ dag</td></tr>
+    <tr><td>9</td><td><a href="#prive-nav">Privéles in de navigatie</a></td><td>Link “Privéles →” in het Lessen-menu (desktop) + chip (mobiel)</td><td><span class="tag t-code">code</span></td><td>klein (1 u)</td></tr>
+    <tr><td>10</td><td><a href="#samenwerkingen-speels">Samenwerkingen speels</a></td><td>Ronde portretten als botsende “deeltjes”: slepen/gooien, hover-label, klik = kaart. Prototype hieronder</td><td><span class="tag t-code">code</span></td><td>1 dag</td></tr>
   </table>
 
   <!-- 1 -->
@@ -103,6 +123,14 @@
     <li><b>Hover</b> (op knoppen/links met class <code>focuson</code>): stip krimpt weg naar 0, ring schaalt <b>×3</b> (0,3 s). Op een donkere achtergrond wordt alles wit.</li>
     <li>Enkel vanaf 1200 px breed (niet op tablet/gsm).</li>
   </ul>
+
+  <h3>Screenshots van Sansara</h3>
+  <p class="muted small">Gemaakt op sansararesort.com (1440 px breed, pop-ups weggehaald). De zwarte pijl is de gewone muispijl; die verschijnt niet in een screenshot, dus heb ik hem op de exacte muispositie ingetekend.</p>
+  <div class="shots3">
+    <figure><img src="client-feedback-v3/img/sans-1-idle.png" alt="Sansara: stip en ring rond de muis in rust"><figcaption><b>In rust</b>: turquoise stip + dunne ring liggen samen rond de punt van de gewone muispijl.</figcaption></figure>
+    <figure><img src="client-feedback-v3/img/sans-2-move.png" alt="Sansara: stip en ring lopen achter tijdens bewegen"><figcaption><b>Tijdens bewegen</b>: de stip loopt een beetje achter, de ring nog meer (0,3 s / 0,7 s) en ze schuiven daarna terug op hun plaats.</figcaption></figure>
+    <figure><img src="client-feedback-v3/img/sans-3-hover.png" alt="Sansara: ring groot en wit boven de knop Book now"><figcaption><b>Boven een knop</b> (“Book now”): de stip verdwijnt, de ring wordt ×3 groter en hier wit (knop heeft class <code>white</code>).</figcaption></figure>
+  </div>
 
   <h3>Probeer het voorstel</h3>
   <p class="muted small">Beweeg de muis hieronder (desktop). Stip &amp; ring in onze ember-kleur; links wordt de ring groot, op donker wordt hij wit.</p>
@@ -162,49 +190,76 @@
   <p><span class="tag t-q">vraag</span> “Enkel Waar en Begeleiding” = ook <b>Deelnemers</b> weg op de terugblik-pagina? Zo gelezen in het voorstel hierboven. Op het kaartje bij “Voorbij” blijft “12 deelnemers” staan, tenzij jullie dat ook weg willen.</p>
 
   <!-- 4 -->
-  <h2 id="testimonials">4 · Testimonials &amp; reviews: hoe werkt het, en waarom zie ik ze niet?</h2>
-  <blockquote>Ik snap niet goed hoe de 'testimonials' en de 'reviews' werken; Waar kan je die toevoegen in de studio? Ik voeg er toe, maar ze komen niet tevoorschijn. Bv deze: …/studio/structure/testimonial;kmzixlc5xAVMYQZkjpyb1e</blockquote>
+  <h2 id="testimonials">4 · Testimonials &amp; reviews → één document “Testimonial”</h2>
+  <blockquote>Ik snap niet goed hoe de 'testimonials' en de 'reviews' werken; Waar kan je die toevoegen in de studio? Ik voeg er toe, maar ze komen niet tevoorschijn.</blockquote>
+  <p><b>Beslissing</b>: reviews en testimonials zijn hetzelfde, één keer via het formulier en één keer met de hand ingevuld. We maken er <b>één soort document</b> van: <b>Testimonial</b>. Per testimonial zet je zelf een vinkje “Op Home”, en er komt een <b>tabel</b> met alle testimonials, met dat vinkje in de eerste kolom.</p>
 
+  <h3>Waarom het nu verwarrend is</h3>
+  <table>
+    <tr><th></th><th>Review (nu)</th><th>Testimonial (nu)</th></tr>
+    <tr><td>Hoe binnen</td><td>Formulier op <code>/retreats/&lt;slug&gt;/review</code> → privé <code>reviewSubmission</code> (met e-mail) → status “Gepubliceerd” maakt een publieke kopie <code>review</code> (<code>studio/structure/views.tsx:38-67</code>)</td><td>Met de hand: Inhoud → Testimonials</td></tr>
+    <tr><td>Waar in Studio</td><td>Contact → Reviews</td><td>Inhoud → Testimonials (los van Reviews)</td></tr>
+    <tr><td>Op Home?</td><td>Vanzelf bij 4★+ (<code>sanity/queries.ts:202</code>), geen keuze</td><td>Enkel als je hem <em>ook</em> kiest in Home → tab Testimonials (<code>home-page.ts:59-67</code>), en dat is nu leeg → “komt niet tevoorschijn”</td></tr>
+    <tr><td>Op retreatpagina?</td><td>Ja</td><td>Nee</td></tr>
+    <tr><td>Sterren / taal</td><td>Score verplicht, 1 taal</td><td>Geen score, NL/EN</td></tr>
+  </table>
+  <p class="why">De testimonial uit de link heet ook nog <b>“[Naam]”</b>, en Hilde staat er twee keer in (als review én als testimonial, bijna dezelfde tekst). De migratie hieronder lost dat mee op.</p>
+
+  <h3>Nieuw model</h3>
   <div class="grid">
     <div class="card">
-      <h3 style="margin-top:0">Reviews</h3>
+      <h3 style="margin-top:0">Testimonial <span class="muted small">(publiek, staat op de site)</span></h3>
       <ul class="small">
-        <li><b>Wie schrijft</b>: deelnemers zelf, via het reviewformulier op de site (link via Studio → retreat → “Kopieer reviewlink”).</li>
-        <li><b>Studio</b>: <b>Contact → Reviews</b>. Nieuwe staan op “Nieuw”.</li>
-        <li><b>Online</b>: openen → Overzicht → status <b>Gepubliceerd</b>.</li>
-        <li><b>Waar</b>: op de retreatpagina (en latere edities, bv. Eifel 2025 → Eifel 2026) + bij 4★ of meer <b>vanzelf op Home</b>.</li>
-        <li>Live nu: Hilde (Spa) en Nathalie (Eifel), dat zijn de twee kaartjes op Home.</li>
+        <li><b>Op Home</b>: schakelaar (formulier: standaard aan bij 4★+, met de hand: standaard aan)</li>
+        <li><b>Op de retreatpagina</b>: schakelaar, standaard aan (enkel als er een retreat gekozen is)</li>
+        <li><b>Naam</b> · <b>Tekst</b> (NL/EN; de andere taal valt terug op het origineel, of vertalen met AI)</li>
+        <li><b>Score</b> 1–5, <em>optioneel</em> (geen score = geen sterren, telt niet mee in het gemiddelde)</li>
+        <li><b>Retreat</b> (optioneel) of <b>Andere context</b> (bv. “Lessen”)</li>
+        <li><b>Bron</b>: “Formulier” / “Zelf toegevoegd” (alleen-lezen)</li>
+        <li><b>Datum</b>, <b>Taal</b>, optioneel <b>Volgorde</b> op Home</li>
       </ul>
     </div>
     <div class="card">
-      <h3 style="margin-top:0">Testimonials</h3>
+      <h3 style="margin-top:0">Inzending <span class="muted small">(privé, blijft)</span></h3>
       <ul class="small">
-        <li><b>Wie schrijft</b>: jullie zelf, een citaat dat je bv. via WhatsApp kreeg.</li>
-        <li><b>Studio</b>: <b>Inhoud → Testimonials</b> (onder Mails).</li>
-        <li><b>Online</b>: enkel als je ze daarna <b>óók kiest</b> in <b>Pagina's → Home → tab Testimonials</b>.</li>
-        <li><b>Waar</b>: enkel op Home, vóór de reviews.</li>
-        <li>Live nu: 2 testimonials (Hilde, “[Naam]”), maar <b>op Home is er geen enkele gekozen</b>.</li>
+        <li>Wat het formulier binnenstuurt, <b>met e-mail</b>. Blijft een apart privé-document (id met punt, <code>reviewSubmission.&lt;uuid&gt;</code>), omdat de dataset publiek leesbaar is: een e-mail mag nooit in een publiek document staan.</li>
+        <li>Status Nieuw / Gepubliceerd / Geweigerd zoals nu. “Gepubliceerd” maakt of herstelt de <b>Testimonial</b> <code>testimonial-&lt;uuid&gt;</code> met Bron = Formulier. Wie zelf iets toevoegt, maakt meteen een Testimonial, zonder inzending.</li>
+        <li>Interne naam <code>reviewSubmission</code> mag blijven (contactboek, revalidate, formulieren werken er al mee); alleen de titel in de Studio wordt “Testimonial (inzending)”.</li>
       </ul>
     </div>
   </div>
 
-  <p class="why"><b>Waarom de testimonial niet verschijnt</b>: hij is gepubliceerd, maar Home → Testimonials is leeg (<code>homePage.testimonials = null</code>). Het tonen gebeurt alleen via die keuzelijst (<code>sanity/queries.ts:201</code>). Daarnaast heet deze testimonial nog <b>“[Naam]”</b> (placeholder): zo zou hij ook letterlijk op de site komen.</p>
-
-  <h3>Vandaag al oplossen <span class="tag t-studio">studio</span></h3>
-  <ol class="steps">
-    <li>Open de testimonial, vervang <b>Naam “[Naam]”</b> door de echte naam → Publiceren.</li>
-    <li>Pagina's → <b>Home</b> → tab <b>Testimonials</b> → “Testimonials” → <b>Item toevoegen</b> → kies de testimonial(s) → Publiceren.</li>
-    <li>Let op: Hilde staat er twee keer in (als review én als testimonial, bijna dezelfde tekst). Kies er één, anders staat ze dubbel op Home.</li>
-  </ol>
-
-  <h3>Voorstel om het eenvoudiger te maken <span class="tag t-code">code</span></h3>
-  <ul class="files">
-    <li><b>Geen aparte keuzestap meer</b>: elke gepubliceerde testimonial staat vanzelf op Home (nieuwste eerst), met een schakelaar “Niet tonen op Home” per testimonial. Query <code>sanity/queries.ts:201</code> → <code>*[_type=="testimonial" &amp;&amp; hidden != true] | order(_createdAt desc)</code>; veld <code>testimonials</code> in <code>studio/schemaTypes/singletons/home-page.ts:59-67</code> weg (of enkel nog voor de volgorde); veld <code>hidden</code> in <code>studio/schemaTypes/documents/testimonial.ts</code>.</li>
-    <li><b>Eén plek in de Studio</b>: menu <b>Contact → “Reviews &amp; testimonials”</b> met 2 kopjes (“Via het formulier” / “Zelf toegevoegd”) i.p.v. Testimonials los onder Inhoud (<code>studio/structure/index.ts:224-236</code> en <code>:311</code>).</li>
-    <li><b>Testimonial met een retreat</b> ook op die retreatpagina tonen, tussen de reviews (query <code>sanity/queries.ts:280</code>, zonder sterren).</li>
-    <li>Placeholder-namen zoals “[Naam]” niet publiceren: validatie in <code>testimonial.ts</code> (ze staan al in “Nog in te vullen [ ]”).</li>
-    <li>Uitleg in de Studio aanpassen (descriptions <code>testimonial.ts:12-15</code>, Home-overzicht <code>home-page.ts:20</code>, “Zo werkt het”).</li>
+  <h3>Studio: menu en tabel</h3>
+  <p>Contact → <b>Testimonials</b> (vervangt “Reviews” én Inhoud → Testimonials). Bovenaan de rij <b>Tabel</b>, daaronder de lijst per status (Nieuwe inzendingen · Op Home · Alle), met de knop <b>+ Nieuwe testimonial</b>.</p>
+  <div class="tblmock">
+    <table>
+      <tr><th>Op Home</th><th>Naam</th><th>Score</th><th>Tekst</th><th>Retreat / context</th><th>Bron</th><th>Status</th><th>Taal</th><th>Datum</th><th>E-mail</th></tr>
+      <tr><td><input type="checkbox" checked aria-label="Op Home"></td><td>Nathalie</td><td>★★★★★</td><td>Ongelooflijk positieve en aangename sfeer. Een week later…</td><td>Eifel 2026</td><td>Formulier</td><td><span class="pill ok">Gepubliceerd</span></td><td>NL</td><td>—</td><td class="muted">n…@…</td></tr>
+      <tr><td><input type="checkbox" checked aria-label="Op Home"></td><td>Hilde</td><td>★★★★★</td><td>Zo genoten van de ongedwongenheid. En de vele mooie…</td><td>Spa 2025</td><td>Formulier</td><td><span class="pill ok">Gepubliceerd</span></td><td>NL</td><td>24 okt 2026</td><td class="muted">h…@…</td></tr>
+      <tr><td><input type="checkbox" aria-label="Op Home"></td><td class="bad">[Naam]</td><td class="muted">—</td><td>Ik kwam voor de yoga en ging naar huis met een nieuwe vriendengroep.</td><td>Spa 2025</td><td>Zelf toegevoegd</td><td><span class="pill">Online</span></td><td>NL/EN</td><td>4 okt 2026</td><td class="muted">—</td></tr>
+      <tr><td><input type="checkbox" disabled aria-label="Op Home"></td><td>(nieuwe inzending)</td><td>★★★★☆</td><td>…</td><td>Eifel 2026</td><td>Formulier</td><td><span class="pill new">Nieuw</span></td><td>NL</td><td>—</td><td class="muted">…</td></tr>
+    </table>
+  </div>
+  <ul class="small">
+    <li><b>Eerste kolom</b>: vinkje “Op Home”, werkt meteen (patch op de Testimonial, de site wordt opnieuw opgebouwd). Grijs zolang een inzending nog niet gepubliceerd is.</li>
+    <li>Klik op een rij → het document openen. Filters: retreat, bron, status, “enkel op Home”. Knop “Exporteer CSV” zoals bij Inschrijvingen. De e-mail is enkel zichtbaar in de Studio.</li>
+    <li>Bouw: nieuw component <code>studio/components/TestimonialTable.tsx</code> naar het voorbeeld van <code>SignupTable.tsx</code> (zelfde Sanity UI, filters, export). Eén query over <code>testimonial</code> + <code>reviewSubmission</code>, gekoppeld via de uuid.</li>
   </ul>
+
+  <h3>Wijzigingen <span class="tag t-code">code</span></h3>
+  <ul class="files">
+    <li><code>studio/schemaTypes/documents/testimonial.ts</code>: velden <code>showOnHome</code>, <code>showOnRetreat</code>, <code>rating</code> (optioneel), <code>source</code>, <code>lang</code>, <code>date</code>, <code>orderRank</code>; preview met sterren + “Home”-badge; placeholder “[Naam]” blokkeren.</li>
+    <li><code>studio/schemaTypes/documents/review.ts</code>: publiek type <code>review</code> weg; <code>reviewSubmission</code> krijgt titel “Testimonial (inzending)”. <code>studio/schemaTypes/index.ts</code> bijwerken.</li>
+    <li><code>studio/structure/views.tsx:38-67</code>: “Gepubliceerd” maakt een <code>testimonial</code> (<code>testimonial-&lt;uuid&gt;</code>, <code>source: "form"</code>, <code>showOnHome: rating &gt;= 4</code>, tekst in het taalvak van de inzending). Bewerkingen blijven bewaard bij opnieuw publiceren, zoals nu.</li>
+    <li><code>studio/structure/index.ts:224-236</code> + <code>:311</code>: één menu Contact → Testimonials met Tabel bovenaan; los item onder Inhoud weg. Teller-badge blijft op nieuwe inzendingen.</li>
+    <li><code>studio/schemaTypes/singletons/home-page.ts:20,59-67</code>: keuzelijst <code>testimonials</code> weg (enkel de kop blijft), overzicht: “Testimonials met ‘Op Home’ aan”.</li>
+    <li><code>sanity/queries.ts:107-123, 201-202, 280-284</code>: één projectie <code>TESTIMONIAL</code> (naam, tekst, score, context); Home = <code>*[_type=="testimonial" &amp;&amp; showOnHome==true] | order(coalesce(orderRank,1000), date desc)[0...12]</code>; retreatpagina + eerdere edities = <code>showOnRetreat != false</code>.</li>
+    <li><code>app/[lang]/page.tsx:40-50</code>: samenvoegen van twee lijsten weg; <code>components/sections.tsx:229-270</code> (<code>ReviewList</code>): sterren en gemiddelde enkel over wie een score heeft.</li>
+    <li><code>app/api/revalidate/route.ts</code>, <code>lib/receipt.ts</code>, <code>studio/components/Help.tsx</code>, “Nog in te vullen”: namen/uitleg bijwerken; <code>sanity/types.ts</code> opnieuw genereren.</li>
+    <li><b>Migratie</b> <code>studio/scripts/migrate-testimonials.ts</code> (eenmalig, met dry-run): de 2 <code>review</code>-documenten → <code>testimonial-&lt;uuid&gt;</code> (Bron Formulier, Op Home aan); de 2 oude testimonials krijgen Bron “Zelf toegevoegd”; dubbele Hilde samenvoegen (die met score houden); verwijzingen in <code>homePage.testimonials</code> opruimen; daarna de <code>review</code>-documenten weg.</li>
+    <li>De publieke URL <code>/retreats/&lt;slug&gt;/review</code> blijft (er zijn al links verstuurd); het formulier mag als kop “Laat een testimonial achter” krijgen.</li>
+  </ul>
+  <p class="muted small">Inschatting: 1–1,5 dag (schema + migratie + tabel + queries). <span class="tag t-q">vraag</span> Op de site het woord “Reviews” (blok op de retreatpagina) houden of ook “Wat deelnemers zeggen” noemen?</p>
 
   <!-- 5 -->
   <h2 id="instagram">5 · Foto's in het Instagram-blok onderaan Home</h2>
@@ -303,13 +358,92 @@
   </ul>
   <p>Daarna invullen <span class="tag t-studio">studio</span>: Lessen → Lessen-pagina → tab <b>Privéles</b> → Kop “Tarieven privélessen”, Tekst = de introzin, 3 prijsregels, 2 praktische regels → Vertalen (AI) voor EN → Publiceren.</p>
 
+  <!-- 8 -->
+  <h2 id="seo">8 · SEO: begrijpt Google dat dit retreats/events zijn, en dat Yoga, Zen &amp; Tonic yoga aanbiedt?</h2>
+  <p><b>Kort</b>: de retreatpagina's zijn al goed (Google ziet ze als <b>Event</b>). Wat ontbreekt: Google weet nergens <em>wat</em> Yoga, Zen &amp; Tonic doet (yoga, lessen, privéles, regio Antwerpen). Dat staat enkel in de tekst, niet in de gestructureerde data. Gecontroleerd op de live pagina's.</p>
+
+  <h3>Wat al goed zit ✓</h3>
+  <table>
+    <tr><th>Pagina</th><th>Wat Google krijgt</th></tr>
+    <tr><td>Retreatpagina's (komend én voorbij)</td><td>JSON-LD <b>Event</b> (naam, data, plaats + verblijf, organisator = Yoga, Zen &amp; Tonic, begeleiders als <code>performer</code>, foto, prijs + volzet/beschikbaar) + <b>BreadcrumbList</b> (<code>lib/jsonld.ts:73-145</code>). Eigen title &amp; description per retreat, canonical, NL/EN-hreflang, eigen deelafbeelding.</td></tr>
+    <tr><td>Home</td><td><b>Organization</b> + <b>WebSite</b> (naam, logo, e-mail, telefoon, Instagram/Facebook).</td></tr>
+    <tr><td>Sitemap / robots</td><td>Alle pagina's in NL + EN, met hreflang en laatste wijziging; Studio en API uitgesloten.</td></tr>
+    <tr><td>Reviewformulier <code>/retreats/&lt;slug&gt;/review</code></td><td>Terecht <b>noindex</b>: het is enkel een formulier. De reviews zelf staan op de (geïndexeerde) retreatpagina.</td></tr>
+  </table>
+
+  <h3>Wat beter kan <span class="tag t-code">code</span></h3>
+  <table>
+    <tr><th>#</th><th>Probleem</th><th>Oplossing</th><th>Belang</th></tr>
+    <tr><td>a</td><td><b>Geen “wat doen we”</b>: Organization heeft geen aanbod, geen adres/regio, geen oprichters.</td><td><code>organizationLd</code> uitbreiden: <code>knowsAbout</code> (Yoga, Pilates, Meditatie, Freediving), <code>areaServed</code> (Antwerpen, Mortsel), <code>founder</code> (Rita, Philippe als Person), <code>hasOfferCatalog</code> met 3 <b>Service</b>s: “Yogaretreats”, “Yoga- en Pilateslessen”, “Privéles yoga &amp; Pilates”. En deze Organization op <b>elke</b> pagina meesturen (nu enkel Home), zodat de organisator van een Event volledig is.</td><td>hoog</td></tr>
+    <tr><td>b</td><td><b>Lessen-pagina zonder gestructureerde data</b>, H1 is gewoon “Lessen”.</td><td><code>app/[lang]/lessen/page.tsx</code>: JSON-LD <b>Service</b> per stijl (Ashtanga, Vinyasa, Pilates Mat/Reformer, <code>provider</code> = Organization, <code>areaServed</code> Antwerpen) + Service “Privéles” met <b>Offer</b>s (€ 75 / € 45 / € 35 p.p., zie #7). Openingstitel bv. “Yoga- &amp; Pilateslessen in Antwerpen” (in de Studio: Lessen-pagina → Openingsbeeld).</td><td>hoog</td></tr>
+    <tr><td>c</td><td><b>Land als tekst</b>: <code>addressCountry: "Egypte"</code>, <code>"België"</code>; plaats “Ardense bossen · Spa”.</td><td>ISO-code meesturen (<code>EG</code>, <code>BE</code>): veld “Landcode” of een vaste lijst in <code>retreat.ts</code>; <code>addressLocality</code> = enkel de plaats (“Spa”), de omschrijving naar <code>location.name</code>.</td><td>middel</td></tr>
+    <tr><td>d</td><td><b>Event-type te algemeen</b> + geen taal.</td><td>Event blijft het juiste type (er is geen “Retreat” in schema.org), maar voeg <code>about</code>/<code>keywords</code> (“yoga retreat”, “freediving”), <code>inLanguage</code> en <code>organizer.logo</code> toe. Bij voorbije retreats: geen <code>offers</code> (zie #3).</td><td>laag–middel</td></tr>
+    <tr><td>e</td><td><b>Titel ≠ openingstitel</b> bij voorbije retreats: title “Spa: Yoga &amp; Hike”, H1 “Ardennen: Yoga &amp; Spa”.</td><td>Inhoud: in de Studio dezelfde naam gebruiken (retreat → Titel en Openingsbeeld → Titel). Eventueel waarschuwing in de Studio als ze verschillen.</td><td>middel <span class="tag t-studio">studio</span></td></tr>
+    <tr><td>f</td><td><b>Slug “Rochefort”</b> met hoofdletter en zonder jaar (de andere: <code>eifel-2026</code>).</td><td>In de Studio wijzigen naar <code>rochefort-2027</code> (nu het nog niet gedeeld is) + slug-validatie “kleine letters, met jaar”.</td><td>middel <span class="tag t-studio">studio</span></td></tr>
+    <tr><td>g</td><td><b>Over ons</b>: Rita &amp; Philippe niet als Person.</td><td>JSON-LD <b>Person</b> voor beiden (<code>jobTitle</code>, <code>worksFor</code>, <code>sameAs</code> Instagram) op Over ons.</td><td>laag</td></tr>
+    <tr><td>h</td><td><b>Sterren in Google</b>?</td><td>Niet doen: Google toont geen review-sterren voor Events, en reviews die een organisatie over zichzelf op de eigen site zet, komen sinds 2019 ook niet in aanmerking. Een <code>AggregateRating</code> heeft dus geen zin.</td><td>niet nodig</td></tr>
+  </table>
+  <p class="muted small">Daarna controleren met de <a href="https://search.google.com/test/rich-results">Rich Results Test</a> en in Search Console (sitemap indienen, Event-rapport).</p>
+
+  <!-- 9 -->
+  <h2 id="prive-nav">9 · Privéles in de navigatie</h2>
+  <p>Ja, dat is logisch: het blok staat onderaan de Lessen-pagina (<code>#prive</code>) en is nu enkel te vinden door helemaal te scrollen. Twee plaatsen in <code>components/Nav.tsx</code>:</p>
+  <ul class="files">
+    <li><b>Desktop-menu “Lessen”</b> (<code>Nav.tsx:147-162</code>): in de onderste balk naast “📍 studio's” en “Weekplanning →” een derde link <b>“Privéles →”</b> naar <code>href(lang, "lessons", { hash: "prive" })</code>. Alternatief: een 5e kaart naast de stijlen met icoon <code>people</code> en de korte tekst uit de Studio. Voorstel: link in de balk, zodat het raster van 4 stijlen blijft.</li>
+    <li><b>Mobiel menu</b> (<code>Nav.tsx:197-205</code>, <code>subs</code>): chip <b>“Privéles”</b> na “Studio's”.</li>
+    <li>Enkel tonen als het blok bestaat: <code>hasPrivate: defined(*[_id=="lessonsPage"][0].private.title)</code> in <code>SETTINGS_QUERY</code> (<code>sanity/queries.ts</code>), zoals bij de studio's.</li>
+    <li><code>lib/dictionary.ts</code>: <code>chips.private</code> “Privéles” / “Private class”. Optioneel ook in de footer onder Aanbod.</li>
+  </ul>
+
+  <!-- 10 -->
+  <h2 id="samenwerkingen-speels">10 · Samenwerkingen als speels, interactief blok</h2>
+  <p>Idee: op Over ons worden de ronde portretten “deeltjes” die zacht rondzweven, tegen elkaar en tegen de randen botsen, en waarmee een bezoeker kan spelen (vastpakken, gooien). Hover = reactie, klik = details. <b>Probeer het prototype</b> (echte portretten uit de Studio, Raf als voorbeeld van de 7e):</p>
+
+  <div class="bubbles" id="bubbles" aria-label="Prototype samenwerkingen">
+    <canvas></canvas>
+    <div class="bubble-tip" hidden></div>
+    <aside class="bubble-card" hidden>
+      <button class="bubble-x" aria-label="Sluiten">×</button>
+      <img alt="">
+      <div><h3></h3><p class="muted small role"></p><p class="bio"></p><p class="links small"></p></div>
+    </aside>
+    <span class="bubble-hint">sleep &amp; gooi · hover · klik</span>
+  </div>
+
+  <h3>Gedrag</h3>
+  <ul>
+    <li><b>Rust</b>: de cirkels drijven traag (lichte willekeurige drift, zonder zwaartekracht), botsen zacht en veren terug van de randen. Grootte 96–150 px, iets variërend zodat het organisch oogt.</li>
+    <li><b>Muis</b>: de cursor duwt cirkels in de buurt zacht weg (een “bel” rond de muis). Hover: de cirkel groeit ±12 %, krijgt een ember-rand en een label met naam + rol.</li>
+    <li><b>Spelen</b>: vastpakken en gooien; de snelheid van de muis wordt meegegeven en de wrijving laat hem uitbollen.</li>
+    <li><b>Klik</b> (zonder slepen): een kaart met groot portret, naam, rol, bio en links schuift in (desktop rechts in het blok, mobiel als bottom sheet). Esc of × sluit. Elke samenwerking heeft een eigen anker (<code>#elena</code>), zoals nu, dus links vanuit een retreatpagina openen meteen de juiste kaart.</li>
+    <li><b>Mobiel</b>: kleinere cirkels; met je vinger slepen/gooien en tikken = kaart. Met de telefoon kantelen kan later nog (vraagt toestemming op iOS, dus niet standaard).</li>
+  </ul>
+
+  <h3>Toegankelijkheid &amp; SEO (belangrijk)</h3>
+  <ul>
+    <li>De volledige lijst (naam, rol, bio, links) blijft <b>als gewone HTML</b> op de pagina staan, net als nu. Het speelveld is een laag erbovenop. Google en schermlezers lezen de lijst, en zonder JavaScript zie je de huidige weergave.</li>
+    <li>Toetsenbord: elke cirkel is een <code>&lt;button&gt;</code> (Tab → focusring, Enter → kaart).</li>
+    <li><code>prefers-reduced-motion</code>: geen beweging, de cirkels staan stil in een losse cluster (wel hover + klik).</li>
+    <li>Prestaties: de animatie pauzeert buiten beeld (IntersectionObserver) en als het tabblad verborgen is; de cirkels komen pas tot rust als ze niet meer bewegen.</li>
+  </ul>
+
+  <h3>Bouw <span class="tag t-code">code</span></h3>
+  <ul class="files">
+    <li>Nieuw client-component <code>components/CollabField.tsx</code>: eigen kleine physics (± 150 regels: positie/snelheid, cirkel-cirkel-botsing met impuls, randen, wrijving, pointer-afstoting, slepen) op <code>requestAnimationFrame</code>. Geen library nodig (matter.js ≈ 25 kB gzip is overkill voor 7 cirkels). Portretten als <code>&lt;button&gt;</code>-elementen met <code>transform</code> (geen canvas), zodat focus, alt en hover gewoon werken. In het prototype hierboven is het canvas enkel om het snel te tonen.</li>
+    <li><code>app/[lang]/over-ons/page.tsx:103-140</code>: <code>&lt;CollabField people={…} /&gt;</code> boven de bestaande <code>&lt;ul className="collabs"&gt;</code>. De lijst wordt dan visueel verborgen (<code>.sr-only</code>) of blijft zichtbaar als “alle details” eronder. <span class="tag t-q">vraag</span>: welke van de twee?</li>
+    <li>Kaart: hergebruik <code>Photo</code> + <code>RichText</code>; stijl in <code>app/globals.css</code> naast <code>.collabs</code>. Werkt samen met de nieuwe cursor (#1): ring groot boven een cirkel.</li>
+    <li>Studio: niets nieuw. Optioneel veld “Grootte in het speelveld” (S/M/L) per persoon.</li>
+    <li>Inschatting: 1 dag (incl. mobiel en reduced-motion).</li>
+  </ul>
+
   <h2>Volgorde van uitvoeren</h2>
   <ol>
-    <li><b>Zelf in de Studio, nu</b>: Raf aanmaken (#2), testimonial “[Naam]” invullen + kiezen op Home (#4).</li>
-    <li><b>Snelle code</b>: prijs weg bij voorbije retreats (#3), nieuwe yogamat (#6), cursor (#1).</li>
-    <li><b>Nieuwe Studio-velden</b>: privélessen (#7), Instagram-keuze (#5), testimonials automatisch + samen met reviews (#4).</li>
+    <li><b>Zelf in de Studio, nu</b>: Raf aanmaken (#2), slug <code>Rochefort</code> → <code>rochefort-2027</code> en titels gelijktrekken (#8e–f).</li>
+    <li><b>Snelle code</b>: prijs weg bij voorbije retreats (#3), nieuwe yogamat (#6), Privéles in het menu (#9), cursor (#1).</li>
+    <li><b>Nieuwe Studio-velden</b>: privélessen (#7), Instagram-keuze (#5).</li>
+    <li><b>Grotere stukken</b>: Testimonials samenvoegen + tabel + migratie (#4), SEO-aanbod/JSON-LD (#8, samen met #7 voor de prijzen), speels samenwerkingsblok (#10).</li>
   </ol>
-  <p class="muted small">Open vragen: #2 3 kolommen? · #3 ook “Deelnemers” weg op de terugblik-pagina (en op het kaartje)? · #1 kleur: ember (onze accentkleur) of iets anders?</p>
+  <p class="muted small">Open vragen: #1 kleur (ember of iets anders)? · #2 3 kolommen? · #3 ook “Deelnemers” weg op de terugblik-pagina (en het kaartje)? · #4 op de site “Reviews” of “Wat deelnemers zeggen”? · #10 de gewone lijst onder het speelveld zichtbaar laten of enkel voor Google/schermlezers?</p>
 </main>
 
 <script>
@@ -334,6 +468,96 @@
   });
   demo.addEventListener("mouseleave", () => { inside = false; dot.classList.remove("c-on"); ring.classList.remove("c-on"); });
   document.addEventListener("scroll", () => { dot.classList.remove("c-on"); ring.classList.remove("c-on"); inside = false; }, { passive: true });
+})();
+</script>
+<script>
+(() => {
+  const PEOPLE = [{"bio": "Yoga is een rode draad in Elena's dagelijkse leven. Als gepassioneerde yogadocente deelt ze met veel liefde Vinyasa, Yin en meditatie, waarbij ze anderen uitnodigt om te vertragen, opnieuw te verbinden en te leven met meer aandacht en aanwezigheid.", "img": "https://cdn.sanity.io/images/1pbhk0to/production/6429bfcbef030696abe85735827602fcd12960ea-2048x1367.jpg?w=300&h=300&fit=crop&auto=format", "links": [{"label": "Website", "url": "http://www.elenagontcharova.com/"}, {"label": "Instagram", "url": "https://www.instagram.com/yogametelena/"}], "name": "Elena", "role": "Yin en Vinyasa yoga & meditatie"}, {"bio": "Fatim is een zeer ervaren massagetherapeut die zich continu blijft bijscholen. Ze biedt onder meer klassieke massage, shiatsu, dieptemassage en voetreflexologie aan. Haar doel is een veilige plek te creëren waar iedereen ontspannen en weer in evenwicht naar buiten gaat.", "img": "https://cdn.sanity.io/images/1pbhk0to/production/cf1357862be5e329847d5bdd15bbd441de12aee0-1066x1173.jpg?w=300&h=300&fit=crop&auto=format", "links": [{"label": "Website", "url": "http://anoubis.be/"}], "name": "Fatim", "role": "Massage therapeut"}, {"bio": "Foodie Jive is het culinaire duo Elif en Guy, bekend als cateraars van o.a. De Roma. Met verse ingrediënten en veel creativiteit maken ze heerlijke vegetarische maaltijden die lichaam én smaakpapillen verwennen.", "img": "https://cdn.sanity.io/images/1pbhk0to/production/3a7d6b1e8f3bde6327b75263ac039e1c0d86fea0-3000x2250.jpg?w=300&h=300&fit=crop&auto=format", "links": [{"label": "Facebook", "url": "https://www.facebook.com/foodiejive/?locale=nl_BE"}, {"label": "Instagram", "url": "https://www.instagram.com/foodiejive/"}], "name": "Foodie Jive", "role": "Catering"}, {"bio": "Mel is massagetherapeut met een passie voor rust, aanraking en echte verbinding. Tijdens retreats helpt ze je los te laten en terug in je lichaam te komen met diep ontspannende, herstellende massages. Ze werkt intuïtief en rustig, precies afgestemd op wat jouw lichaam nodig heeft om echt te landen.", "img": "https://cdn.sanity.io/images/1pbhk0to/production/986ef1be942c2f1fdc85fe4c44f2cff300e22143-643x1600.jpg?w=300&h=300&fit=crop&auto=format", "links": [{"label": "Website", "url": "https://unwind-massage.be/"}, {"label": "instagram", "url": "https://www.instagram.com/unwind.massage.by.mel?dlrf=dXBmZWl1aGx0d21o&utm_source=qr"}], "name": "Mel", "role": "Massage therapeut"}, {"bio": "Michèle is freediving-instructeur en oceaanliefhebber die je de schoonheid van de onderwaterwereld laat ontdekken. Didactisch ijzersterk, eindeloos geduldig en met een glimlach van hier tot in Dahab.", "img": "https://cdn.sanity.io/images/1pbhk0to/production/f917ca20943f267ec79df1e3460446aa66753983-1008x1012.jpg?w=300&h=300&fit=crop&auto=format", "links": [{"label": "FACEBOOK", "url": "https://www.facebook.com/michele.fouquet.98/"}, {"label": "INSTAGRAM", "url": "https://www.instagram.com/michelefouquet/"}], "name": "Michèle", "role": "Freedive-instructeur, CMAS & AIDA"}, {"bio": "Yoga-enthousiast met een passie voor yin yoga en meditatie.", "img": "https://cdn.sanity.io/images/1pbhk0to/production/41cf0a4701977a3cdd423d88ceac9b8e9363ec1a-828x807.jpg?w=300&h=300&fit=crop&auto=format", "links": [], "name": "Sol", "role": "Yin yoga & meditatie"}, {"name": "Raf", "role": "(voorbeeld: nog toe te voegen)", "bio": "Zo verschijnt een nieuwe samenwerking zodra die in de Studio gepubliceerd is.", "links": [], "img": null}];
+  const box = document.getElementById("bubbles");
+  if (!box) return;
+  const cv = box.querySelector("canvas"), ctx = cv.getContext("2d");
+  const tip = box.querySelector(".bubble-tip"), card = box.querySelector(".bubble-card");
+  const still = matchMedia("(prefers-reduced-motion: reduce)").matches;
+  let W = 0, H = 0, dpr = 1;
+  const resize = () => { dpr = devicePixelRatio || 1; W = box.clientWidth; H = box.clientHeight; cv.width = W * dpr; cv.height = H * dpr; ctx.setTransform(dpr, 0, 0, dpr, 0, 0); };
+  resize(); addEventListener("resize", resize);
+  const small = W < 600;
+  const balls = PEOPLE.map((p, i) => {
+    const r = (small ? 38 : 52) + ((i * 37) % 5) * (small ? 4 : 6);
+    const img = new Image(); if (p.img) img.src = p.img;
+    return { p, img, r, s: 1, x: r + Math.random() * (W - 2 * r), y: r + Math.random() * (H - 2 * r), vx: (Math.random() - .5) * 1.2, vy: (Math.random() - .5) * 1.2 };
+  });
+  let mx = -1e3, my = -1e3, hover = null, drag = null, moved = 0, last = [];
+  const pick = (x, y) => balls.slice().reverse().find((b) => (b.x - x) ** 2 + (b.y - y) ** 2 < (b.r * b.s) ** 2);
+  const pos = (e) => { const r = box.getBoundingClientRect(); return [e.clientX - r.left, e.clientY - r.top]; };
+  cv.addEventListener("pointermove", (e) => {
+    [mx, my] = pos(e);
+    if (drag) { moved += Math.hypot(mx - drag.x, my - drag.y); drag.x = mx; drag.y = my; last.push([mx, my, performance.now()]); last = last.slice(-5); }
+    hover = drag || pick(mx, my);
+    if (hover) { tip.hidden = false; tip.textContent = `${hover.p.name} · ${hover.p.role}`; tip.style.left = hover.x + "px"; const below = hover.y + hover.r * hover.s + 10; tip.style.top = (below > H - 36 ? hover.y - hover.r * hover.s - 38 : below) + "px"; } else tip.hidden = true;
+  });
+  cv.addEventListener("pointerleave", () => { mx = my = -1e3; hover = null; tip.hidden = true; });
+  cv.addEventListener("pointerdown", (e) => { const [x, y] = pos(e); drag = pick(x, y); moved = 0; last = [[x, y, performance.now()]]; if (drag) { cv.setPointerCapture(e.pointerId); cv.classList.add("drag"); } });
+  cv.addEventListener("pointerup", () => {
+    if (!drag) return;
+    cv.classList.remove("drag");
+    if (moved < 6) open(drag.p);
+    else if (last.length > 1) { const [a, b] = [last[0], last.at(-1)], dt = Math.max(16, b[2] - a[2]) / 16; drag.vx = (b[0] - a[0]) / dt; drag.vy = (b[1] - a[1]) / dt; }
+    drag = null;
+  });
+  const open = (p) => {
+    card.hidden = false;
+    const img = card.querySelector("img"); img.src = p.img || ""; img.alt = p.name; img.style.display = p.img ? "" : "none";
+    card.querySelector("h3").textContent = p.name; card.querySelector(".role").textContent = p.role || "";
+    card.querySelector(".bio").textContent = p.bio || "";
+    card.querySelector(".links").innerHTML = (p.links || []).map((l) => `<a href="${l.url}" target="_blank" rel="noopener">${l.label}</a>`).join("");
+  };
+  card.querySelector(".bubble-x").onclick = () => (card.hidden = true);
+  addEventListener("keydown", (e) => e.key === "Escape" && (card.hidden = true));
+
+  const step = () => {
+    for (const b of balls) {
+      b.s += ((b === hover ? 1.12 : 1) - b.s) * .15;
+      if (b === drag) { b.vx = b.vy = 0; continue; }
+      if (!still) { b.vx += (Math.random() - .5) * .03; b.vy += (Math.random() - .5) * .03; }
+      // the pointer pushes nearby bubbles away
+      const dx = b.x - mx, dy = b.y - my, d = Math.hypot(dx, dy), R = b.r * b.s + 60;
+      if (!drag && d < R && d > 0 && b !== hover) { const f = (R - d) / R * .6; b.vx += dx / d * f; b.vy += dy / d * f; }
+      b.vx *= .985; b.vy *= .985;
+      if (still) { b.vx *= .8; b.vy *= .8; }
+      b.x += b.vx; b.y += b.vy;
+      const r = b.r * b.s;
+      if (b.x < r) { b.x = r; b.vx = Math.abs(b.vx) * .8; } if (b.x > W - r) { b.x = W - r; b.vx = -Math.abs(b.vx) * .8; }
+      if (b.y < r) { b.y = r; b.vy = Math.abs(b.vy) * .8; } if (b.y > H - r) { b.y = H - r; b.vy = -Math.abs(b.vy) * .8; }
+    }
+    // circle–circle collisions (equal mass, a little bounce)
+    for (let i = 0; i < balls.length; i++) for (let j = i + 1; j < balls.length; j++) {
+      const a = balls[i], b = balls[j], dx = b.x - a.x, dy = b.y - a.y, d = Math.hypot(dx, dy) || 1, min = a.r * a.s + b.r * b.s + 4;
+      if (d >= min) continue;
+      const nx = dx / d, ny = dy / d, o = (min - d) / 2;
+      const ka = a === drag ? 0 : b === drag ? 2 : 1, kb = 2 - ka;
+      a.x -= nx * o * ka; a.y -= ny * o * ka; b.x += nx * o * kb; b.y += ny * o * kb;
+      const rel = (b.vx - a.vx) * nx + (b.vy - a.vy) * ny;
+      if (rel < 0) { const imp = -rel * .9; a.vx -= nx * imp * (ka / 2); a.vy -= ny * imp * (ka / 2); b.vx += nx * imp * (kb / 2); b.vy += ny * imp * (kb / 2); }
+    }
+  };
+  const draw = () => {
+    ctx.clearRect(0, 0, W, H);
+    for (const b of balls) {
+      const r = b.r * b.s;
+      ctx.save(); ctx.beginPath(); ctx.arc(b.x, b.y, r, 0, Math.PI * 2); ctx.closePath();
+      ctx.fillStyle = "#e3d9cb"; ctx.fill(); ctx.clip();
+      if (b.img.complete && b.img.naturalWidth) ctx.drawImage(b.img, b.x - r, b.y - r, 2 * r, 2 * r);
+      else { ctx.fillStyle = "#6b655c"; ctx.font = `${r * .7}px Georgia, serif`; ctx.textAlign = "center"; ctx.textBaseline = "middle"; ctx.fillText(b.p.name[0], b.x, b.y); }
+      ctx.restore();
+      ctx.beginPath(); ctx.arc(b.x, b.y, r, 0, Math.PI * 2);
+      ctx.lineWidth = b === hover ? 2 : 1; ctx.strokeStyle = b === hover ? "#b5603a" : "rgba(31,29,26,.25)"; ctx.stroke();
+    }
+  };
+  let on = true;
+  new IntersectionObserver(([e]) => (on = e.isIntersecting)).observe(box);
+  const loop = () => { if (on) { step(); draw(); } requestAnimationFrame(loop); };
+  loop();
 })();
 </script>
 </body>
