@@ -986,7 +986,10 @@ function PhotoActions({
   );
 }
 
-/** Alt text NL + EN: saved when you leave the field. */
+/**
+ * Alt text with the same small NL | EN tabs as every localized field in the forms (components/I18nTabs.tsx):
+ * one language at a time; a dot = still empty, red = NL (required) empty. Saved when you leave the field.
+ */
 function AltFields({
   item,
   onSave,
@@ -998,6 +1001,7 @@ function AltFields({
     nl: altOf(item, "nl"),
     en: altOf(item, "en"),
   });
+  const [active, setActive] = useState<"nl" | "en">("nl");
   useEffect(
     () => setVals({ nl: altOf(item, "nl"), en: altOf(item, "en") }),
     [item.alt],
@@ -1015,26 +1019,55 @@ function AltFields({
       }));
     onSave(alt);
   };
+  const tab = (l: "nl" | "en") => {
+    const empty = !vals[l].trim();
+    const label = l.toUpperCase();
+    return (
+      <Button
+        key={l}
+        role="tab"
+        aria-selected={active === l}
+        mode={active === l ? "default" : "bleed"}
+        tone={l === "nl" && empty ? "critical" : active === l ? "primary" : "default"}
+        paddingX={2}
+        paddingY={1}
+        fontSize={0}
+        radius={2}
+        text={`${label}${empty ? " •" : ""}`}
+        title={empty ? `${label}: nog leeg` : label}
+        onClick={() => setActive(l)}
+      />
+    );
+  };
   return (
-    <Stack gap={3}>
-      {(["nl", "en"] as const).map((l) => (
-        <Stack key={l} gap={2}>
-          <Text size={1} weight="semibold">
-            Alt-tekst {l.toUpperCase()}
-            {l === "nl" ? " (verplicht)" : ""}
-          </Text>
-          <TextInput
-            value={vals[l]}
-            maxLength={125}
-            placeholder="Beschrijf wat je ziet, zonder “foto van …”"
-            onChange={(e) =>
-              setVals((v) => ({ ...v, [l]: e.currentTarget.value }))
-            }
-            onBlur={commit}
-            fontSize={1}
-          />
-        </Stack>
-      ))}
+    <Stack gap={2}>
+      <Flex align="center" gap={2}>
+        <Text size={1} weight="semibold">
+          Alt-tekst
+        </Text>
+        <Card radius={2} padding={0} tone="transparent" border style={{ display: "inline-flex" }}>
+          <Flex role="tablist" gap={0}>
+            {tab("nl")}
+            {tab("en")}
+          </Flex>
+        </Card>
+      </Flex>
+      <TextInput
+        key={active}
+        value={vals[active]}
+        maxLength={125}
+        placeholder={
+          active === "nl"
+            ? "Verplicht: beschrijf wat je ziet, zonder “foto van …”"
+            : "Leeg = de Nederlandse tekst op de site"
+        }
+        onChange={(e) => {
+          const v = e.currentTarget.value;
+          setVals((x) => ({ ...x, [active]: v }));
+        }}
+        onBlur={commit}
+        fontSize={1}
+      />
     </Stack>
   );
 }

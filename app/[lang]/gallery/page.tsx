@@ -30,7 +30,8 @@ export default async function Gallery({ params }: PageProps<"/[lang]/gallery">) 
     alt: p.alt,
     credit: p.photographer,
   }));
-  const ld = galleryImagesLd(tiles.map((p, i) => ({ url: p.full, alt: p.alt, photographer: photos[i].photographer })));
+  // contentUrl = the <img src> in this HTML, so Google ties the credit to the image it indexes
+  const ld = galleryImagesLd(tiles.map((p, i) => ({ url: (typeof p.img?.src === "string" ? p.img.src : null) ?? p.full, alt: p.alt, photographer: photos[i].photographer })));
   return (
     <section className="s" style={{ borderTop: 0, paddingTop: 48 }}>
       {ld.length ? <JsonLd data={ld} /> : null}
