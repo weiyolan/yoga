@@ -1,0 +1,340 @@
+<!doctype html>
+<html lang="nl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Feedback v3: wijzigingen website — Yoga, Zen &amp; Tonic</title>
+<style>
+  :root { --ink:#1f1d1a; --muted:#6b655c; --line:#e3ddd2; --paper:#faf7f2; --card:#fff; --accent:#a8572f; --good:#3d6b45; --bad:#9a3b32; --code:#f2ede4; }
+  * { box-sizing:border-box; }
+  body { margin:0; background:var(--paper); color:var(--ink); font:16px/1.6 -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
+  main { max-width:1040px; margin:0 auto; padding:48px 24px 96px; }
+  h1, h2, h3 { font-family:Georgia, "Times New Roman", serif; font-weight:normal; line-height:1.2; }
+  h1 { font-size:2.5rem; margin:0 0 8px; }
+  h2 { font-size:1.8rem; margin:64px 0 8px; padding-top:24px; border-top:1px solid var(--line); }
+  h3 { font-size:1.2rem; margin:22px 0 6px; }
+  .sub { color:var(--muted); margin:0 0 24px; }
+  a { color:var(--accent); }
+  q, .quote { font-style:italic; color:var(--muted); }
+  blockquote { margin:12px 0; padding:10px 16px; border-left:3px solid var(--accent); background:var(--card); color:var(--muted); font-style:italic; border-radius:0 8px 8px 0; }
+  code { background:var(--code); padding:1px 5px; border-radius:4px; font-size:.88em; }
+  pre { background:#24211d; color:#efe9df; padding:14px 16px; border-radius:8px; overflow:auto; font-size:.82rem; line-height:1.5; }
+  pre code { background:none; padding:0; }
+  ul, ol { padding-left:1.3em; } li { margin:4px 0; }
+  table { width:100%; border-collapse:collapse; background:var(--card); border:1px solid var(--line); font-size:.92rem; margin:12px 0; }
+  th, td { text-align:left; vertical-align:top; padding:9px 12px; border-bottom:1px solid var(--line); }
+  th { background:#f2ede4; font-weight:600; }
+  .card { background:var(--card); border:1px solid var(--line); border-radius:12px; padding:18px 20px; margin:16px 0; }
+  .grid { display:grid; grid-template-columns:repeat(auto-fit, minmax(300px,1fr)); gap:16px; }
+  .grid .card { margin:0; }
+  .tag { display:inline-block; font-size:.72rem; letter-spacing:.06em; text-transform:uppercase; padding:2px 8px; border-radius:99px; margin-right:6px; vertical-align:middle; }
+  .t-code { background:var(--accent); color:#fff; } .t-studio { background:#3d6b45; color:#fff; } .t-q { background:#c9a227; color:#1f1d1a; }
+  .why { border-left:3px solid var(--bad); padding-left:12px; }
+  .files li code { white-space:nowrap; }
+  .muted { color:var(--muted); } .small { font-size:.88rem; }
+  .steps { counter-reset:s; list-style:none; padding:0; }
+  .steps li { counter-increment:s; padding-left:34px; position:relative; margin:8px 0; }
+  .steps li::before { content:counter(s); position:absolute; left:0; top:1px; width:24px; height:24px; border-radius:50%; background:var(--good); color:#fff; font-size:.8rem; display:grid; place-items:center; }
+  /* mat */
+  .mats { display:grid; grid-template-columns:1fr 1fr; gap:16px; }
+  .mat { background:#efe9df; border-radius:10px; aspect-ratio:4/5; display:grid; place-items:center; position:relative; }
+  .mat svg { width:52%; stroke:var(--ink); fill:none; stroke-width:1.2; }
+  .mat span { position:absolute; top:10px; left:12px; font-size:.75rem; text-transform:uppercase; letter-spacing:.08em; color:var(--muted); }
+  /* cursor demo */
+  .demo { position:relative; height:260px; border-radius:12px; overflow:hidden; display:grid; grid-template-columns:1fr 1fr; border:1px solid var(--line); }
+  .demo > div { display:grid; place-items:center; align-content:center; gap:14px; padding:20px; text-align:center; }
+  .demo .light { background:#f4efe7; } .demo .dark { background:#2a2622; color:#efe9df; }
+  .demo .btn { display:inline-block; padding:13px 22px; border-radius:99px; border:1px solid currentColor; text-decoration:none; color:inherit; font-size:.78rem; letter-spacing:.08em; text-transform:uppercase; }
+  .c-dot, .c-ring { position:fixed; top:0; left:0; pointer-events:none; border-radius:50%; z-index:50; opacity:0; transition:opacity .2s; }
+  .c-dot { width:7px; height:7px; margin:-3.5px 0 0 -3.5px; background:#b5603a; transition:opacity .2s, scale .3s cubic-bezier(.2,.7,.2,1); }
+  .c-ring { width:30px; height:30px; margin:-15px 0 0 -15px; border:1px solid #b5603a; transition:opacity .2s, scale .3s cubic-bezier(.2,.7,.2,1), background .3s; }
+  .c-on { opacity:1; }
+  .c-ring.hover { scale:2.6; background:rgba(181,96,58,.08); } .c-dot.hover { scale:0; }
+  .c-ring.white { border-color:#fff; } .c-dot.white { background:#fff; }
+  /* private lessons mockup */
+  .pl { background:#f4efe7; border-radius:12px; padding:28px; display:grid; grid-template-columns:1.1fr 1fr; gap:28px; }
+  .pl h4 { margin:0 0 8px; font:600 .72rem/1 sans-serif; letter-spacing:.1em; text-transform:uppercase; color:var(--muted); }
+  .pl .label { font-size:.72rem; letter-spacing:.1em; text-transform:uppercase; color:var(--accent); }
+  .pl h3 { font-size:1.7rem; margin:6px 0 10px; }
+  .rates { list-style:none; padding:0; margin:0 0 20px; border-top:1px solid var(--line); }
+  .rates li { display:flex; justify-content:space-between; gap:12px; padding:9px 0; border-bottom:1px solid var(--line); margin:0; }
+  .rates b { font-weight:500; font-family:Georgia, serif; font-size:1.1rem; }
+  .kv { margin:0; } .kv div { display:grid; grid-template-columns:80px 1fr; gap:10px; padding:6px 0; } .kv dt { color:var(--muted); } .kv dd { margin:0; }
+  @media (max-width:760px) { .pl, .mats { grid-template-columns:1fr; } }
+  nav.toc { display:flex; flex-wrap:wrap; gap:6px 18px; font-size:.92rem; margin:18px 0 0; }
+</style>
+</head>
+<body>
+<main>
+  <h1>Feedback v3: wat er moet veranderen</h1>
+  <p class="sub">Yoga, Zen &amp; Tonic · 30 okt 2026 · nagekeken op de live site (yogazentonic.com), de Studio-code (<code>main</code>) en de gepubliceerde Sanity-inhoud.</p>
+
+  <div class="card">
+    <b>Legende</b><br>
+    <span class="tag t-code">code</span> wijziging aan de website/Studio nodig ·
+    <span class="tag t-studio">studio</span> kan vandaag al zelf in de Studio ·
+    <span class="tag t-q">vraag</span> keuze nodig van Rita &amp; Philippe
+  </div>
+
+  <table>
+    <tr><th>#</th><th>Feedback</th><th>Wat</th><th>Soort</th><th>Inschatting</th></tr>
+    <tr><td>1</td><td><a href="#cursor">Pointer zoals Sansara</a></td><td>Cursor herschrijven: gewone muis blijft, gekleurde stip + volgring met vertraging, ring groeit bij hover</td><td><span class="tag t-code">code</span></td><td>klein (½ dag)</td></tr>
+    <tr><td>2</td><td><a href="#samenwerkingen">7 samenwerkingen, Raf &amp; Sol</a></td><td>Geen limiet in de code. Sol staat er al; Raf moet nog aangemaakt worden. Verbergen kan met een schakelaar</td><td><span class="tag t-studio">studio</span></td><td>geen code</td></tr>
+    <tr><td>3</td><td><a href="#voorbij">Voorbije retreats zonder prijs</a></td><td>Op de terugblik-pagina enkel “Waar” &amp; “Begeleiding”; prijs ook uit Google-beschrijving &amp; JSON-LD</td><td><span class="tag t-code">code</span></td><td>klein (1–2 u)</td></tr>
+    <tr><td>4</td><td><a href="#testimonials">Testimonials &amp; reviews</a></td><td>Testimonials verschijnen enkel als je ze op Home kiest → automatisch tonen + samen in één menu</td><td><span class="tag t-studio">studio</span> <span class="tag t-code">code</span></td><td>klein–middel (½ dag)</td></tr>
+    <tr><td>5</td><td><a href="#instagram">Foto's Instagram-blok</a></td><td>Nu = de 6 nieuwste “Uitgelichte” foto's. Eigen keuzeveld op Home toevoegen</td><td><span class="tag t-code">code</span></td><td>klein (2–3 u)</td></tr>
+    <tr><td>6</td><td><a href="#mat">Yogamat-symbool</a></td><td>Nieuwe, langwerpige SVG (voorstel hieronder)</td><td><span class="tag t-code">code</span></td><td>klein (1 u)</td></tr>
+    <tr><td>7</td><td><a href="#prive">Tarieven privélessen</a></td><td>Privéles-blok uitbreiden met prijslijst + “Locatie &amp; praktisch”</td><td><span class="tag t-code">code</span></td><td>middel (½ dag)</td></tr>
+  </table>
+
+  <!-- 1 -->
+  <h2 id="cursor">1 · Pointer zoals bij Sansara</h2>
+  <blockquote>Pointer toch niet ideaal, liefst als het kan zoals bij https://www.sansararesort.com/</blockquote>
+
+  <h3>Hoe het nu werkt</h3>
+  <p><code>components/Cursor.tsx</code> + <code>app/globals.css:457-468</code>: de gewone muispijl wordt verborgen (<code>cursor: none !important</code>), een kleine stip volgt de muis <em>direct</em>, een witte ring met <code>mix-blend-mode: difference</code> (kleuren omkeren) volgt met vertraging en wordt groter (34 → 64 px) boven links/knoppen/foto's.</p>
+  <p class="why">Waarom dat “niet ideaal” voelt: geen echte muispijl meer (je verliest het gevoel waar je precies klikt), de ring keert de kleuren om (op foto's geeft dat vreemde kleuren), en de stip heeft geen vertraging, dus stip en ring lijken los van elkaar.</p>
+
+  <h3>Hoe het bij Sansara werkt (uit hun code)</h3>
+  <ul>
+    <li><b>Gewone muispijl blijft zichtbaar</b> (nergens <code>cursor:none</code>). De stip + ring zijn een extra laag.</li>
+    <li><b>Stip</b>: effen kleur (hun turquoise <code>#68c6c5</code>), ± 8 px, volgt met <b>0,3 s</b> vertraging.</li>
+    <li><b>Ring</b>: dunne lijn (0,05vw ≈ 1 px) in dezelfde kleur, ± 30 px, volgt met <b>0,7 s</b> vertraging → mooie “sleep”.</li>
+    <li><b>Hover</b> (op knoppen/links met class <code>focuson</code>): stip krimpt weg naar 0, ring schaalt <b>×3</b> (0,3 s). Op een donkere achtergrond wordt alles wit.</li>
+    <li>Enkel vanaf 1200 px breed (niet op tablet/gsm).</li>
+  </ul>
+
+  <h3>Probeer het voorstel</h3>
+  <p class="muted small">Beweeg de muis hieronder (desktop). Stip &amp; ring in onze ember-kleur; links wordt de ring groot, op donker wordt hij wit.</p>
+  <div class="demo" id="demo">
+    <div class="light"><a class="btn" href="#cursor">Ontdek de retreats</a><span class="muted small">lichte achtergrond</span></div>
+    <div class="dark" data-cursor="white"><a class="btn" href="#cursor">Inschrijven</a><span class="small" style="opacity:.7">donkere achtergrond / foto</span></div>
+  </div>
+
+  <h3>Wijzigingen <span class="tag t-code">code</span></h3>
+  <ul class="files">
+    <li><code>app/globals.css:467-468</code>: regels <code>body.has-cursor … { cursor: none !important }</code> weg → gewone muispijl terug.</li>
+    <li><code>app/globals.css:458-466</code>: ring zonder <code>mix-blend-mode</code>, rand <code>1px solid var(--ember)</code>, ± 30 px; stip 7 px in <code>var(--ember)</code>. Hover via <code>scale</code> (ring ×2,6–3, stip → 0) i.p.v. width/height, met <code>transition: scale .3s</code>. Variant <code>.white</code> voor donkere vlakken (hero, slotfoto, footer, lightbox).</li>
+    <li><code>components/Cursor.tsx</code>: ook de stip met vertraging laten volgen (bv. <code>EASE_DOT = .25</code>, <code>EASE_RING = .1</code> per frame ≈ Sansara's 0,3 s / 0,7 s); class <code>big</code> → <code>hover</code> die ook op de stip komt; <code>white</code> zetten als het element onder de muis in een donker vlak zit (<code>[data-cursor=white]</code> of <code>.hero, .closing, .footer, dialog</code>).</li>
+    <li>Media query: enkel <code>(pointer: fine) and (min-width: 1200px)</code>. Klik-“squeeze” mag blijven (subtiel).</li>
+  </ul>
+
+  <!-- 2 -->
+  <h2 id="samenwerkingen">2 · Samenwerkingen: 7, met Raf &amp; Sol</h2>
+  <blockquote>Mensen met wie we samenwerkten: kunnen we er 7 hebben? Raf en Sol erbij? Hoe mensen verwijderen indien nodig?</blockquote>
+  <p><b>Ja, er is geen maximum.</b> Over ons toont automatisch elke <em>gepubliceerde</em> Persoon met Soort “Samenwerking” die niet verborgen is (<code>sanity/queries.ts:344</code>).</p>
+  <table>
+    <tr><th>Nu gepubliceerd (live)</th><th>Status</th></tr>
+    <tr><td>Elena, Fatim, Foodie Jive, Mel, Michèle</td><td>zichtbaar</td></tr>
+    <tr><td><b>Sol</b></td><td class="good">staat er al (zichtbaar op Over ons)</td></tr>
+    <tr><td><b>Raf</b></td><td class="bad">bestaat niet als gepubliceerde persoon → nog aanmaken (of een concept staat nog niet op “Publiceren”)</td></tr>
+  </table>
+  <p>Met Raf erbij = 7. In het raster van 2 kolommen staat de 7e dan alleen op de laatste rij; dat oogt prima. <span class="tag t-q">vraag</span> Liever 3 kolommen op brede schermen? Dan is het één regel in <code>app/globals.css:301</code> (<code>.collabs</code>).</p>
+
+  <h3>Raf toevoegen <span class="tag t-studio">studio</span></h3>
+  <ol class="steps">
+    <li>Studio → <b>Over ons</b> → rechtsboven het <b>+</b>-menu → <b>Nieuwe persoon</b>.</li>
+    <li>Soort: <b>Samenwerking</b>. Vul <b>Naam</b>, <b>Rol</b> (NL + EN) en <b>Portret</b> in (verplicht), optioneel “Over”, Website, Andere links.</li>
+    <li>Optioneel <b>Volgorde</b>: laag getal = eerst. Leeg = alfabetisch na de genummerde.</li>
+    <li>Klik <b>Publiceren</b> (onderaan rechts). Pas dan staat Raf op de site.</li>
+  </ol>
+
+  <h3>Iemand weghalen <span class="tag t-studio">studio</span></h3>
+  <ul>
+    <li><b>Aanbevolen: “Verbergen op Over ons” aanzetten</b> (schakelaar onderaan de persoon) → Publiceren. De persoon verdwijnt van Over ons, maar blijft als begeleider op oude retreatpagina's staan. Later terugzetten = schakelaar uit.</li>
+    <li><b>Definitief</b>: in de persoon ⋯-menu → <b>Verwijderen</b>. Lukt niet zolang die persoon bij een retreat onder “Begeleiding” staat; de Studio toont dan waar. Eerst daar weghalen.</li>
+  </ul>
+  <p class="muted small">Optioneel <span class="tag t-code">code</span>: de uitleg “Verbergen = weg van Over ons, Verwijderen = overal weg” in “Zo werkt het” (<code>studio/components/Help.tsx</code>) zetten, zodat het niet opnieuw gevraagd wordt.</p>
+
+  <!-- 3 -->
+  <h2 id="voorbij">3 · Voorbije retreats: enkel Waar &amp; Begeleiding</h2>
+  <blockquote>Bij 'voorbije retreats', willen we enkel de kopjes Waar en Begeleiding op website. Om de prijs er af te krijgen. Liefst vermijden om de prijs weg te doen uit studio, en niet enkel onderaan bij het kopje 'achteraf'.</blockquote>
+  <p>De terugblik-pagina van een voorbije retreat toont nu 4 feiten naast “In een notendop”: <b>Waar · Begeleiding · Prijs (vanaf €…) · Deelnemers</b> (<code>app/[lang]/retreats/[slug]/page.tsx:161-175</code>). De prijs komt uit “Prijs vanaf” of de laagste prijs uit Praktisch.</p>
+  <p class="good"><b>Oplossing in de code, niets weghalen in de Studio</b>: de prijs blijft bewaard (handig als je de retreat opnieuw organiseert), de site toont hem gewoon niet meer zodra de einddatum voorbij is.</p>
+  <h3>Wijzigingen <span class="tag t-code">code</span></h3>
+  <ul class="files">
+    <li><code>app/[lang]/retreats/[slug]/page.tsx:161-175</code>: <code>price</code> en de rijen <code>t.price</code> + <code>t.participants</code> uit <code>facts</code> halen → enkel <code>[t.where, …]</code> en <code>[t.hosts, …]</code>.</li>
+    <li><code>app/[lang]/retreats/[slug]/page.tsx:56-62</code> (<code>generateMetadata</code>): “vanaf € …” enkel in de Google-/deelbeschrijving zetten als de retreat nog komt.</li>
+    <li><code>lib/jsonld.ts:131</code>: geen <code>offers</code> (prijs voor Google) meer voor voorbije retreats.</li>
+    <li>Kaartjes bij “Voorbij” op /retreats en het menu tonen al geen prijs (<code>components/sections.tsx:138-143</code>, enkel “12 deelnemers”) → niets te doen.</li>
+    <li>Studio-uitleg bijwerken: “Prijs vanaf” (<code>studio/schemaTypes/documents/retreat.ts:142-149</code>) + “Aantal deelnemers” (<code>:316-325</code>) → “Niet getoond bij een voorbije retreat”; groepsuitleg bovenaan (<code>:22</code>).</li>
+  </ul>
+  <p><span class="tag t-q">vraag</span> “Enkel Waar en Begeleiding” = ook <b>Deelnemers</b> weg op de terugblik-pagina? Zo gelezen in het voorstel hierboven. Op het kaartje bij “Voorbij” blijft “12 deelnemers” staan, tenzij jullie dat ook weg willen.</p>
+
+  <!-- 4 -->
+  <h2 id="testimonials">4 · Testimonials &amp; reviews: hoe werkt het, en waarom zie ik ze niet?</h2>
+  <blockquote>Ik snap niet goed hoe de 'testimonials' en de 'reviews' werken; Waar kan je die toevoegen in de studio? Ik voeg er toe, maar ze komen niet tevoorschijn. Bv deze: …/studio/structure/testimonial;kmzixlc5xAVMYQZkjpyb1e</blockquote>
+
+  <div class="grid">
+    <div class="card">
+      <h3 style="margin-top:0">Reviews</h3>
+      <ul class="small">
+        <li><b>Wie schrijft</b>: deelnemers zelf, via het reviewformulier op de site (link via Studio → retreat → “Kopieer reviewlink”).</li>
+        <li><b>Studio</b>: <b>Contact → Reviews</b>. Nieuwe staan op “Nieuw”.</li>
+        <li><b>Online</b>: openen → Overzicht → status <b>Gepubliceerd</b>.</li>
+        <li><b>Waar</b>: op de retreatpagina (en latere edities, bv. Eifel 2025 → Eifel 2026) + bij 4★ of meer <b>vanzelf op Home</b>.</li>
+        <li>Live nu: Hilde (Spa) en Nathalie (Eifel), dat zijn de twee kaartjes op Home.</li>
+      </ul>
+    </div>
+    <div class="card">
+      <h3 style="margin-top:0">Testimonials</h3>
+      <ul class="small">
+        <li><b>Wie schrijft</b>: jullie zelf, een citaat dat je bv. via WhatsApp kreeg.</li>
+        <li><b>Studio</b>: <b>Inhoud → Testimonials</b> (onder Mails).</li>
+        <li><b>Online</b>: enkel als je ze daarna <b>óók kiest</b> in <b>Pagina's → Home → tab Testimonials</b>.</li>
+        <li><b>Waar</b>: enkel op Home, vóór de reviews.</li>
+        <li>Live nu: 2 testimonials (Hilde, “[Naam]”), maar <b>op Home is er geen enkele gekozen</b>.</li>
+      </ul>
+    </div>
+  </div>
+
+  <p class="why"><b>Waarom de testimonial niet verschijnt</b>: hij is gepubliceerd, maar Home → Testimonials is leeg (<code>homePage.testimonials = null</code>). Het tonen gebeurt alleen via die keuzelijst (<code>sanity/queries.ts:201</code>). Daarnaast heet deze testimonial nog <b>“[Naam]”</b> (placeholder): zo zou hij ook letterlijk op de site komen.</p>
+
+  <h3>Vandaag al oplossen <span class="tag t-studio">studio</span></h3>
+  <ol class="steps">
+    <li>Open de testimonial, vervang <b>Naam “[Naam]”</b> door de echte naam → Publiceren.</li>
+    <li>Pagina's → <b>Home</b> → tab <b>Testimonials</b> → “Testimonials” → <b>Item toevoegen</b> → kies de testimonial(s) → Publiceren.</li>
+    <li>Let op: Hilde staat er twee keer in (als review én als testimonial, bijna dezelfde tekst). Kies er één, anders staat ze dubbel op Home.</li>
+  </ol>
+
+  <h3>Voorstel om het eenvoudiger te maken <span class="tag t-code">code</span></h3>
+  <ul class="files">
+    <li><b>Geen aparte keuzestap meer</b>: elke gepubliceerde testimonial staat vanzelf op Home (nieuwste eerst), met een schakelaar “Niet tonen op Home” per testimonial. Query <code>sanity/queries.ts:201</code> → <code>*[_type=="testimonial" &amp;&amp; hidden != true] | order(_createdAt desc)</code>; veld <code>testimonials</code> in <code>studio/schemaTypes/singletons/home-page.ts:59-67</code> weg (of enkel nog voor de volgorde); veld <code>hidden</code> in <code>studio/schemaTypes/documents/testimonial.ts</code>.</li>
+    <li><b>Eén plek in de Studio</b>: menu <b>Contact → “Reviews &amp; testimonials”</b> met 2 kopjes (“Via het formulier” / “Zelf toegevoegd”) i.p.v. Testimonials los onder Inhoud (<code>studio/structure/index.ts:224-236</code> en <code>:311</code>).</li>
+    <li><b>Testimonial met een retreat</b> ook op die retreatpagina tonen, tussen de reviews (query <code>sanity/queries.ts:280</code>, zonder sterren).</li>
+    <li>Placeholder-namen zoals “[Naam]” niet publiceren: validatie in <code>testimonial.ts</code> (ze staan al in “Nog in te vullen [ ]”).</li>
+    <li>Uitleg in de Studio aanpassen (descriptions <code>testimonial.ts:12-15</code>, Home-overzicht <code>home-page.ts:20</code>, “Zo werkt het”).</li>
+  </ul>
+
+  <!-- 5 -->
+  <h2 id="instagram">5 · Foto's in het Instagram-blok onderaan Home</h2>
+  <blockquote>Hoe kan ik de foto's wijzigen onderaan bij Instagram sectie?</blockquote>
+  <p><b>Nu</b>: het blok toont automatisch de <b>6 nieuwst geüploade foto's met “Uitgelicht” aan</b> uit de Fotobank (<code>sanity/queries.ts:200</code>). Er staan 16 foto's op Uitgelicht, dus enkel de 6 recentst geüploade komen in beeld. “Uitgelicht” betekent ook: een grote tegel op de Gallery-pagina (<code>studio/schemaTypes/documents/media-item.ts:47</code>).</p>
+  <p><b>Vandaag</b> <span class="tag t-studio">studio</span>: Fotobank → foto openen → “Uitgelicht” aan/uit → Publiceren. Omslachtig (je moet er 10 uitzetten om een oudere foto erin te krijgen, en dat verandert ook de Gallery). Het blok staat ook nergens in de Home-tabs, vandaar dat het niet te vinden is.</p>
+  <h3>Wijzigingen <span class="tag t-code">code</span></h3>
+  <ul class="files">
+    <li><code>studio/schemaTypes/singletons/home-page.ts</code>: nieuwe tab <b>Instagram</b> met veld <b>“Foto's Instagram-blok”</b> (lijst met foto's uit de Fotobank, max. 6, sleepbaar voor de volgorde, met de bestaande foto-kiezer <code>studio/components/PhotoPicker.tsx</code>) + regel in het Home-overzicht (<code>SECTIONS</code>).</li>
+    <li><code>sanity/queries.ts:200</code>: <code>"instagram": coalesce(instagramPhotos[]-&gt;…, *[_type=="mediaItem" &amp;&amp; highlight==true]…[0...6])</code> → eigen keuze, anders zoals nu.</li>
+    <li><code>studio/schemaTypes/documents/media-item.ts:47</code>: uitleg “Uitgelicht” bijwerken (Instagram enkel als Home → Instagram leeg is).</li>
+    <li><code>sanity/types.ts</code> opnieuw genereren (typegen).</li>
+  </ul>
+
+  <!-- 6 -->
+  <h2 id="mat">6 · Yogamat-symbool bij Rita</h2>
+  <blockquote>Grafisch symbooltje bij rita van yoga mat is niet zo stilistisch. Lijkt nog te veel op rol WC papier. Maak langwerpiger en betere SVG.</blockquote>
+  <p>Het symbool staat op Over ons boven Rita's portret (hover toont de foto). Nu: korte, dikke rol (± 1,7 : 1) met grote spiraal en een afgerold stuk ervoor → leest als WC-rol/keukenrol. Voorstel: <b>lange, slanke rol (± 4 : 1)</b>, kleine ovale kop met fijne spiraal, <b>twee banden</b> en een <b>draagriem</b> erover: dat maakt meteen duidelijk dat het een yogamat is.</p>
+  <div class="mats">
+    <div class="mat"><span>Nu</span><svg viewBox="0 0 100 100" aria-hidden="true" stroke-linejoin="round" stroke-linecap="round">
+    
+    <ellipse cx="30" cy="44" rx="8.5" ry="13" />
+    <path d="M30 31 L74 31 A8.5 13 0 0 1 74 57 L30 57" />
+    <path d="M30.5 44.0 30.6 44.2 30.6 44.5 30.5 44.8 30.4 45.0 30.3 45.3 30.1 45.5 29.8 45.6 29.6 45.6 29.3 45.4 29.0 45.2 28.8 44.8 28.6 44.4 28.5 43.8 28.5 43.3 28.6 42.7 28.8 42.1 29.1 41.7 29.5 41.3 30.0 41.1 30.4 41.1 30.9 41.2 31.4 41.6 31.8 42.1 32.1 42.8 32.3 43.6 32.4 44.5 32.3 45.4 32.1 46.3 31.7 47.1 31.2 47.7 30.6 48.1 29.9 48.3 29.2 48.3 28.5 47.9 27.8 47.3 27.3 46.5 26.9 45.4 26.7 44.2 26.7 43.0 26.9 41.7 27.3 40.6 27.9 39.6 28.6 38.8 29.5 38.4 30.4 38.3 31.4 38.5 32.2 39.1 33.0 40.0 33.6 41.2 34.0 42.6 34.2 44.1 34.1 45.7 33.8 47.3 33.2 48.7 32.4 49.8 31.4 50.7" />
+    <path d="M45 31 A8.5 13 0 0 1 45 57" />
+    <path d="M48 31 A8.5 13 0 0 1 48 57" />
+    <path d="M30 57 L22 72 L74 72 L82 57 L74 57" />
+  </svg></div>
+    <div class="mat"><span>Voorstel</span><svg viewBox="0 0 100 56" aria-hidden="true" stroke-linejoin="round" stroke-linecap="round">
+    <ellipse cx="10" cy="36" rx="4.6" ry="11" />
+    <path d="M10 25 H88 A4.6 11 0 0 1 88 47 H10" />
+    <path d="M10 34.9 10.1 34.8 10.2 34.8 10.2 34.8 10.3 34.8 10.4 34.9 10.5 35 10.6 35.1 10.7 35.3 10.8 35.6 10.8 35.8 10.9 36.1 10.9 36.5 10.9 36.8 10.9 37.1 10.8 37.5 10.7 37.8 10.6 38.1 10.5 38.4 10.4 38.7 10.2 38.9 10 39 9.8 39.1 9.6 39.1 9.4 39 9.2 38.8 9.1 38.6 8.9 38.3 8.7 37.9 8.6 37.5 8.5 37 8.4 36.4 8.3 35.8 8.3 35.2 8.4 34.6 8.4 34 8.5 33.4 8.7 32.9 8.9 32.4 9.1 31.9 9.3 31.6 9.6 31.3 9.9 31.1 10.2 31.1 10.5 31.1 10.8 31.3 11.1 31.5 11.4 31.9 11.7 32.4 11.9 33 12.1 33.7 12.3 34.4 12.4 35.2 12.5 36.1 12.5 37 12.4 37.9 12.3 38.7 12.1 39.6 11.9 40.4 11.6 41.1 11.3 41.7 11 42.2 10.6 42.5 10.2 42.8 9.8 42.8 9.3 42.8 8.9 42.5 8.5 42.2 8.1 41.6 7.8 41 7.4 40.2 7.2 39.3 7 38.3 6.8 37.2 6.8 36 6.8 34.9 6.8 33.7 7 32.6 7.2 31.5 7.5 30.5 7.8 29.6 8.2 28.8 8.7 28.2 9.1 27.7 9.7 27.4 10.2 27.3 10.8 27.3 11.3 27.6 11.8 28.1 12.3 28.8 12.8 29.6 13.2 30.6 13.5 31.7 13.8 33 13.9 34.3 14 35.7 14 37.2 14 38.6 13.8 40 13.5 41.4 13.2 42.6 12.8 43.7 12.3 44.7 11.7 45.5 11.1 46.1 10.5 46.5 9.8 46.6 9.2 46.6 8.5 46.2 7.9 45.7 7.3 44.9" />
+    <path d="M24.4 25 A4.6 11 0 0 1 24.4 47 M27.6 25 A4.6 11 0 0 1 27.6 47 M70.4 25 A4.6 11 0 0 1 70.4 47 M73.6 25 A4.6 11 0 0 1 73.6 47" />
+    <path d="M27 25 C38 11 60 11 71 25" />
+    <path d="M29.2 25 C39 14 59 14 68.8 25" />
+  </svg></div>
+  </div>
+  <h3>Wijziging <span class="tag t-code">code</span></h3>
+  <p><code>components/icons.tsx:31-43</code> (<code>YogaMat</code>) vervangen door (zelfde lijnstijl 1,2 px, viewBox iets platter zodat de mat breder in beeld komt):</p>
+  <pre><code>export const YogaMat = () =&gt; (
+  &lt;svg viewBox=&quot;0 0 100 56&quot; aria-hidden=&quot;true&quot; strokeLinejoin=&quot;round&quot; strokeLinecap=&quot;round&quot;&gt;
+    {/* a long rolled-up mat on its side: the spiral end, two straps, a carry strap over the top */}
+    &lt;ellipse cx=&quot;10&quot; cy=&quot;36&quot; rx=&quot;4.6&quot; ry=&quot;11&quot; /&gt;
+    &lt;path d=&quot;M10 25 H88 A4.6 11 0 0 1 88 47 H10&quot; /&gt;
+    &lt;path d=&quot;M10 34.9 10.1 34.8 10.2 34.8 10.2 34.8 10.3 34.8 10.4 34.9 10.5 35 10.6 35.1 10.7 35.3 10.8 35.6 10.8 35.8 10.9 36.1 10.9 36.5 10.9 36.8 10.9 37.1 10.8 37.5 10.7 37.8 10.6 38.1 10.5 38.4 10.4 38.7 10.2 38.9 10 39 9.8 39.1 9.6 39.1 9.4 39 9.2 38.8 9.1 38.6 8.9 38.3 8.7 37.9 8.6 37.5 8.5 37 8.4 36.4 8.3 35.8 8.3 35.2 8.4 34.6 8.4 34 8.5 33.4 8.7 32.9 8.9 32.4 9.1 31.9 9.3 31.6 9.6 31.3 9.9 31.1 10.2 31.1 10.5 31.1 10.8 31.3 11.1 31.5 11.4 31.9 11.7 32.4 11.9 33 12.1 33.7 12.3 34.4 12.4 35.2 12.5 36.1 12.5 37 12.4 37.9 12.3 38.7 12.1 39.6 11.9 40.4 11.6 41.1 11.3 41.7 11 42.2 10.6 42.5 10.2 42.8 9.8 42.8 9.3 42.8 8.9 42.5 8.5 42.2 8.1 41.6 7.8 41 7.4 40.2 7.2 39.3 7 38.3 6.8 37.2 6.8 36 6.8 34.9 6.8 33.7 7 32.6 7.2 31.5 7.5 30.5 7.8 29.6 8.2 28.8 8.7 28.2 9.1 27.7 9.7 27.4 10.2 27.3 10.8 27.3 11.3 27.6 11.8 28.1 12.3 28.8 12.8 29.6 13.2 30.6 13.5 31.7 13.8 33 13.9 34.3 14 35.7 14 37.2 14 38.6 13.8 40 13.5 41.4 13.2 42.6 12.8 43.7 12.3 44.7 11.7 45.5 11.1 46.1 10.5 46.5 9.8 46.6 9.2 46.6 8.5 46.2 7.9 45.7 7.3 44.9&quot; /&gt;
+    &lt;path d=&quot;M24.4 25 A4.6 11 0 0 1 24.4 47 M27.6 25 A4.6 11 0 0 1 27.6 47 M70.4 25 A4.6 11 0 0 1 70.4 47 M73.6 25 A4.6 11 0 0 1 73.6 47&quot; /&gt;
+    &lt;path d=&quot;M27 25 C38 11 60 11 71 25&quot; /&gt;
+    &lt;path d=&quot;M29.2 25 C39 14 59 14 68.8 25&quot; /&gt;
+  &lt;/svg&gt;
+);</code></pre>
+  <p class="muted small">Alternatief <span class="tag t-studio">studio</span>: bij Rita (Over ons → Rita) kan je in het veld <b>Voorwerp</b> een eigen foto zetten (bv. haar opgerolde mat); dan wordt die getoond i.p.v. de tekening.</p>
+
+  <!-- 7 -->
+  <h2 id="prive">7 · Tarieven privélessen</h2>
+  <blockquote>Ik zou nog graag weten hoe ik voor de privelessen al deze info toevoeg: Tarieven Privélessen · Prijzen per persoon (1-op-1 € 75, Duet € 45 p.p., Trio € 35 p.p.) · Locatie &amp; Praktisch (Waar, Vervoer)</blockquote>
+  <p><b>Nu</b>: Studio → Lessen → Lessen-pagina → tab <b>Privéles</b> heeft enkel Kop, Tekst (max. 300 tekens), <b>Praktisch (1 grijze regel, max. 80 tekens)</b>, Foto en Knop (<code>studio/schemaTypes/singletons/lessons-page.ts:89-102</code>). Live staat: “60 min · prijs 70€ · Mortsel of bij jou thuis (prijs is excl. verplaatsingskosten)”. Een prijslijst met 3 regels + Waar/Vervoer past daar niet in → <b>er moeten velden bij</b>.</p>
+
+  <h3>Voorstel: zo ziet het blok eruit</h3>
+  <div class="pl">
+    <div>
+      <span class="label">Privéles</span>
+      <h3>Tarieven privélessen</h3>
+      <p>Wil je persoonlijke begeleiding op maat, alleen of in een klein groepje?</p>
+      <h4>Prijzen per persoon</h4>
+      <ul class="rates">
+        <li><span>Privéles (1-op-1)</span><b>€ 75</b></li>
+        <li><span>Duet (2 personen)</span><b>€ 45 p.p.</b></li>
+        <li><span>Trio (3 personen)</span><b>€ 35 p.p.</b></li>
+      </ul>
+      <h4>Locatie &amp; praktisch</h4>
+      <dl class="kv">
+        <div><dt>Waar</dt><dd>In Mortsel of bij jou thuis (binnen een straal van 10 km).</dd></div>
+        <div><dt>Vervoer</dt><dd>Bij lessen op locatie worden eventuele vervoersonkosten apart verrekend.</dd></div>
+      </dl>
+      <p style="margin-top:18px"><span style="display:inline-block;padding:12px 20px;border-radius:99px;background:var(--ink);color:#fff;font-size:.75rem;letter-spacing:.08em;text-transform:uppercase">Contacteer Rita</span></p>
+    </div>
+    <div style="background:#d9cfc1;border-radius:4px;min-height:260px;display:grid;place-items:center;color:var(--muted);font-size:.85rem">foto (zoals nu)</div>
+  </div>
+
+  <h3>Wijzigingen <span class="tag t-code">code</span></h3>
+  <ul class="files">
+    <li><code>studio/schemaTypes/singletons/lessons-page.ts:89-102</code> (object <code>private</code>) uitbreiden met:
+      <ul>
+        <li><code>ratesTitle</code> (NL/EN, “Prijzen per persoon”)</li>
+        <li><code>rates[]</code>: per regel <b>Omschrijving</b> (NL/EN, bv. “Duet (2 personen)”), <b>Bedrag (€)</b>, schakelaar <b>“per persoon”</b> (→ “p.p.” / “pp”)</li>
+        <li><code>detailsTitle</code> (NL/EN, “Locatie &amp; praktisch”)</li>
+        <li><code>details[]</code>: per regel <b>Kopje</b> (Waar, Vervoer…) + <b>Tekst</b> (NL/EN)</li>
+        <li>het oude veld “Praktisch” blijft als optionele korte regel (bv. “60 min”), of verbergen als het leeg is</li>
+      </ul>
+    </li>
+    <li><code>sanity/queries.ts:306</code>: nieuwe velden mee ophalen (met <code>t()</code> voor NL/EN).</li>
+    <li><code>app/[lang]/lessen/page.tsx:222-254</code>: prijslijst + Waar/Vervoer tonen onder de tekst, zelfde stijl als “Praktisch” op de retreatpagina; bedragen via <code>euro()</code> (<code>lib/format.ts</code>).</li>
+    <li><code>lib/dictionary.ts</code>: standaardkoppen NL/EN (“Prijzen per persoon” / “Prices per person”, “Locatie &amp; praktisch” / “Location &amp; practical”, “p.p.” / “pp”).</li>
+    <li>Optioneel: JSON-LD <code>Offer</code>s voor de privélessen (Google), <code>lib/jsonld.ts</code>.</li>
+    <li><code>sanity/types.ts</code> opnieuw genereren; Lessen-overzicht in de Studio (vinkjes per blok) aanvullen.</li>
+  </ul>
+  <p>Daarna invullen <span class="tag t-studio">studio</span>: Lessen → Lessen-pagina → tab <b>Privéles</b> → Kop “Tarieven privélessen”, Tekst = de introzin, 3 prijsregels, 2 praktische regels → Vertalen (AI) voor EN → Publiceren.</p>
+
+  <h2>Volgorde van uitvoeren</h2>
+  <ol>
+    <li><b>Zelf in de Studio, nu</b>: Raf aanmaken (#2), testimonial “[Naam]” invullen + kiezen op Home (#4).</li>
+    <li><b>Snelle code</b>: prijs weg bij voorbije retreats (#3), nieuwe yogamat (#6), cursor (#1).</li>
+    <li><b>Nieuwe Studio-velden</b>: privélessen (#7), Instagram-keuze (#5), testimonials automatisch + samen met reviews (#4).</li>
+  </ol>
+  <p class="muted small">Open vragen: #2 3 kolommen? · #3 ook “Deelnemers” weg op de terugblik-pagina (en op het kaartje)? · #1 kleur: ember (onze accentkleur) of iets anders?</p>
+</main>
+
+<script>
+(() => {
+  const demo = document.getElementById("demo");
+  if (!demo || !matchMedia("(pointer: fine)").matches) return;
+  const dot = document.createElement("div"), ring = document.createElement("div");
+  dot.className = "c-dot"; ring.className = "c-ring"; document.body.append(ring, dot);
+  let x = 0, y = 0, dx = 0, dy = 0, rx = 0, ry = 0, raf = 0, inside = false;
+  const tick = () => {
+    dx += (x - dx) * .25; dy += (y - dy) * .25;   // dot ≈ 0.3 s
+    rx += (x - rx) * .1;  ry += (y - ry) * .1;    // ring ≈ 0.7 s
+    dot.style.translate = `${dx}px ${dy}px`; ring.style.translate = `${rx}px ${ry}px`;
+    raf = Math.abs(x - rx) + Math.abs(y - ry) > .1 ? requestAnimationFrame(tick) : 0;
+  };
+  demo.addEventListener("mousemove", (e) => {
+    x = e.clientX; y = e.clientY;
+    if (!inside) { dx = rx = x; dy = ry = y; inside = true; }
+    const t = e.target, hover = !!t.closest("a, button"), white = !!t.closest("[data-cursor=white]");
+    for (const el of [dot, ring]) { el.classList.add("c-on"); el.classList.toggle("hover", hover); el.classList.toggle("white", white); }
+    if (!raf) raf = requestAnimationFrame(tick);
+  });
+  demo.addEventListener("mouseleave", () => { inside = false; dot.classList.remove("c-on"); ring.classList.remove("c-on"); });
+  document.addEventListener("scroll", () => { dot.classList.remove("c-on"); ring.classList.remove("c-on"); inside = false; }, { passive: true });
+})();
+</script>
+</body>
+</html>
