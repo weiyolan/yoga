@@ -31,7 +31,7 @@ export function Help() {
           Nieuwsbrief: Contact → Nieuwsbrieven → +. Schrijf, kijk het voorbeeld rechts na, stuur een testmail naar jezelf, publiceer, dan “Nieuwsbrief versturen…” onderaan. Het paneel rechts toont bij welke stap je bent. Wie hem krijgt zie je in Contact → Contactboek.
         </Text>
         <Text size={1} muted>
-          Google: elke pagina en retreat heeft “SEO & delen” met bovenaan een voorbeeld van hoe Google ze toont (NL en EN). Geef elke pagina een eigen beschrijving van 120–155 tekens; leeg = de introtekst. Elke foto in de Fotobank een alt-tekst (Fotobank → Alt-teksten aanvullen), en waar je het weet de fotograaf: die staat onder de foto op volledig scherm en Google krijgt hem mee als maker (Inhoud → Fotografen).
+          Google: elke pagina en retreat heeft “SEO & delen” met bovenaan een voorbeeld van hoe Google ze toont (NL en EN). Geef elke pagina een eigen beschrijving van 120–155 tekens; leeg = de introtekst. Elke foto in de Fotobank een alt-tekst (Fotobank → Alt-teksten aanvullen), en waar je het weet de fotograaf: die staat onder de foto op volledig scherm en Google krijgt hem mee als maker (Fotobank → Fotografen).
         </Text>
       </Stack>
     </Box>

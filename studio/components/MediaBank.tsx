@@ -6,6 +6,7 @@ import { SearchIcon } from "@sanity/icons/Search";
 import { SparklesIcon } from "@sanity/icons/Sparkles";
 import { TrashIcon } from "@sanity/icons/Trash";
 import { UploadIcon } from "@sanity/icons/Upload";
+import { UsersIcon } from "@sanity/icons/Users";
 import {
   Badge,
   Box,
@@ -45,7 +46,7 @@ type Item = {
   photographer?: { _type: "reference"; _ref: string } | null;
   used: number;
 };
-type Photographer = { _id: string; name?: string };
+type Photographer = { _id: string; name?: string; website?: string };
 type Client = ReturnType<typeof useClient>;
 
 const QUERY = `*[_type == "mediaItem" && !(_id in path("drafts.**"))] | order(_createdAt desc){
@@ -74,7 +75,7 @@ const FILTERS: { id: string; title: string; match: (i: Item) => boolean }[] = [
   })),
 ];
 
-const PHOTOGRAPHERS = `*[_type == "photographer" && !(_id in path("drafts.**"))] | order(name asc){ _id, name }`;
+const PHOTOGRAPHERS = `*[_type == "photographer" && !(_id in path("drafts.**"))] | order(name asc){ _id, name, website }`;
 
 /** Patch the published photo and, when there is one, its draft (the Fotobank edits apply at once). `null` clears a field. */
 export async function save(
@@ -133,6 +134,8 @@ export function MediaBank() {
   const [q, setQ] = useState("");
   const [sel, setSel] = useState<string | null>(null);
   const [busy, setBusy] = useState<string | null>(null);
+  // Fotografen dialog; `assignTo` = the photo that gets a newly added photographer
+  const [people, setPeople] = useState<{ assignTo?: string } | null>(null);
   const upload = useRef<HTMLInputElement>(null);
 
   const load = useCallback(
@@ -303,6 +306,13 @@ export function MediaBank() {
                 disabled={!!busy || !todo.length}
                 onClick={() => fillAll(todo)}
                 title="AI vult de ontbrekende alt-teksten in (NL + EN), alleen waar ze leeg zijn"
+              />
+              <Button
+                icon={UsersIcon}
+                mode="ghost"
+                text={`Fotografen (${photographers.length})`}
+                onClick={() => setPeople({})}
+                title="Wie de foto's nam: toevoegen, aanpassen, verwijderen"
               />
               <Button
                 icon={AddIcon}
@@ -519,6 +529,7 @@ export function MediaBank() {
                 value={item.photographer?._ref ?? ""}
                 onChange={(e) => {
                   const ref = e.currentTarget.value;
+                  if (ref === NEW) return setPeople({ assignTo: item._id });
                   update(item, {
                     photographer: ref ? { _type: "reference", _ref: ref } : null,
                   });
@@ -530,9 +541,10 @@ export function MediaBank() {
                     {p.name || "(zonder naam)"}
                   </option>
                 ))}
+                <option value={NEW}>+ Nieuwe fotograaf…</option>
               </Select>
               <Text size={0} muted>
-                Staat klein onder de foto op volledig scherm. Nieuwe fotograaf: Inhoud → Fotografen.
+                Staat klein onder de foto op volledig scherm, met link naar hun website.
               </Text>
             </Stack>
             <Flex as="label" gap={2} align="center">
@@ -583,6 +595,192 @@ export function MediaBank() {
           </Stack>
         </Card>
       ) : null}
+      {people ? (
+        <Photographers
+          client={client}
+          list={photographers}
+          items={items ?? []}
+          onClose={() => setPeople(null)}
+          onAdded={(p) => {
+            setPhotographers((l) => [...l, p].sort((a, b) => (a.name ?? "").localeCompare(b.name ?? "")));
+            const photo = items?.find((i) => i._id === people.assignTo);
+            if (photo) {
+              void update(photo, { photographer: { _type: "reference", _ref: p._id } });
+              setPeople(null);
+            }
+          }}
+          onChanged={(id, set) =>
+            setPhotographers((l) =>
+              set ? l.map((p) => (p._id === id ? { ...p, ...set } : p)) : l.filter((p) => p._id !== id),
+            )
+          }
+          onError={(title, err) => toast.push({ status: "error", title, description: String(err) })}
+        />
+      ) : null}
+    </Flex>
+  );
+}
+
+const NEW = "__new";
+
+/** "https://" in front when it's left out (miloweiler.com → https://miloweiler.com). */
+const asUrl = (s: string) => {
+  const v = s.trim();
+  return !v || /^https?:\/\//i.test(v) ? v : `https://${v}`;
+};
+
+/**
+ * Fotobank → Fotografen: everyone who took photos, edited in place (saved when you leave a field).
+ * Adding from a photo's dropdown assigns the new photographer to that photo. Deleting is only
+ * possible once no photo uses them any more.
+ */
+function Photographers({
+  client,
+  list,
+  items,
+  onClose,
+  onAdded,
+  onChanged,
+  onError,
+}: {
+  client: Client;
+  list: Photographer[];
+  items: Item[];
+  onClose: () => void;
+  onAdded: (p: Photographer) => void;
+  onChanged: (id: string, set: Partial<Photographer> | null) => void;
+  onError: (title: string, err: unknown) => void;
+}) {
+  const [draft, setDraft] = useState({ name: "", website: "" });
+  const [busy, setBusy] = useState(false);
+  const uses = (id: string) => items.filter((i) => i.photographer?._ref === id).length;
+
+  const add = async () => {
+    const name = draft.name.trim();
+    if (!name) return;
+    setBusy(true);
+    try {
+      const website = asUrl(draft.website) || undefined;
+      const doc = await client.create({ _type: "photographer", name, website });
+      setDraft({ name: "", website: "" });
+      onAdded({ _id: doc._id, name, website });
+    } catch (err) {
+      onError("Fotograaf toevoegen", err);
+    }
+    setBusy(false);
+  };
+  const edit = async (p: Photographer, set: Partial<Photographer>) => {
+    const k = Object.keys(set)[0] as "name" | "website";
+    if ((set[k] ?? "") === (p[k] ?? "") || (k === "name" && !set.name)) return;
+    onChanged(p._id, set);
+    try {
+      await save(client, p._id, { [k]: set[k] || null });
+    } catch (err) {
+      onError("Niet bewaard", err);
+    }
+  };
+  const remove = async (p: Photographer) => {
+    try {
+      await client.transaction().delete(p._id).delete(`drafts.${p._id}`).commit();
+      onChanged(p._id, null);
+    } catch (err) {
+      onError("Verwijderen", err);
+    }
+  };
+
+  return (
+    <Dialog id="media-photographers" header="Fotografen" onClose={onClose} width={1}>
+      <Stack padding={4} gap={4}>
+        <Text size={1} muted>
+          De naam staat klein onder de foto op volledig scherm (met link naar de website) en gaat
+          naar Google als maker van de foto. Kies per foto wie hem nam.
+        </Text>
+        {list.map((p) => (
+          <PhotographerRow key={p._id} p={p} uses={uses(p._id)} onEdit={(set) => edit(p, set)} onRemove={() => remove(p)} />
+        ))}
+        <Card padding={3} radius={2} tone="primary" border>
+          <Stack gap={2}>
+            <Text size={1} weight="semibold">
+              Nieuwe fotograaf
+            </Text>
+            <Flex gap={2} wrap="wrap">
+              <Box flex={1} style={{ minWidth: 140 }}>
+                <TextInput
+                  fontSize={1}
+                  placeholder="Naam, bv. Milo Weiler"
+                  value={draft.name}
+                  autoFocus
+                  onChange={(e) => setDraft((d) => ({ ...d, name: e.currentTarget.value }))}
+                  onKeyDown={(e) => e.key === "Enter" && add()}
+                />
+              </Box>
+              <Box flex={1} style={{ minWidth: 140 }}>
+                <TextInput
+                  fontSize={1}
+                  placeholder="Website (optioneel)"
+                  value={draft.website}
+                  onChange={(e) => setDraft((d) => ({ ...d, website: e.currentTarget.value }))}
+                  onKeyDown={(e) => e.key === "Enter" && add()}
+                />
+              </Box>
+              <Button icon={AddIcon} tone="primary" fontSize={1} text="Toevoegen" disabled={busy || !draft.name.trim()} onClick={add} />
+            </Flex>
+          </Stack>
+        </Card>
+      </Stack>
+    </Dialog>
+  );
+}
+
+function PhotographerRow({
+  p,
+  uses,
+  onEdit,
+  onRemove,
+}: {
+  p: Photographer;
+  uses: number;
+  onEdit: (set: Partial<Photographer>) => void;
+  onRemove: () => void;
+}) {
+  const [vals, setVals] = useState({ name: p.name ?? "", website: p.website ?? "" });
+  useEffect(() => setVals({ name: p.name ?? "", website: p.website ?? "" }), [p.name, p.website]);
+  return (
+    <Flex gap={2} align="center" wrap="wrap">
+      <Box flex={1} style={{ minWidth: 140 }}>
+        <TextInput
+          fontSize={1}
+          value={vals.name}
+          onChange={(e) => setVals((v) => ({ ...v, name: e.currentTarget.value }))}
+          onBlur={() => onEdit({ name: vals.name.trim() })}
+          customValidity={vals.name.trim() ? undefined : "Naam is verplicht"}
+        />
+      </Box>
+      <Box flex={1} style={{ minWidth: 140 }}>
+        <TextInput
+          fontSize={1}
+          placeholder="Website (optioneel)"
+          value={vals.website}
+          onChange={(e) => setVals((v) => ({ ...v, website: e.currentTarget.value }))}
+          onBlur={() => {
+            const website = asUrl(vals.website);
+            setVals((v) => ({ ...v, website }));
+            onEdit({ website });
+          }}
+        />
+      </Box>
+      <Badge tone={uses ? "primary" : "default"} fontSize={0}>
+        {uses} foto{uses === 1 ? "" : "'s"}
+      </Badge>
+      <Button
+        icon={TrashIcon}
+        mode="bleed"
+        tone="critical"
+        fontSize={1}
+        disabled={!!uses}
+        title={uses ? "Nog gekozen bij foto's: haal hem daar eerst weg" : "Verwijderen"}
+        onClick={onRemove}
+      />
     </Flex>
   );
 }
