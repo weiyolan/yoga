@@ -37,17 +37,8 @@ export default async function Home({ params }: PageProps<"/[lang]">) {
   ]);
   const d = getDictionary(lang);
   const t = d.home;
-  // Curated testimonials first, then the latest approved reviews (4★+).
-  const quotes = [
-    ...(page?.testimonials ?? []),
-    ...(page?.reviews ?? []).map((r) => ({
-      _id: r._id,
-      quote: r.text,
-      name: r.name,
-      context: r.context,
-      rating: r.rating,
-    })),
-  ].slice(0, 12);
+  // every testimonial with “Op Home” on (Studio → Contact → Testimonials)
+  const quotes = (page?.testimonials ?? []).map((q) => ({ ...q, quote: q.text }));
   const f = page?.featuredRetreat;
   const cards = page?.upcomingRetreats ?? [];
   const handle = layout?.instagram?.match(/instagram\.com\/([^/?#]+)/)?.[1];

@@ -31,39 +31,43 @@ const MessageView = submissionView({
   ],
 });
 
-/** The public copy of a review submission (no e-mail): `review-<uuid>`. */
+/** The testimonial made from a submission (no e-mail): `testimonial-<uuid>`. */
 const publicId = (id: string) =>
-  `review-${id.replace(/^reviewSubmission\./, "")}`;
+  `testimonial-${id.replace(/^reviewSubmission\./, "")}`;
 
 const ReviewView = submissionView({
   title: (d) =>
-    `${str(d.name) || "Review"} ${"★".repeat(Number(d.rating) || 0)}`,
+    `${str(d.name) || "Testimonial"} ${"★".repeat(Number(d.rating) || 0)}`,
   statuses: REVIEW_STATUSES,
   rows: [
-    { label: "Review", render: (d) => str(d.text) },
+    { label: "Tekst", render: (d) => str(d.text) },
     { label: "E-mail (niet publiek)", render: (d) => mail(d.email) },
     { label: "Score", render: (d) => `${d.rating ?? "-"} / 5` },
   ],
-  // the copy on the site: name and text can be tidied there (kept on re-publish)
+  // the testimonial on the site: name, text, “Op Home” can be changed there (kept on re-publish)
   extra: (d) =>
     d.status === "approved" ? (
       <Box>
-        <IntentButton intent="edit" params={{ id: publicId(d._id), type: "review" }} icon={EditIcon} mode="ghost" text="Tekst op de site aanpassen" />
+        <IntentButton intent="edit" params={{ id: publicId(d._id), type: "testimonial" }} icon={EditIcon} mode="ghost" text="Testimonial openen (tekst, Op Home…)" />
       </Box>
     ) : null,
-  // Gepubliceerd → public copy without e-mail; anything else → offline. Edits on the copy are kept on re-publish.
+  // Gepubliceerd → a testimonial without e-mail; anything else → offline. Edits on the testimonial are kept on re-publish.
   onStatus: async (client, d, status) => {
     const id = publicId(d._id);
     if (status !== "approved")
       return void (await client.delete(id).catch(() => {}));
+    const lang = str(d.lang) || "nl";
     await client.createIfNotExists({
       _id: id,
-      _type: "review",
+      _type: "testimonial",
+      source: "form",
+      showOnHome: Number(d.rating) >= 4,
+      showOnRetreat: true,
       name: d.name,
       rating: d.rating,
-      text: d.text,
-      lang: d.lang,
-      submittedAt: d.submittedAt,
+      quote: [{ _key: lang, _type: "internationalizedArrayTextValue", language: lang, value: d.text }],
+      lang,
+      date: d.submittedAt,
       retreat: d.retreat,
     });
   },

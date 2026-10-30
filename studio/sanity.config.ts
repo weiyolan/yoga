@@ -79,7 +79,7 @@ export default defineConfig({
     // + the AI helpers (✨, via the site's /api/ai): alt text on photos, NL → EN on everything with texts
     actions: (prev, { schemaType }) => {
       if (schemaType === "signup") return [confirmationMailAction, ...prev.filter(({ action }) => action !== "duplicate")];
-      if (formTypes.has(schemaType) || schemaType === "review") return prev.filter(({ action }) => action !== "duplicate");
+      if (formTypes.has(schemaType)) return prev.filter(({ action }) => action !== "duplicate");
       const base = singletons.has(schemaType) ? prev.filter(({ action }) => action && singletonActions.has(action)) : prev;
       // newsletters: “Versturen” is the main button once published (it hides itself while there are unpublished changes)
       if (schemaType === "newsletter") return [sendNewsletterAction, ...base, translateAction];

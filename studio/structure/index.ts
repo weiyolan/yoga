@@ -3,6 +3,7 @@ import { AddIcon } from "@sanity/icons/Add";
 import { CalendarIcon } from "@sanity/icons/Calendar";
 import { CogIcon } from "@sanity/icons/Cog";
 import { ClipboardIcon } from "@sanity/icons/Clipboard";
+import { CommentIcon } from "@sanity/icons/Comment";
 import { ComposeIcon } from "@sanity/icons/Compose";
 import { ControlsIcon } from "@sanity/icons/Controls";
 import { MenuIcon } from "@sanity/icons/Menu";
@@ -32,6 +33,7 @@ import { Help } from "../components/Help";
 import { Placeholders } from "../components/Placeholders";
 import { countBadgeIcon } from "../components/CountBadgeIcon";
 import { SignupTable } from "../components/SignupTable";
+import { TestimonialTable } from "../components/TestimonialTable";
 import { RetreatList, RETREATS_PAGE_ID } from "../components/RetreatList";
 import { statusList } from "../components/StatusList";
 import { documentNode } from "./views";
@@ -152,7 +154,7 @@ const SignupList = statusList({
   ],
 });
 
-/** Reviews: one list, by status and per retreat. The public copy opens from the review itself (structure/views.tsx). */
+/** Testimonial submissions (the form): one list, by status and per retreat. The testimonial opens from the submission itself (structure/views.tsx). */
 const ReviewList = statusList({
   type: "reviewSubmission",
   perRetreat: true,
@@ -235,20 +237,54 @@ export const structure: StructureResolver = (S) =>
               documentNode(S, "message").schemaType("message").documentId(id),
             ),
         ),
+      // what participants say: the table, the form submissions (with e-mail) and every testimonial (studio/components/TestimonialTable.tsx)
       S.listItem()
-        .id("reviews")
-        .title("Reviews")
+        .id("testimonials")
+        .title("Testimonials")
         .icon(countBadgeIcon(StarIcon, "reviewSubmission"))
         .child(
-          S.component(ReviewList)
-            .id("reviews")
-            .title("Reviews")
-            .maxWidth(400)
-            .child((id) =>
-              documentNode(S, "reviewSubmission").schemaType("reviewSubmission").documentId(id),
-            ),
+          S.list()
+            .id("testimonials")
+            .title("Testimonials")
+            .menuItems([S.menuItem().title("Nieuwe testimonial").icon(AddIcon).showAsAction(true).intent({ type: "create", params: { type: "testimonial" } })])
+            .items([
+              S.listItem()
+                .id("testimonials-table")
+                .title("Tabel")
+                .icon(ThListIcon)
+                .child(S.component(TestimonialTable).id("testimonials-table").title("Testimonials: tabel")),
+              S.listItem()
+                .id("reviews")
+                .title("Inzendingen (formulier)")
+                .icon(countBadgeIcon(StarIcon, "reviewSubmission"))
+                .child(
+                  S.component(ReviewList)
+                    .id("reviews")
+                    .title("Inzendingen")
+                    .maxWidth(400)
+                    .child((id) => documentNode(S, "reviewSubmission").schemaType("reviewSubmission").documentId(id)),
+                ),
+              S.divider().title("Op de site"),
+              S.listItem()
+                .id("testimonials-home")
+                .title("Op Home")
+                .icon(HomeIcon)
+                .child(
+                  S.documentList()
+                    .id("testimonials-home")
+                    .title("Op Home")
+                    .schemaType("testimonial")
+                    .filter('_type == "testimonial" && showOnHome == true')
+                    .defaultOrdering([{ field: "orderRank", direction: "asc" }, { field: "date", direction: "desc" }]),
+                ),
+              S.listItem()
+                .id("testimonials-all")
+                .title("Alle testimonials")
+                .icon(CommentIcon)
+                .child(S.documentTypeList("testimonial").title("Alle testimonials").defaultOrdering([{ field: "date", direction: "desc" }])),
+            ]),
         ),
-      // every address from sign-ups, newsletter, contact form and reviews (components/ContactBook.tsx)
+      // every address from sign-ups, newsletter, contact form and testimonials (components/ContactBook.tsx)
       S.listItem()
         .id("contacts")
         .title("Contactboek")
@@ -321,7 +357,6 @@ export const structure: StructureResolver = (S) =>
             [{ type: "confirmationMail", title: "Nieuwe bevestigingsmail" }],
           ),
         ),
-      S.documentTypeListItem("testimonial").title("Testimonials"),
       // every photo as tiles with search, filters, upload and AI; a photo opens large with its fields (components/MediaBank.tsx)
       S.listItem()
         .id("media")
