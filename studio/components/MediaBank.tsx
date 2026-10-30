@@ -769,9 +769,11 @@ function PhotographerRow({
           }}
         />
       </Box>
-      <Badge tone={uses ? "primary" : "default"} fontSize={0}>
-        {uses} foto{uses === 1 ? "" : "'s"}
-      </Badge>
+      <Flex justify="flex-end" style={{ width: 64 }}>
+        <Badge tone={uses ? "primary" : "default"} fontSize={0}>
+          {uses} foto{uses === 1 ? "" : "'s"}
+        </Badge>
+      </Flex>
       <Button
         icon={TrashIcon}
         mode="bleed"
