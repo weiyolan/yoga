@@ -53,14 +53,19 @@ export async function POST(request: Request) {
     return new Response("No recipient", { status: 500 });
   }
 
+  // reading a received mail needs a Full access API key; a "Sending access" key gets restricted_api_key
   const { data: mail, error } = await resend.emails.receiving.get(email_id);
-  if (error || !mail?.raw?.download_url) {
+  if (error || !mail) {
     console.error("inbound: get", email_id, error);
-    return new Response("Not available yet", { status: 500 }); // Resend retries
+    const hint = error?.name === "restricted_api_key" ? " (RESEND_API_KEY needs Full access)" : "";
+    return new Response(`Get failed: ${error?.name ?? "no data"}: ${error?.message ?? ""}${hint}`, { status: 500 }); // Resend retries
   }
-  const raw = await fetch(mail.raw.download_url);
-  if (!raw.ok) return new Response("Raw mail not available", { status: 500 });
-  const parsed = await PostalMime.parse(await raw.arrayBuffer(), { attachmentEncoding: "base64" });
+  // the raw message keeps attachments and inline images; without it, the parsed html/text
+  const raw = mail.raw?.download_url ? await fetch(mail.raw.download_url) : null;
+  if (raw && !raw.ok) return new Response(`Raw mail not available (${raw.status})`, { status: 500 });
+  const parsed = raw
+    ? await PostalMime.parse(await raw.arrayBuffer(), { attachmentEncoding: "base64" })
+    : { from: undefined, subject: mail.subject, text: mail.text ?? "", html: mail.html ?? undefined, attachments: [] };
 
   const name = parsed.from?.name || addr(sender);
   const fromAddr = addr(from);
@@ -87,7 +92,7 @@ export async function POST(request: Request) {
   );
   if (sendError) {
     console.error("inbound: forward", email_id, sendError);
-    return new Response("Forward failed", { status: 500 });
+    return new Response(`Forward failed: ${sendError.name}: ${sendError.message}`, { status: 500 });
   }
   return new Response(null, { status: 204 });
 }
