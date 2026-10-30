@@ -9,6 +9,9 @@ import { buildMetadata } from "@/lib/metadata";
 import { langParam } from "@/lib/routes";
 import { sanityFetch } from "@/sanity/fetch";
 import { ABOUT_QUERY } from "@/sanity/queries";
+import { urlFor } from "@/sanity/image";
+import type { ABOUT_QUERY_RESULT } from "@/sanity/types";
+import { CollabTower } from "@/components/CollabTower";
 
 export async function generateMetadata({ params }: PageProps<"/[lang]/over-ons">) {
   const lang = await langParam(params);
@@ -30,11 +33,55 @@ function Video({ url }: { url: string }) {
   return vimeo ? <iframe className="hero-iframe" src={`https://player.vimeo.com/video/${vimeo}?background=1&dnt=1`} title="" aria-hidden="true" tabIndex={-1} allow="autoplay" /> : null;
 }
 
+type Person = NonNullable<NonNullable<ABOUT_QUERY_RESULT>["collaborators"]>[number];
+
+/** A square portrait for a tower stone (the hotspot from the Fotobank is kept). */
+const portrait = (m: Person["portrait"]) => {
+  const url = m?.image?.asset?.url;
+  if (!url) return null;
+  return url.startsWith("/") ? url : urlFor(m).width(320).height(320).url();
+};
+
+/** One collaborator: portrait, name, role, bio, links (the classic list, and the card of the tower). */
+function Collaborator({ p, t }: { p: Person; t: ReturnType<typeof getDictionary>["about"] }) {
+  const links = [...(p.website ? [{ _key: "web", label: t.website, url: p.website }] : []), ...(p.links ?? [])];
+  return (
+    <>
+      <Photo media={p.portrait} ratio="r1" className="round" sizes="96px" />
+      <div>
+        <h3>{p.name}</h3>
+        {p.role ? <p className="muted small">{p.role}</p> : null}
+        <RichText value={p.bio} />
+        {links.length ? (
+          <p className="row small" style={{ gap: 16, marginTop: 8 }}>
+            {links.map((l) =>
+              l.url ? (
+                <a key={l._key} className="link" href={l.url} target="_blank" rel="noopener">
+                  {l.label}
+                </a>
+              ) : null,
+            )}
+          </p>
+        ) : null}
+      </div>
+    </>
+  );
+}
+
 export default async function About({ params }: PageProps<"/[lang]/over-ons">) {
   const lang = await langParam(params);
   const page = await sanityFetch({ query: ABOUT_QUERY, lang });
   const t = getDictionary(lang).about;
   const objects = [YogaMat, DivingMask];
+  const list = page?.collaborators?.length ? (
+    <ul className="collabs">
+      {page.collaborators.map((p) => (
+        <li key={p._id} id={anchor(p.name)}>
+          <Collaborator p={p} t={t} />
+        </li>
+      ))}
+    </ul>
+  ) : null;
 
   return (
     <>
@@ -113,32 +160,26 @@ export default async function About({ params }: PageProps<"/[lang]/over-ons">) {
                 {page.collaboratorsIntro}
               </p>
             ) : null}
-            <ul className="collabs">
-              {page.collaborators.map((p) => {
-                const links = [...(p.website ? [{ _key: "web", label: t.website, url: p.website }] : []), ...(p.links ?? [])];
-                return (
-                  <li key={p._id} id={anchor(p.name)}>
-                    <Photo media={p.portrait} ratio="r1" className="round" sizes="96px" />
-                    <div>
-                      <h3>{p.name}</h3>
-                      {p.role ? <p className="muted small">{p.role}</p> : null}
-                      <RichText value={p.bio} />
-                      {links.length ? (
-                        <p className="row small" style={{ gap: 16, marginTop: 8 }}>
-                          {links.map((l) =>
-                            l.url ? (
-                              <a key={l._key} className="link" href={l.url} target="_blank" rel="noopener">
-                                {l.label}
-                              </a>
-                            ) : null,
-                          )}
-                        </p>
-                      ) : null}
-                    </div>
-                  </li>
-                );
-              })}
-            </ul>
+            {page.collaboratorsStyle === "classic" ? (
+              list
+            ) : (
+              // the tower + the same list for Google, screen readers, “reduce motion” and no JavaScript (app/globals.css .tower-wrap)
+              <div className="tower-wrap">
+                <CollabTower
+                  label={page.collaboratorsTitle || t.collaboratorsTitle}
+                  closeLabel={t.close}
+                  people={page.collaborators.map((p) => ({
+                    key: p._id,
+                    id: anchor(p.name),
+                    name: p.name ?? "",
+                    role: p.role,
+                    img: portrait(p.portrait),
+                    card: <Collaborator p={p} t={t} />,
+                  }))}
+                />
+                {list}
+              </div>
+            )}
           </div>
         </section>
       ) : null}

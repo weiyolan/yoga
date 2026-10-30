@@ -178,6 +178,7 @@ const nl = {
     collaboratorsLabel: "Samenwerkingen",
     collaboratorsTitle: "Onze fijne samenwerkingen",
     website: "Website",
+    close: "Sluiten",
   },
   faq: {
     label: "FAQ",
@@ -484,6 +485,7 @@ const en: Dictionary = {
     collaboratorsLabel: "Collaborations",
     collaboratorsTitle: "The lovely people we work with",
     website: "Website",
+    close: "Close",
   },
   faq: {
     label: "FAQ",
