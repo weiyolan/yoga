@@ -710,7 +710,11 @@ function Photographers({
                   placeholder="Naam, bv. Milo Weiler"
                   value={draft.name}
                   autoFocus
-                  onChange={(e) => setDraft((d) => ({ ...d, name: e.currentTarget.value }))}
+                  onChange={(e) => {
+                    // read now: React clears currentTarget before it runs the updater
+                    const value = e.currentTarget.value;
+                    setDraft((d) => ({ ...d, name: value }));
+                  }}
                   onKeyDown={(e) => e.key === "Enter" && add()}
                 />
               </Box>
@@ -719,7 +723,11 @@ function Photographers({
                   fontSize={1}
                   placeholder="Website (optioneel)"
                   value={draft.website}
-                  onChange={(e) => setDraft((d) => ({ ...d, website: e.currentTarget.value }))}
+                  onChange={(e) => {
+                    // read now: React clears currentTarget before it runs the updater
+                    const value = e.currentTarget.value;
+                    setDraft((d) => ({ ...d, website: value }));
+                  }}
                   onKeyDown={(e) => e.key === "Enter" && add()}
                 />
               </Box>
@@ -751,7 +759,11 @@ function PhotographerRow({
         <TextInput
           fontSize={1}
           value={vals.name}
-          onChange={(e) => setVals((v) => ({ ...v, name: e.currentTarget.value }))}
+          onChange={(e) => {
+                    // read now: React clears currentTarget before it runs the updater
+                    const value = e.currentTarget.value;
+                    setVals((v) => ({ ...v, name: value }));
+                  }}
           onBlur={() => onEdit({ name: vals.name.trim() })}
           customValidity={vals.name.trim() ? undefined : "Naam is verplicht"}
         />
@@ -761,7 +773,11 @@ function PhotographerRow({
           fontSize={1}
           placeholder="Website (optioneel)"
           value={vals.website}
-          onChange={(e) => setVals((v) => ({ ...v, website: e.currentTarget.value }))}
+          onChange={(e) => {
+                    // read now: React clears currentTarget before it runs the updater
+                    const value = e.currentTarget.value;
+                    setVals((v) => ({ ...v, website: value }));
+                  }}
           onBlur={() => {
             const website = asUrl(vals.website);
             setVals((v) => ({ ...v, website }));
