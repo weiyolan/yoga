@@ -198,7 +198,11 @@ export const HOME_QUERY = defineQuery(`*[_id == "homePage"][0]{
   "upcomingRetreats": *[_type == "retreat" && ${UPCOMING}] | order(startDate asc)[0...3]${RETREAT_CARD},
   "styles": *[_type == "yogaClass"] | order(orderRank asc)${STYLE},
   "studios": *[_type == "studio"] | order(name asc){ _id, name, website },
-  "instagram": *[_type == "mediaItem" && highlight == true] | order(_createdAt desc)[0...6]${MEDIA},
+  // own choice (Home → Instagram), else the 6 newest highlighted photos
+  "instagram": select(
+    count(instagramPhotos) > 0 => instagramPhotos[0...6]->${MEDIA},
+    *[_type == "mediaItem" && highlight == true] | order(_createdAt desc)[0...6]${MEDIA}
+  ),
   "testimonials": testimonials[]->${TESTIMONIAL},
   "reviews": *[_type == "review" && rating >= 4 && !(_id in path("drafts.**"))] | order(submittedAt desc)[0...12]${REVIEW},
   "aboutTitle": ${t("aboutTitle")},
