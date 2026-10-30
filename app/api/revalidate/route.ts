@@ -7,6 +7,8 @@ import { revalidatePath, revalidateTag } from "next/cache";
 import { NextResponse, type NextRequest } from "next/server";
 import { SANITY_TAG } from "@/sanity/fetch";
 
+const PRIVATE_TYPES = new Set(["signup", "message", "subscriber", "reviewSubmission", "aiTicket"]);
+
 export async function POST(request: NextRequest) {
   const secret = process.env.SANITY_REVALIDATE_SECRET;
   if (!secret) return NextResponse.json({ message: "SANITY_REVALIDATE_SECRET is not set" }, { status: 500 });
@@ -19,6 +21,8 @@ export async function POST(request: NextRequest) {
   } catch {
     return NextResponse.json({ message: "Bad body" }, { status: 400 });
   }
+  // Form submissions and AI tickets are private (dotted ids) and never on a page: nothing to refresh.
+  if (type && PRIVATE_TYPES.has(type)) return NextResponse.json({ revalidated: false, type });
   // expire: 0 → the next visitor gets the new content (not a stale copy first)
   revalidateTag(SANITY_TAG, { expire: 0 });
   // …and every page path explicitly, so hosts that cache per path (Netlify) refresh them too.

@@ -9,9 +9,9 @@ export const galleryPage = defineType({
   type: "document",
   icon: ImagesIcon,
   fields: [
-    i18nString("title", { title: "Kop", required: true }),
-    i18nText("intro", { title: "Intro (optioneel)", max: 200 }),
-    defineField({ name: "seo", title: "SEO & delen", type: "seo" }),
+    i18nString("title", { title: "Kop", required: true, description: "Grote titel bovenaan de Gallery-pagina; ook de paginatitel in Google als je bij SEO niets invult." }),
+    i18nText("intro", { title: "Intro (optioneel)", max: 200, description: "Korte tekst onder de kop van de Gallery-pagina, boven de foto's; ook reserve-omschrijving voor Google. Leeg = geen intro." }),
+    defineField({ name: "seo", title: "SEO & delen", type: "seo", description: "Niet zichtbaar op de pagina zelf: titel, omschrijving en deelfoto van de Gallery-pagina in Google en bij delen via WhatsApp of sociale media." }),
   ],
   preview: { prepare: () => ({ title: "Gallery", subtitle: "Foto's: Fotobank → Tonen in gallery" }) },
 });

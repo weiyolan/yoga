@@ -11,7 +11,7 @@
     "esModuleInterop": true,
     "resolveJsonModule": true,
     "isolatedModules": true,
-    "allowImportingTsExtensions": false
+    "allowImportingTsExtensions": true
   },
   "include": ["**/*.ts", "**/*.tsx", "../sanity/site.config.ts"],
   "exclude": ["node_modules", "dist"]

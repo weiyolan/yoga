@@ -1,15 +1,16 @@
+import Link from "next/link";
 import { ContactForm } from "@/components/Forms";
 import { Photo } from "@/components/Photo";
 import { getDictionary } from "@/lib/dictionary";
 import { buildMetadata } from "@/lib/metadata";
-import { langParam } from "@/lib/routes";
+import { href, langParam } from "@/lib/routes";
 import { sanityFetch } from "@/sanity/fetch";
 import { CONTACT_QUERY, LAYOUT_QUERY } from "@/sanity/queries";
 
 export async function generateMetadata({ params }: PageProps<"/[lang]/contact">) {
   const lang = await langParam(params);
   const page = await sanityFetch({ query: CONTACT_QUERY, lang });
-  return buildMetadata({ lang, route: "contact", seo: page?.seo, fallbackTitle: page?.title, fallbackImage: page?.photo });
+  return buildMetadata({ lang, route: "contact", seo: page?.seo, fallbackTitle: page?.title, fallbackDescription: page?.intro });
 }
 
 export default async function Contact({ params }: PageProps<"/[lang]/contact">) {
@@ -25,6 +26,10 @@ export default async function Contact({ params }: PageProps<"/[lang]/contact">) 
         <span className="label">{t.label}</span>
         {page?.title ? <h1 style={{ fontSize: "clamp(2.4rem,5vw,4rem)", marginBottom: 18 }}>{page.title}</h1> : null}
         {page?.intro ? <p className="muted">{page.intro}</p> : null}
+        <p className="small muted">
+          {getDictionary(lang).faq.contactHint}{" "}
+          <Link href={href(lang, "faq")}>{getDictionary(lang).faq.contactLink}</Link>.
+        </p>
         <ContactForm lang={lang} subjects={page?.subjects ?? []} notifyLabel={page?.notifyLabel ?? null} thanks={layout?.texts?.contactThanks} />
         <div className="g2" style={{ marginTop: 48, gap: 20, alignItems: "start" }}>
           {email ? (

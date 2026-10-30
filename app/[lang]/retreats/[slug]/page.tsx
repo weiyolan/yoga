@@ -1,17 +1,34 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { SignupForm } from "@/components/Forms";
-import { Lightbox, LightboxTrigger, type LightboxItem } from "@/components/Lightbox";
+import { HashRedirect } from "@/components/HashRedirect";
+import { JsonLd } from "@/components/JsonLd";
+import {
+  Lightbox,
+  LightboxTrigger,
+  type LightboxItem,
+} from "@/components/Lightbox";
 import { fullSrc, Photo } from "@/components/Photo";
 import { Paragraphs } from "@/components/RichText";
-import { Hero } from "@/components/sections";
+import { Hero, ReviewList } from "@/components/sections";
+import { Toc } from "@/components/Toc";
 import { getDictionary } from "@/lib/dictionary";
-import { dateRange, euro, join, photoCaption } from "@/lib/format";
-import { buildMetadata } from "@/lib/metadata";
-import { href, langParam } from "@/lib/routes";
+import { dateRange, euro, join, placesLabel, spotsLeft } from "@/lib/format";
+import { breadcrumbLd, imageUrl, retreatLd } from "@/lib/jsonld";
+import { buildMetadata, clip, sentences } from "@/lib/metadata";
+import {
+  href,
+  langParam,
+  retreatHref,
+  reviewHref,
+  signupHref,
+} from "@/lib/routes";
 import { isUpcoming, sanityFetch } from "@/sanity/fetch";
 import type { Media } from "@/sanity/image";
-import { LAYOUT_QUERY, RETREAT_BY_SLUG_QUERY, RETREAT_SLUGS_QUERY } from "@/sanity/queries";
+import {
+  RETREAT_BY_SLUG_QUERY,
+  RETREAT_SLUGS_QUERY,
+  SETTINGS_QUERY,
+} from "@/sanity/queries";
 
 /** Known retreats are prerendered; a new one renders on its first visit and is cached from then on. */
 export async function generateStaticParams() {
@@ -22,24 +39,56 @@ export async function generateStaticParams() {
 async function load(params: PageProps<"/[lang]/retreats/[slug]">["params"]) {
   const lang = await langParam(params);
   const { slug } = await params;
-  const retreat = await sanityFetch({ query: RETREAT_BY_SLUG_QUERY, params: { slug }, lang });
+  const retreat = await sanityFetch({
+    query: RETREAT_BY_SLUG_QUERY,
+    params: { slug },
+    lang,
+  });
   return { lang, slug, retreat };
 }
 
-export async function generateMetadata({ params }: PageProps<"/[lang]/retreats/[slug]">) {
+export async function generateMetadata({
+  params,
+}: PageProps<"/[lang]/retreats/[slug]">) {
   const { lang, slug, retreat } = await load(params);
   if (!retreat) return {};
-  return buildMetadata({ lang, route: "retreats", slug, seo: retreat.seo, fallbackTitle: retreat.title, fallbackImage: retreat.hero?.photo ?? retreat.cardPhoto });
+  // no SEO description: "22–29 mei 2027 · Dahab, Egypte · vanaf € 1.120. <in a nutshell>" (no price once it's over)
+  const facts = [
+    dateRange(lang, retreat.startDate, retreat.endDate),
+    join(retreat.place, retreat.country),
+    retreat.priceFrom && isUpcoming(retreat.endDate)
+      ? `${getDictionary(lang).card.from} ${euro(lang, retreat.priceFrom)}`
+      : null,
+  ]
+    .filter(Boolean)
+    .join(" · ");
+
+  return buildMetadata({
+    lang,
+    route: "retreats",
+    slug,
+    seo: retreat.seo,
+    fallbackTitle: retreat.title,
+    fallbackDescription: sentences(
+      facts,
+      retreat.nutshellTitle,
+      retreat.nutshellText,
+    ),
+    type: "article",
+  });
 }
 
-const clean = (xs: string[] | null | undefined) => (xs ?? []).map((x) => x.trim()).filter(Boolean);
+const clean = (xs: string[] | null | undefined) =>
+  (xs ?? []).map((x) => x.trim()).filter(Boolean);
 /** "Rita, Philippe & Michèle" */
 const names = (xs: (string | null)[] | null | undefined) => {
   const n = (xs ?? []).filter(Boolean);
   return n.length > 1 ? `${n.slice(0, -1).join(", ")} & ${n.at(-1)}` : n[0];
 };
 
-export default async function RetreatPage({ params }: PageProps<"/[lang]/retreats/[slug]">) {
+export default async function RetreatPage({
+  params,
+}: PageProps<"/[lang]/retreats/[slug]">) {
   const { lang, retreat: r } = await load(params);
   if (!r) notFound();
   const d = getDictionary(lang);
@@ -47,26 +96,83 @@ export default async function RetreatPage({ params }: PageProps<"/[lang]/retreat
   const upcoming = isUpcoming(r.endDate);
   const when = dateRange(lang, r.startDate, r.endDate);
   const where = join(r.place, r.country);
-  const group = r.capacity ? `${d.card.max} ${r.capacity}` : null;
+  const group = placesLabel(lang, r);
   const highlights = clean(r.highlights);
   const included = clean(r.included);
   const notIncluded = clean(r.notIncluded);
-  const signup = r.signupUrl;
-  const texts = signup ? null : (await sanityFetch({ query: LAYOUT_QUERY, lang }))?.texts;
+  // Sign-up: an external link (Studio override) or our own sign-up page; full → the same page as waiting list.
+  const external = r.signupUrl;
+  const full = spotsLeft(r) === 0;
+  const signupTo = external || signupHref(lang, r.slug);
+  const signupLabel = full && !external ? t.waitlist : t.signup;
+  const signupLink = (className: string, style?: React.CSSProperties) =>
+    external ? (
+      <a
+        className={className}
+        href={external}
+        target="_blank"
+        rel="noopener"
+        style={style}
+      >
+        {signupLabel}
+      </a>
+    ) : (
+      <Link className={className} href={signupTo} style={style}>
+        {signupLabel}
+      </Link>
+    );
+
+  const site =
+    (await sanityFetch({ query: SETTINGS_QUERY, lang }))?.siteName ??
+    d.siteName;
+  const ld = (
+    <JsonLd
+      data={[
+        retreatLd(r, {
+          name: site,
+          lang,
+          url: retreatHref(lang, r.slug),
+          signupUrl:
+            upcoming && !external ? signupHref(lang, r.slug) : undefined,
+          description: clip(sentences(r.nutshellTitle, r.nutshellText)),
+          images: [
+            ...new Set([imageUrl(r.hero?.photo), imageUrl(r.cardPhoto)]),
+          ],
+        }),
+        breadcrumbLd([
+          [site, href(lang, "home")],
+          [d.nav.retreats, href(lang, "retreats")],
+          [r.title ?? "", retreatHref(lang, r.slug)],
+        ]),
+      ]}
+    />
+  );
 
   if (!upcoming) {
     // Past retreat: a look back — photos, the nutshell and the facts; no booking box.
-    const recap = (r.recapPhotos?.length ? r.recapPhotos : [...(r.moodPhotos ?? []), ...(r.placePhotos ?? [])]) as Media[];
-    const lb: LightboxItem[] = recap.map((m) => ({ src: fullSrc(m) ?? "", alt: m.alt, caption: photoCaption(lang, m) }));
-    const price = r.priceFrom ?? Math.min(...(r.prices ?? []).map((p) => p.amount ?? Infinity));
+    const recap = (
+      r.recapPhotos?.length
+        ? r.recapPhotos
+        : [...(r.moodPhotos ?? []), ...(r.placePhotos ?? [])]
+    ) as Media[];
+    const lb: LightboxItem[] = recap.map((m) => ({
+      src: fullSrc(m) ?? "",
+      alt: m.alt,
+      credit: m.photographer,
+    }));
+    // no price on a look back (it stays in the Studio, for a next edition)
     const facts = [
       [t.where, join(where, r.venue)],
       [t.hosts, names(r.hosts?.map((p) => p.name))],
-      [t.price, Number.isFinite(price) ? `${t.from} ${euro(lang, price)}` : null],
-      [t.participants, r.participantCount ?? (r.capacity ? `${d.card.max} ${r.capacity}` : null)],
+      [
+        t.participants,
+        r.participantCount ??
+          (r.capacity ? `${d.card.max} ${r.capacity}` : null),
+      ],
     ].filter(([, v]) => v);
     return (
       <Lightbox lang={lang} items={lb}>
+        {ld}
         <Hero
           hero={r.hero}
           title={r.hero?.title || r.title}
@@ -112,9 +218,22 @@ export default async function RetreatPage({ params }: PageProps<"/[lang]/retreat
               <h2>{r.labels?.recapTitle || t.recapPhotos}</h2>
               <div className="mosaic" style={{ marginTop: 28 }}>
                 {recap.map((m, i) => (
-                  <figure key={`${m._id}-${i}`} className={["w2 h2", "", "", "w2", "", "h2", "", ""][i % 8] || undefined}>
-                    <LightboxTrigger index={i} label={`${t.photos}: ${m.alt || m.title || i + 1}`}>
-                      <Photo media={m} sizes="(max-width: 700px) 50vw, 25vw" style={{ height: "100%" }} />
+                  <figure
+                    key={`${m._id}-${i}`}
+                    className={
+                      ["w2 h2", "", "", "w2", "", "h2", "", ""][i % 8] ||
+                      undefined
+                    }
+                  >
+                    <LightboxTrigger
+                      index={i}
+                      label={`${t.photos}: ${m.alt || i + 1}`}
+                    >
+                      <Photo
+                        media={m}
+                        sizes="(max-width: 700px) 50vw, 25vw"
+                        style={{ height: "100%" }}
+                      />
                     </LightboxTrigger>
                   </figure>
                 ))}
@@ -123,11 +242,26 @@ export default async function RetreatPage({ params }: PageProps<"/[lang]/retreat
           </section>
         ) : null}
 
+        {r.reviews?.length ? (
+          <section className="s" id="reviews">
+            <div className="wrap">
+              <span className="label">{d.review.label}</span>
+              <h2>{d.review.title}</h2>
+              <ReviewList lang={lang} reviews={r.reviews} />
+            </div>
+          </section>
+        ) : null}
+
         <section className="s center">
           <div className="wrap">
-            <h2 style={{ margin: "0 auto 22px", maxWidth: "20ch" }}>{r.labels?.pastCtaTitle || t.nextTitle}</h2>
+            <h2 style={{ margin: "0 auto 22px", maxWidth: "20ch" }}>
+              {r.labels?.pastCtaTitle || t.nextTitle}
+            </h2>
             <div className="row" style={{ justifyContent: "center" }}>
-              <Link className="btn" href={href(lang, "retreats", { hash: "komend" })}>
+              <Link
+                className="btn"
+                href={href(lang, "retreats", { hash: "komend" })}
+              >
                 {t.otherRetreats}
               </Link>
               <Link className="btn ghost" href={href(lang, "contact")}>
@@ -136,6 +270,8 @@ export default async function RetreatPage({ params }: PageProps<"/[lang]/retreat
             </div>
           </div>
         </section>
+        {/* Old review links (…#review) → the review page. */}
+        <HashRedirect hash="review" to={reviewHref(lang, r.slug)} />
       </Lightbox>
     );
   }
@@ -144,26 +280,66 @@ export default async function RetreatPage({ params }: PageProps<"/[lang]/retreat
   const mood = (r.moodPhotos ?? []).slice(0, 4);
   const place = (r.placePhotos ?? []).slice(0, 2);
   const all = [...mood, ...place] as Media[];
-  const items: LightboxItem[] = all.map((m) => ({ src: fullSrc(m) ?? "", alt: m.alt, caption: photoCaption(lang, m) }));
-  const thumb = (m: Media | undefined, i: number, sizes: string, ratio?: "r32", style?: React.CSSProperties) =>
+  const items: LightboxItem[] = all.map((m) => ({
+    src: fullSrc(m) ?? "",
+    alt: m.alt,
+    credit: m.photographer,
+  }));
+  const thumb = (
+    m: Media | undefined,
+    i: number,
+    sizes: string,
+    ratio?: "r32",
+    style?: React.CSSProperties,
+  ) =>
     m ? (
-      <LightboxTrigger index={i} label={`${t.photos}: ${m.alt || m.title || i + 1}`} style={style}>
-        <Photo media={m} ratio={ratio} sizes={sizes} style={ratio ? undefined : { height: "100%" }} />
+      <LightboxTrigger
+        index={i}
+        label={`${t.photos}: ${m.alt || i + 1}`}
+        style={style}
+      >
+        <Photo
+          media={m}
+          ratio={ratio}
+          sizes={sizes}
+          style={ratio ? undefined : { height: "100%" }}
+        />
       </LightboxTrigger>
     ) : (
       <div className="ph" style={style} />
     );
 
+  // its own reviews (once there are), else those of earlier editions
+  const reviews = r.reviews?.length ? r.reviews : (r.earlierReviews ?? []);
+  // FAQ: the questions ticked for retreat pages, else the first 4
+  const allFaqs = (r.faqs ?? []).filter(
+    (f): f is NonNullable<typeof f> & { question: string; answer: string } =>
+      !!f?.question && !!f.answer,
+  );
+  const faqs = allFaqs.some((f) => f.onRetreat)
+    ? allFaqs.filter((f) => f.onRetreat)
+    : allFaqs.slice(0, 4);
   const toc = [
-    ["notendop", t.toc.nutshell, r.nutshellTitle || r.nutshellText || highlights.length],
+    [
+      "notendop",
+      t.toc.nutshell,
+      r.nutshellTitle || r.nutshellText || highlights.length,
+    ],
     ["plek", t.toc.place, r.placeTitle || r.placeText],
     ["mensen", t.toc.people, r.hosts?.length],
     ["programma", t.toc.programme, r.programme?.length],
-    ["praktisch", t.toc.practical, r.prices?.length || included.length || notIncluded.length],
+    [
+      "praktisch",
+      t.toc.practical,
+      r.prices?.length || included.length || notIncluded.length,
+    ],
+    ["reviews", t.toc.reviews, reviews.length],
+    ["vragen", t.toc.faq, faqs.length],
   ] as const;
 
   return (
     <Lightbox lang={lang} items={items}>
+      {ld}
       <Hero
         hero={r.hero}
         title={r.hero?.title || r.title}
@@ -171,22 +347,22 @@ export default async function RetreatPage({ params }: PageProps<"/[lang]/retreat
           <>
             {when ? <span>{when}</span> : null}
             {where ? <span>{where}</span> : null}
-            {r.capacity ? <span>{`${d.card.max} ${r.capacity} ${d.card.participants}`}</span> : null}
-            {r.priceFrom ? <span>{`${d.card.from} ${euro(lang, r.priceFrom)}`}</span> : null}
+            {group ? <span>{group}</span> : null}
+            {r.priceFrom ? (
+              <span>{`${d.card.from} ${euro(lang, r.priceFrom)}`}</span>
+            ) : null}
           </>
         }
-        actions={
-          <a className="btn white" href="#inschrijven">
-            {t.signup}
-          </a>
-        }
+        actions={signupLink("btn white")}
       />
 
       {mood.length ? (
         <section className="s" style={{ borderTop: 0, paddingTop: 24 }}>
           <div className="wrap">
             <div className="mood">
-              {thumb(mood[0], 0, "(max-width: 860px) 100vw, 66vw", undefined, { minHeight: 420 })}
+              {thumb(mood[0], 0, "(max-width: 860px) 100vw, 66vw", undefined, {
+                minHeight: 420,
+              })}
               <div className="side">
                 {thumb(mood[1], 1, "(max-width: 860px) 100vw, 33vw")}
                 {mood.length > 3 ? (
@@ -203,7 +379,10 @@ export default async function RetreatPage({ params }: PageProps<"/[lang]/retreat
         </section>
       ) : null}
 
-      <section className="s" style={{ paddingTop: 40, borderTop: mood.length ? undefined : 0 }}>
+      <section
+        className="s"
+        style={{ paddingTop: 40, borderTop: mood.length ? undefined : 0 }}
+      >
         <div className="wrap detail">
           <div>
             {toc[0][2] ? (
@@ -229,7 +408,14 @@ export default async function RetreatPage({ params }: PageProps<"/[lang]/retreat
                 {place.length ? (
                   <div className="g2" style={{ gap: 10, marginTop: 22 }}>
                     {place.map((m, i) => (
-                      <div key={m._id}>{thumb(m as Media, mood.length + i, "(max-width: 860px) 100vw, 30vw", "r32")}</div>
+                      <div key={m._id}>
+                        {thumb(
+                          m as Media,
+                          mood.length + i,
+                          "(max-width: 860px) 100vw, 30vw",
+                          "r32",
+                        )}
+                      </div>
                     ))}
                   </div>
                 ) : null}
@@ -243,9 +429,15 @@ export default async function RetreatPage({ params }: PageProps<"/[lang]/retreat
                 <div className="people">
                   {r.hosts.map((p) => (
                     <div key={p._id}>
-                      <Photo media={p.portrait} ratio="r45" sizes="(max-width: 700px) 50vw, 220px" />
+                      <Photo
+                        media={p.portrait}
+                        ratio="r45"
+                        sizes="(max-width: 700px) 50vw, 220px"
+                      />
                       <b>{p.name}</b>
-                      {p.role ? <span className="muted small">{p.role}</span> : null}
+                      {p.role ? (
+                        <span className="muted small">{p.role}</span>
+                      ) : null}
                     </div>
                   ))}
                 </div>
@@ -278,9 +470,15 @@ export default async function RetreatPage({ params }: PageProps<"/[lang]/retreat
                       <h4>{t.price}</h4>
                       <ul className="ticks">
                         {(r.prices ?? []).map((p) => (
-                          <li key={p._key}>{[euro(lang, p.amount), p.label].filter(Boolean).join(" ")}</li>
+                          <li key={p._key}>
+                            {[euro(lang, p.amount), p.label]
+                              .filter(Boolean)
+                              .join(" ")}
+                          </li>
                         ))}
-                        {r.capacity ? <li>{`${d.card.max} ${r.capacity} ${d.card.participants}`}</li> : null}
+                        {r.capacity ? (
+                          <li>{`${d.card.max} ${r.capacity} ${d.card.participants}`}</li>
+                        ) : null}
                       </ul>
                     </div>
                   ) : null}
@@ -341,56 +539,101 @@ export default async function RetreatPage({ params }: PageProps<"/[lang]/retreat
                   <dd>{r.venue}</dd>
                 </>
               ) : null}
+              {r.hosts?.length ? (
+                <>
+                  <dt>{t.hosts}</dt>
+                  <dd>{names(r.hosts.map((p) => p.name))}</dd>
+                </>
+              ) : null}
             </dl>
-            <a className="btn" href="#inschrijven" style={{ width: "100%", justifyContent: "center" }}>
-              {t.signup}
-            </a>
-            <ul>
-              {toc
+            {signupLink("btn", { width: "100%", justifyContent: "center" })}
+            <Toc
+              label={t.toc.title}
+              items={toc
                 .filter(([, , show]) => show)
-                .map(([id, label]) => (
-                  <li key={id}>
-                    <a href={`#${id}`}>{label}</a>
-                  </li>
-                ))}
-            </ul>
+                .map(([id, label]) => [id, label])}
+            />
           </aside>
         </div>
       </section>
 
-      {signup ? (
-        // An external sign-up link (Studio override): the closing photo with a button that opens it in a new tab.
-        <section className="hero short" id="inschrijven" style={{ height: "70vh" }}>
-          <Photo media={r.closingPhoto} className="dark" sizes="100vw" />
-          <div className="txt center" style={{ left: 0, right: 0, bottom: "auto", top: "50%", transform: "translateY(-50%)" }}>
-            {r.closingTitle ? <h1 style={{ margin: "0 auto", maxWidth: "14ch" }}>{r.closingTitle}</h1> : null}
-            {r.closingText ? <p style={{ margin: "16px auto 24px" }}>{r.closingText}</p> : null}
-            <div className="row" style={{ justifyContent: "center" }}>
-              <a className="btn white" href={signup} target="_blank" rel="noopener">
-                {t.signup}
-              </a>
-              <Link className="btn light" href={href(lang, "contact")}>
-                {t.ask}
-              </Link>
-            </div>
-          </div>
-        </section>
-      ) : (
-        <section className="split" id="inschrijven">
-          <Photo media={r.closingPhoto ?? r.hero?.photo} sizes="(max-width: 860px) 100vw, 50vw" />
-          <div className="pane">
-            <span className="label">{d.signup.label}</span>
-            <h2>{r.closingTitle || r.title}</h2>
-            {r.closingText ? <p className="muted">{r.closingText}</p> : null}
-            <SignupForm
+      {reviews.length ? (
+        <section className="s alt" id="reviews">
+          <div className="wrap">
+            <span className="label">{d.review.label}</span>
+            <h2>{r.reviews?.length ? d.review.title : t.earlierReviews}</h2>
+            <ReviewList
               lang={lang}
-              retreatId={r._id}
-              rooms={(r.prices ?? []).map((p) => [p.label, euro(lang, p.amount)].filter(Boolean).join(" · "))}
-              texts={{ thanks: texts?.signupThanks, consent: texts?.signupConsent }}
+              reviews={reviews}
+              context={!r.reviews?.length}
             />
           </div>
         </section>
-      )}
+      ) : null}
+
+      {faqs.length ? (
+        <section className="s" id="vragen">
+          <div className="wrap faq retreat-faq">
+            <span className="label">{t.faqLabel}</span>
+            <h2>{t.faqTitle}</h2>
+            <div className="faq-group">
+              {faqs.map((f) => (
+                <details key={f._key}>
+                  <summary>{f.question}</summary>
+                  <div className="faq-a">
+                    <Paragraphs text={f.answer} />
+                  </div>
+                </details>
+              ))}
+            </div>
+            <p className="faq-more">
+              <Link className="link" href={href(lang, "faq")}>
+                {t.faqAll}
+              </Link>
+            </p>
+          </div>
+        </section>
+      ) : null}
+
+      {/* Closing photo + the sign-up button. Keeps the old #inschrijven anchor: it now forwards to the sign-up page. */}
+      <section
+        className="hero short closing"
+        id="inschrijven"
+        style={{ height: "70vh" }}
+      >
+        <Photo
+          media={r.closingPhoto ?? r.hero?.photo}
+          className="dark"
+          sizes="100vw"
+        />
+        <div
+          className="txt center"
+          style={{
+            left: 0,
+            right: 0,
+            bottom: "auto",
+            top: "50%",
+            transform: "translateY(-50%)",
+          }}
+        >
+          <h2 className="as-h1" style={{ margin: "0 auto", maxWidth: "14ch" }}>
+            {r.closingTitle || r.title}
+          </h2>
+          {r.closingText ? (
+            <p style={{ margin: "16px auto 24px" }}>{r.closingText}</p>
+          ) : null}
+          <div
+            className="row"
+            style={{
+              justifyContent: "center",
+              marginTop: r.closingText ? 0 : 24,
+            }}
+          >
+            {signupLink("btn white")}
+          </div>
+        </div>
+      </section>
+      {external ? null : <HashRedirect hash="inschrijven" to={signupTo} />}
     </Lightbox>
   );
 }

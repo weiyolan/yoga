@@ -1,0 +1,883 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Sanity Studio UX: best practices · Yoga, Zen & Tonic</title><style>
+:root{--bg:#F4F1EC;--card:#fff;--ink:#1A1917;--soft:#5E5A54;--line:#D8D2C8;--ember:#D4552B;--dark:#0F1A1D}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.6 -apple-system,'Segoe UI',Helvetica,Arial,sans-serif}
+header{background:var(--dark);color:#F4F1EC;padding:40px 24px}
+header .in,main{max-width:880px;margin:0 auto}
+header .logo{font:26px/1 Georgia,serif}header .logo em{color:var(--ember)}
+header p{margin:10px 0 0;opacity:.75}
+main{padding:32px 24px 64px}
+main>h1:first-child{display:none}
+h1,h2,h3{font-family:Georgia,'Times New Roman',serif;font-weight:400;line-height:1.25}
+h2{font-size:28px;margin:48px 0 16px;padding-top:24px;border-top:1px solid var(--line)}
+h3{font-size:20px;margin:28px 0 10px}
+hr{display:none}
+a{color:var(--ember)}
+code{font:13.5px/1.4 ui-monospace,SFMono-Regular,Menlo,monospace;background:#ECE7DF;padding:1px 5px;border-radius:4px}
+pre{background:var(--dark);color:#EDE8E0;padding:16px 18px;border-radius:8px;overflow:auto}
+pre code{background:none;padding:0;color:inherit}
+table{width:100%;border-collapse:collapse;background:var(--card);margin:16px 0;font-size:14.5px;border:1px solid var(--line)}
+th,td{text-align:left;vertical-align:top;padding:10px 12px;border-bottom:1px solid var(--line)}
+th{font:600 11px/1.4 -apple-system,'Segoe UI',Helvetica,Arial,sans-serif;letter-spacing:.12em;text-transform:uppercase;color:var(--soft);background:#FAF8F5}
+ol,ul{padding-left:22px}li{margin:4px 0}
+blockquote{margin:0;padding:8px 16px;border-left:3px solid var(--ember);background:var(--card)}
+nav.toc{background:var(--card);border:1px solid var(--line);border-radius:8px;padding:14px 18px;margin:0 0 8px}
+nav.toc b{font:600 11px/1 sans-serif;letter-spacing:.12em;text-transform:uppercase;color:var(--soft)}
+nav.toc ol{margin:8px 0 0}
+img{max-width:100%;border:1px solid var(--line);border-radius:8px;background:#fff}
+details{background:var(--card);border:1px solid var(--line);border-radius:8px;padding:10px 14px;margin:16px 0}
+summary{cursor:pointer;font-weight:600}details pre{margin:12px 0 4px;max-height:640px}
+@media(max-width:600px){table{display:block;overflow-x:auto}}
+</style></head><body><header><div class="in"><div class="logo">Yoga, Zen <em>&amp;</em> Tonic</div><p>Sanity Studio UX: best practices</p></div></header><main><h1>Sanity Studio UX: best practices</h1>
+<p>What we changed compared with the classic Sanity Studio UI, why, and the pitfalls we ran into.
+The editors (Rita &amp; Philippe) are not technical and often edit on a phone. Every rule below
+comes from something that confused them or took too much room.</p>
+<p>Code references are relative to <code>studio/</code>.</p>
+<hr>
+<nav class="toc"><b>Contents</b><ol><li><a href="#1-principles">Principles</a></li><li><a href="#2-navigation-structure">Navigation (structure)</a></li><li><a href="#3-fields">Fields</a></li><li><a href="#4-documents">Documents</a></li><li><a href="#5-pitfalls-in-sanity-ui-and-the-studio-versions-in-this-repo">Pitfalls in @sanity/ui and the Studio (versions in this repo)</a></li><li><a href="#6-other-tools-that-made-a-difference">Other tools that made a difference</a></li><li><a href="#7-verifying-without-sanity-access">Verifying without Sanity access</a></li><li><a href="#8-appendix-the-nl-en-tabs-code">Appendix: the NL | EN tabs (code)</a></li><li><a href="#9-appendix-the-one-row-field-code">Appendix: the one-row field (code)</a></li></ol></nav><h2 id="1-principles">1. Principles</h2>
+<ol>
+<li><strong>Explain where the value goes.</strong> Every field says where it appears on the site (or in which
+mail, or &quot;intern&quot;) and what it&#39;s for. Not &quot;Titel&quot;, but &quot;the big title on the card and in Google&quot;.</li>
+<li><strong>Help on demand, not in the way.</strong> Help texts sit behind a small ⓘ after the title, so long
+explanations cost no space.</li>
+<li><strong>Dense but readable.</strong> Short fields take one row (title left, input right). Long texts, lists and
+groups keep the full width.</li>
+<li><strong>Keep Sanity&#39;s own behaviour.</strong> Restyle Sanity&#39;s default field (<code>renderDefault</code>) rather than
+rebuilding it, so comments, the &quot;…&quot; menu, validation and change bars keep working.</li>
+<li><strong>Fewer clicks in the navigation.</strong> Put things one level higher when a sub-list only holds one or
+two items.</li>
+<li><strong>Follow the page.</strong> Tabs and overviews follow the order of the page on the site, top to bottom.</li>
+<li><strong>No red for &quot;not done yet&quot;.</strong> Empty is not an error: in progress = blue, done = green. Red is for
+real validation errors.</li>
+<li><strong>Dutch, plain, with examples</strong> (“bv. …”) and the fallback when empty (“Leeg = …”).</li>
+</ol>
+<hr>
+<h2 id="2-navigation-structure">2. Navigation (structure)</h2>
+<table>
+<thead>
+<tr>
+<th>Classic</th>
+<th>Ours</th>
+<th>Where</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>Type list → sub-list → documents (3 panels)</td>
+<td>One panel with the page singleton on top + the documents under a heading per kind</td>
+<td><code>structure/index.ts</code> <code>liveList</code> (Formulieren, Mails, Lessen, Over ons), <code>components/RetreatList.tsx</code> (Retreats)</td>
+</tr>
+<tr>
+<td>Separate lists for upcoming / past, new / published</td>
+<td>One list with filter chips (Komend / Voorbij / Alle; Nieuw / Gepubliceerd / Geweigerd / Alle)</td>
+<td><code>RetreatList.tsx</code>, <code>StatusList.tsx</code> (Inschrijvingen, Contactformulier, Reviews)</td>
+</tr>
+<tr>
+<td>Component panes fill the whole width</td>
+<td><code>S.component(...).maxWidth(400)</code> for list-like components</td>
+<td><code>structure/index.ts</code></td>
+</tr>
+<tr>
+<td>Generic &quot;+&quot; offers everything</td>
+<td><code>newDocumentOptions</code> / <code>schema.templates</code> filter out singletons, submissions and fixed docs</td>
+<td><code>sanity.config.ts</code></td>
+</tr>
+<tr>
+<td>Pink initials as workspace icon</td>
+<td>The site icon as <code>icon</code> in <code>defineConfig</code></td>
+<td><code>components/StudioLogo.tsx</code></td>
+</tr>
+</tbody></table>
+<p><strong>Navigation depth: at most two clicks to any document.</strong> The classic structure tends to grow a
+level per idea: &quot;Formulieren&quot; → &quot;Inschrijfformulieren&quot; → the forms → a form. Every extra panel costs
+width (on a phone, a whole screen) and makes people lose track of where they are. Our rules:</p>
+<ul>
+<li><strong>Group → document.</strong> The first panel holds the groups (Retreats, Formulieren, Mails, …); the second panel holds the documents themselves.</li>
+<li><strong>No sub-list with one or two items.</strong> Pull them up: the page singleton goes on top of the document list (Retreats-pagina above the retreats, Inschrijving pagina above the forms), with a divider in between.</li>
+<li><strong>No separate lists per state.</strong> Use filter chips in one list instead (Komend / Voorbij / Alle; Nieuw / Bevestigd / …).</li>
+<li><strong>Keep list panels narrow.</strong> Give them a max width, so the document gets the room.</li>
+<li><strong>Mind the cost of a flat list.</strong> A flat list made with <code>S.documentTypeListItem</code> directly in the root is not the same as &quot;one level less&quot;: it moves the page singleton elsewhere. We tried that and reverted it. The singleton belongs with its documents.</li>
+</ul>
+<p><strong>A live mixed list (static items + documents).</strong> <code>liveList(S, id, title, top, parts, create)</code> in <code>structure/index.ts</code>: <code>top</code> = the singletons, <code>parts</code> = one heading per document type (with an optional <code>match</code> and <code>sort</code>, e.g. founders vs collaborators, <code>orderRank</code> as on the site), <code>create</code> = the &quot;+&quot; menu. Under the hood a child returns an Observable:</p>
+<pre><code class="language-ts">.child(() =&gt; {
+  const client = S.context.getClient({ apiVersion });
+  return client
+    .listen(query, {}, { visibility: &quot;query&quot;, includeResult: false, events: [&quot;welcome&quot;, &quot;mutation&quot;] })
+    .pipe(debounceTime(300), switchMap(() =&gt; client.fetch(query, {}, { perspective: &quot;drafts&quot; })),
+      map((docs) =&gt; S.list().items([singleton(...), S.divider(), ...docs.map(...)])));
+})
+</code></pre>
+<ul>
+<li>Deduplicate drafts (<code>drafts.</code> prefix) and published documents by their published id.</li>
+<li>Add a &quot;+&quot; via <code>.menuItems([S.menuItem().intent({ type: &quot;create&quot;, params: { type } })])</code>.</li>
+<li><code>S.context</code> has no <code>documentStore</code>: use <code>getClient</code>.</li>
+<li>Add <code>rxjs</code> to the Studio&#39;s own dependencies.</li>
+</ul>
+<p><strong>Singletons:</strong> a fixed <code>documentId</code>, no duplicate/delete actions, and kept out of &quot;new document&quot;.</p>
+<hr>
+<h2 id="3-fields">3. Fields</h2>
+<h3>3.1 Help behind a ⓘ (every field)</h3>
+<ul>
+<li>Where: <code>components/InlineFields.tsx</code> (<code>Help</code>), wired in <code>components/I18nTabs.tsx</code> (<code>I18nTabsField</code> = <code>form.components.field</code>).</li>
+<li>How: render the field with <code>renderDefault({ ...props, description: undefined, title: &lt;&gt;{title}&lt;Help text={description}/&gt;&lt;/&gt; })</code>.</li>
+<li>Behaviour: opens on hover (desktop) and on tap (phone); a tap elsewhere closes it (a <code>pointerdown</code> listener on <code>document</code>).</li>
+<li>The tooltip: <code>Popover</code> from <code>@sanity/ui/popover</code>, with a max width of about 320px set on an inner div (setting it on the Popover itself is ignored).</li>
+<li>Every field has a description that answers two questions: <strong>where on the site</strong> and <strong>what for</strong>. Keep examples and &quot;Leeg = …&quot; in it.</li>
+</ul>
+<h3>3.2 One-row fields</h3>
+<ul>
+<li><strong>Which fields:</strong> short ones only: <code>string</code>, <code>number</code>, <code>url</code>, <code>date</code>, <code>slug</code>, <code>reference</code>, and one-line NL | EN.</li>
+<li><strong>Not:</strong> <code>text</code>, booleans, option lists, arrays, objects, or fields with their own <code>components.input</code>. The exception is the NL | EN plugin&#39;s own input, which is allowed.</li>
+<li><strong>Layout:</strong> a CSS grid on Sanity&#39;s own field markup: <code>title+ⓘ | input | &quot;…&quot;</code>. The header is unwrapped with <code>display: contents</code>.<ul>
+<li>The &quot;…&quot; card is <code>position: absolute</code> by default. Make it <code>position: static</code> or it floats away.</li>
+<li>Use <code>align-items: center</code> and a narrow title column (<code>minmax(80px, 26%)</code>).</li>
+<li>A container query (<code>&lt; 300px</code>) stacks the title above the input again.</li>
+<li>A negative <code>margin-block</code> pulls the rows together, because the form puts 32px between fields.</li>
+</ul>
+</li>
+<li><strong>NL | EN fields:</strong> the language tabs and the ✨ translate button move right of the input (the title column is too narrow). They are passed via React context from the field to the input component.</li>
+<li><strong>Switch it off</strong> for part of a form with <code>&lt;InlineFields.Provider value={false}&gt;</code>.</li>
+</ul>
+<h3>3.3 Languages (sanity-plugin-internationalized-array)</h3>
+<ul>
+<li>Show one language at a time with small NL | EN tabs. A dot on a tab means empty; red or amber means an error or warning in that language.</li>
+<li>Hide the other languages with <code>display: none</code>, never by leaving them out of <code>members</code>. Leaving them out broke the add and translate actions.</li>
+<li>One &quot;Vertaal&quot; (✨) button per field, plus a bulk translator.</li>
+<li><strong>Previews:</strong> never select an i18n field raw as <code>title</code>. It is an array, so Sanity logs <em>“The &quot;title&quot; field should be a string…”</em>. Use <code>pick(value)</code> in <code>prepare</code>.<ul>
+<li>This also applies to Presentation <code>defineLocations</code> selects. We removed <code>locations</code> entirely: the &quot;Gebruikt op x pagina&#39;s&quot; banner only took room.</li>
+</ul>
+</li>
+</ul>
+<h3>3.4 Better inputs for common patterns</h3>
+<table>
+<thead>
+<tr>
+<th>Pattern</th>
+<th>Input</th>
+<th>Where</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>Object of on/off options</td>
+<td>One compact list of switches (title + ⓘ) instead of a box per toggle (<code>options.columns</code> made ragged boxes)</td>
+<td><code>FormBuilder.tsx</code> → <code>ToggleListInput</code></td>
+</tr>
+<tr>
+<td>Choosing a type</td>
+<td>Tiles with an icon and a one-line explanation</td>
+<td><code>QuestionTypeInput</code></td>
+</tr>
+<tr>
+<td>“Show only if …”</td>
+<td>Checkboxes of the previous question&#39;s answers instead of free text</td>
+<td><code>ShowIfInput</code></td>
+</tr>
+<tr>
+<td>Status</td>
+<td>Radio buttons that also update the derived counts</td>
+<td><code>StatusInput.tsx</code></td>
+</tr>
+<tr>
+<td>Photo</td>
+<td>A picker from the Fotobank (reuse + reset/delete)</td>
+<td><code>PhotoPicker.tsx</code>, <code>MediaBank.tsx</code></td>
+</tr>
+</tbody></table>
+<p><strong>Unset vs default.</strong> For booleans, show <code>value ?? initialValue</code>, exactly as the site reads it (<code>coalesce(x, true)</code>, <code>!= false</code>). Otherwise an untouched toggle looks off while the site treats it as on. Done once for every lone on/off in <code>I18nTabsInput</code> (<code>form.components.input</code>), and in <code>ToggleListInput</code> for lists.</p>
+<hr>
+<h2 id="4-documents">4. Documents</h2>
+<h3>4.1 Large documents (a retreat, Home)</h3>
+<ul>
+<li><strong>Groups:</strong><ul>
+<li>Groups in page order, each with an icon.</li>
+<li><code>default: true</code> on the first one, so the document doesn&#39;t open on &quot;Alle velden&quot;.</li>
+</ul>
+</li>
+<li><strong>Overview on top:</strong> a custom root input (<code>components.input</code> on the document type) shows:<ul>
+<li>a progress bar;</li>
+<li>the page from top to bottom, one tile per group: where it shows on the site, x/y filled, what is still empty, and how many texts have no EN;</li>
+<li>clicking a tile calls <code>props.onFieldGroupSelect(group)</code>;</li>
+<li>collapsible, with the choice stored in <code>localStorage</code>; collapsed, it explains only the open tab.</li>
+<li>Where: <code>components/PageOverview.tsx</code> (<code>overviewInput({ label, sections, storageKey })</code>), used by the retreat and Home.</li>
+<li>Optional groups (sign-up overrides, SEO) show &quot;standaard&quot; or &quot;aangepast&quot; and don&#39;t count toward the progress.</li>
+</ul>
+</li>
+<li><strong>Fieldsets</strong> (&quot;Wanneer&quot;, &quot;Waar&quot;, &quot;Plaatsen &amp; prijs&quot;) for grouping. Drop <code>columns</code> once fields are one row.</li>
+<li><strong>Derived values</strong> are <code>readOnly</code> (e.g. <code>booked</code>). Add a manual correction field next to them (<code>bookedExtra</code>) and sum the two in GROQ, instead of letting people overwrite the derived number.</li>
+</ul>
+<h3>4.2 Flexible content</h3>
+<ul>
+<li>Replace fixed fields (&quot;retreats + one button&quot;) with an ordered array of block types, for example retreat/lesstijl reference cards, an own card, a button and extra text (newsletter &quot;Onder de tekst&quot;).</li>
+<li>Give each block type a preview with an icon and a subtitle that says what it is.</li>
+<li><strong>Migration path:</strong><ol>
+<li>Keep the old fields with <code>deprecated: { reason }</code> and <code>hidden: ({ value }) =&gt; !value</code>.</li>
+<li>Keep rendering them as a fallback.</li>
+<li>Ship a <code>content:vN</code> script that moves the data.</li>
+</ol>
+</li>
+</ul>
+<h3>4.3 Mails</h3>
+<ul>
+<li>Show the HTML preview as an inspector next to the form, in the language picked in the preview.</li>
+<li>Add a &quot;test mail to yourself&quot; button and a step indicator (write → test → publish → send).</li>
+<li>Mail texts are editable documents with defaults taken from the site dictionary (templates), so the Studio opens prefilled.</li>
+</ul>
+<h3>4.4 Submissions (sign-ups, messages, reviews)</h3>
+<p>Form submissions are documents people never &quot;write&quot; in the Studio. They read them, decide, and move on.
+The classic form view (greyed-out read-only fields) is the wrong tool for that.</p>
+<table>
+<thead>
+<tr>
+<th>Need</th>
+<th>Ours</th>
+<th>Where</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>See at a glance what&#39;s new</td>
+<td>Live count bubble on the menu icon (&quot;3&quot; on Inschrijvingen) and a &quot;Nieuw&quot; badge on the document</td>
+<td><code>components/CountBadgeIcon.tsx</code>, <code>actions/badges.ts</code></td>
+</tr>
+<tr>
+<td>Find one quickly</td>
+<td>One list per kind with status chips (with counts, opens on &quot;Alle&quot;), optionally per retreat, newest first. Each row has a coloured status badge: Nieuw = blue, Bevestigd / Beantwoord = green, Wachtlijst = amber, Geannuleerd / Geweigerd = red</td>
+<td><code>components/StatusList.tsx</code>, <code>components/StatusPreview.tsx</code></td>
+</tr>
+<tr>
+<td>Read it</td>
+<td>The default view is a readable card (name, contact, answers as label/value), not form fields</td>
+<td><code>components/SignupView.tsx</code>, <code>components/SubmissionView.tsx</code></td>
+</tr>
+<tr>
+<td>Decide</td>
+<td>Status buttons on that card plus an internal note. A sign-up&#39;s status also recomputes &quot;Geboekt&quot; on its retreat</td>
+<td><code>SignupView.tsx</code>, <code>lib/booked.ts</code>, <code>components/StatusInput.tsx</code></td>
+</tr>
+<tr>
+<td>Answer</td>
+<td>&quot;Bevestigingsmail&quot; is the first action on a sign-up: preview it, then send (the waitlist version when full)</td>
+<td><code>actions/confirmation-mail.tsx</code></td>
+</tr>
+<tr>
+<td>Overview / export</td>
+<td>Table view with one row per sign-up and one column per question, filter per retreat and status, CSV export. The same question across forms fills the same column (so harmonise labels)</td>
+<td><code>components/SignupTable.tsx</code></td>
+</tr>
+<tr>
+<td>Reviews</td>
+<td>One list with status chips (Nieuw / Gepubliceerd / Geweigerd) and per retreat. A review comes in private (with e-mail) as <code>reviewSubmission</code>. Setting &quot;Gepubliceerd&quot; copies it without the e-mail to a public <code>review</code> (shown on the retreat page, and on Home from 4★). &quot;Geweigerd&quot; or back to &quot;Nieuw&quot; takes the copy offline. &quot;Tekst op de site aanpassen&quot; on a published one opens the public copy (an <code>IntentButton</code>). A &quot;Reviewlink&quot; action on a retreat gives the link to send to participants</td>
+<td><code>schemaTypes/documents/review.ts</code>, <code>structure/views.ts</code>, <code>actions/review-link.tsx</code></td>
+</tr>
+</tbody></table>
+<p><strong>Rules:</strong></p>
+<ul>
+<li><strong>No &quot;duplicate&quot; action on submissions.</strong> A copy would get a public id.</li>
+<li><strong>Not in &quot;new document&quot;.</strong> They are only created by the site&#39;s forms.</li>
+<li><strong>Private ids.</strong> Submissions holding personal data use dotted ids (<code>signup.&lt;uuid&gt;</code>), so they are never readable by the public API.</li>
+<li><strong>Status values are short words</strong> with fixed colours, the same in the list, on the card and in the table.</li>
+</ul>
+<hr>
+<h2 id="5-pitfalls-in-sanity-ui-and-the-studio-versions-in-this-repo">5. Pitfalls in @sanity/ui and the Studio (versions in this repo)</h2>
+<table>
+<thead>
+<tr>
+<th>Pitfall</th>
+<th>Fix</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>Stack space={n}</code> → type error</td>
+<td>This version uses <code>gap</code></td>
+</tr>
+<tr>
+<td><code>Popover</code> not in <code>@sanity/ui</code></td>
+<td><code>import { Popover } from &quot;@sanity/ui/popover&quot;</code>; it has no <code>onClickOutside</code>, so use your own listener</td>
+</tr>
+<tr>
+<td>Icons inside <code>&lt;Text&gt;</code> scale with the text size</td>
+<td>Set the size on the icon itself: <code>style={{ fontSize: 15, width: &quot;1em&quot;, height: &quot;1em&quot; }}</code></td>
+</tr>
+<tr>
+<td><code>all: &quot;unset&quot;</code> on a button removes your margin</td>
+<td>Reset only what you need (<code>appearance</code>, <code>background</code>, <code>border</code>, <code>font</code>) and use padding for the gap</td>
+</tr>
+<tr>
+<td>A colour set on a wrapper of an icon inside <code>Text</code> is ignored</td>
+<td>Set <code>style.color</code> on the icon itself</td>
+</tr>
+<tr>
+<td><code>Card selected</code> turns the whole card blue and hides coloured text</td>
+<td>Use a coloured border for &quot;active&quot; instead</td>
+</tr>
+<tr>
+<td>The field &quot;…&quot; menu jumps to the bottom after a layout change</td>
+<td>It is <code>position: absolute</code> inside the header; set <code>position: static</code></td>
+</tr>
+<tr>
+<td>Every field gets <code>components.input</code> from the i18n plugin</td>
+<td>Don&#39;t treat &quot;has a custom input&quot; as &quot;custom UI&quot; for <code>internationalizedArray*</code></td>
+</tr>
+<tr>
+<td><code>options.columns</code> on objects of booleans gives ragged boxes</td>
+<td>Use a custom list input</td>
+</tr>
+<tr>
+<td><code>ObjectInputProps.onFieldGroupSelect</code></td>
+<td>Takes only <code>(groupName)</code></td>
+</tr>
+<tr>
+<td>A lone boolean ignores the field&#39;s <code>title</code>/<code>description</code> props: <code>BooleanInput</code> draws its own header from <code>schemaType</code></td>
+<td>Pass a changed <code>schemaType</code> (<code>description: undefined</code>, title + ⓘ) to <code>renderDefault</code> in the input component</td>
+</tr>
+<tr>
+<td>Groups without <code>default: true</code> open on &quot;Alle velden&quot;</td>
+<td>Every document with groups: <code>default: true</code> on the first, and an icon on each</td>
+</tr>
+<tr>
+<td>The i18n plugin puts a ⊖ next to every language value (only on NL / EN fields, so some fields had one and others not)</td>
+<td>It means &quot;remove this language&quot;: one tap wiped the NL text the site shows. We hide it with CSS (<code>.i18n-tab-item &gt; [data-ui=&quot;Card&quot;] &gt; [data-ui=&quot;Flex&quot;] &gt; :not(:first-child)</code>); emptying the box does the same on purpose</td>
+</tr>
+<tr>
+<td>Typegen</td>
+<td><code>npm run typegen</code> after schema or query changes; GROQ with an interpolated <code>${CONST}</code> is fine</td>
+</tr>
+</tbody></table>
+<hr>
+<h2 id="6-other-tools-that-made-a-difference">6. Other tools that made a difference</h2>
+<table>
+<thead>
+<tr>
+<th>Problem with the classic Studio</th>
+<th>Ours</th>
+<th>Where</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>Drafts vs published confused people, and the perspective picker got an account stuck on &quot;Gepubliceerd&quot;</td>
+<td>Releases and scheduled drafts are switched off: one flow, edit the draft, then Publiceren. &quot;Zo werkt het&quot; explains it in a few lines</td>
+<td><code>sanity.config.ts</code>, <code>components/Help.tsx</code></td>
+</tr>
+<tr>
+<td>Placeholder texts like “[IBAN]” went live unnoticed</td>
+<td>Validation warns (yellow) on any text in [brackets], and &quot;Nog in te vullen [ ]&quot; lists every document that still has one</td>
+<td><code>schemaTypes/shared/i18n.ts</code> (<code>noPlaceholders</code>), <code>components/Placeholders.tsx</code></td>
+</tr>
+<tr>
+<td>English was always behind</td>
+<td>✨ per field, plus &quot;Vertalen (AI)&quot;: every document with Dutch but no English, tick and translate in bulk into the drafts</td>
+<td><code>components/I18nTabs.tsx</code>, <code>components/BulkTranslate.tsx</code></td>
+</tr>
+<tr>
+<td>Images were uploaded again and again per document, without alt text</td>
+<td>One Fotobank (<code>mediaItem</code>): tiles with search, filters and upload, and AI alt texts (NL + EN). Fields pick from it. &quot;Andere foto uploaden&quot; replaces a photo everywhere at once; &quot;Verwijderen&quot; only works once nothing uses it, and it lists where the photo is used</td>
+<td><code>components/MediaBank.tsx</code>, <code>components/PhotoPicker.tsx</code>, <code>schemaTypes/shared/media.ts</code></td>
+</tr>
+<tr>
+<td>SEO fields were blind</td>
+<td>&quot;SEO &amp; delen&quot; shows the Google snippet per language, with the same fallbacks as the site and length checks</td>
+<td><code>components/SeoPreview.tsx</code></td>
+</tr>
+<tr>
+<td>Not clear where a shared document is used</td>
+<td>&quot;Gebruikt door&quot; on forms and mails lists the retreats using them (the default one: also the retreats that picked none)</td>
+<td><code>components/UsedByInput.tsx</code></td>
+</tr>
+<tr>
+<td>People were scattered over sign-ups, messages and subscribers</td>
+<td>&quot;Contactboek&quot;: one row per e-mail address with where it came from, newsletter on/off, CSV import and export</td>
+<td><code>components/ContactBook.tsx</code></td>
+</tr>
+<tr>
+<td>Editing blind</td>
+<td>Live preview (Presentation) with drafts and click-to-edit, without the &quot;Gebruikt op x pagina&#39;s&quot; banner</td>
+<td><code>presentation/resolve.ts</code></td>
+</tr>
+<tr>
+<td>Mails were a black box</td>
+<td>A preview of the HTML mail next to the form, a test mail to yourself, and editable texts with the site&#39;s defaults</td>
+<td><code>components/MailPreview.tsx</code></td>
+</tr>
+<tr>
+<td>Content changes across many documents by hand</td>
+<td>Versioned scripts (<code>npm run content:vN -- --dry</code>, then for real) and <code>publish:drafts</code> (<code>--only=type</code>, <code>--skip-placeholders</code>). <code>--dry</code> prints what they would change first</td>
+<td><code>scripts/</code></td>
+</tr>
+</tbody></table>
+<h2 id="7-verifying-without-sanity-access">7. Verifying without Sanity access</h2>
+<ul>
+<li>Build the site with the offline fixture: <code>npm run fixture</code>, then <code>SANITY_FIXTURE=1 npm run build &amp;&amp; npm start</code>. The embedded Studio lives at <code>/studio</code>.</li>
+<li>Drive the embedded Studio with Playwright and mock <code>*.sanity.io</code>:<ul>
+<li>answer <code>/data/query</code> with groq-js over the fixture;</li>
+<li>answer <code>/data/doc</code>, <code>/users/me</code>, the ACL/grants endpoints and <code>/data/listen</code> (a welcome event).</li>
+</ul>
+</li>
+<li>Screenshot at desktop width and at 412px. A phone is where most layout bugs show.</li>
+<li>Before reading the Studio console: preview warnings print the schema type and the offending <code>select</code> (search for &quot;Check the preview config&quot;).</li>
+</ul>
+<hr>
+<h2 id="8-appendix-the-nl-en-tabs-code">8. Appendix: the NL | EN tabs (code)</h2>
+<p><img src="data:image/png;base64,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" alt="NL | EN tabs: a one-row field (tabs + ✨ right of the input) and a full-width text (tabs after the title)"></p>
+<p><strong>How it works</strong> (<code>components/I18nTabs.tsx</code>; the plugin is <code>sanity-plugin-internationalized-array</code>):</p>
+<ol>
+<li><strong>Wiring:</strong> three form-wide components, so every localized field gets tabs without touching any schema:<ul>
+<li><code>field</code> holds the active language and draws the tabs;</li>
+<li><code>input</code> adds an &quot;NL / EN toevoegen&quot; button when the active language has no item yet;</li>
+<li><code>item</code> hides the other languages.</li>
+</ul>
+</li>
+<li><strong>One language at a time:</strong> the items of the other languages get <code>display: none</code>. They are never removed from <code>members</code>; removing them broke the add and translate actions.</li>
+<li><strong>Tab state:</strong> a dot on a tab means that language is still empty; red or amber means a validation error or warning in that language.</li>
+<li><strong>✨ Vertaal:</strong> fills the English of this one field with an AI translation of the Dutch. On one-row fields, the tabs and ✨ move right of the input via context (<code>side</code>).</li>
+<li><strong>Plugin header:</strong> the plugin&#39;s own “NEDERLANDS / ENGLISH” header above each input is hidden with CSS, because the tab already says it.</li>
+</ol>
+<pre><code class="language-ts">// sanity.config.ts
+internationalizedArray({
+  languages: languages.map(({ id, title }) =&gt; ({ id, title })),
+  defaultLanguages: [defaultLanguage],
+  fieldTypes: [&quot;string&quot;, defineField({ name: &quot;text&quot;, type: &quot;text&quot;, rows: 3 }), &quot;simpleBlockContent&quot;],
+  buttonLocations: [], // adding a language: the tabs have their own button
+  languageDisplay: &quot;titleOnly&quot;,
+}),
+// …
+form: { components: { field: I18nTabsField, input: I18nTabsInput, item: I18nTabsItem } },
+</code></pre>
+<pre><code class="language-tsx">// the items of the other languages are only hidden, never left out of `members`
+export function I18nTabsItem(props: ItemProps) {
+  const active = useContext(ActiveLanguage)?.active;
+  const lang = (props.value as Item | undefined)?.language;
+  if (!active || !isItem(props.schemaType.name) || !lang) return props.renderDefault(props);
+  return (
+    &lt;div className=&quot;i18n-tab-item&quot; style={lang === active ? undefined : { display: &quot;none&quot; }}&gt;
+      {props.renderDefault(props)}
+    &lt;/div&gt;
+  );
+}
+
+// the plugin&#39;s “NEDERLANDS” / “ENGLISH” header above each input: the tab already says it
+const CSS = `.i18n-tab-item [data-ui=&quot;Flex&quot;]:has(&gt; [data-ui=&quot;fieldHeaderContentBox&quot;] label[for$=&quot;.value&quot;]) { display: none; }`;
+</code></pre>
+<details><summary>Full file: <code>components/I18nTabs.tsx</code></summary><pre><code>import { AddIcon } from "@sanity/icons/Add";
+import { SparklesIcon } from "@sanity/icons/Sparkles";
+import { Box, Button, Card, Flex, Stack, Text } from "@sanity/ui";
+import { useToast } from "@sanity/ui/toast";
+import { randomKey } from "@sanity/util/content";
+import { createContext, useContext, useState, type MouseEvent, type ReactNode } from "react";
+import { insert, set, setIfMissing, useClient, type ArrayOfObjectsInputProps, type FieldProps, type InputProps, type ItemProps } from "sanity";
+import { apiVersion, defaultLanguage, languages } from "../../sanity/site.config";
+import { findJobs, translatedValue, translateJobs } from "../lib/ai";
+import { MAIL_TYPES, OpenMailPreview } from "./MailPreview";
+import { Help, InlineField, isShort, useInlineFields } from "./InlineFields";
+
+<p>/**</p>
+<ul>
+<li>NL | EN tabs (small, after the field title) on every localized field (sanity-plugin-internationalized-array): one language at a</li>
+<li>time, so short and long texts take half the space. The other languages are only hidden</li>
+<li>(<code>display: none</code> on their array item), never left out of <code>members</code>: leaving them out broke</li>
+<li>alt texts and the add/translate actions before (plan S15). A dot on a tab = still empty; red/amber =</li>
+<li>a validation error/warning in that language. “Vertaal” fills the English of this one field.
+ */
+type Item = { _key: string; _type: string; language?: string; value?: unknown };
+type Node = { validation?: { level: string }[]; members?: { kind: string; field?: Node; item?: Node }[] };</li>
+</ul>
+<p>// side: NL | EN + ✨ when the field is one row (right of the input: the title column is too narrow)
+type Active = { active: string; setActive: (lang: string) =&gt; void; side?: ReactNode };
+const ActiveLanguage = createContext&lt;Active | null&gt;(null);
+const isArray = (name: string) =&gt; name.startsWith(&quot;internationalizedArray&quot;) &amp;&amp; !name.endsWith(&quot;Value&quot;);
+const isItem = (name: string) =&gt; name.startsWith(&quot;internationalizedArray&quot;) &amp;&amp; name.endsWith(&quot;Value&quot;);
+const filled = (v: unknown) =&gt; (typeof v === &quot;string&quot; ? v.trim().length &gt; 0 : Array.isArray(v) &amp;&amp; v.length &gt; 0);
+const issues = (n?: Node): string[] =&gt; [...(n?.validation ?? []).map((v) =&gt; v.level), ...(n?.members ?? []).flatMap((m) =&gt; issues(m.field ?? m.item))];</p>
+<p>/** form.components.field: the tabs, small, right after the field title; holds the active language. */
+export function I18nTabsField(props: FieldProps) {
+  // every help text behind a small ? after the title; short fields as one row (components/InlineFields.tsx)
+  const compact = true;
+  const inline = useInlineFields() &amp;&amp; isShort(props);
+  if (!isArray(props.schemaType.name)) {
+    if (inline) return &lt;InlineField props={props} /&gt;;
+    if (compact &amp;&amp; props.description &amp;&amp; props.name !== &quot;value&quot;)
+      return props.renderDefault({ ...props, description: undefined, title: (&lt;&gt;{props.title}&lt;Help text={props.description} /&gt;&lt;/&gt;) as unknown as string });
+    return props.renderDefault(props);
+  }
+  return &lt;TabsField {...props} inline={inline} compact={compact} /&gt;;
+}</p>
+<p>/** form.components.input: the plugin&#39;s own input + an “add” button when the active language has no item yet. */
+export function I18nTabsInput(props: InputProps) {
+  // an untouched on/off with a default shows that default, as the site reads it (<code>!= false</code>, <code>coalesce(x, true)</code>)
+  // and its help behind the ? too: a lone on/off draws its own title + description from schemaType
+  if (props.schemaType.jsonType === &quot;boolean&quot;) {
+    const st = props.schemaType;
+    const value = props.value === undefined &amp;&amp; typeof st.initialValue === &quot;boolean&quot; ? st.initialValue : props.value;
+    const schemaType = st.description ? { ...st, description: undefined, title: (&lt;&gt;{st.title}&lt;Help text={st.description} /&gt;&lt;/&gt;) as unknown as string } : st;
+    return props.renderDefault({ ...props, value, schemaType } as InputProps);
+  }
+  if (props.id === &quot;root&quot; &amp;&amp; MAIL_TYPES.includes(props.schemaType.name))
+    return (
+      &lt;&gt;
+        &lt;OpenMailPreview /&gt;
+        {props.renderDefault(props)}
+      &lt;/&gt;
+    );
+  const ctx = useContext(ActiveLanguage);
+  if (!ctx || !isArray(props.schemaType.name)) return props.renderDefault(props);
+  const input = &lt;TabsInput {...(props as ArrayOfObjectsInputProps)} active={ctx.active} /&gt;;
+  if (!ctx.side) return input;
+  return (
+    &lt;Flex align=&quot;center&quot; gap={1}&gt;
+      &lt;Box flex={1}&gt;{input}&lt;/Box&gt;
+      &lt;Box style={{ flex: &quot;none&quot; }}&gt;
+        {ctx.side}
+      &lt;/Box&gt;
+    &lt;/Flex&gt;
+  );
+}</p>
+<p>/** form.components.item: hides the items of the other languages. */
+export function I18nTabsItem(props: ItemProps) {
+  const active = useContext(ActiveLanguage)?.active;
+  const lang = (props.value as Item | undefined)?.language;
+  if (!active || !isItem(props.schemaType.name) || !lang) return props.renderDefault(props);
+  return (
+    &lt;div className=&quot;i18n-tab-item&quot; style={lang === active ? undefined : { display: &quot;none&quot; }}&gt;
+      {props.renderDefault(props)}
+    &lt;/div&gt;
+  );
+}</p>
+<p>/** The plugin&#39;s “NEDERLANDS” / “ENGLISH” header above each input: the tab already says it. */
+// + the plugin&#39;s ⊖ next to each language (“remove this language”): one tap wiped the NL text the site shows;
+//   emptying the box does the same on purpose
+const CSS = <code>.i18n-tab-item [data-ui=&quot;Flex&quot;]:has(&amp;gt; [data-ui=&quot;fieldHeaderContentBox&quot;] label[for$=&quot;.value&quot;]) { display: none; } .i18n-tab-item &amp;gt; [data-ui=&quot;Card&quot;] &amp;gt; [data-ui=&quot;Flex&quot;] &amp;gt; :not(:first-child) { display: none; }</code>;</p>
+<p>function TabsField({ inline, compact, ...props }: FieldProps &amp; { inline?: boolean; compact?: boolean }) {
+  const [active, setActive] = useState&lt;string&gt;(defaultLanguage);
+  const [busy, setBusy] = useState(false);
+  const client = useClient({ apiVersion });
+  const toast = useToast();
+  const input = (props as FieldProps &amp; { inputProps: ArrayOfObjectsInputProps }).inputProps;
+  const value = (props.value as Item[] | undefined) ?? [];
+  const itemOf = (lang: string) =&gt; value.find((i) =&gt; i.language === lang);
+  const memberOf = (lang: string) =&gt; input.members.find((m) =&gt; m.kind === &quot;item&quot; &amp;&amp; (m.item.value as Item | undefined)?.language === lang);
+  const readOnly = !!input.readOnly;
+  const canTranslate = filled(itemOf(defaultLanguage)?.value) &amp;&amp; languages.length &gt; 1;</p>
+<p>  const translate = async () =&gt; {
+    const to = active === defaultLanguage ? languages.find((l) =&gt; l.id !== defaultLanguage)!.id : active;
+    const jobs = findJobs({ field: value }, defaultLanguage, to, true);
+    if (!jobs.length) return;
+    setBusy(true);
+    try {
+      const [out] = await translateJobs(client, jobs, defaultLanguage, to);
+      const job = jobs[0];
+      const v = translatedValue(job, out);
+      input.onChange(
+        job.en ? set(v, [{ _key: job.en._key }, &quot;value&quot;]) : [setIfMissing([]), insert([{ _key: randomKey(12), _type: job.nl._type, language: to, value: v }], &quot;after&quot;, [{ _key: job.nl._key }])],
+      );
+      setActive(to);
+    } catch (err) {
+      toast.push({ status: &quot;error&quot;, title: &quot;Vertalen niet gelukt&quot;, description: String(err instanceof Error ? err.message : err) });
+    } finally {
+      setBusy(false);
+    }
+  };</p>
+<p>  // clicks in the header must not reach the field&#39;s &lt;label&gt;/&lt;legend&gt;
+  const click = (fn: () =&gt; void) =&gt; (e: MouseEvent) =&gt; {
+    e.preventDefault();
+    e.stopPropagation();
+    fn();
+  };</p>
+<p>  const tab = (id: string): ReactNode =&gt; {
+    const levels = issues(memberOf(id)?.kind === &quot;item&quot; ? (memberOf(id) as { item: Node }).item : undefined);
+    const tone = levels.includes(&quot;error&quot;) ? &quot;critical&quot; : levels.includes(&quot;warning&quot;) ? &quot;caution&quot; : undefined;
+    const empty = !filled(itemOf(id)?.value);
+    const label = id.toUpperCase();
+    return (
+      &lt;Button
+        key={id}
+        as=&quot;span&quot;
+        role=&quot;tab&quot;
+        aria-selected={active === id}
+        mode={active === id ? &quot;default&quot; : &quot;bleed&quot;}
+        tone={tone ?? (active === id ? &quot;primary&quot; : &quot;default&quot;)}
+        paddingX={2}
+        paddingY={1}
+        fontSize={0}
+        radius={2}
+        text={<code>${label}${empty ? &quot; •&quot; : &quot;&quot;}</code>}
+        title={empty ? <code>${label}: nog leeg</code> : label}
+        onClick={click(() =&gt; setActive(id))}
+      /&gt;
+    );
+  };</p>
+<p>  const tabs = (
+    &lt;Card as=&quot;span&quot; radius={2} padding={0} tone=&quot;transparent&quot; border style={{ display: &quot;inline-flex&quot; }}&gt;
+      &lt;Flex as=&quot;span&quot; role=&quot;tablist&quot; gap={0}&gt;
+        {languages.map((l) =&gt; tab(l.id))}
+      &lt;/Flex&gt;
+    &lt;/Card&gt;
+  );
+  const ai = canTranslate ? (
+        &lt;Button
+          as=&quot;span&quot;
+          mode=&quot;bleed&quot;
+          paddingX={2}
+          paddingY={1}
+          fontSize={0}
+          icon={SparklesIcon}
+          text={busy ? &quot;Bezig…&quot; : undefined}
+          title=&quot;Vertaal: vul het Engels van dit veld in met een AI-vertaling van het Nederlands (overschrijft).&quot;
+          aria-label=&quot;Vertaal dit veld&quot;
+          aria-disabled={busy || readOnly}
+          style={busy || readOnly ? { opacity: 0.5, pointerEvents: &quot;none&quot; } : undefined}
+          onClick={click(() =&gt; void translate())}
+        /&gt;
+  ) : null;</p>
+<p>  const title = (
+    &lt;Flex as=&quot;span&quot; align=&quot;center&quot; gap={2} wrap=&quot;wrap&quot; style={{ display: &quot;inline-flex&quot; }}&gt;
+      &lt;span&gt;{props.title}&lt;/span&gt;
+      {compact &amp;&amp; props.description ? &lt;Help text={props.description} /&gt; : null}
+      {inline ? null : tabs}
+      {inline ? null : ai}
+    &lt;/Flex&gt;
+  );</p>
+<p>  return (
+    &lt;ActiveLanguage.Provider value={{ active, setActive, side: inline ? (
+          &lt;Flex align=&quot;center&quot; gap={1}&gt;
+            {tabs}
+            {ai}
+          &lt;/Flex&gt;
+        ) : null }}&gt;
+      &lt;style&gt;{CSS}&lt;/style&gt;
+      {inline ? &lt;InlineField props={props} title={title} /&gt; : props.renderDefault({ ...props, title: title as unknown as string, ...(compact ? { description: undefined } : {}) })}
+    &lt;/ActiveLanguage.Provider&gt;
+  );
+}</p>
+<p>function TabsInput(props: ArrayOfObjectsInputProps &amp; { active: string }) {
+  const { active } = props;
+  const value = (props.value as Item[] | undefined) ?? [];
+  const add = (lang: string) =&gt; props.onChange([setIfMissing([]), insert([{ _key: randomKey(12), _type: <code>${props.schemaType.name}Value</code>, language: lang }], &quot;after&quot;, [-1])]);
+  if (value.some((i) =&gt; i.language === active) || props.readOnly) return props.renderDefault(props);
+  return (
+    // one element: the form&#39;s grid puts 32px between its children
+    &lt;Stack gap={2}&gt;
+      {props.renderDefault(props)}
+      &lt;Card padding={3} radius={2} border tone=&quot;transparent&quot;&gt;
+        &lt;Flex align=&quot;center&quot; gap={3}&gt;
+          &lt;Box flex={1}&gt;
+            &lt;Text size={1} muted&gt;
+              {active === defaultLanguage ? &quot;Nog geen Nederlandse tekst.&quot; : &quot;Nog geen Engelse tekst: leeg = de Nederlandse tekst op de site.&quot;}
+            &lt;/Text&gt;
+          &lt;/Box&gt;
+          &lt;Button mode=&quot;ghost&quot; padding={2} fontSize={1} icon={AddIcon} text={<code>${active.toUpperCase()} toevoegen</code>} onClick={() =&gt; add(active)} /&gt;
+        &lt;/Flex&gt;
+      &lt;/Card&gt;
+    &lt;/Stack&gt;
+  );
+}
+</code></pre></details></p>
+<hr>
+<h2 id="9-appendix-the-one-row-field-code">9. Appendix: the one-row field (code)</h2>
+<p><img src="data:image/png;base64,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" alt="One-row fields: title + ⓘ left; input, NL | EN, ✨ and the “…” menu right"></p>
+<p><strong>How it works</strong> (<code>components/InlineFields.tsx</code>, called from <code>I18nTabsField</code> = <code>form.components.field</code>):</p>
+<ol>
+<li><strong>Which fields:</strong> <code>isShort(props)</code> decides from the schema type chain: <code>string</code>, <code>number</code>, <code>url</code>, <code>date</code>, <code>slug</code>, <code>reference</code> and the one-line NL | EN. It never picks <code>text</code>, booleans, option lists, arrays, objects or custom inputs.</li>
+<li><strong>Sanity&#39;s own field:</strong> the field is rendered with <code>props.renderDefault(...)</code>, with the help moved behind the ⓘ in the title. Comments, the “…” menu, validation and change bars are untouched.</li>
+<li><strong>CSS grid:</strong> turns Sanity&#39;s header + input stack into <code>title | input | “…”</code>.<ul>
+<li>The header is unwrapped with <code>display: contents</code>.</li>
+<li>The “…” card loses its <code>position: absolute</code>.</li>
+<li>Everything is centred vertically.</li>
+</ul>
+</li>
+<li><strong>NL | EN fields:</strong> the tabs and ✨ are passed to the input via context (<code>side</code>) and drawn right of it.</li>
+<li><strong>Narrow columns:</strong> a container query stacks the title above the input again below 300px.</li>
+</ol>
+<pre><code class="language-ts">// which fields get one row
+export function isShort(props: FieldProps) {
+  const chain = names(props.schemaType); // e.g. [&quot;title&quot;, &quot;internationalizedArrayString&quot;, &quot;array&quot;]
+  if (props.name === &quot;value&quot; || chain.includes(&quot;text&quot;) || chain.includes(&quot;boolean&quot;)) return false;
+  if ((props.schemaType.options as { list?: unknown[] })?.list?.length) return false;
+  // own inputs (tiles, checkboxes) need the width; the NL | EN plugin&#39;s input is fine
+  if (props.schemaType.components?.input &amp;&amp; !chain.includes(&quot;internationalizedArrayString&quot;)) return false;
+  return chain.some((n) =&gt; SHORT.has(n));
+}
+
+// Sanity&#39;s field markup: VStack [header Flex (fieldHeaderContentBox | “…” Card), input]
+const ROW = `.inline-field [data-ui=&quot;VStack&quot;]:has(&gt; [data-ui=&quot;Flex&quot;] &gt; [data-ui=&quot;fieldHeaderContentBox&quot;]):not(.i18n-tab-item *)`;
+const HEAD = `${ROW} &gt; [data-ui=&quot;Flex&quot;]:first-child`;
+const CSS = `
+.inline-field { container-type: inline-size; margin-block: -10px; }
+${ROW} { display: grid !important; grid-template-columns: minmax(80px, 26%) minmax(0, 1fr) auto; column-gap: 8px; align-items: center; }
+${HEAD} { display: contents !important; }
+${HEAD} &gt; [data-ui=&quot;fieldHeaderContentBox&quot;] { grid-column: 1; grid-row: 1; }
+${HEAD} &gt; :not([data-ui=&quot;fieldHeaderContentBox&quot;]) { grid-column: 3; grid-row: 1; position: static !important; inset: auto !important; }
+${ROW} &gt; :not(:first-child) { grid-column: 2; }
+${ROW} &gt; :nth-child(2) { grid-row: 1; }
+@container (max-width: 300px) { /* title on top again */ }
+`;
+
+export function InlineField({ props, title }: { props: FieldProps; title?: ReactNode }) {
+  const t = title ?? &lt;&gt;{props.title}{props.description ? &lt;Help text={props.description} /&gt; : null}&lt;/&gt;;
+  return (
+    &lt;div className=&quot;inline-field&quot;&gt;
+      &lt;style&gt;{CSS}&lt;/style&gt;
+      {props.renderDefault({ ...props, description: undefined, title: t as unknown as string })}
+    &lt;/div&gt;
+  );
+}
+</code></pre>
+<pre><code class="language-tsx">// I18nTabs.tsx: the field component decides; NL | EN fields pass their tabs + ✨ to the input
+export function I18nTabsField(props: FieldProps) {
+  const inline = useInlineFields() &amp;&amp; isShort(props);
+  if (!isArray(props.schemaType.name)) {
+    if (inline) return &lt;InlineField props={props} /&gt;;
+    if (props.description &amp;&amp; props.name !== &quot;value&quot;)
+      return props.renderDefault({ ...props, description: undefined, title: (&lt;&gt;{props.title}&lt;Help text={props.description} /&gt;&lt;/&gt;) as unknown as string });
+    return props.renderDefault(props);
+  }
+  return &lt;TabsField {...props} inline={inline} compact /&gt;;
+}
+</code></pre>
+<details><summary>Full file: <code>components/InlineFields.tsx</code></summary><pre><code>import { HelpCircleIcon } from "@sanity/icons/HelpCircle";
+import { Text } from "@sanity/ui";
+import { Popover } from "@sanity/ui/popover";
+import {
+  createContext,
+  useContext,
+  useEffect,
+  useRef,
+  useState,
+  type ReactNode,
+} from "react";
+import type { FieldProps, SchemaType } from "sanity";
+
+<p>/**</p>
+<ul>
+<li>Every field: its help text behind a small ? after the title (Help, via I18nTabsField).</li>
+<li>Short fields (text line, number, date, link, slug, a picked document, NL | EN line) as one row:</li>
+<li>title + ? + the usual “…” menu on the left, the input on the right. Long texts, lists, groups, on/off</li>
+<li>and custom inputs stay full width. It&#39;s Sanity&#39;s own field (renderDefault: comments, “…”, validation,</li>
+<li>change bars all stay), only laid out as a grid by CSS. A very narrow column (&lt; 300px) stacks again.</li>
+<li>InlineFields (context) = false switches it off for a part of a form.
+ */
+export const InlineFields = createContext(true);
+export const useInlineFields = () =&gt; useContext(InlineFields);</li>
+</ul>
+<p>const SHORT = new Set([
+  &quot;string&quot;,
+  &quot;number&quot;,
+  &quot;url&quot;,
+  &quot;date&quot;,
+  &quot;datetime&quot;,
+  &quot;slug&quot;,
+  &quot;reference&quot;,
+  &quot;internationalizedArrayString&quot;,
+]);
+const names = (t: SchemaType | undefined): string[] =&gt;
+  t ? [t.name, ...names(t.type as SchemaType | undefined)] : [];</p>
+<p>/** One line is enough: short text, number, date, link, slug, a picked document (not long text, lists, groups, on/off, own inputs). */
+export function isShort(props: FieldProps) {
+  const chain = names(props.schemaType);
+  if (
+    props.name === &quot;value&quot; ||
+    chain.includes(&quot;text&quot;) ||
+    chain.includes(&quot;boolean&quot;)
+  )
+    return false;
+  const opts = props.schemaType.options as { list?: unknown[] } | undefined;
+  if (opts?.list?.length) return false;
+  // own inputs (tiles, checkboxes) need the width; the NL | EN plugin&#39;s input is fine
+  if (
+    (props.schemaType.components as { input?: unknown } | undefined)?.input &amp;&amp;
+    !chain.includes(&quot;internationalizedArrayString&quot;)
+  )
+    return false;
+  return chain.some((n) =&gt; SHORT.has(n));
+}</p>
+<p>// the field&#39;s own layout: a VStack [header (title | “…” menu), input]. As a grid: title | input | “…”
+// (the header is unwrapped with display: contents). The language items inside an NL | EN field keep theirs.
+const ROW = <code>.inline-field [data-ui=&quot;VStack&quot;]:has(&amp;gt; [data-ui=&quot;Flex&quot;] &amp;gt; [data-ui=&quot;fieldHeaderContentBox&quot;]):not(.i18n-tab-item *)</code>;
+const HEAD = <code>${ROW} &amp;gt; [data-ui=&quot;Flex&quot;]:first-child</code>;
+const CSS = <code>/* the form puts 32px between fields: rows sit closer together */ .inline-field { container-type: inline-size; margin-block: -10px; } ${ROW} { display: grid !important; grid-template-columns: minmax(80px, 26%) minmax(0, 1fr) auto; column-gap: 8px; row-gap: 4px; align-items: center; } ${HEAD} { display: contents !important; } ${HEAD} &amp;gt; [data-ui=&quot;fieldHeaderContentBox&quot;] { grid-column: 1; grid-row: 1; } ${HEAD} &amp;gt; :not([data-ui=&quot;fieldHeaderContentBox&quot;]) { grid-column: 3; grid-row: 1; position: static !important; inset: auto !important; } ${ROW} &amp;gt; :not(:first-child) { grid-column: 2; } ${ROW} &amp;gt; :nth-child(2) { grid-row: 1; } @container (max-width: 300px) {   ${ROW} { grid-template-columns: minmax(0, 1fr) auto; }   ${HEAD} &amp;gt; [data-ui=&quot;fieldHeaderContentBox&quot;] { padding-top: 0; }   ${HEAD} &amp;gt; :not([data-ui=&quot;fieldHeaderContentBox&quot;]) { grid-column: 2; padding-top: 0; }   ${ROW} &amp;gt; :not(:first-child) { grid-column: 1 / -1; }   ${ROW} &amp;gt; :nth-child(2) { grid-row: 2; } }</code>;</p>
+<p>/** A small ? next to the title: the help text on hover, or on tap (phone); tap again / elsewhere closes it. */
+export function Help({ text }: { text: ReactNode }) {
+  const [hover, setHover] = useState(false);
+  const [pinned, setPinned] = useState(false);
+  const ref = useRef&lt;HTMLButtonElement&gt;(null);
+  // a tap elsewhere closes it
+  useEffect(() =&gt; {
+    if (!pinned) return;
+    const close = (e: PointerEvent) =&gt;
+      !ref.current?.contains(e.target as Node) &amp;&amp; setPinned(false);
+    document.addEventListener(&quot;pointerdown&quot;, close);
+    return () =&gt; document.removeEventListener(&quot;pointerdown&quot;, close);
+  }, [pinned]);
+  return (
+    &lt;&gt;
+      &lt;Popover
+        open={hover || pinned}
+        portal
+        placement=&quot;top&quot;
+        fallbackPlacements={[&quot;bottom&quot;, &quot;right&quot;]}
+        padding={3}
+        radius={2}
+        shadow={2}
+        style={{ maxWidth: 300 }}
+        content={
+          &lt;div style={{ maxWidth: 320 }}&gt;
+            &lt;Text size={1} muted&gt;
+              {text}
+            &lt;/Text&gt;
+          &lt;/div&gt;
+        }
+      &gt;
+        &lt;button
+          ref={ref}
+          type=&quot;button&quot;
+          aria-label=&quot;Uitleg&quot;
+          onMouseEnter={() =&gt; setHover(true)}
+          onMouseLeave={() =&gt; setHover(false)}
+          onClick={() =&gt; setPinned((p) =&gt; !p)}
+          // same size everywhere (px, not the title&#39;s size), on the line of the title
+          style={{
+            appearance: &quot;none&quot;,
+            background: &quot;none&quot;,
+            border: 0,
+            font: &quot;inherit&quot;,
+            cursor: &quot;help&quot;,
+            display: &quot;inline-flex&quot;,
+            alignSelf: &quot;center&quot;,
+            verticalAlign: &quot;middle&quot;,
+            fontSize: 15,
+            lineHeight: 0,
+            color: &quot;var(--card-muted-fg-color)&quot;,
+            padding: &quot;1px 1px 1px 2px&quot;,
+          }}
+        &gt;
+          &lt;HelpCircleIcon
+            style={{ fontSize: 15, width: &quot;1em&quot;, height: &quot;1em&quot; }}
+          /&gt;
+        &lt;/button&gt;
+      &lt;/Popover&gt;
+    &lt;/&gt;
+  );
+}</p>
+<p>/** Sanity&#39;s own field, title (may hold the NL | EN tabs) + ? on the left, input on the right. */
+export function InlineField({
+  props,
+  title,
+}: {
+  props: FieldProps;
+  title?: ReactNode;
+}) {
+  const t = title ?? (
+    &lt;&gt;
+      {props.title}
+      {props.description ? &lt;Help text={props.description} /&gt; : null}
+    &lt;/&gt;
+  );
+  return (
+    &lt;div className=&quot;inline-field&quot;&gt;
+      &lt;style&gt;{CSS}&lt;/style&gt;
+      {props.renderDefault({
+        ...props,
+        description: undefined,
+        title: t as unknown as string,
+      })}
+    &lt;/div&gt;
+  );
+}
+</code></pre></details></p>
+</main></body></html>

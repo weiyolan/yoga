@@ -9,7 +9,8 @@ import { getDictionary } from "@/lib/dictionary";
 import type { Lang } from "@/sanity/site.config";
 import { Icon } from "./icons";
 
-export type LightboxItem = { src: string; alt: string; caption?: string | null };
+/** `credit`: the Fotobank photographer, shown small under the photo (linked to their website). */
+export type LightboxItem = { src: string; alt: string; credit?: { name: string | null; website: string | null } | null };
 
 const Ctx = createContext<(index: number) => void>(() => {});
 
@@ -72,7 +73,20 @@ export function Lightbox({ lang, items, children }: { lang: Lang; items: Lightbo
           <figure>
             <img src={item.src} alt={item.alt} draggable={false} />
             <figcaption>
-              {item.caption ? <span>{item.caption}</span> : <span />}
+              <span className="credit">
+                {item.credit?.name ? (
+                  <>
+                    {t.photo}{" "}
+                    {item.credit.website ? (
+                      <a href={item.credit.website} target="_blank" rel="noopener">
+                        {item.credit.name}
+                      </a>
+                    ) : (
+                      item.credit.name
+                    )}
+                  </>
+                ) : null}
+              </span>
               <span className="count">
                 {index! + 1} / {n}
               </span>

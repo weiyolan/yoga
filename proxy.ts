@@ -5,9 +5,10 @@
  *   /nl/retreats         → 308 /retreats       (one URL per page)
  *   /en/lessons          → /en/lessen          (localized segment → Dutch folder)
  *   /en/lessen           → 308 /en/lessons
+ *   /en/retreats/x/sign-up → /en/retreats/x/inschrijven (sign-up page; the Dutch segment → 308)
  */
 import { NextResponse, type NextRequest } from "next/server";
-import { internalSegment, routes, type Route } from "@/lib/routes";
+import { internalSegment, routes, signupSegment, type Route } from "@/lib/routes";
 import { defaultLanguage, isLang, type Lang } from "@/sanity/site.config";
 
 export function proxy(request: NextRequest) {
@@ -30,6 +31,14 @@ export function proxy(request: NextRequest) {
       return NextResponse.redirect(url, 308);
     }
     parts[0] = internalSegment(lang, parts[0]) ?? parts[0];
+    if (parts[0] === routes.retreats[defaultLanguage] && parts.length === 3) {
+      const own: string = signupSegment[lang];
+      if (parts[2] === signupSegment[defaultLanguage] && own !== parts[2]) {
+        url.pathname = `/${[lang, routes.retreats[lang], parts[1], signupSegment[lang]].join("/")}`;
+        return NextResponse.redirect(url, 308);
+      }
+      if (parts[2] === own) parts[2] = signupSegment[defaultLanguage];
+    }
   }
 
   url.pathname = `/${[lang, ...parts].join("/")}`;

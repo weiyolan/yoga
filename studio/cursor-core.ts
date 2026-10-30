@@ -1,10 +1,11 @@
 /**
  * Circle-and-dot cursor (design-system signature), shared by the site (components/Cursor.tsx) and the Studio
  * (studio/cursor.tsx). Plain DOM, no React: mount it from an effect and call the returned cleanup.
- * The dot follows the pointer; the ring trails behind and settles around it when the pointer rests
- * (no trailing under reduced motion).
- * The ring inverts what's under it (blend mode); the dot is a sibling so it stays ember.
+ * The dot follows the pointer; the ring trails behind and settles around it when the pointer rests.
+ * The ring inverts what's under it (blend mode); the dot is a sibling so it stays ember, with a halo for contrast.
  * Hidden until the first move and whenever the pointer leaves the window or is over a text field.
+ * Click: the ring squeezes while pressed and bounces back on release.
+ * Reduced motion: still there, without the trailing and the bounce (the ring sits on the pointer).
  * Styles: .cursor / .cursor-dot / body.has-cursor (app/globals.css on the site, injected in the Studio).
  */
 
@@ -14,8 +15,8 @@ const EASE = 0.16; // share of the remaining distance the ring covers per frame
 /** `big`: selector that grows the ring (links, buttons…). */
 export function mountCursor(big: string): () => void {
   if (!matchMedia("(pointer: fine)").matches) return () => {};
-  // Reduced motion: keep the cursor, drop the trailing (the ring sits on the pointer).
-  const ease = matchMedia("(prefers-reduced-motion: reduce)").matches ? 1 : EASE;
+  const reduced = matchMedia("(prefers-reduced-motion: reduce)").matches;
+  const ease = reduced ? 1 : EASE;
 
   const ring = document.createElement("div");
   const dot = document.createElement("div");
@@ -34,7 +35,8 @@ export function mountCursor(big: string): () => void {
       ry = y;
       frame = 0;
     } else frame = requestAnimationFrame(tick);
-    ring.style.transform = `translate(${rx}px,${ry}px)`;
+    // `translate`, not `transform`: it applies after `scale`, so the click scale stays centred on the ring
+    ring.style.translate = `${rx}px ${ry}px`;
   };
 
   const show = (on: boolean) => {
@@ -53,10 +55,12 @@ export function mountCursor(big: string): () => void {
       ry = y;
       seen = true;
     }
-    dot.style.transform = `translate(${x}px,${y}px)`;
+    dot.style.translate = `${x}px ${y}px`;
     if (!frame) frame = requestAnimationFrame(tick);
     const el = e.target as Element;
-    ring.classList.toggle("big", !!el.closest?.(big));
+    const isBig = !!el.closest?.(big);
+    ring.classList.toggle("big", isBig);
+    dot.classList.toggle("big", isBig);
     show(!el.closest?.(TEXT));
   };
   // Leaving the window, or entering an iframe (the Studio's live preview runs its own cursor).
@@ -66,15 +70,35 @@ export function mountCursor(big: string): () => void {
     seen = false;
   };
   const hide = () => show(false);
+  const press = (e: PointerEvent) => {
+    if (e.pointerType !== "mouse" || e.button !== 0) return;
+    ring.classList.remove("bounce");
+    ring.classList.add("press");
+    dot.classList.add("press");
+  };
+  const release = () => {
+    if (!ring.classList.contains("press")) return;
+    ring.classList.remove("press");
+    dot.classList.remove("press");
+    if (reduced) return;
+    void ring.offsetWidth; // restart the animation on quick double clicks
+    ring.classList.add("bounce");
+  };
+  const settled = () => ring.classList.remove("bounce");
 
   addEventListener("mousemove", move, { passive: true });
   document.addEventListener("mouseout", out);
   addEventListener("blur", hide);
+  addEventListener("pointerdown", press, { passive: true });
+  addEventListener("pointerup", release, { passive: true });
+  ring.addEventListener("animationend", settled);
   return () => {
     cancelAnimationFrame(frame);
     removeEventListener("mousemove", move);
     document.removeEventListener("mouseout", out);
     removeEventListener("blur", hide);
+    removeEventListener("pointerdown", press);
+    removeEventListener("pointerup", release);
     document.body.classList.remove("has-cursor");
     ring.remove();
     dot.remove();

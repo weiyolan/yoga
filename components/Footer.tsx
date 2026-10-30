@@ -27,13 +27,14 @@ export function Footer({ lang, layout }: { lang: Lang; layout: LAYOUT_QUERY_RESU
             <h4>{t.offer}</h4>
             <Link href={href(lang, "retreats")}>{d.nav.retreats}</Link>
             <Link href={href(lang, "lessons")}>{d.nav.lessons}</Link>
-            <Link href={href(lang, "coaching")}>{d.nav.coaching}</Link>
+            {layout?.hasPrivate ? <Link href={href(lang, "lessons", { hash: "prive" })}>{d.nav.chips.private}</Link> : null}
           </div>
           <div>
             <h4>{t.about}</h4>
             <Link href={href(lang, "about")}>{d.nav.about}</Link>
             <Link href={href(lang, "gallery")}>{d.nav.gallery}</Link>
             <Link href={href(lang, "contact")}>{d.nav.contact}</Link>
+            <Link href={href(lang, "faq")}>{d.nav.faq}</Link>
           </div>
           <div>
             <h4>{t.follow}</h4>
@@ -45,7 +46,17 @@ export function Footer({ lang, layout }: { lang: Lang; layout: LAYOUT_QUERY_RESU
         </div>
         <div className="legal">
           <span>© {name}</span>
-          <Link href={href(lang, "privacy")}>{d.privacy.link}</Link>
+          {(["privacy", "terms", "cancellation", "cookies"] as const).map((r) => (
+            <Link key={r} href={href(lang, r)}>
+              {d.legal.titles[r]}
+            </Link>
+          ))}
+          <span>
+            Powered by{" "}
+            <a href="https://www.ywdesign.co" target="_blank" rel="noopener" className="powered">
+              ywdesign.co
+            </a>
+          </span>
         </div>
       </div>
     </footer>

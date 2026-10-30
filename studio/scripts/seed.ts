@@ -5,17 +5,27 @@
  *   npx sanity exec scripts/seed.ts -- --dry   # prints what it would write, no network
  *   ... --dry --out=../.fixture/dataset.json  # dataset for the frontend fixture mode
  *
- * Safe to re-run: documents are matched on slug / name / image asset and replaced,
- * singletons use their fixed id. Photos get a title, place and categories, but no
- * alt text on purpose: they show up under Fotobank → "Te doen: zonder alt-tekst".
+ *   npm run seed -- --replace             # overwrite existing documents with the seed (loses Studio edits)
+ *
+ * Safe to re-run: documents are matched on slug / name / image asset, singletons use their
+ * fixed id. By default only empty fields are filled in (setIfMissing), so edits made in the
+ * Studio are kept; --replace writes the seed over them. Photos get their categories, but
+ * no alt text on purpose: they show up under Fotobank → "Te doen: zonder alt-tekst" (or use
+ * ✨ Alt-teksten aanvullen there). Texts are the v2 drafts (scripts/v2-content.ts).
+ *
+ * The interface texts the site falls back on (lib/dictionary.ts) are seeded too, so every
+ * heading, menu description and form text is visible and editable in the Studio.
  */
 import { randomUUID } from "node:crypto";
 import { createReadStream, existsSync, writeFileSync } from "node:fs";
 import path from "node:path";
 import { getCliClient } from "sanity/cli";
-import { apiVersion, defaultLanguage, type Lang } from "../../sanity/site.config";
+import { getDictionary, type Dictionary } from "../../lib/dictionary.ts";
+import { apiVersion, defaultLanguage, type Lang } from "../../sanity/site.config.ts";
+import * as v2 from "./v2-content.ts";
 
 const DRY = process.argv.includes("--dry");
+const REPLACE = process.argv.includes("--replace");
 const ROOT = path.resolve(process.cwd(), "..");
 // SANITY_AUTH_TOKEN (write token) from studio/.env; without it, `--with-user-token` login is used
 if (existsSync(".env")) process.loadEnvFile(".env");
@@ -42,13 +52,19 @@ function blocks(nl: string, en?: string) {
   return Object.entries(en ? { nl, en } : { nl }).map(([language, v]) => ({ _key: key(), _type: "internationalizedArraySimpleBlockContentValue", language, value: pt(v) }));
 }
 
+/** A default from the site's dictionary, in both languages. */
+const dict = (pick: (d: Dictionary) => string) => ({ nl: pick(getDictionary("nl")), en: pick(getDictionary("en")) });
+
 const ref = (id: string) => ({ _type: "reference", _ref: id });
 const refs = (ids: (string | undefined)[]) => ids.filter(Boolean).map((id) => ({ _key: key(), ...ref(id!) }));
 
 type Doc = { _type: string; [k: string]: unknown };
 const written: Doc[] = [];
 
-/** Create, or replace the document matching `filter` (keeps its generated _id). */
+/** Drops undefined fields (setIfMissing would otherwise try to set them). */
+const defined = (doc: Doc) => Object.fromEntries(Object.entries(doc).filter(([, v]) => v !== undefined)) as Doc;
+
+/** Create the document matching `filter`, or fill its empty fields (--replace: overwrite it). Keeps its _id. */
 async function upsert(doc: Doc, filter: string, params: Record<string, unknown>): Promise<string> {
   if (!client) {
     const _id = `dry.${doc._type}.${written.length}`;
@@ -56,46 +72,53 @@ async function upsert(doc: Doc, filter: string, params: Record<string, unknown>)
     return _id;
   }
   const existing = await client.fetch<string | null>(`*[_type == $type && ${filter}][0]._id`, { type: doc._type, ...params });
-  const res = existing ? await client.createOrReplace({ ...doc, _id: existing }) : await client.create(doc);
-  console.log(`${existing ? "updated" : "created"} ${doc._type} ${res._id}`);
-  return res._id;
+  if (!existing) {
+    const res = await client.create(doc);
+    console.log(`created ${doc._type} ${res._id}`);
+    return res._id;
+  }
+  if (REPLACE) await client.createOrReplace({ ...doc, _id: existing });
+  else await client.patch(existing).setIfMissing(defined(doc)).commit();
+  console.log(`${REPLACE ? "replaced" : "filled in"} ${doc._type} ${existing}`);
+  return existing;
 }
 
 async function singleton(_id: string, doc: Doc) {
   if (!client) return void written.push({ _id, ...doc });
-  await client.createOrReplace({ _id, ...doc });
-  console.log(`saved ${_id}`);
+  if (REPLACE) await client.createOrReplace({ _id, ...doc });
+  else await client.transaction().createIfNotExists({ _id, _type: doc._type }).patch(_id, (p) => p.setIfMissing(defined(doc))).commit();
+  console.log(`${REPLACE ? "replaced" : "filled in"} ${_id}`);
 }
 
 /* ------------------------------------------------------------------ Fotobank */
 
-type Photo = { file: string; title: Tr; place?: Tr; categories: string[]; takenAt?: string; retreat?: "dahab" | "eifel" | "ardennen" };
+type Photo = { file: string; categories: string[] };
 
 const PHOTOS: Record<string, Photo> = {
-  aerial: { file: "studio/seed/images/aerial-yoga.jpg", title: { nl: "Aerial yoga", en: "Aerial yoga" }, place: "Dahab", categories: ["retreats"], retreat: "dahab" },
-  campfire: { file: "studio/seed/images/campfire.jpg", title: { nl: "Kampvuur", en: "Campfire" }, place: "Eifel", categories: ["retreats", "natuur"], retreat: "eifel" },
-  cooking: { file: "studio/seed/images/cooking.jpg", title: { nl: "Samen koken", en: "Cooking together" }, categories: ["retreats"] },
-  desertBw: { file: "studio/seed/images/desert-bw.jpg", title: { nl: "Woestijn", en: "Desert" }, place: "Sinaï", categories: ["natuur"], retreat: "dahab" },
-  handstand: { file: "studio/seed/images/desert-handstand.jpg", title: { nl: "Handstand in de woestijn", en: "Handstand in the desert" }, place: "Sinaï", categories: ["retreats", "natuur"], retreat: "dahab" },
-  desert: { file: "studio/seed/images/desert.jpg", title: { nl: "Woestijn", en: "Desert" }, place: "Sinaï", categories: ["natuur"], retreat: "dahab" },
-  diving: { file: "studio/seed/images/diving.jpg", title: { nl: "Duiken", en: "Diving" }, place: "Dahab", categories: ["retreats"], retreat: "dahab" },
-  fish: { file: "studio/seed/images/fish.jpg", title: { nl: "Rode Zee", en: "Red Sea" }, place: "Dahab", categories: ["natuur"], retreat: "dahab" },
-  freediving: { file: "studio/seed/images/freediving.jpg", title: { nl: "Freediving", en: "Freediving" }, place: "Lighthouse Bay", categories: ["retreats"], retreat: "dahab" },
-  freediving2: { file: "studio/seed/images/freediving2.jpg", title: { nl: "Freediving", en: "Freediving" }, place: "Lighthouse Bay", categories: ["retreats"], retreat: "dahab" },
-  freediving3: { file: "studio/seed/images/freediving3.jpg", title: { nl: "Freediving", en: "Freediving" }, place: "Lighthouse Bay", categories: ["retreats"], retreat: "dahab" },
-  hike: { file: "studio/seed/images/hike.jpg", title: { nl: "Hike", en: "Hike" }, place: "Eifel", categories: ["retreats", "natuur"], retreat: "eifel" },
-  hike2: { file: "studio/seed/images/hike2.jpg", title: { nl: "Hike in het bos", en: "Forest hike" }, place: "Eifel", categories: ["retreats", "natuur"], retreat: "eifel" },
-  hotel: { file: "studio/seed/images/hotel.jpg", title: { nl: "Nour Boutique Hotel", en: "Nour Boutique Hotel" }, place: "Dahab", categories: ["retreats"], retreat: "dahab" },
-  learning: { file: "studio/seed/images/learning.jpg", title: { nl: "Samen leren", en: "Learning together" }, categories: ["retreats"] },
-  retreat: { file: "studio/seed/images/retreat.jpg", title: { nl: "Retreat", en: "Retreat" }, categories: ["retreats"] },
-  pool: { file: "studio/seed/images/swimmingpool.jpg", title: { nl: "Zwembad", en: "Pool" }, categories: ["retreats"] },
-  team: { file: "studio/seed/images/team.jpg", title: { nl: "De groep", en: "The group" }, categories: ["retreats", "team"] },
-  yogaOutside: { file: "studio/seed/images/yoga-outside.jpg", title: { nl: "Yoga buiten", en: "Yoga outdoors" }, categories: ["lessen", "natuur"] },
-  yoga: { file: "studio/seed/images/yoga.jpg", title: { nl: "Yoga", en: "Yoga" }, categories: ["lessen"] },
-  yoga2: { file: "studio/seed/images/yoga2.jpg", title: { nl: "Yoga", en: "Yoga" }, categories: ["lessen"] },
-  yoga3: { file: "studio/seed/images/yoga3.jpg", title: { nl: "Yoga", en: "Yoga" }, categories: ["lessen"] },
-  founders: { file: "studio/seed/images/rita&philippe.jpg", title: { nl: "Rita & Philippe", en: "Rita & Philippe" }, categories: ["team"] },
-  founders2: { file: "studio/seed/images/philippe and rita.jpg", title: { nl: "Philippe & Rita", en: "Philippe & Rita" }, categories: ["team"] },
+  aerial: { file: "studio/seed/images/aerial-yoga.jpg", categories: ["retreats"] },
+  campfire: { file: "studio/seed/images/campfire.jpg", categories: ["retreats", "natuur"] },
+  cooking: { file: "studio/seed/images/cooking.jpg", categories: ["retreats"] },
+  desertBw: { file: "studio/seed/images/desert-bw.jpg", categories: ["natuur"] },
+  handstand: { file: "studio/seed/images/desert-handstand.jpg", categories: ["retreats", "natuur"] },
+  desert: { file: "studio/seed/images/desert.jpg", categories: ["natuur"] },
+  diving: { file: "studio/seed/images/diving.jpg", categories: ["retreats"] },
+  fish: { file: "studio/seed/images/fish.jpg", categories: ["natuur"] },
+  freediving: { file: "studio/seed/images/freediving.jpg", categories: ["retreats"] },
+  freediving2: { file: "studio/seed/images/freediving2.jpg", categories: ["retreats"] },
+  freediving3: { file: "studio/seed/images/freediving3.jpg", categories: ["retreats"] },
+  hike: { file: "studio/seed/images/hike.jpg", categories: ["retreats", "natuur"] },
+  hike2: { file: "studio/seed/images/hike2.jpg", categories: ["retreats", "natuur"] },
+  hotel: { file: "studio/seed/images/hotel.jpg", categories: ["retreats"] },
+  learning: { file: "studio/seed/images/learning.jpg", categories: ["retreats"] },
+  retreat: { file: "studio/seed/images/retreat.jpg", categories: ["retreats"] },
+  pool: { file: "studio/seed/images/swimmingpool.jpg", categories: ["retreats"] },
+  team: { file: "studio/seed/images/team.jpg", categories: ["retreats", "team"] },
+  yogaOutside: { file: "studio/seed/images/yoga-outside.jpg", categories: ["lessen", "natuur"] },
+  yoga: { file: "studio/seed/images/yoga.jpg", categories: ["lessen"] },
+  yoga2: { file: "studio/seed/images/yoga2.jpg", categories: ["lessen"] },
+  yoga3: { file: "studio/seed/images/yoga3.jpg", categories: ["lessen"] },
+  founders: { file: "studio/seed/images/rita&philippe.jpg", categories: ["team"] },
+  founders2: { file: "studio/seed/images/philippe and rita.jpg", categories: ["team"] },
 };
 type PhotoKey = keyof typeof PHOTOS;
 const media: Partial<Record<PhotoKey, string>> = {};
@@ -115,10 +138,7 @@ async function seedPhotos() {
       {
         _type: "mediaItem",
         image: { _type: "image", asset: ref(assetId) },
-        title: str(p.title),
-        place: p.place ? str(p.place) : undefined,
         categories: p.categories,
-        takenAt: p.takenAt,
         showInGallery: true,
         highlight: ["handstand", "freediving", "hike2"].includes(k),
       },
@@ -141,34 +161,74 @@ async function seed() {
     pili: await upsert({ _type: "studio", name: "Studio Pili", city: "Antwerpen", website: "https://www.studiopili.be/" }, "name == $name", { name: "Studio Pili" }),
     magnolia: await upsert({ _type: "studio", name: "Magnolia Studios", city: "Antwerpen", website: "https://magnoliastudios.be/" }, "name == $name", { name: "Magnolia Studios" }),
   };
-  const style = (orderRank: number, name: string, slug: string, photo: PhotoKey, what: Tr, forWhom: Tr, at: string[]) =>
+  const studioId = (name: string) => Object.values(studios)[["Antwerp Yoga", "Studio Pili", "Magnolia Studios"].indexOf(name)];
+  const style = (orderRank: number, name: string, slug: string, photo: PhotoKey, what: Tr, forWhom: Tr) =>
     upsert(
-      { _type: "yogaClass", name, slug: { _type: "slug", current: slug }, orderRank, photo: m(photo), what: txt(what), forWhom: txt(forWhom), studios: refs(at) },
+      { _type: "yogaClass", name, slug: { _type: "slug", current: slug }, orderRank, photo: m(photo), what: txt(v2.styles[slug]?.what ?? what), forWhom: txt(forWhom), studios: refs(v2.styles[slug].studios.map(studioId)) },
       "slug.current == $slug",
       { slug },
     );
   const styles = {
-    ashtanga: await style(10, "Ashtanga", "ashtanga", "yoga", { nl: "Een vaste, dynamische reeks op het ritme van je adem.", en: "A set, dynamic sequence paced by your breath." }, { nl: "Wie structuur en uitdaging zoekt.", en: "Those who like structure and a challenge." }, [studios.antwerp]),
-    vinyasa: await style(20, "Vinyasa", "vinyasa", "yoga2", { nl: "Vloeiende flows, elke les anders.", en: "Flowing sequences, different every class." }, { nl: "Alle niveaus.", en: "All levels." }, [studios.pili, studios.antwerp]),
-    mat: await style(30, "Pilates Mat", "pilates-mat", "yoga3", { nl: "Kracht vanuit je core, op de mat.", en: "Core strength, on the mat." }, { nl: "Iedereen die sterker en soepeler wil worden.", en: "Anyone who wants to get stronger and more supple." }, [studios.magnolia]),
-    reformer: await style(40, "Pilates Reformer", "pilates-reformer", "yogaOutside", { nl: "Pilates op het toestel: gericht en intens.", en: "Pilates on the machine: precise and intense." }, { nl: "Beginners en gevorderden.", en: "Beginners and advanced." }, [studios.pili]),
+    ashtanga: await style(10, "Ashtanga", "ashtanga", "yoga", { nl: "Een vaste, dynamische reeks op het ritme van je adem.", en: "A set, dynamic sequence paced by your breath." }, { nl: "Wie structuur en uitdaging zoekt.", en: "Those who like structure and a challenge." }),
+    vinyasa: await style(20, "Vinyasa", "vinyasa", "yoga2", { nl: "Vloeiende flows, elke les anders.", en: "Flowing sequences, different every class." }, { nl: "Alle niveaus.", en: "All levels." }),
+    mat: await style(30, "Pilates Mat", "pilates-mat", "yoga3", { nl: "Kracht vanuit je core, op de mat.", en: "Core strength, on the mat." }, { nl: "Iedereen die sterker en soepeler wil worden.", en: "Anyone who wants to get stronger and more supple." }),
+    reformer: await style(40, "Pilates Reformer", "pilates-reformer", "yogaOutside", { nl: "Pilates op het toestel: gericht en intens.", en: "Pilates on the machine: precise and intense." }, { nl: "Beginners en gevorderden.", en: "Beginners and advanced." }),
   };
 
   /* people */
   const rita = await upsert(
-    { _type: "person", name: "Rita", role: str({ nl: "Yoga- & Pilatesleraar · oprichter", en: "Yoga & Pilates teacher · founder" }), portrait: m("founders"), bio: blocks("Rita is verliefd op yoga. [3–4 zinnen: hoe ze bij yoga kwam, wat ze graag geeft, wat je bij haar mag verwachten.]") },
+    { _type: "person", name: "Rita", kind: "founder", role: str({ nl: "Yoga- & Pilatesleraar · oprichter", en: "Yoga & Pilates teacher · founder" }), portrait: m("founders"), bio: blocks(v2.bios.Rita.nl, v2.bios.Rita.en) },
     "name == $name",
     { name: "Rita" },
   );
   const philippe = await upsert(
-    { _type: "person", name: "Philippe", role: str({ nl: "Natuur & freediving · oprichter", en: "Nature & freediving · founder" }), portrait: m("founders2"), bio: blocks("Philippe is verliefd op de natuur en freediven. [3–4 zinnen: de zee, het avontuur, zijn rol tijdens de retreats.]") },
+    { _type: "person", name: "Philippe", kind: "founder", role: str({ nl: "Natuur & freediving · oprichter", en: "Nature & freediving · founder" }), portrait: m("founders2"), bio: blocks(v2.bios.Philippe.nl, v2.bios.Philippe.en) },
     "name == $name",
     { name: "Philippe" },
   );
   const michele = await upsert(
-    { _type: "person", name: "Michèle", role: str({ nl: "Freedive-instructeur, CMAS & AIDA", en: "Freediving instructor, CMAS & AIDA" }) },
+    { _type: "person", name: "Michèle", kind: "collaborator", role: str({ nl: "Freedive-instructeur, CMAS & AIDA", en: "Freediving instructor, CMAS & AIDA" }) },
     "name == $name",
     { name: "Michèle" },
+  );
+  for (const c of v2.collaborators) await upsert({ _type: "person", name: c.name, kind: "collaborator", role: str(c.role) }, "name == $name", { name: c.name });
+
+  /* sign-up forms */
+  const forms: Record<string, string> = {};
+  for (const f of v2.signupForms)
+    forms[f.key] = await upsert(
+      {
+        _type: "signupForm",
+        name: f.name,
+        isDefault: f.isDefault,
+        standard: { phone: true, room: true, diet: true },
+        message: true,
+        questions: f.questions.map((q) => ({
+          _key: key(),
+          _type: "signupQuestion",
+          label: str(q.label),
+          help: q.help ? str(q.help) : undefined,
+          type: q.type,
+          options: q.options ? lines(q.options.nl, q.options.en) : undefined,
+          required: q.required,
+        })),
+      },
+      "name == $name",
+      { name: f.name },
+    );
+
+  /* confirmation mail */
+  await upsert(
+    {
+      _type: "confirmationMail",
+      name: "Standaard",
+      isDefault: true,
+      body: txt(v2.mails.signupMail),
+      payment: txt(v2.mails.paymentMail),
+      waitlistBody: txt(dict((d) => d.signup.waitlistMailBody("{naam}", "{retreat}", "{datum}"))),
+    },
+    "name == $name",
+    { name: "Standaard" },
   );
 
   /* retreats */
@@ -183,6 +243,7 @@ async function seed() {
     venue: "Nour Boutique Hotel",
     capacity: 8,
     priceFrom: 1120,
+    signupForm: ref(forms.freediving),
     cardPhoto: m("handstand"),
     hero: hero("freediving", { nl: "Dahab: Yoga & Freediving", en: "Dahab: Yoga & Freediving" }),
     moodPhotos: ms("aerial", "desert", "hotel", "cooking"),
@@ -234,8 +295,16 @@ async function seed() {
     nutshellText: txt(
       "Dagen vol yoga, stevige hikes door eindeloos groen, en avonden bij de sauna en whirlpool. Een lang weekend om je hoofd leeg te maken en op te laden in de natuur.",
     ),
+    capacity: 10,
+    placeTitle: str({ nl: "De Belgische Eifel", en: "The Belgian Eifel" }),
+    placePhotos: ms("hike", "yogaOutside"),
     hosts: refs([rita, philippe]),
+    prices: v2.eifel.prices.map((p) => ({ _key: key(), _type: "price", label: str(p.label), amount: p.amount })),
+    included: lines(v2.eifel.included.nl, v2.eifel.included.en),
+    notIncluded: lines(v2.eifel.notIncluded.nl, v2.eifel.notIncluded.en),
+    programme: v2.eifel.programme.map((p) => ({ _key: key(), _type: "programmeItem", title: str(p.title), text: txt(p.text) })),
     closingTitle: str({ nl: "Zin om mee te gaan?", en: "Want to join?" }),
+    closingPhoto: m("campfire"),
   });
 
   const ardennen = await retreat("ardennen-2026", {
@@ -250,16 +319,9 @@ async function seed() {
     nutshellText: txt("Een driedaagse in een imposante design-loft middenin de Ardense bossen. Yoga, sauna en jacuzzi, een goed glas wijn en vooral: niets moeten."),
     hosts: refs([rita, philippe]),
     participantCount: 12,
+    closingPhoto: m("retreat"),
     recapPhotos: ms("pool", "campfire", "yoga3", "learning", "retreat"),
   });
-
-  /* link photos to their retreat */
-  const retreatIds = { dahab, eifel, ardennen };
-  for (const [k, p] of Object.entries(PHOTOS) as [PhotoKey, Photo][]) {
-    if (!p.retreat) continue;
-    if (client) await client.patch(media[k]!).set({ retreat: ref(retreatIds[p.retreat]) }).commit();
-    else Object.assign(written.find((d) => d._id === media[k])!, { retreat: ref(retreatIds[p.retreat]) });
-  }
 
   /* testimonials */
   const quote = await upsert(
@@ -274,30 +336,59 @@ async function seed() {
   await singleton("settings", {
     _type: "settings",
     siteName: "Yoga, Zen & Tonic",
-    tagline: str({ nl: "Beyond the mat, into the moment", en: "Beyond the mat, into the moment" }),
-    phone: "+32 477 74 42 40",
-    instagram: "https://www.instagram.com/",
-    facebook: "https://www.facebook.com/yogazentonic",
-    seo: seo("Yoga, Zen & Tonic", { nl: "Yoga-retreats, lessen en private coaching met Rita & Philippe.", en: "Yoga retreats, classes and private coaching with Rita & Philippe." }),
+    tagline: str(v2.tagline),
+    seo: { ...seo("Yoga, Zen & Tonic", v2.seoDescription), shareImage: m("handstand") },
+  });
+  await singleton("navigation", {
+    _type: "navigation",
+    menuFounders: str(dict((d) => d.nav.founders)),
+    menuFoundersSub: str(dict((d) => d.nav.foundersSub)),
+    menuTeam: str(dict((d) => d.nav.team[1])),
+    menuDrive: str(dict((d) => d.nav.drive[1])),
+    menuCollaborators: str(dict((d) => d.nav.collaborators[1])),
+    menuUpcoming: str(dict((d) => d.nav.upcoming[1])),
+    menuPast: str(dict((d) => d.nav.past[1])),
+    newsletterTitle: str(dict((d) => d.footer.keepPosted)),
+    newsletterThanks: str(dict((d) => d.footer.subscribed)),
+  });
+  await singleton("signupSettings", {
+    _type: "signupSettings",
+    signupConsent: txt(dict((d) => d.signup.consent)),
+    signupTerms: txt(dict((d) => d.signup.terms)),
+    signupThanks: txt(dict((d) => d.signup.sent)),
+  });
+  await singleton("mailSettings", { _type: "mailSettings", autoConfirm: false, newsletterConfirm: true });
+  await singleton("newsletterMail", {
+    _type: "newsletterMail",
+    subject: str(dict((d) => d.footer.mailSubject)),
+    body: txt(dict((d) => d.footer.mailBody("{naam}"))),
   });
   await singleton("homePage", {
     _type: "homePage",
-    hero: hero("handstand", "Beyond the mat, into the moment"),
-    introTitle: str({ nl: "Geen zweverig gedoe. Wél yoga, natuur en warme mensen.", en: "No woolly stuff. Just yoga, nature and warm people." }),
-    intro: txt("[1 paragraaf: achtergrond en historie van Yoga, Zen & Tonic.]"),
+    hero: hero("handstand", v2.home.heroTitle, v2.home.heroSubtitle),
+    introTitle: str(v2.home.introTitle),
+    intro: txt(v2.home.intro),
     testimonials: refs([quote]),
     aboutTitle: str("Rita & Philippe"),
-    aboutText: txt({
-      nl: "Rita is verliefd op yoga, Philippe op de natuur en freediven. Samen maken ze retreats die krachtig, authentiek en fun zijn.",
-      en: "Rita loves yoga, Philippe loves nature and freediving. Together they create retreats that are powerful, authentic and fun.",
-    }),
+    aboutText: txt(v2.home.aboutText),
     aboutPhoto: m("founders"),
+    introLink: str(dict((d) => d.home.meet)),
+    retreatsTitle: str(dict((d) => d.home.retreatsTitle)),
+    lessonsTitle: str(v2.home.lessonsTitle),
+    lessonsText: txt(v2.home.lessonsText),
+    testimonialsTitle: str(dict((d) => d.home.testimonials)),
   });
   await singleton("retreatsPage", {
     _type: "retreatsPage",
     hero: hero("desert", "Retreats"),
     upcomingTitle: str({ nl: "Binnenkort", en: "Coming up" }),
     pastTitle: str({ nl: "Waar we al waren", en: "Where we've been" }),
+    noneUpcoming: txt(dict((d) => d.retreats.noneUpcoming)),
+    peopleTitle: str(dict((d) => d.retreat.peopleTitle)),
+    programmeTitle: str(dict((d) => d.retreat.programmeTitle)),
+    practicalTitle: str(dict((d) => d.retreat.practicalTitle)),
+    recapTitle: str(dict((d) => d.retreat.recapPhotos)),
+    pastCtaTitle: str(dict((d) => d.retreat.nextTitle)),
   });
   await singleton("lessonsPage", {
     _type: "lessonsPage",
@@ -305,52 +396,63 @@ async function seed() {
     stylesTitle: str({ nl: "Vier stijlen", en: "Four styles" }),
     studiosTitle: str({ nl: "Drie studio's", en: "Three studios" }),
     scheduleTitle: str({ nl: "Wanneer geeft Rita les?", en: "When does Rita teach?" }),
+    scheduleEmpty: txt(dict((d) => d.lessons.scheduleEmpty)),
     schedule: (
       [
-        ["mon", "07:00", styles.ashtanga, studios.antwerp],
-        ["tue", "18:30", styles.mat, studios.magnolia],
-        ["wed", "12:15", styles.vinyasa, studios.pili],
-        ["thu", "19:00", styles.reformer, studios.pili],
-        ["sat", "09:30", styles.vinyasa, studios.antwerp],
+        ["mon", "07:00", styles.ashtanga, studios.antwerp, "all"],
+        ["tue", "18:30", styles.mat, studios.magnolia, "beginner"],
+        ["wed", "12:15", styles.vinyasa, studios.pili, "all"],
+        ["thu", "19:00", styles.reformer, studios.pili, "intermediate"],
+        ["sat", "09:30", styles.vinyasa, studios.pili, "all"],
       ] as const
-    ).map(([day, startTime, s, at]) => ({ _key: key(), _type: "classSlot", day, startTime, durationMinutes: 60, style: ref(s), studio: ref(at) })),
-  });
-  await singleton("coachingPage", {
-    _type: "coachingPage",
-    hero: hero("yoga3", { nl: "Private coaching", en: "Private coaching" }, { nl: "Eén op één, op jouw tempo.", en: "One to one, at your pace." }),
-    blocks: [
-      ["Wat", "Een les op maat", "[2–3 zinnen: wat een individuele sessie is en voor wie.]"],
-      ["Wat kan je verwachten", "Aandacht voor jou", "[2–3 zinnen: kennismaking, doelen, opbouw.]"],
-      ["Duur & prijs", "60 of 90 minuten", "[Prijs, locatie: thuis, in de studio of online.]"],
-    ].map(([label, title, text]) => ({ _key: key(), _type: "coachingBlock", label: str(label), title: str(title), text: txt(text) })),
-    photos: ms("yoga2", "yogaOutside"),
-    ctaTitle: str({ nl: "Ben je benieuwd? Of heb je vragen?", en: "Curious? Or have questions?" }),
+    ).map(([day, startTime, s, at, level]) => ({ _key: key(), _type: "classSlot", day, startTime, durationMinutes: 60, style: ref(s), studio: ref(at), level })),
+    private: {
+      title: str(v2.privateLesson.title),
+      text: txt(v2.privateLesson.text),
+      practical: str(v2.privateLesson.practical),
+      photo: m("yoga2"),
+      button: str(v2.privateLesson.button),
+    },
   });
   await singleton("aboutPage", {
     _type: "aboutPage",
-    hero: hero("founders2", { nl: "Over ons", en: "About us" }, "Yoga, Zen & Tonic: beyond the mat, into the moment."),
+    hero: hero("founders2", { nl: "Over ons", en: "About us" }, v2.about.heroSubtitle),
     founders: refs([rita, philippe]),
-    principlesTitle: str({ nl: "Drie principes", en: "Three principles" }),
-    principles: [
-      [{ nl: "Geen druk", en: "No pressure" }, "[1–2 zinnen]"],
-      [{ nl: "Echte mensen", en: "Real people" }, "[1–2 zinnen]"],
-      [{ nl: "Buiten zijn", en: "Being outdoors" }, "[1–2 zinnen]"],
-    ].map(([title, text]) => ({ _key: key(), _type: "principle", title: str(title as Tr), text: txt(text as Tr) })),
+    driveTitle: str(v2.about.driveTitle),
+    driveText: txt(v2.about.driveText),
+    values: v2.about.values.map((v) => ({ _key: key(), _type: "value", title: str(v.title), text: txt(v.text) })),
+    collaboratorsTitle: str(v2.about.collaboratorsTitle),
+    collaboratorsIntro: txt(v2.about.collaboratorsIntro),
+  });
+  await singleton("faqPage", {
+    _type: "faqPage",
+    title: str(v2.faq.title),
+    intro: txt(v2.faq.intro),
+    groups: v2.faq.groups.map((g) => ({
+      _key: key(),
+      _type: "faqGroup",
+      title: str(g.title),
+      items: g.items.map((i) => ({ _key: key(), _type: "faqItem", question: str(i.q), answer: txt(i.a) })),
+    })),
   });
   await singleton("galleryPage", { _type: "galleryPage", title: str({ nl: "Momenten", en: "Moments" }) });
   await singleton("contactPage", {
     _type: "contactPage",
     photo: m("fish"),
     title: str({ nl: "Zeg eens hallo", en: "Say hello" }),
-    intro: txt({ nl: "Vragen over een retreat, een les of coaching? Stuur ons een bericht, we antwoorden binnen 2 dagen.", en: "Questions about a retreat, a class or coaching? Send us a message, we reply within 2 days." }),
-    subjects: lines(["Retreat", "Lessen", "Coaching", "Iets anders"], ["Retreat", "Classes", "Coaching", "Something else"]),
+    intro: txt(v2.contact.intro),
+    subjects: lines(v2.contact.subjects.nl, v2.contact.subjects.en),
     notifyLabel: str({ nl: "Hou me op de hoogte van de volgende retreat", en: "Let me know about the next retreat" }),
+    contactThanks: str(dict((d) => d.contact.sent)),
+    phone: "+32 477 74 42 40",
+    instagram: "https://www.instagram.com/",
+    facebook: "https://www.facebook.com/yogazentonic",
   });
 
   // Starting point only: have it checked before going live.
-  const section = (title: Tr, text: Tr) => ({ _key: key(), _type: "privacySection", title: str(title), text: txt(text) });
-  await singleton("privacyPage", {
-    _type: "privacyPage",
+  const section = (title: Tr, text: Tr) => ({ _key: key(), _type: "legalSection", title: str(title), text: txt(text) });
+  await singleton("legal-privacy", {
+    _type: "legalPage",
     title: str({ nl: "Privacyverklaring", en: "Privacy statement" }),
     intro: txt({
       nl: "Yoga, Zen & Tonic (Rita & Philippe) gaat zorgvuldig om met je gegevens. Hier lees je welke gegevens we verzamelen via deze website, waarom, en wat je rechten zijn.",
@@ -360,8 +462,8 @@ async function seed() {
       section(
         { nl: "Welke gegevens", en: "What we collect" },
         {
-          nl: "Als je je inschrijft voor een retreat: naam, e-mail, GSM, aantal personen, kamerkeuze, dieetwensen en je bericht.\n\nAls je het contactformulier gebruikt: naam, e-mail, onderwerp en bericht.\n\nAls je je inschrijft voor onze updates: je e-mailadres.",
-          en: "When you sign up for a retreat: name, email, phone, number of people, room choice, dietary needs and your message.\n\nWhen you use the contact form: name, email, subject and message.\n\nWhen you sign up for updates: your email address.",
+          nl: "Als je je inschrijft voor een retreat: naam, e-mail, GSM, kamerkeuze, je antwoorden op de vragen bij die retreat, dieetwensen en je bericht.\n\nAls je het contactformulier gebruikt: naam, e-mail, onderwerp en bericht.\n\nAls je je inschrijft voor onze updates: je e-mailadres.",
+          en: "When you sign up for a retreat: name, email, phone, room choice, your answers to that retreat's questions, dietary needs and your message.\n\nWhen you use the contact form: name, email, subject and message.\n\nWhen you sign up for updates: your email address.",
         },
       ),
       section(
@@ -389,6 +491,14 @@ async function seed() {
     ],
     updatedAt: new Date().toISOString().slice(0, 10),
   });
+  for (const [route, page] of Object.entries(v2.legal))
+    await singleton(`legal-${route}`, {
+      _type: "legalPage",
+      title: str(page.title),
+      intro: txt(page.intro),
+      sections: page.sections.map((x) => section(x.title, x.text)),
+      updatedAt: new Date().toISOString().slice(0, 10),
+    });
 
   if (DRY) {
     const count: Record<string, number> = {};

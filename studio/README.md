@@ -12,18 +12,34 @@ sanity/                  shared with the Next.js app
   image.ts               urlFor(), respects the hotspot
 ```
 
+See also [SANITY-UI.md](SANITY-UI.md): Studio UX best practices (what we changed from the classic UI and why).
+
 ## Content model
 
 | Studio | Type | Notes |
 |---|---|---|
-| Instellingen | `settings` (singleton) | name, slogan, e-mail, GSM, socials, default sign-up link, default SEO |
+| Veelgestelde vragen | `faqPage` (singleton) | `/faq`: title, intro, groups of question + answer (fold-out, FAQPage data for Google). Linked from the footer, Contact and the mobile menu. |
+| Algemeen | `settings` (singleton, first of the pages) | site name, slogan, default SEO |
+| Menu & footer | `navigation` (singleton) | the short texts in the header dropdowns, newsletter title + thanks |
+| Formulieren → Inschrijving pagina | `signupSettings` (singleton) | akkoord/bedankt texts of the sign-up form |
+| Mails → Opties | `mailSettings` (singleton) | "Bevestigingsmail automatisch versturen", "Meldingen naar", "Nieuwsbrief: bevestigingsmail versturen" |
+| Mails → Nieuwsbrief bevestiging | `newsletterMail` (singleton) | subject + text of the mail after a newsletter sign-up (+ unsubscribe link); preview side panel |
+| Contact → Nieuwsbrieven | `newsletter` | a newsletter to the contact book: subject, header photo, title, rich text, retreat cards, optional button; "Naar wie" (subscribers / retreat participants / everyone). Preview + test mail on the right; publish, then "Nieuwsbrief versturen…" (count, confirm, once). Each person gets it in their language with their own unsubscribe link (also as List-Unsubscribe header) |
+| Contact | `contactPage` (singleton) | the page + Contact & social (e-mail, GSM, Instagram, Facebook; also in the footer) and the contact form's thanks |
 | Home | `homePage` (singleton) | opening image, intro (≤ 400 chars), featured retreat (empty = next one), ≤ 3 testimonials, "who are we" |
-| **Fotobank** | `mediaItem` | **every photo is stored once**: hotspot, alt text, title, description, place, date, categories, retreat, "show in gallery", "highlighted". Pages only *reference* photos. |
-| Pagina's | `retreatsPage` · `lessonsPage` · `coachingPage` · `aboutPage` · `galleryPage` · `contactPage` (singletons) | opening image + page-specific fields + SEO. The weekly schedule lives on `lessonsPage`. |
+| **Fotobank** | `mediaItem` | **every photo is stored once**: hotspot, alt text (SEO), categories, "show in gallery", "highlighted". No title or place (the gallery shows none). Pages only *reference* photos. |
+| Pagina's | `homePage` · `retreatsPage` · `lessonsPage` · `aboutPage` · `galleryPage` · `contactPage` (singletons) | opening image + page-specific fields + SEO. The weekly schedule (with a level per class) and the Privéles block live on `lessonsPage`. |
+| Juridisch | `legalPage` × 4, fixed ids `legal-privacy`, `legal-terms`, `legal-cancellation`, `legal-cookies` | title, intro, sections. Footer links + sign-up consent. |
+| Inschrijfformulieren | `signupForm` | intro text; optional “Hoe wil je verdergaan?” (sign up / more info / keep me posted: the last two become a `message` + newsletter subscription); standard fields on/off (GSM, room, diet, message) + extra questions (text, long text, yes/no, choice with optional “Andere: …”). “Nieuwe stap” starts a step with its own title (like Google Forms sections; a step with only hidden questions is skipped); “Kamerkeuze” / “Dieet” as a question put those fields there with your own title; “Enkel tonen als de vraag ervoor … is” makes a question conditional (`lib/signup-form.ts`, shared by the browser and the server). A retreat picks one; empty = the one marked "Standaard". "Gebruikt door" lists the retreats. |
+| Mails → Inschrijving bevestiging | `confirmationMail` | the participant's confirmation mail: subject, text, payment block, waiting-list version. Same "Standaard" / "Gebruikt door" as the forms. Sent automatically only with Mails → Opties → "Bevestigingsmail automatisch versturen"; else "Bevestigingsmail" on a sign-up opens it in your mail app. |
 | Retreats | `retreat` | groups follow the detail page: basics · in a nutshell · the place · the people · programme · practical · closing. Komend / Voorbij is **derived from `endDate`**, never stored. |
-| Team & begeleiders | `person` | Rita, Philippe, guest guides (portrait + optional "object" photo for the hover swap) |
+| Over ons → Rita & Philippe / Samenwerkingen | `person` (+ the `aboutPage` singleton in the same menu item) | `kind`: founder (Rita & Philippe, optional "object" photo for the hover swap) or collaborator (teachers, cooks, a company…, with website + links). Every collaborator shows on Over ons automatically. |
 | Lessen | `yogaClass`, `studio` | styles (what / for whom / where), studios |
 | Testimonials | `testimonial` | quote ≤ 200 chars, optional link to a retreat |
+| Inschrijvingen | `signup` (from the site, private) | opens as a readable card with status buttons; "Bevestigd" updates `booked` on the retreat. Also: Nieuw (with count badge), Tabel (all fields, filter, CSV), Per retreat |
+| Contactformulier | `message` (from the site, private) | card view with status |
+| Contactboek | `signup` + `subscriber` + `message` + `reviewSubmission` + `contact` | one row per e-mail address (lib/contacts.ts): where it came from, newsletter yes / unsubscribed (toggle by hand), search, filter chips, copy addresses, CSV export. "Toevoegen" (one by hand) and "CSV importeren" (column E-mail + optional Naam, GSM, Taal, Nieuwsbrief ja/afgemeld; `;` or `,`; the export works too; preview with new/existing count) make private `contact.<hash>` documents, + a subscriber when asked. The newsletters use the same list |
+| Reviews | `reviewSubmission` (private) → `review` (public) | "Gepubliceerd" copies a submission without e-mail to a public review |
 
 Design rules (from the agent-toolkit skills `sanity-best-practices` and `content-modeling-best-practices`):
 
@@ -90,7 +106,17 @@ The frontend needs `NEXT_PUBLIC_SANITY_PROJECT_ID` and `NEXT_PUBLIC_SANITY_DATAS
 | `npm run dev` / `build` / `deploy` | Studio |
 | `npm run typegen` | extract the schema and regenerate `../sanity/types.ts` (run after changing a schema or a query) |
 | `npm run validate` | schema validation |
-| `npm run seed` | idempotent seed. `npx sanity exec scripts/seed.ts -- --dry` prints it without writing |
+| `npm run seed` | idempotent seed: fills only empty fields, so Studio edits are kept (`-- --replace` overwrites). `npx sanity exec scripts/seed.ts -- --dry` prints it without writing |
+| `npm run migrate:v2` | one-off v2 migration on the live dataset (Fotobank fields, Coaching → Lessen, principles → values, person kind, privacy → legal page, booked). `-- --dry` first |
+| `npm run content:v2` | one-off v2 texts (docs/plan.html Part 1, `scripts/v2-content.ts`) as **drafts**, for R&P to review and publish. Run after `migrate:v2`. `-- --dry` first |
+| `npm run migrate:mails` | one-off: the confirmation mail texts in the old Instellingen → a "Standaard" Bevestigingsmail (published), then unsets them (and the default sign-up link). `-- --dry` first |
+| `npm run migrate:settings` | one-off: moves the old Instellingen fields to Contact (contact & social, contact thanks), Menu & footer, Formulieren → Inschrijving (texts) and Mails → Opties (autoConfirm, notifyEmail, also from Formulieren → Inschrijving); published → published, draft → draft; then unsets them from Algemeen. `-- --dry` first |
+| `npm run content:v3` | one-off drafts: Veelgestelde vragen (first version) + Eifel prices / inbegrepen / programma (from `eiffel.txt`, only where empty). `-- --dry` first |
+| `npm run content:v4` | one-off drafts: an example newsletter “Nieuwe retreats” (upcoming retreats as cards, button to /retreats) if there is none yet, and the existing public reviews with name + text in [brackets] (examples to replace); the Nieuwsbrief bevestiging greeting “Dag,” → “Dag {naam},”. Safe to run again. `-- --dry` first |
+| `npm run content:v5` | one-off drafts: the sign-up forms “Yoga & Freediving (Dahab)” and “Pilates, Yoga & Wellness (Eifel)” (from the Google Forms, NL + EN, with steps, conditional questions, “Andere”, “meer info / hou me op de hoogte”). Only if they don't exist. `-- --dry` first |
+| `npm run content:v6` | one-off drafts: the Lessen page's section per style (subtitle, text, “Zo verloopt een les”, “Wat het je geeft”, level, what to bring; NL + EN) for Ashtanga, Vinyasa, Pilates Mat and Pilates Reformer. Only fills empty fields. `-- --dry` first |
+| `npm run content:v7` | one-off drafts: “SEO & delen” (Google title + description, NL + EN) for every page and Standaard SEO, and a description per retreat from its own fields (dates, place, “in een notendop”). Only fills empty fields; also counts photos without alt text. `-- --dry` first |
+| `npm run publish:drafts` | publishes every draft (Sanity's publish action, like the Studio button) and lists the `[placeholders]` still in them; draft-only references become normal ones. `-- --dry` to list, `-- --skip-placeholders` to keep drafts with `[..]` as drafts, `-- --only=faqPage,retreat` for some types |
 
 ## Seed content
 
@@ -102,7 +128,7 @@ The seed creates three retreats:
 
 It also adds Rita, Philippe and Michèle, 4 styles, 3 studios, the weekly schedule, one testimonial, all pages and 24 photos.
 
-Photos get a title, place and categories but **no alt text**. That is deliberate: they appear under *Fotobank → Te doen: zonder alt-tekst*, where Philou & Tita describe them properly and set the hotspot.
+Photos get a title, place and categories but **no alt text**. That is deliberate: they appear in the *Fotobank* under the filter *Zonder alt-tekst* (or use *Alt-teksten aanvullen (AI)* there), where Philou & Tita describe them properly and set the hotspot.
 
 Placeholders in `[brackets]` are texts the client still has to write.
 

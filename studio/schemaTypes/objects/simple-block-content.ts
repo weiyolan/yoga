@@ -24,6 +24,7 @@ export const simpleBlockContent = defineType({
               defineField({
                 name: "href",
                 type: "url",
+                description: "Waar deze link in de tekst naartoe gaat (op de site of in de mail). Een volledige link, een pad op de site zoals /contact, of mailto:/tel:.",
                 validation: (rule) => rule.required().uri({ scheme: ["http", "https", "mailto", "tel"], allowRelative: true }),
               }),
             ],

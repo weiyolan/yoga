@@ -10,6 +10,20 @@
     "typegen": "sanity schema extract --force && sanity typegen generate",
     "validate": "sanity schema validate",
     "seed": "sanity exec scripts/seed.ts --with-user-token",
+    "migrate:v2": "sanity exec scripts/migrate-v2.ts --with-user-token --",
+    "content:v2": "sanity exec scripts/content-v2.ts --with-user-token --",
+    "migrate:mails": "sanity exec scripts/migrate-mails.ts --with-user-token --",
+    "migrate:settings": "sanity exec scripts/migrate-settings.ts --with-user-token --",
+    "content:v3": "sanity exec scripts/content-v3.ts --with-user-token --",
+    "content:v4": "sanity exec scripts/content-v4.ts --with-user-token --",
+    "content:v5": "sanity exec scripts/content-v5.ts --with-user-token --",
+    "content:v6": "sanity exec scripts/content-v6.ts --with-user-token --",
+    "content:v7": "sanity exec scripts/content-v7.ts --with-user-token --",
+    "content:v8": "sanity exec scripts/content-v8.ts --with-user-token --",
+    "content:v9": "sanity exec scripts/content-v9.ts --with-user-token --",
+    "content:v10": "sanity exec scripts/content-v10.ts --with-user-token --",
+    "migrate:testimonials": "sanity exec scripts/migrate-testimonials.ts --with-user-token --",
+    "publish:drafts": "sanity exec scripts/publish-drafts.ts --with-user-token --",
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
@@ -18,6 +32,7 @@
     "@sanity/vision": "^6.17.0",
     "react": "^19.3.0",
     "react-dom": "^19.3.0",
+    "rxjs": "^7.8.2",
     "sanity": "^6.17.0",
     "sanity-plugin-internationalized-array": "^5.3.2",
     "styled-components": "^6.5.3"

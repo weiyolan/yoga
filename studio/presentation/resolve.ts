@@ -1,4 +1,6 @@
-import { defineDocuments, defineLocations, type PresentationPluginOptions } from "sanity/presentation";
+import { defineDocuments, type PresentationPluginOptions } from "sanity/presentation";
+import { routes } from "../../lib/routes";
+import { LEGAL_PAGES } from "../schemaTypes/singletons/legal-page";
 
 /**
  * Presentation tool: which document a previewed URL edits, and where a document is shown.
@@ -16,32 +18,23 @@ export const resolve: PresentationPluginOptions["resolve"] = {
     { route: "/en/retreats", filter: `_id == "retreatsPage"` },
     { route: "/retreats/:slug", filter: `_type == "retreat" && slug.current == $slug` },
     { route: "/en/retreats/:slug", filter: `_type == "retreat" && slug.current == $slug` },
+    { route: "/retreats/:slug/inschrijven", filter: `_type == "retreat" && slug.current == $slug` },
+    { route: "/retreats/:slug/review", filter: `_type == "retreat" && slug.current == $slug` },
+    { route: "/en/retreats/:slug/sign-up", filter: `_type == "retreat" && slug.current == $slug` },
     ...page("lessen", "lessonsPage"),
     { route: "/en/lessons", filter: `_id == "lessonsPage"` },
-    ...page("coaching", "coachingPage"),
-    { route: "/en/coaching", filter: `_id == "coachingPage"` },
     ...page("over-ons", "aboutPage"),
     { route: "/en/about", filter: `_id == "aboutPage"` },
     ...page("gallery", "galleryPage"),
     { route: "/en/gallery", filter: `_id == "galleryPage"` },
+    ...page("faq", "faqPage"),
+    { route: "/en/faq", filter: `_id == "faqPage"` },
     ...page("contact", "contactPage"),
     { route: "/en/contact", filter: `_id == "contactPage"` },
-    ...page("privacy", "privacyPage"),
-    { route: "/en/privacy", filter: `_id == "privacyPage"` },
+    ...LEGAL_PAGES.flatMap((p) => [
+      { route: `/${routes[p.route].nl}`, filter: `_id == "${p.id}"` },
+      { route: `/en/${routes[p.route].en}`, filter: `_id == "${p.id}"` },
+    ]),
   ]),
-  locations: {
-    retreat: defineLocations({
-      select: { title: "title", slug: "slug.current" },
-      resolve: (doc) =>
-        doc?.slug
-          ? {
-              locations: [
-                { title: "Retreatpagina", href: `/retreats/${doc.slug}` },
-                { title: "Retreats", href: "/retreats" },
-                { title: "Home", href: "/" },
-              ],
-            }
-          : null,
-    }),
-  },
+  // no `locations`: the banner “Gebruikt op x pagina's” on top of a retreat only took room
 };

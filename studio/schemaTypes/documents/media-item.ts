@@ -1,6 +1,6 @@
 import { ImageIcon } from "@sanity/icons/Image";
 import { defineField, defineType } from "sanity";
-import { i18nString, i18nText, pick } from "../shared/i18n";
+import { i18nString, pick } from "../shared/i18n";
 
 export const MEDIA_CATEGORIES = [
   { title: "Retreats", value: "retreats" },
@@ -10,63 +10,55 @@ export const MEDIA_CATEGORIES = [
 ];
 
 /**
- * Fotobank: every picture on the site lives here once. Hotspot, alt text and SEO
- * are filled in once; pages reference the item, so a fix applies everywhere.
+ * Fotobank: every picture on the site lives here once. Hotspot and alt text are filled in
+ * once; pages reference the item, so a fix applies everywhere. One short form: the gallery
+ * shows no title or place, so a photo only needs its image, alt text (SEO) and categories (+ optionally who took it).
  */
 export const mediaItem = defineType({
   name: "mediaItem",
   title: "Foto",
   type: "document",
   icon: ImageIcon,
-  groups: [
-    { name: "image", title: "Foto", default: true },
-    { name: "seo", title: "SEO & toegankelijkheid" },
-    { name: "gallery", title: "Gallery" },
-  ],
   fields: [
     defineField({
       name: "image",
       title: "Foto",
       type: "image",
-      group: "image",
       options: { hotspot: true, metadata: ["lqip", "palette", "exif"] },
-      description: "Zet het focuspunt (hotspot) op het belangrijkste deel: elke uitsnede op de site houdt dat punt in beeld.",
+      description: "De foto zelf, overal waar je hem kiest (pagina’s, retreats, gallery). Zet het focuspunt (hotspot) op het belangrijkste deel: elke uitsnede op de site houdt dat punt in beeld.",
       validation: (rule) => rule.required(),
     }),
-    i18nString("title", { title: "Titel / bijschrift", group: ["image", "gallery"], max: 80, description: "Wat je ziet, bv. “Woestijn bij zonsopgang”." }),
-    i18nString("place", { title: "Plaats", group: ["image", "gallery"], description: "bv. “Dahab” of “Eifel”." }),
-    defineField({ name: "takenAt", title: "Datum", type: "date", group: ["image", "gallery"], options: { dateFormat: "D MMMM YYYY" } }),
     i18nString("alt", {
       title: "Alt-tekst",
-      group: "seo",
       required: true,
       max: 125,
-      description: "Beschrijf de foto voor wie hem niet ziet (schermlezers, Google). Geen “foto van …”.",
+      description: "Niet zichtbaar, maar voorgelezen door schermlezers en gelezen door Google (ook in de vergrote weergave). Beschrijf kort wat er te zien is, zonder “foto van …”.",
     }),
-    i18nText("description", { title: "Beschrijving (optioneel)", group: "seo", max: 300, description: "Langere context voor zoekmachines." }),
-    defineField({ name: "credit", title: "Fotograaf", type: "string", group: "seo" }),
     defineField({
       name: "categories",
       title: "Categorieën",
       type: "array",
-      group: "gallery",
       of: [{ type: "string" }],
       options: { list: MEDIA_CATEGORIES, layout: "grid" },
+      description: "De filterknoppen op de Gallery-pagina (bv. “Natuur”): de foto verschijnt onder elke categorie die je aanvinkt. Helpt je ook zoeken in de Fotobank.",
       validation: (rule) => rule.unique(),
     }),
-    defineField({ name: "retreat", title: "Retreat", type: "reference", to: [{ type: "retreat" }], group: "gallery", description: "Optioneel: bij welke retreat hoort deze foto?" }),
-    defineField({ name: "showInGallery", title: "Tonen in gallery", type: "boolean", group: "gallery", initialValue: true }),
-    defineField({ name: "highlight", title: "Uitgelicht", type: "boolean", group: "gallery", initialValue: false, description: "Krijgt een grotere plek in de mozaïek." }),
+    defineField({
+      name: "photographer",
+      title: "Fotograaf",
+      type: "reference",
+      to: [{ type: "photographer" }],
+      description: "Optioneel: wie de foto nam. De naam (met link naar hun website) staat klein onder de foto op volledig scherm en gaat naar Google. Nog niet in de lijst? Fotobank → Fotografen, of hier “Nieuwe aanmaken”.",
+    }),
+    defineField({ name: "showInGallery", title: "Tonen in gallery", type: "boolean", initialValue: true, description: "Aan = de foto staat in de mozaïek op de Gallery-pagina. Uit = enkel te gebruiken op andere pagina’s (bv. een portret of logo)." }),
+    defineField({ name: "highlight", title: "Uitgelicht", type: "boolean", initialValue: false, description: "Krijgt een grote tegel in de mozaïek op de Gallery-pagina en komt in het Instagram-blok op Home (de 6 nieuwste, enkel als Home → Instagram leeg is). Ook reservefoto voor gedeelde links zonder eigen foto." }),
   ],
-  orderings: [
-    { title: "Nieuwste eerst", name: "takenAtDesc", by: [{ field: "takenAt", direction: "desc" }] },
-    { title: "Laatst toegevoegd", name: "createdDesc", by: [{ field: "_createdAt", direction: "desc" }] },
-  ],
+  orderings: [{ title: "Laatst toegevoegd", name: "createdDesc", by: [{ field: "_createdAt", direction: "desc" }] }],
   preview: {
-    select: { title: "title", alt: "alt", place: "place", takenAt: "takenAt", media: "image", file: "image.asset.originalFilename" },
-    prepare: ({ title, alt, place, takenAt, media, file }) => ({
-      title: pick(title) ?? pick(alt) ?? file ?? "Foto",
-      subtitle: [pick(alt) ? null : "⚠ geen alt-tekst", pick(place), takenAt].filter(Boolean).join(" · "),
+    select: { alt: "alt", categories: "categories", media: "image", file: "image.asset.originalFilename" },
+    prepare: ({ alt, categories, media, file }) => ({
+      title: pick(alt) ?? "⚠ geen alt-tekst",
+      subtitle: [pick(alt) ? null : file, (categories as string[] | undefined)?.map((c) => MEDIA_CATEGORIES.find((x) => x.value === c)?.title ?? c).join(", ")].filter(Boolean).join(" · "),
       media,
     }),
   },

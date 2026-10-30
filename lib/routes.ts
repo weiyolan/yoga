@@ -3,18 +3,24 @@
  * Page folders in `app/[lang]` use the Dutch segment; `proxy.ts` maps the
  * localized segments below onto them.
  */
-import { defaultLanguage, languageIds, type Lang } from "@/sanity/site.config";
+import { defaultLanguage, languageIds, type Lang } from "../sanity/site.config";
 
 export const routes = {
   home: { nl: "", en: "" },
   retreats: { nl: "retreats", en: "retreats" },
   lessons: { nl: "lessen", en: "lessons" },
-  coaching: { nl: "coaching", en: "coaching" },
   about: { nl: "over-ons", en: "about" },
   gallery: { nl: "gallery", en: "gallery" },
   contact: { nl: "contact", en: "contact" },
+  faq: { nl: "faq", en: "faq" },
   privacy: { nl: "privacy", en: "privacy" },
+  terms: { nl: "voorwaarden", en: "terms" },
+  cancellation: { nl: "annulatie", en: "cancellation" },
+  cookies: { nl: "cookies", en: "cookies" },
 } as const satisfies Record<string, Record<Lang, string>>;
+
+/** Last segment of a retreat's sign-up page: `/retreats/<slug>/inschrijven`, `/en/retreats/<slug>/sign-up`. */
+export const signupSegment = { nl: "inschrijven", en: "sign-up" } as const satisfies Record<Lang, string>;
 
 export type Route = keyof typeof routes;
 
@@ -26,6 +32,12 @@ export function href(lang: Lang, route: Route, opts: { slug?: string | null; has
 
 /** Retreat detail page. */
 export const retreatHref = (lang: Lang, slug: string | null | undefined, hash?: string) => href(lang, "retreats", { slug, hash });
+
+/** A retreat's sign-up page (also the waiting list when it's full). */
+export const signupHref = (lang: Lang, slug: string | null | undefined) => href(lang, "retreats", { slug: slug ? `${slug}/${signupSegment[lang]}` : undefined });
+
+/** A past retreat's review page: only reached through the link Rita & Philippe send (Studio → “Kopieer reviewlink”). */
+export const reviewHref = (lang: Lang, slug: string | null | undefined) => href(lang, "retreats", { slug: slug ? `${slug}/review` : undefined });
 
 /** Internal (Dutch) folder for a localized first segment, e.g. `about` → `over-ons`. */
 export function internalSegment(lang: Lang, segment: string): string | undefined {
@@ -43,10 +55,11 @@ export function parsePath(pathname: string): { lang: Lang; route: Route | undefi
   return { lang, route, rest: parts };
 }
 
-/** Same page in another language (retreat slugs are shared across languages). */
+/** Same page in another language (retreat slugs are shared across languages, the sign-up segment isn't). */
 export function translatePath(pathname: string, to: Lang) {
   const { route, rest } = parsePath(pathname);
-  return href(to, route ?? "home", { slug: rest.join("/") || undefined });
+  const parts = rest.map((p, i) => (i === 1 && route === "retreats" && (Object.values(signupSegment) as string[]).includes(p) ? signupSegment[to] : p));
+  return href(to, route ?? "home", { slug: parts.join("/") || undefined });
 }
 
 /** `[lang]` param → Lang (the layout already 404s on anything else). */
