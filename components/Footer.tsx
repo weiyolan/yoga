@@ -27,6 +27,7 @@ export function Footer({ lang, layout }: { lang: Lang; layout: LAYOUT_QUERY_RESU
             <h4>{t.offer}</h4>
             <Link href={href(lang, "retreats")}>{d.nav.retreats}</Link>
             <Link href={href(lang, "lessons")}>{d.nav.lessons}</Link>
+            {layout?.hasPrivate ? <Link href={href(lang, "lessons", { hash: "prive" })}>{d.nav.chips.private}</Link> : null}
           </div>
           <div>
             <h4>{t.about}</h4>

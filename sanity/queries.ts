@@ -155,6 +155,7 @@ export const LAYOUT_QUERY = defineQuery(`*[_id == "settings"][0]{
   "nextRetreat": *[_type == "retreat" && ${UPCOMING}] | order(startDate asc)[0]${RETREAT_CARD},
   "styles": *[_type == "yogaClass"] | order(orderRank asc){ _id, name, "slug": slug.current, "what": ${t("what")} },
   "studios": *[_type == "studio"] | order(name asc).name,
+  "hasPrivate": defined(*[_id == "lessonsPage"][0].private.title),
   "galleryCategories": array::unique(*[_type == "mediaItem" && showInGallery != false].categories[]),
   "foundersPhoto": *[_id == "homePage"][0].aboutPhoto->${MEDIA},
   "texts": {
