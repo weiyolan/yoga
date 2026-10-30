@@ -446,6 +446,7 @@ section.alt .sched-slot { background: var(--bg); }
 .footer .sub { display: flex; flex-wrap: wrap; gap: 8px 16px; margin-top: 16px; } .footer .sub input.sub-name { flex: 1 1 110px; }
 .footer .sub input { flex: 1 1 180px; min-width: 0; border: 0; border-bottom: 1px solid #888; padding: 10px 0; background: transparent; color: #fff; font: inherit; } .footer .sub input::placeholder { color: #999; } .footer .sub input:focus { outline: none; border-color: var(--ember); }
 .footer .legal { border-top: 1px solid #444; margin-top: 48px; padding-top: 20px; display: flex; justify-content: space-between; color: #888; font-size: .8rem; flex-wrap: wrap; gap: 10px; }
+.footer .legal a.powered { display: inline; margin: 0; color: #B9BFBE; text-decoration: underline; text-underline-offset: 3px; } .footer .legal a.powered:hover { color: #fff; }
 
 /* split (contact) */
 .split { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); min-height: 100vh; }

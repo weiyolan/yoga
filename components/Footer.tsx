@@ -50,6 +50,16 @@ export function Footer({ lang, layout }: { lang: Lang; layout: LAYOUT_QUERY_RESU
               {d.legal.titles[r]}
             </Link>
           ))}
+          <span>
+            Powered by{" "}
+            <a href="https://www.ywdesign.co" target="_blank" rel="noopener" className="powered">
+              ywdesign.co
+            </a>
+          </span>
+          {/* SEO credit for the photographer (not all photos are his, so not shown visually) */}
+          <a href="https://miloweiler.com" className="visually-hidden" tabIndex={-1}>
+            Milo Weiler Photography
+          </a>
         </div>
       </div>
     </footer>
