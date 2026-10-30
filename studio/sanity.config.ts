@@ -7,6 +7,7 @@ import { internationalizedArray } from "sanity-plugin-internationalized-array";
 import { apiVersion, defaultLanguage, languages } from "../sanity/site.config";
 import { FORM_TYPES, schemaTypes, SINGLETONS } from "./schemaTypes";
 import { resolve } from "./presentation/resolve";
+import { CursorLayout } from "./cursor";
 import { structure } from "./structure";
 
 /** The live website (hosted Studio → Live preview). */
@@ -44,6 +45,8 @@ export default defineConfig({
     nlNLLocale(),
     visionTool({ defaultApiVersion: apiVersion }),
   ],
+
+  studio: { components: { layout: CursorLayout } },
 
   schema: {
     types: schemaTypes,
