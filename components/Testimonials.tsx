@@ -33,6 +33,8 @@ export function Testimonials({
     const el = track.current;
     if (!el) return;
     const update = () => {
+      // no width yet (hidden tab, not laid out): n would be Infinity → Array.from throws; the observer retries
+      if (!el.clientWidth) return;
       const n = Math.max(1, Math.ceil((el.scrollWidth - 2) / el.clientWidth));
       setPages(n);
       const atEnd = el.scrollLeft + el.clientWidth >= el.scrollWidth - 4;
@@ -40,10 +42,11 @@ export function Testimonials({
     };
     update();
     el.addEventListener("scroll", update, { passive: true });
-    addEventListener("resize", update);
+    const resize = new ResizeObserver(update);
+    resize.observe(el);
     return () => {
       el.removeEventListener("scroll", update);
-      removeEventListener("resize", update);
+      resize.disconnect();
     };
   }, [items.length]);
 
