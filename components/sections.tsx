@@ -266,28 +266,35 @@ export function ReviewList({
           )}
         </p>
       ) : null}
-      <div className="reviews">
-        {reviews.map((r) => (
-          <figure key={r._id} className="review">
+      {(() => {
+        // the first one (the order in the Studio) as a big pull quote, the rest as cards (swipeable on mobile)
+        const [lead, ...rest] = reviews;
+        const card = (r: ReviewData, lead = false) => (
+          <figure key={r._id} className={lead ? "review lead" : "review"}>
             {r.rating ? (
-              <span
-                className="rating"
-                role="img"
-                aria-label={t.stars(r.rating)}
-              >
+              <span className="rating" role="img" aria-label={t.stars(r.rating)}>
                 {stars(r.rating)}
               </span>
             ) : null}
             <blockquote>{r.text}</blockquote>
             <figcaption>
-              {r.name}
-              {context && r.context ? (
-                <small className="muted"> · {r.context}</small>
-              ) : null}
+              <span className="who" aria-hidden="true">
+                {(r.name?.match(/\p{L}/u)?.[0] ?? "★").toUpperCase()}
+              </span>
+              <span>
+                {r.name}
+                {context && r.context ? <small className="muted">{r.context}</small> : null}
+              </span>
             </figcaption>
           </figure>
-        ))}
-      </div>
+        );
+        return (
+          <>
+            {card(lead, true)}
+            {rest.length ? <div className="reviews">{rest.map((r) => card(r))}</div> : null}
+          </>
+        );
+      })()}
     </>
   );
 }
