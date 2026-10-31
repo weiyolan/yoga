@@ -149,13 +149,17 @@ button.ph { border: 0; padding: 0; cursor: zoom-in; display: block; }
 @media (max-width: 420px) { .nav .cta { display: none; } }
 
 /* ---------- hero ---------- */
-.hero { position: relative; height: 100vh; min-height: 560px; max-height: 920px; color: #fff; }
-.hero.short { height: 66vh; min-height: 440px; }
+.hero { position: relative; height: 100vh; height: 100svh; min-height: 560px; max-height: 920px; color: #fff; }
+.hero.short { height: 66vh; height: 66svh; min-height: 440px; }
 .hero > .ph { position: absolute; inset: 0; height: 100%; }
 .hero .txt { position: absolute; left: var(--gutter); right: var(--gutter); bottom: 56px; z-index: 2; }
 .hero .txt h1 { max-width: 13ch; }
 .hero .txt p { color: #fff; opacity: .92; font-size: 1.15rem; }
 .hero .meta { display: flex; gap: 22px; flex-wrap: wrap; font-size: .9rem; opacity: .95; margin: 14px 0 22px; }
+@media (max-width: 860px) {
+  .hero .txt { bottom: calc(40px + env(safe-area-inset-bottom)); }
+  .hero .meta { gap: 6px 18px; margin: 10px 0 18px; }
+}
 .hero::before { content: ""; position: absolute; inset: 0 0 auto; height: 180px; z-index: 1; background: linear-gradient(rgba(0,0,0,.38), transparent); pointer-events: none; }
 .hero::after { content: ""; position: absolute; inset: 0; background: linear-gradient(transparent 45%, rgba(0,0,0,.35)); pointer-events: none; }
 /* Retreat page closing photo: text in the middle, so a soft dark veil over the whole photo + a halo behind the text */
