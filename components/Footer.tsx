@@ -45,7 +45,7 @@ export function Footer({ lang, layout }: { lang: Lang; layout: LAYOUT_QUERY_RESU
           </div>
         </div>
         <div className="legal">
-          <span>© {name}</span>
+          <span>© {new Date().getFullYear()} {name}</span>
           {(["privacy", "terms", "cancellation", "cookies"] as const).map((r) => (
             <Link key={r} href={href(lang, r)}>
               {d.legal.titles[r]}
