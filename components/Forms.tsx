@@ -29,6 +29,7 @@ import {
   type FormQuestion,
 } from "@/lib/signup-form";
 import type { Lang } from "@/sanity/site.config";
+import { Icon } from "./icons";
 import { Select } from "./Select";
 
 const idle: FormState = { status: "idle" };
@@ -110,8 +111,8 @@ export function NewsletterForm({
       />
       <input type="hidden" name="lang" value={lang} />
       <Honeypot />
-      <button className="btn sm white" disabled={pending}>
-        {t.subscribe}
+      <button className="sub-go" disabled={pending} aria-label={t.subscribe} title={t.subscribe}>
+        <Icon name="arrow" />
       </button>
       {state.status === "error" || state.status === "invalid" ? (
         <p className="form-msg" role="alert">

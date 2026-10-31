@@ -279,6 +279,7 @@ const nl = {
     invalid: "Kies een score, vul je naam, e-mail en ervaring in en vink het akkoord aan.",
     error: "Er ging iets mis. Probeer opnieuw of mail ons rechtstreeks.",
     average: (avg: string, n: number) => `${avg} / 5 · ${n === 1 ? "1 review" : `${n} reviews`}`,
+    slide: (i: number, n: number) => `Review ${i} van ${n}`,
   },
   /** “We got it” mails to whoever sent a form (app/actions/forms.ts → receipt). */
   receipt: {
@@ -586,6 +587,7 @@ const en: Dictionary = {
     invalid: "Pick a rating, fill in your name, email and experience, and tick the agreement.",
     error: "Something went wrong. Please try again or email us directly.",
     average: (avg: string, n: number) => `${avg} / 5 · ${n === 1 ? "1 review" : `${n} reviews`}`,
+    slide: (i: number, n: number) => `Review ${i} of ${n}`,
   },
   receipt: {
     contactSubject: "We received your message",

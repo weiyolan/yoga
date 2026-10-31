@@ -12,6 +12,7 @@ import type {
   RETREATS_QUERY_RESULT,
 } from "@/sanity/types";
 import { Photo, SanityImg } from "./Photo";
+import { ReviewTrack } from "./ReviewTrack";
 
 export type RetreatCardData = RETREATS_QUERY_RESULT["upcoming"][number];
 export type StyleData = Pick<
@@ -266,11 +267,9 @@ export function ReviewList({
           )}
         </p>
       ) : null}
-      {(() => {
-        // the first one (the order in the Studio) as a big pull quote, the rest as cards (swipeable on mobile)
-        const [lead, ...rest] = reviews;
-        const card = (r: ReviewData, lead = false) => (
-          <figure key={r._id} className={lead ? "review lead" : "review"}>
+      <ReviewTrack labels={reviews.map((_, i) => t.slide(i + 1, reviews.length))}>
+        {reviews.map((r) => (
+          <figure key={r._id} className="review">
             {r.rating ? (
               <span className="rating" role="img" aria-label={t.stars(r.rating)}>
                 {stars(r.rating)}
@@ -287,14 +286,8 @@ export function ReviewList({
               </span>
             </figcaption>
           </figure>
-        );
-        return (
-          <>
-            {card(lead, true)}
-            {rest.length ? <div className="reviews">{rest.map((r) => card(r))}</div> : null}
-          </>
-        );
-      })()}
+        ))}
+      </ReviewTrack>
     </>
   );
 }
