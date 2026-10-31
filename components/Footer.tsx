@@ -53,12 +53,11 @@ export function Footer({ lang, layout }: { lang: Lang; layout: LAYOUT_QUERY_RESU
           ))}
         </div>
         <a className="powered" href="https://www.ywdesign.co" target="_blank" rel="noopener">
-          <span>Powered by</span>
+          <span>Powered by ywdesign.co</span>
           {/* the YWdesign mark (ywdesign.co/icon.svg) */}
           <svg viewBox="25 21 471 383" aria-hidden="true">
             <path d="M260.79 21.7247C270.806 21.6198 281.859 22.6423 294.109 24.8644L299.499 75.34C258.291 68.1893 239.076 71.2069 227.071 110.324L265.122 233.976L303.079 110.324H364.134L402.127 234.824L440.026 110.324H495.207L432.684 315.683H371.608L333.541 190.927L295.241 315.683H235.019L196.667 190.861L158.601 315.683C138.454 380.403 108.901 415.357 30.5004 401.136L25.1097 350.66C66.3182 357.811 85.5328 354.79 97.5824 315.675L34.9642 110.324H90.139L128.088 234.774L166.031 110.317C183.017 55.7076 206.709 22.2914 260.79 21.7247Z" />
           </svg>
-          <span>ywdesign.co</span>
         </a>
       </div>
     </footer>
