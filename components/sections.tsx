@@ -2,7 +2,7 @@
 import Link from "next/link";
 import type { ReactNode } from "react";
 import { getDictionary } from "@/lib/dictionary";
-import { dateRange, euro, placesLabel } from "@/lib/format";
+import { dateRange, euro, placesLabel, tidy } from "@/lib/format";
 import { retreatHref } from "@/lib/routes";
 import { isUpcoming } from "@/sanity/fetch";
 import type { Lang } from "@/sanity/site.config";
@@ -276,7 +276,7 @@ export function ReviewList({
                 {stars(r.rating)}
               </span>
             ) : null}
-            <blockquote>{r.text}</blockquote>
+            <blockquote>{tidy(r.text)}</blockquote>
             <figcaption>
               <span className="who" aria-hidden="true">
                 {(r.name?.match(/\p{L}/u)?.[0] ?? "★").toUpperCase()}

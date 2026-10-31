@@ -63,15 +63,27 @@ export const faqPage = defineType({
                       type: "boolean",
                       initialValue: false,
                       description:
-                        "Toont deze vraag ook onderaan elke komende retreatpagina, in “Goed om te weten”. Niets aangevinkt = de eerste 4 vragen.",
+                        "Toont deze vraag ook onderaan de komende retreatpagina's, in “Goed om te weten”. Niets aangevinkt = de eerste 4 vragen.",
+                    }),
+                    defineField({
+                      name: "retreats",
+                      title: "Enkel bij deze retreats (optioneel)",
+                      type: "array",
+                      of: [defineArrayMember({ type: "reference", to: [{ type: "retreat" }], options: { disableNew: true } })],
+                      hidden: ({ parent }) => !(parent as { onRetreat?: boolean } | undefined)?.onRetreat,
+                      description:
+                        "Leeg = op elke retreatpagina. Kies je retreats (bv. Dahab voor een vraag over duiken), dan staat de vraag enkel daar, en ook bij hun volgende edities (dahab-2026 → dahab-2027).",
                     }),
                   ],
                   preview: {
-                    select: { q: "question", a: "answer", on: "onRetreat" },
-                    prepare: ({ q, a, on }) => ({
-                      title: `${on ? "★ " : ""}${pick(q) ?? "Vraag"}`,
-                      subtitle: pick(a),
-                    }),
+                    select: { q: "question", a: "answer", on: "onRetreat", r0: "retreats.0.title", r1: "retreats.1.title", r2: "retreats.2.title" },
+                    prepare: ({ q, a, on, r0, r1, r2 }) => {
+                      const only = [r0, r1].map((r) => pick(r)).filter(Boolean);
+                      return {
+                        title: `${on ? "★ " : ""}${pick(q) ?? "Vraag"}`,
+                        subtitle: on && only.length ? `Enkel: ${only.join(", ")}${r2 ? ", …" : ""}` : pick(a),
+                      };
+                    },
                   },
                 }),
               ],

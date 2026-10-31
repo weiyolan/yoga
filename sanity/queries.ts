@@ -297,8 +297,8 @@ export const RETREAT_BY_SLUG_QUERY = defineQuery(`*[_type == "retreat" && slug.c
     count(${SAME_KIND}) > 0 => ${SAME_KIND} | ${BY_DATE}[0...6]${TESTIMONIAL},
     *[_type == "testimonial" && ${LIVE} && defined(retreat) && showOnRetreat != false && (rating >= 4 || !defined(rating))] | ${BY_DATE}[0...6]${TESTIMONIAL}
   ),
-  // FAQ → questions ticked “Ook tonen op de retreatpagina's” (else the first ones; picked in the page)
-  "faqs": *[_id == "faqPage"][0].groups[].items[]{ _key, onRetreat, "question": ${t("question")}, "answer": ${t("answer")} },
+  // FAQ → questions ticked “Ook tonen op de retreatpagina's”, optionally only for some retreats (+ their other editions); else the first ones; picked in the page
+  "faqs": *[_id == "faqPage"][0].groups[].items[]{ _key, onRetreat, "retreats": retreats[]->slug.current, "question": ${t("question")}, "answer": ${t("answer")} },
   "labels": *[_id == "retreatsPage"][0]{
     "peopleTitle": ${t("peopleTitle")},
     "programmeTitle": ${t("programmeTitle")},

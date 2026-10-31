@@ -38,3 +38,7 @@ export function placesLabel(lang: Lang, r: { capacity?: number | null; booked?: 
   if (left === null) return null;
   return left ? t.spotsLeft(left) : t.full;
 }
+
+/** Typed or pasted text without stray whitespace: no spaces at line ends, at most one empty line in a row, nothing before/after. */
+export const tidy = (s?: string | null) =>
+  (s ?? "").replace(/[ \t ]+$/gm, "").replace(/\n{3,}/g, "\n\n").trim();

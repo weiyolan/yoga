@@ -316,8 +316,14 @@ export default async function RetreatPage({
     (f): f is NonNullable<typeof f> & { question: string; answer: string } =>
       !!f?.question && !!f.answer,
   );
+  // “Enkel bij deze retreats”: same first slug word = another edition (dahab-2026 → dahab-2027)
+  const series = (s?: string | null) => s?.split("-")[0];
   const faqs = allFaqs.some((f) => f.onRetreat)
-    ? allFaqs.filter((f) => f.onRetreat)
+    ? allFaqs.filter(
+        (f) =>
+          f.onRetreat &&
+          (!f.retreats?.length || f.retreats.some((s) => series(s) === series(r.slug))),
+      )
     : allFaqs.slice(0, 4);
   const toc = [
     [

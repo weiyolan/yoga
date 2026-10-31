@@ -6,6 +6,7 @@
  * “page”). No autoplay.
  */
 import { useEffect, useRef, useState } from "react";
+import { tidy } from "@/lib/format";
 import { Icon } from "./icons";
 
 type Item = {
@@ -102,7 +103,7 @@ export function Testimonials({
                 {"★".repeat(t.rating)}
               </p>
             ) : null}
-            <blockquote>“{t.quote}”</blockquote>
+            <blockquote>“{tidy(t.quote)}”</blockquote>
             <figcaption className="muted small">
               {[t.name, t.context].filter(Boolean).join(" · ")}
             </figcaption>
