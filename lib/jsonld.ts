@@ -244,18 +244,17 @@ export function retreatLd(
     performer: (r.hosts ?? [])
       .filter((h) => h.name)
       .map((h) => ({ "@type": "Person", name: h.name })),
-    // a past retreat: no price for Google
-    offers: r.priceFrom && isUpcoming(r.endDate)
-      ? compact({
-          "@type": "Offer",
-          price: r.priceFrom,
-          priceCurrency: "EUR",
-          url: abs(signupUrl ?? url),
-          availability: full
-            ? "https://schema.org/SoldOut"
-            : "https://schema.org/InStock",
-        })
-      : undefined,
+    // always an Offer (Google flags Events without one); a past retreat can't be booked anymore
+    offers: compact({
+      "@type": "Offer",
+      price: r.priceFrom || undefined,
+      priceCurrency: r.priceFrom ? "EUR" : undefined,
+      url: abs(signupUrl ?? url),
+      availability:
+        full || !isUpcoming(r.endDate)
+          ? "https://schema.org/SoldOut"
+          : "https://schema.org/InStock",
+    }),
     maximumAttendeeCapacity: r.capacity || undefined,
   });
 }
