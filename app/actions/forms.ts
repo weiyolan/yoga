@@ -20,6 +20,7 @@ import {
   visibleKeys,
   type FormQuestion,
 } from "@/lib/signup-form";
+import { parseReview, withDefaults } from "@/lib/review-form";
 import { subscriberId, unsubscribeUrl } from "@/lib/unsubscribe";
 import { isUpcoming, sanityFetch } from "@/sanity/fetch";
 import {
@@ -700,6 +701,92 @@ async function sendReviewInner(data: FormData): Promise<FormState> {
       [r.score, `${"★".repeat(rating)}${"☆".repeat(5 - rating)}`],
       [r.yours, text],
     ],
+    retreat.photo,
+  );
+}
+
+/**
+ * A retreat's own feedback form (Studio → Formulieren → Feedbackformulieren; the review page when the
+ * retreat has one): every answer is stored on a private `reviewSubmission` (Studio → Testimonials →
+ * Inzendingen) with a Dutch snapshot of the questions + raw values for the results, and the team gets a mail.
+ * The “Quote voor de site” answer is the testimonial text, published only when the team sets “Gepubliceerd”
+ * and the writer allowed it (“Toestemming publicatie”). E-mail is optional; the receipt only goes out with a quote that may be published.
+ */
+export async function sendFeedback(
+  _: FormState,
+  data: FormData,
+): Promise<FormState> {
+  return keep(data, await sendFeedbackInner(data));
+}
+
+async function sendFeedbackInner(data: FormData): Promise<FormState> {
+  if (field(data, "website")) return { status: "sent" };
+  const lang = langOf(data);
+  const id = field(data, "retreat", 100);
+  const [retreat, retreatNl] = await Promise.all([
+    sanityFetch({ query: SIGNUP_RETREAT_QUERY, params: { id }, lang }),
+    sanityFetch({ query: SIGNUP_RETREAT_QUERY, params: { id }, lang: "nl" }),
+  ]);
+  const form = retreat?.reviewForm;
+  if (!retreat || !retreatNl || !form?.questions?.length) return { status: "invalid" };
+  const title = retreat.title ?? "retreat";
+  const titleNl = retreatNl.title ?? title;
+  const sent = formValues(data);
+  const p = parseReview(
+    withDefaults(form.questions, lang, title),
+    withDefaults(retreatNl.reviewForm?.questions, "nl", titleNl),
+    (name) => sent[name] ?? "",
+    (name) => data.getAll(name).map(String),
+  );
+  if (!p.ok || !p.answers.length) return { status: "invalid" };
+
+  const who = p.name || p.email || "anoniem";
+  const stars = p.rating ? `${"★".repeat(p.rating)}${"☆".repeat(5 - p.rating)}` : "";
+  const rows: [string, string][] = p.answers.map((a) => [a.row ? `${a.question} · ${a.row}` : a.question, a.answer]);
+  const team = toTeam({
+    soort: "Feedback",
+    name: p.name,
+    email: p.email || "",
+    subject: `Nieuwe feedback ${stars}: ${titleNl} (${who})`.replace("  ", " "),
+    heading: `Nieuwe feedback: ${titleNl}`,
+    photo: retreat.photo,
+    text: p.quote ? `Quote: “${p.quote}”${p.publish === "private" ? " (niet publiceren)" : ""}` : "",
+    rows: [...rows, ["Taal", lang]],
+    footnote: p.quote && p.publish !== "private" ? "Publiceer de quote als testimonial in de Studio → Testimonials → Inzendingen." : "Alle antwoorden: Studio → Testimonials → Inzendingen, samengevat in Formulieren → het feedbackformulier → Resultaten.",
+  });
+  const state = await anyOf(
+    "feedback form",
+    [
+      store({
+        _id: `reviewSubmission.${randomUUID()}`,
+        _type: "reviewSubmission",
+        status: "new",
+        retreat: { _type: "reference", _ref: retreat._id },
+        name: p.name || undefined,
+        email: p.email || undefined,
+        rating: p.rating ?? undefined,
+        text: p.quote || undefined,
+        publish: p.publish ?? undefined,
+        form: form.name ?? undefined,
+        formId: form._id,
+        answers: p.answers.map((a) => ({ _key: randomUUID().slice(0, 12), _type: "reviewAnswer", ...a })),
+        lang,
+        submittedAt: new Date().toISOString(),
+      }),
+      team.step,
+    ],
+    team,
+  );
+  // the receipt (Bevestigingsmails → Bevestiging testimonial) speaks of a review going online: only then
+  if (!p.email || !p.quote || p.publish === "private") return state;
+  const r = getDictionary(lang).receipt;
+  return receipt(
+    state,
+    "review",
+    lang,
+    p.email,
+    { naam: p.name, retreat: title },
+    [[r.retreat, title], ...(stars ? [[r.score, stars] as [string, string]] : []), ...(p.quote ? [[r.yours, p.quote] as [string, string]] : [])],
     retreat.photo,
   );
 }

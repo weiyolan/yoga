@@ -7,7 +7,7 @@
  *   POST { task: "test-newsletter", to, lang, mail } → the Nieuwsbrief-bevestiging, same idea.
  *   POST { task: "test-receipt", to, lang, kind, mail } → a Bevestiging bericht / les-aanvraag / review, same idea.
  *   POST { task: "test-issue", to, lang, id } → a Nieuwsbrief as it is now in the editor (draft), same idea.
- *   POST { task: "issue", id, again? } → the published Nieuwsbrief to its audience (lib/contacts.ts), each
+ *   POST { task: "issue", id, again? } → the published Brief (newsletter) to its recipients (`to`, lib/contacts.ts), each
  *        in their language with their own unsubscribe link; marks it “Verstuurd op”. Once, unless `again`.
  *   POST { task: "signup", signupId }
  *        → the retreat's confirmation mail to that participant, with their answers; marks the
@@ -16,7 +16,7 @@
 import { NextResponse, type NextRequest } from "next/server";
 import { confirmationContent, type ConfirmationMail } from "@/lib/confirmation";
 import { getDictionary } from "@/lib/dictionary";
-import { contacts, CONTACTS_QUERY, recipients, type ContactsData } from "@/lib/contacts";
+import { contacts, CONTACTS_QUERY, recipients, type ContactsData, type Recipients } from "@/lib/contacts";
 import { mailConfigured, sendMail, sendMany } from "@/lib/mail";
 import { siteUrl } from "@/lib/metadata";
 import { newsletterContent } from "@/lib/newsletter";
@@ -110,10 +110,10 @@ export async function POST(request: NextRequest) {
     if (body.task === "issue") {
       const id = str(body.id, 100) ?? "";
       if (!id || id.startsWith("drafts.")) return json(request, { message: "Ongeldige nieuwsbrief" }, 400);
-      const published = await writeClient.getDocument<{ _type: string; sentAt?: string; audience?: string[] }>(id);
-      if (published?._type !== "newsletter") return json(request, { message: "Publiceer de nieuwsbrief eerst" }, 400);
+      const published = await writeClient.getDocument<{ _type: string; sentAt?: string; audience?: string[]; to?: Recipients }>(id);
+      if (published?._type !== "newsletter") return json(request, { message: "Publiceer de brief eerst" }, 400);
       if (published.sentAt && body.again !== true) return json(request, { message: `Al verstuurd op ${published.sentAt.slice(0, 10)}` }, 409);
-      const list = recipients(contacts(await writeClient.fetch<ContactsData>(CONTACTS_QUERY, {}, { perspective: "raw" })), published.audience);
+      const list = recipients(contacts(await writeClient.fetch<ContactsData>(CONTACTS_QUERY, {}, { perspective: "raw" })), published.to, published.audience);
       if (!list.length) return json(request, { message: "Niemand om naar te versturen" }, 400);
       const issues = Object.fromEntries(
         await Promise.all((["nl", "en"] as Lang[]).map(async (l) => [l, await writeClient!.fetch<NewsletterIssue>(NEWSLETTER_ISSUE_QUERY, { id, lang: l }, { perspective: "published" })] as const)),

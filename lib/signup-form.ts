@@ -32,7 +32,8 @@ export function formValues(data: FormData) {
   return out;
 }
 
-const isChoice = (q: FormQuestion) => q.type === "choice" || q.type === "multi";
+/** Radio / checkbox options (also a feedback form's “Toestemming publicatie”, lib/review-form.ts). */
+const isChoice = (q: FormQuestion) => q.type === "choice" || q.type === "multi" || q.type === "publish";
 
 /** Does the raw value of `prev` match one of the lines of `showIf` (Dutch option texts, “Ja” / “Nee”, “Andere”)? */
 function matches(prev: FormQuestion, raw: string, showIf: string) {

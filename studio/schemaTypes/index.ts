@@ -6,6 +6,7 @@ import { reviewSubmission } from "./documents/review";
 import { message } from "./documents/message";
 import { signup } from "./documents/signup";
 import { signupForm } from "./documents/signup-form";
+import { reviewForm } from "./documents/review-form";
 import { confirmationMail } from "./documents/confirmation-mail";
 import { newsletter } from "./documents/newsletter";
 import { subscriber } from "./documents/subscriber";
@@ -53,6 +54,7 @@ export const schemaTypes = [
   photographer,
   retreat,
   signupForm,
+  reviewForm,
   confirmationMail,
   newsletter,
   person,

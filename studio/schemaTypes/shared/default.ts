@@ -7,14 +7,14 @@ import { usedByInput } from "../../components/UsedByInput";
  * every retreat that didn't pick one (only one may be standard) + which retreats use it.
  * `field` is the retreat's reference field to this type; `group`: show them in every group.
  */
-export const defaultFields = (type: string, field: string, what: string, group?: string[]) => [
+export const defaultFields = (type: string, field: string, what: string, group?: string[], tab = "Inschrijven") => [
   defineField({
     name: "isDefault",
     title: "Standaard",
     type: "boolean",
     group,
     initialValue: false,
-    description: `Aan = deze ${what} wordt gebruikt voor elke retreat die bij “Inschrijven” niets gekozen heeft. Zet dit op één document. Zelf niet zichtbaar op de site.`,
+    description: `Aan = deze ${what} wordt gebruikt voor elke retreat die bij “${tab}” niets gekozen heeft. Zet dit op één document. Zelf niet zichtbaar op de site.`,
     validation: (rule) =>
       rule.custom(async (value, ctx) => {
         if (!value) return true;

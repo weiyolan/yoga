@@ -60,7 +60,7 @@ const SECTIONS: Section[] = [
     optional: true,
     checks: [plain("Externe link", "signupUrl"), plain("Formulier", "signupForm._ref"), plain("Bevestigingsmail", "confirmationMail._ref")],
   },
-  { group: "recap", title: "Achteraf", where: "Na de einddatum: aantal deelnemers + de foto's van de retreat.", past: true, checks: [num("Aantal deelnemers", "participantCount"), list("Foto's achteraf", "recapPhotos")] },
+  { group: "recap", title: "Achteraf", where: "Na de einddatum: aantal deelnemers + de foto's van de retreat. Hier ook de reviewlink en het feedbackformulier.", past: true, checks: [num("Aantal deelnemers", "participantCount"), list("Foto's achteraf", "recapPhotos")] },
   { group: "seo", title: "SEO", where: "Google en delen op WhatsApp / Facebook. Leeg = titel + notendop.", optional: true, checks: [t("Titel", "seo.title"), t("Beschrijving", "seo.description")] },
 ];
 

@@ -446,7 +446,7 @@ export function ContactBook() {
         </Card>
       )}
       <Text size={0} muted>
-        {all.length} adressen, één rij per e-mailadres. Nieuwsbrieven gaan nooit naar wie zich afmeldde (Contact → Nieuwsbrieven). CSV importeren: een kolom E-mail, eventueel Naam, GSM, Taal, Nieuwsbrief (ja / afgemeld); ook de CSV van hier.
+        {all.length} adressen, één rij per e-mailadres. Brieven gaan nooit naar wie zich afmeldde (Contact → Brieven). CSV importeren: een kolom E-mail, eventueel Naam, GSM, Taal, Nieuwsbrief (ja / afgemeld); ook de CSV van hier.
       </Text>
       {adding ? <AddDialog onClose={() => setAdding(false)} /> : null}
       {file ? <ImportDialog file={file} known={new Set(all.map((c) => c.email))} onClose={() => setFile(null)} /> : null}

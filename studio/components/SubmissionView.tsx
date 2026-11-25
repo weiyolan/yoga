@@ -12,17 +12,20 @@ type Tone = "primary" | "positive" | "caution" | "critical" | "default";
 export type SubmissionViewOptions = {
   title: (doc: Doc) => string;
   statuses: { title: string; value: string; tone: Tone }[];
-  rows: { label: string; render: (doc: Doc) => ReactNode }[];
+  /** `block`: the render is its own layout (not wrapped in one Text), left out when empty. */
+  rows: { label: string; render: (doc: Doc) => ReactNode; block?: boolean }[];
   /** Runs after the status was saved (e.g. publish an approved review). */
   onStatus?: (client: Client, doc: Doc, status: string) => Promise<void>;
   /** Extra under the status buttons (e.g. a link to the public copy). */
   extra?: (doc: Doc) => ReactNode;
+  /** Why a status can't be chosen for this document (e.g. “Gepubliceerd” without a quote), else null. */
+  blocked?: (doc: Doc, status: string) => string | null;
 };
 
 const date = (iso?: string) => (iso ? new Date(iso).toLocaleString("nl-BE", { dateStyle: "long", timeStyle: "short" }) : "-");
 
 /** Default view of a form submission (message, review): a readable card with status buttons and a note. */
-export function submissionView({ title, statuses, rows, onStatus, extra }: SubmissionViewOptions): UserViewComponent {
+export function submissionView({ title, statuses, rows, onStatus, extra, blocked }: SubmissionViewOptions): UserViewComponent {
   return function SubmissionView({ document }) {
     const doc = document.displayed as Doc;
     const client = useClient({ apiVersion });
@@ -33,7 +36,7 @@ export function submissionView({ title, statuses, rows, onStatus, extra }: Submi
     const current = statuses.find((s) => s.value === (doc.status ?? statuses[0].value)) ?? statuses[0];
 
     const setStatus = async (status: string) => {
-      if (status === doc.status) return;
+      if (status === doc.status || blocked?.(doc, status)) return;
       setBusy(true);
       try {
         await client.patch(doc._id).set({ status }).commit();
@@ -68,23 +71,32 @@ export function submissionView({ title, statuses, rows, onStatus, extra }: Submi
             </Text>
             <Flex gap={2} wrap="wrap">
               {statuses.map((s) => (
-                <Button key={s.value} text={s.title} tone={s.tone} mode={current.value === s.value ? "default" : "ghost"} disabled={busy} onClick={() => setStatus(s.value)} />
+                <Button key={s.value} text={s.title} tone={s.tone} mode={current.value === s.value ? "default" : "ghost"} disabled={busy || (!!blocked?.(doc, s.value) && current.value !== s.value)} title={blocked?.(doc, s.value) ?? undefined} onClick={() => setStatus(s.value)} />
               ))}
             </Flex>
+            {statuses.map((s) => (s.value !== current.value && blocked?.(doc, s.value) ? <Text key={s.value} size={1} muted>{s.title}: {blocked(doc, s.value)}</Text> : null))}
             {extra?.(doc)}
           </Stack>
           <Card padding={4} radius={3} shadow={1}>
             <Stack gap={5}>
-              {rows.map((r) => (
-                <Stack key={r.label} gap={2}>
-                  <Text size={1} muted weight="medium">
-                    {r.label}
-                  </Text>
-                  <Text size={2}>
-                    <span style={{ whiteSpace: "pre-wrap" }}>{r.render(doc) || "-"}</span>
-                  </Text>
-                </Stack>
-              ))}
+              {rows.map((r) => {
+                const v = r.render(doc);
+                if (r.block && !v) return null;
+                return (
+                  <Stack key={r.label} gap={2}>
+                    <Text size={1} muted weight="medium">
+                      {r.label}
+                    </Text>
+                    {r.block ? (
+                      v
+                    ) : (
+                      <Text size={2}>
+                        <span style={{ whiteSpace: "pre-wrap" }}>{v || "-"}</span>
+                      </Text>
+                    )}
+                  </Stack>
+                );
+              })}
             </Stack>
           </Card>
           <Stack gap={3}>

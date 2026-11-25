@@ -1,5 +1,5 @@
 import { StarIcon } from "@sanity/icons/Star";
-import { defineField, defineType } from "sanity";
+import { defineArrayMember, defineField, defineType } from "sanity";
 import { statusPreview } from "../../components/StatusPreview";
 import { stars } from "./testimonial";
 
@@ -29,6 +29,39 @@ export const reviewSubmission = defineType({
     defineField({ name: "email", title: "E-mail", description: "Ingevuld op het reviewformulier. Nooit publiek: de testimonial op de site heeft geen e-mail. De ontvangstbevestiging ging naar dit adres en het komt in het contactboek.", type: "string", readOnly: true }),
     defineField({ name: "rating", title: "Score", description: "Het aantal sterren (1–5) gekozen op het reviewformulier. Verschijnt bij “Gepubliceerd” op de site; bij 4★ of meer staat “Op Home” meteen aan.", type: "number", readOnly: true }),
     defineField({ name: "text", title: "Review", description: "De review zoals geschreven op de website. Bij “Gepubliceerd” verschijnt deze tekst op de site; bijwerken doe je in de testimonial (knop “Testimonial openen” in het Overzicht).", type: "text", rows: 5, readOnly: true }),
+    defineField({
+      name: "publish",
+      title: "Mag op de site",
+      description: "Feedbackformulier met “Toestemming publicatie”: wat de schrijver koos. Met voornaam = hun naam bij de testimonial; anoniem = “Deelnemer <retreat>”; niet publiceren = enkel voor jullie (Gepubliceerd kan dan niet).",
+      type: "string",
+      options: { list: [{ title: "Met voornaam", value: "name" }, { title: "Anoniem", value: "anonymous" }, { title: "Niet publiceren", value: "private" }] },
+      readOnly: true,
+    }),
+    defineField({ name: "formId", title: "Formulier-id", type: "string", readOnly: true, hidden: true }),
+    defineField({ name: "form", title: "Formulier", description: "Het feedbackformulier waarmee dit verstuurd werd (leeg = het korte standaard-reviewformulier).", type: "string", readOnly: true }),
+    defineField({
+      name: "answers",
+      title: "Antwoorden",
+      description: "Alle antwoorden op het feedbackformulier, met een kopie van de vragen zoals ze toen waren (in het Nederlands). Het formulier later aanpassen verandert dit niet. Samengevat per retreat in Formulieren → het feedbackformulier → Resultaten.",
+      type: "array",
+      readOnly: true,
+      of: [
+        defineArrayMember({
+          name: "reviewAnswer",
+          type: "object",
+          fields: [
+            defineField({ name: "question", title: "Vraag", type: "string" }),
+            defineField({ name: "row", title: "Rij (raster)", type: "string" }),
+            defineField({ name: "answer", title: "Antwoord", type: "text", rows: 2 }),
+            defineField({ name: "qKey", title: "Vraag-id", type: "string", hidden: true }),
+            defineField({ name: "type", title: "Soort", type: "string", hidden: true }),
+            defineField({ name: "rowIndex", title: "Rij-nummer", type: "number", hidden: true }),
+            defineField({ name: "value", title: "Waarde", type: "number", hidden: true }),
+          ],
+          preview: { select: { title: "question", row: "row", answer: "answer" }, prepare: ({ title, row, answer }) => ({ title: row ? `${title} · ${row}` : title, subtitle: answer }) },
+        }),
+      ],
+    }),
     defineField({ name: "lang", title: "Taal", description: "De taal van de website (NL of EN) bij het versturen. De ontvangstbevestiging ging in deze taal; het contactboek gebruikt ze ook voor de nieuwsbrief.", type: "string", readOnly: true }),
     defineField({ name: "submittedAt", title: "Verstuurd op", description: "Automatisch: wanneer de review op de website verstuurd werd. Wordt bij publiceren de datum van de testimonial en bepaalt de volgorde “Nieuwste eerst”.", type: "datetime", readOnly: true }),
   ],

@@ -120,6 +120,22 @@ const RETREAT_MAIL = `coalesce(confirmationMail->${MAIL}, *[_type == "confirmati
 /** The retreat's own form, else the one marked “Standaard” (null = only the built-in fields). */
 const RETREAT_FORM = `coalesce(signupForm->${FORM}, *[_type == "signupForm" && isDefault == true && !(_id in path("drafts.**"))][0]${FORM})` as const;
 
+/** A feedback form (Formulieren → Feedbackformulieren, lib/review-form.ts). */
+const REVIEW_FORM = `{
+  _id,
+  name,
+  "title": ${t("title")},
+  "intro": ${t("intro")},
+  "questions": questions[]{
+    _key, "label": ${t("label")}, "help": ${t("help")}, type, "options": ${lines("options")}, other, required, showIf,
+    "optionsNl": string::split(coalesce(options[language == "${defaultLanguage}"][0].value, ""), "\\n"),
+    "rows": ${lines("rows")}, scaleMax, "low": ${t("low")}, "high": ${t("high")}
+  }
+}` as const;
+
+/** The retreat's own published feedback form, else the one marked “Standaard” (null = the short built-in review form). */
+const RETREAT_REVIEW_FORM = `coalesce(reviewForm->${REVIEW_FORM}, *[_type == "reviewForm" && isDefault == true && !(_id in path("drafts.**"))][0]${REVIEW_FORM})` as const;
+
 /** What a participant says (studio/schemaTypes/documents/testimonial.ts): typed in, or made from a form submission (no e-mail). */
 const TESTIMONIAL = `{
   _id,
@@ -249,7 +265,8 @@ export const SIGNUP_RETREAT_QUERY = defineQuery(`*[_type == "retreat" && _id == 
   deposit,
   "photo": coalesce(hero.photo, cardPhoto)->image.asset->url,
   "form": ${RETREAT_FORM},
-  "mail": ${RETREAT_MAIL}
+  "mail": ${RETREAT_MAIL},
+  "reviewForm": ${RETREAT_REVIEW_FORM}
 }`);
 
 /** Sign-up page (/retreats/<slug>/inschrijven): a short summary of the retreat + its form. */
@@ -259,7 +276,8 @@ export const SIGNUP_PAGE_QUERY = defineQuery(`*[_type == "retreat" && slug.curre
   "photo": coalesce(closingPhoto, hero.photo)->${MEDIA},
   "prices": prices[]{ _key, "label": ${t("label")}, amount },
   "closingTitle": ${t("closingTitle")},
-  "form": ${RETREAT_FORM}
+  "form": ${RETREAT_FORM},
+  "reviewForm": ${RETREAT_REVIEW_FORM}
 }`);
 
 export const RETREAT_SLUGS_QUERY = defineQuery(`*[_type == "retreat" && defined(slug.current)].slug.current`);

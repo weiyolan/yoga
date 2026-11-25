@@ -156,7 +156,7 @@ function ReceiptPreview({ doc }: { doc: Doc | null | undefined }) {
       </Flex>
       <Rendered subject={subject} html={mailHtml(content)} />
       <Text size={0} muted>
-        Voorbeeld voor “Anna”; onderaan staat wat zij stuurde. Lege velden = de standaardtekst die je hier ziet. Aan/uit: Mails → Opties.
+        Voorbeeld voor “Anna”; onderaan staat wat zij stuurde. Lege velden = de standaardtekst die je hier ziet. Aan/uit: Bevestigingsmails → Opties.
       </Text>
       <TestMail send={(to) => siteApi(client, "/api/mail", { task: "test-receipt", to, lang, kind, mail })} />
     </Stack>
@@ -272,7 +272,7 @@ function Steps({ id, written }: { id: string; written: boolean }) {
     { title: "Schrijven", done: written, hint: "Onderwerp en tekst invullen (links)." },
     { title: "Testmail", done: false, hint: "Stuur hem naar jezelf (onderaan dit paneel) en kijk hem na op je gsm." },
     { title: "Publiceren", done: live, hint: draft && published ? "Je wijzigingen zijn nog niet gepubliceerd: “Publiceren” onderaan." : "“Publiceren” onderaan." },
-    { title: "Versturen", done: !!sentAt, hint: sentAt ? `Verstuurd op ${sentAt.slice(0, 10)}.` : "De knop “Nieuwsbrief versturen…” onderaan: toont het aantal ontvangers, dan bevestigen." },
+    { title: "Versturen", done: !!sentAt, hint: sentAt ? `Verstuurd op ${sentAt.slice(0, 10)}.` : "De knop “Brief versturen…” onderaan: toont het aantal ontvangers, dan bevestigen." },
   ];
   // the step to do now (the test mail is a tip, shown together with “Publiceren”)
   const next = sentAt ? -1 : !written ? 0 : !live ? 2 : 3;
