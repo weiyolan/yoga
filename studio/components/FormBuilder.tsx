@@ -26,6 +26,8 @@ export const QUESTION_TYPES: { title: string; value: string; icon: ComponentType
   { title: "Ja / nee", value: "yesno", icon: ThumbsUpIcon, hint: "Twee bolletjes: Ja of Nee" },
   { title: "Keuze (één)", value: "choice", icon: DotIcon, hint: "Eén antwoord uit een lijst" },
   { title: "Meerdere keuzes", value: "multi", icon: CheckmarkIcon, hint: "Vinkjes: meerdere antwoorden mogelijk" },
+  { title: "Raster", value: "grid", icon: ThLargeIcon, hint: "Rijen × kolommen: per rij één antwoord (bv. Yoga, Pilates… × Nooit … Gevorderd)" },
+  { title: "Schaal", value: "scale", icon: ControlsIcon, hint: "Cijfers 1 tot …, met een woord aan beide kanten" },
   { title: "Nieuwe stap", value: "section", icon: SplitHorizontalIcon, hint: "Begint een nieuwe pagina met deze titel" },
   { title: "Kamerkeuze", value: "room", icon: HomeIcon, hint: "Uit de prijzen van de retreat" },
   { title: "Dieet / allergieën", value: "diet", icon: LemonIcon, hint: "Open vak, komt in de kolom Dieet" },
@@ -38,14 +40,14 @@ const pickTypes = (...values: string[]) => values.map((v) => QUESTION_TYPES.find
 /** The question types of a feedback form (Feedbackformulier → Vragen, lib/review-form.ts). */
 export const REVIEW_QUESTION_TYPES: QType[] = [
   ...pickTypes("text", "textarea", "yesno", "choice", "multi"),
-  { title: "Raster", value: "grid", icon: ThLargeIcon, hint: "Rijen × kolommen: per rij één antwoord (bv. Organisatie, Maaltijden… × Niet goed … Uitstekend)" },
-  { title: "Schaal", value: "scale", icon: ControlsIcon, hint: "Cijfers 1 tot …, met een woord aan beide kanten" },
+  { ...pickTypes("grid")[0], hint: "Rijen × kolommen: per rij één antwoord (bv. Organisatie, Maaltijden… × Niet goed … Uitstekend)" },
+  ...pickTypes("scale"),
   { title: "Sterren", value: "stars", icon: StarIcon, hint: "1 tot 5 (of 10) sterren. De eerste sterrenvraag is de score van de testimonial" },
   { title: "Quote voor de site", value: "quote", icon: CommentIcon, hint: "Open vak: wordt de tekst van de testimonial als je hem publiceert" },
   { title: "Toestemming publicatie", value: "publish", icon: EyeOpenIcon, hint: "Met voornaam / anoniem / niet publiceren" },
   { title: "Naam", value: "name", icon: UserIcon, hint: "Hun (voor)naam, bij de testimonial" },
   { title: "E-mail", value: "email", icon: EnvelopeIcon, hint: "Voor de bedankmail en het contactboek" },
-  { title: "Nieuw deel", value: "section", icon: SplitHorizontalIcon, hint: "Een titel tussen de vragen (bv. “Deel 2: Prijs-kwaliteit”)" },
+  { title: "Nieuwe stap", value: "section", icon: SplitHorizontalIcon, hint: "Begint een nieuwe pagina met deze titel (bv. “Prijs-kwaliteit”)" },
 ];
 export const reviewQuestionType = (v?: string) => REVIEW_QUESTION_TYPES.find((q) => q.value === v);
 
@@ -115,7 +117,7 @@ export function ShowIfInput(props: TextInputProps) {
     return (
       <Card padding={3} radius={2} tone="transparent" border>
         <Text size={1} muted>
-          {prev?.type === "grid" ? "De vraag hierboven is een raster: deze vraag wordt altijd getoond." : prev ? "De vraag hierboven is een nieuwe stap (of deel): deze vraag wordt altijd getoond." : "Dit is de eerste vraag: wordt altijd getoond."}
+          {prev?.type === "grid" ? "De vraag hierboven is een raster: deze vraag wordt altijd getoond." : prev ? "De vraag hierboven is een nieuwe stap: deze vraag wordt altijd getoond." : "Dit is de eerste vraag: wordt altijd getoond."}
           {lines.length ? ` (Nu ingesteld: ${lines.join(" / ")}; zet de vraag direct onder de vraag waarvan ze afhangt.)` : ""}
         </Text>
       </Card>

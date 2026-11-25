@@ -41,7 +41,7 @@ const INTEREST = {
 const NAME_OPTION = { nl: "Met mijn voornaam (vul hieronder je voornaam in)", en: "With my first name (fill it in below)" };
 
 const QUESTIONS: Q[] = [
-  section("Deel 1: Terugblik op deze retreat", "Part 1: Looking back on this retreat"),
+  section("Terugblik op deze retreat", "Looking back on this retreat"),
   {
     type: "grid",
     label: { nl: "Hoe heb je de volgende onderdelen van onze retreat ervaren?", en: "How did you experience these parts of our retreat?" },
@@ -77,6 +77,8 @@ const QUESTIONS: Q[] = [
     required: true,
   },
   { type: "textarea", label: { nl: "Wil je één van je bovenstaande scores nog kort toelichten?", en: "Would you like to explain one of your scores above?" } },
+
+  section("De lessen", "The classes"),
   {
     type: "grid",
     label: { nl: "Hoe vond je de groepslessen?", en: "How did you like the group classes?" },
@@ -88,7 +90,7 @@ const QUESTIONS: Q[] = [
   { type: "textarea", label: { nl: "Wat is je het meest bijgebleven of vond je het fijnste aan dit weekend?", en: "What stayed with you most, or what did you enjoy most this weekend?" } },
   { type: "textarea", label: { nl: "Zijn er dingen die we volgens jou nog kunnen verbeteren of anders kunnen aanpakken?", en: "Is there anything we could improve or do differently?" } },
 
-  section("Deel 2: Prijs-kwaliteit & aanbeveling", "Part 2: Value & recommendation"),
+  section("Prijs-kwaliteit & aanbeveling", "Value & recommendation"),
   {
     type: "scale",
     label: { nl: "Hoe beoordeel je de verhouding tussen prijs en kwaliteit?", en: "How do you rate the value for money?" },
@@ -108,7 +110,7 @@ const QUESTIONS: Q[] = [
     required: true,
   },
 
-  section("Deel 3: Toekomstige retreats", "Part 3: Future retreats"),
+  section("Toekomstige retreats", "Future retreats"),
   {
     type: "grid",
     label: { nl: "Waar zou je in de toekomst interesse in hebben?", en: "What would you be interested in?" },

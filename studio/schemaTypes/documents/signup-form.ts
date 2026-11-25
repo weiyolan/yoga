@@ -65,14 +65,26 @@ export const signupForm = defineType({
               options: { list: QUESTION_TYPES.map(({ title, value }) => ({ title, value })) },
               components: { input: QuestionTypeInput },
               initialValue: "text",
-              description: "Hoe de vraag op het formulier verschijnt: kort of lang tekstvak, ja/nee, keuzes, kamer, dieet, of “Nieuwe stap” (een nieuwe pagina in het formulier).",
+              description: "Hoe de vraag op het formulier verschijnt: kort of lang tekstvak, ja/nee, keuzes, raster, schaal, kamer, dieet, of “Nieuwe stap” (een nieuwe pagina in het formulier).",
               validation: (rule) => rule.required(),
             }),
             i18nString("label", { title: "Vraag (of titel)", required: true, max: 120, description: "De vraag zoals ze op het formulier staat (bij “Nieuwe stap”: de titel van die pagina). Ook de titel bij het antwoord in de inschrijving." }),
             i18nString("help", { title: "Uitleg (optioneel)", max: 300, description: "Op het formulier: kleine tekst onder de vraag (of de titel van de stap), om uit te leggen wat je wil weten." }),
-            i18nLines("options", { title: "Keuzes", description: "De antwoorden waaruit ze op het formulier kunnen kiezen.", hidden: ({ parent }) => !["choice", "multi"].includes((parent as Q)?.type ?? "") }),
+            i18nLines("rows", { title: "Rijen", description: "Raster: de onderdelen die ze elk een antwoord geven, bv. “Yoga”, “Pilates”, “Freediving”.", hidden: ({ parent }) => (parent as Q)?.type !== "grid" }),
+            i18nLines("options", { title: "Keuzes (bij een raster: de kolommen)", description: "De antwoorden waaruit ze op het formulier kunnen kiezen. Raster: de kolommen, bv. Nooit gedaan / Beginner / Gevorderd.", hidden: ({ parent }) => !["choice", "multi", "grid"].includes((parent as Q)?.type ?? "") }),
+            defineField({
+              name: "scaleMax",
+              title: "Tot",
+              type: "number",
+              initialValue: 5,
+              options: { list: [3, 4, 5, 6, 7, 10].map((n) => ({ title: `1 – ${n}`, value: n })), layout: "radio", direction: "horizontal" },
+              description: "Schaal: van 1 tot dit getal.",
+              hidden: ({ parent }) => (parent as Q)?.type !== "scale",
+            }),
+            i18nString("low", { title: "Woord bij 1", max: 40, description: "Schaal: links van de cijfers, bv. “Helemaal niet”.", hidden: ({ parent }) => (parent as Q)?.type !== "scale" }),
+            i18nString("high", { title: "Woord bij het hoogste cijfer", max: 40, description: "Schaal: rechts van de cijfers, bv. “Super fit”.", hidden: ({ parent }) => (parent as Q)?.type !== "scale" }),
             defineField({ name: "other", title: "Ook “Andere: …” (zelf invullen)", type: "boolean", initialValue: false, description: "Aan = onder de keuzes op het formulier staat ook “Andere:” met een vakje om zelf iets in te vullen.", hidden: ({ parent }) => !["choice", "multi"].includes((parent as Q)?.type ?? "") }),
-            defineField({ name: "required", title: "Verplicht", type: "boolean", initialValue: false, description: "Aan = op het formulier moet deze vraag ingevuld zijn voor ze verder kunnen.", hidden: ({ parent }) => (parent as Q)?.type === "section" }),
+            defineField({ name: "required", title: "Verplicht", type: "boolean", initialValue: false, description: "Aan = op het formulier moet deze vraag ingevuld zijn voor ze verder kunnen (bij een raster: elke rij).", hidden: ({ parent }) => (parent as Q)?.type === "section" }),
             defineField({
               name: "showIf",
               title: "Enkel tonen als de vraag hierboven … is",
@@ -85,16 +97,17 @@ export const signupForm = defineType({
           ],
           // the list reads like the form: steps as headings, conditional questions indented (↳), an icon per type
           preview: {
-            select: { label: "label", type: "type", required: "required", showIf: "showIf", options: "options" },
-            prepare: ({ label, type, required, showIf, options }) => {
+            select: { label: "label", type: "type", required: "required", showIf: "showIf", options: "options", rows: "rows", scaleMax: "scaleMax" },
+            prepare: ({ label, type, required, showIf, options, rows, scaleMax }) => {
               const t = questionType(type);
-              const n = (pick(options) ?? "").split("\n").filter((o: string) => o.trim()).length;
+              const count = (v: unknown) => (pick(v as never) ?? "").split("\n").filter((o: string) => o.trim()).length;
+              const n = count(options);
               return {
                 title: type === "section" ? `STAP · ${(pick(label) ?? "Nieuwe stap").toUpperCase()}` : `${showIf ? "↳ " : ""}${pick(label) ?? "Nieuwe vraag"}${required ? " *" : ""}`,
                 subtitle:
                   type === "section"
                     ? "Nieuwe pagina in het formulier"
-                    : [t?.title, n ? `${n} keuzes` : null, showIf ? `enkel als: ${String(showIf).split("\n").join(" / ")}` : null].filter(Boolean).join(" · "),
+                    : [t?.title, type === "grid" ? `${count(rows)} rijen × ${n} kolommen` : type === "scale" ? `1 – ${scaleMax ?? 5}` : n ? `${n} keuzes` : null, showIf ? `enkel als: ${String(showIf).split("\n").join(" / ")}` : null].filter(Boolean).join(" · "),
                 media: t?.icon,
               };
             },

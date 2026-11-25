@@ -13,14 +13,12 @@ import {
   type ReceiptVars,
 } from "@/lib/receipt";
 import {
-  answerText,
   fieldName,
   formValues,
-  otherName,
   visibleKeys,
   type FormQuestion,
 } from "@/lib/signup-form";
-import { parseReview, withDefaults } from "@/lib/review-form";
+import { answered, answerParts, parseReview, withDefaults } from "@/lib/review-form";
 import { subscriberId, unsubscribeUrl } from "@/lib/unsubscribe";
 import { isUpcoming, sanityFetch } from "@/sanity/fetch";
 import {
@@ -433,28 +431,32 @@ async function signupInner(data: FormData): Promise<FormState> {
           .filter((x) => /^(\d+|other)$/.test(x))
           .join(",")
       : field(data, fieldName(q), 2000);
-  // (a placed room choice isn't enforced: without prices on the retreat there is nothing to pick)
-  if (questions.some((q) => q.required && q.type !== "room" && !raw(q)))
+  // field value as answerParts() reads it (“Meerdere keuzes”: the ticks joined; grid rows: q.<key>.r<i>)
+  const get = (name: string) => {
+    const q = questions.find((x) => fieldName(x) === name);
+    return q ? raw(q) : field(data, name, 500);
+  };
+  // (a placed room choice isn't enforced: without prices on the retreat there is nothing to pick; a grid: every row)
+  if (questions.some((q) => q.required && q.type !== "room" && (q.type === "diet" ? !raw(q) : !answered(q, get))))
     return { status: "invalid" };
   const opts = (q?: { options: string[] | null } | null) =>
     (q?.options ?? []).filter(Boolean);
+  // one answer per question, a grid: one per answered row (“Ervaring · Pilates”)
   const answers = questions
     .filter((q) => q.type !== "room" && q.type !== "diet")
-    .map((q) => {
+    .flatMap((q) => {
       const nl = retreatNl.form?.questions?.find((x) => x._key === q._key);
-      const other = field(data, otherName(q), 500);
-      return {
-        label: q.label ?? "",
-        labelNl: nl?.label ?? q.label ?? "",
-        answer: answerText(q, raw(q), other, t),
-        answerNl: answerText(
-          q,
-          raw(q),
-          other,
-          tNl,
-          opts(nl).length ? opts(nl) : opts(q),
-        ),
-      };
+      const mine = answerParts(q, get, t);
+      const dutch = answerParts(q, get, tNl, opts(nl).length ? opts(nl) : opts(q), nl?.rows?.length ? nl.rows : q.rows);
+      return mine.map((a, i) => {
+        const row = (base: string | null | undefined, r?: string) => (r ? `${base ?? ""} · ${r}` : (base ?? ""));
+        return {
+          label: row(q.label, a.row),
+          labelNl: row(nl?.label ?? q.label, dutch[i]?.row ?? a.row),
+          answer: a.answer,
+          answerNl: dutch[i]?.answer ?? a.answer,
+        };
+      });
     });
 
   const title = retreat.title ?? "retreat";

@@ -10,13 +10,7 @@ import { answerText, otherName, qName, visibleKeys, type FormQuestion } from "./
  * `scale` (1…max with a word at both ends), `stars` (1…max stars), `quote` (the testimonial text),
  * `publish` (how the quote may be shown: with first name / anonymous / not), `name`, `email`.
  */
-export type ReviewQuestion = FormQuestion & {
-  rows?: string[] | null;
-  rowsNl?: string[] | null;
-  scaleMax?: number | null;
-  low?: string | null;
-  high?: string | null;
-};
+export type ReviewQuestion = FormQuestion;
 
 export type ReviewFormDef = {
   _id: string;
@@ -161,3 +155,37 @@ export function parseReview(questions: ReviewQuestion[], nl: ReviewQuestion[] | 
 /** Shown on the testimonial: their name, “Deelnemer <retreat>” when anonymous. */
 export const publicName = (p: Pick<ParsedReview, "name" | "publish">, retreat: string, lang: "nl" | "en") =>
   p.publish === "anonymous" || !p.name ? `${lang === "en" ? "Participant" : "Deelnemer"} ${retreat}` : p.name;
+
+/**
+ * What one question's answer reads as, one part per grid row (`row`), in the language of `options` / `rows`
+ * (the sign-up form calls it twice: the participant's language for their mail, Dutch to store). `get`
+ * returns a field's value (several ticks of a “Meerdere keuzes” joined with “,”, like formValues()).
+ * Empty = not answered (a grid: only the answered rows).
+ */
+export function answerParts(
+  q: ReviewQuestion,
+  get: (name: string) => string,
+  words: { yes: string; no: string; other: string },
+  options = q.options,
+  rows = q.rows,
+): { row?: string; answer: string }[] {
+  const opts = list(options);
+  if (q.type === "grid")
+    return list(rows).flatMap((row, i) => {
+      const raw = get(rowName(q, i));
+      return /^\d+$/.test(raw) && opts[Number(raw)] ? [{ row, answer: opts[Number(raw)] }] : [];
+    });
+  const raw = get(qName(q)).trim();
+  if (!raw) return [];
+  if (q.type === "scale" || q.type === "stars") {
+    const v = Number(raw);
+    if (!Number.isInteger(v) || v < 1 || v > maxOf(q)) return [];
+    return [{ answer: q.type === "stars" ? `${"★".repeat(v)}${"☆".repeat(maxOf(q) - v)} (${v}/${maxOf(q)})` : `${v} / ${maxOf(q)}` }];
+  }
+  const text = answerText(q, raw, get(otherName(q)).trim().slice(0, 500), words, options);
+  return text ? [{ answer: text }] : [];
+}
+
+/** Is a required question answered (a grid: every row)? */
+export const answered = (q: ReviewQuestion, get: (name: string) => string) =>
+  q.type === "grid" ? list(q.rows).every((_, i) => /^\d+$/.test(get(rowName(q, i)))) : !!get(qName(q)).trim();

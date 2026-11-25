@@ -29,7 +29,7 @@ export const reviewForm = defineType({
       name: "questions",
       title: "Vragen",
       type: "array",
-      description: "De vragen van het feedbackformulier, in deze volgorde (één pagina, zoals Google Forms). “Nieuw deel” zet een tussentitel. Tip: “Quote voor de site” + “Toestemming publicatie” + “Naam” maken er een testimonial van die je met één klik publiceert.",
+      description: "De vragen van het feedbackformulier, in deze volgorde. “Nieuwe stap” begint een nieuwe pagina met die titel en een voortgangsbalk, zoals het inschrijfformulier (geen stappen = alles op één pagina). Tip: “Quote voor de site” + “Toestemming publicatie” + “Naam” maken er een testimonial van die je met één klik publiceert.",
       validation: (rule) => rule.min(1),
       of: [
         defineArrayMember({
@@ -47,7 +47,7 @@ export const reviewForm = defineType({
               description: "Hoe de vraag op het formulier verschijnt.",
               validation: (rule) => rule.required(),
             }),
-            i18nString("label", { title: "Vraag (of titel)", required: true, max: 220, description: "De vraag zoals ze op het formulier staat (bij “Nieuw deel”: de tussentitel). Ook de titel bij het antwoord in de inzending en de resultaten." }),
+            i18nString("label", { title: "Vraag (of titel)", required: true, max: 220, description: "De vraag zoals ze op het formulier staat (bij “Nieuwe stap”: de titel van die pagina). Ook de titel bij het antwoord in de inzending en de resultaten." }),
             i18nString("help", { title: "Uitleg (optioneel)", max: 300, description: "Kleine tekst onder de vraag, bv. “1 = helemaal niet waarschijnlijk | 10 = zeer waarschijnlijk”." }),
             i18nLines("rows", { title: "Rijen", description: "Raster: de onderdelen die ze elk een antwoord geven, bv. “Organisatie & begeleiding”, “De maaltijden”.", hidden: only("grid") }),
             i18nLines("options", {
@@ -86,8 +86,8 @@ export const reviewForm = defineType({
               const detail =
                 type === "grid" ? `${count(rows)} rijen × ${count(options)} kolommen` : type === "scale" || type === "stars" ? `1 – ${scaleMax ?? 5}` : count(options) ? `${count(options)} keuzes` : null;
               return {
-                title: type === "section" ? `DEEL · ${(pick(label) ?? "Nieuw deel").toUpperCase()}` : `${showIf ? "↳ " : ""}${pick(label) ?? "Nieuwe vraag"}${required ? " *" : ""}`,
-                subtitle: type === "section" ? "Tussentitel" : [t?.title, detail, showIf ? `enkel als: ${String(showIf).split("\n").join(" / ")}` : null].filter(Boolean).join(" · "),
+                title: type === "section" ? `STAP · ${(pick(label) ?? "Nieuwe stap").toUpperCase()}` : `${showIf ? "↳ " : ""}${pick(label) ?? "Nieuwe vraag"}${required ? " *" : ""}`,
+                subtitle: type === "section" ? "Nieuwe pagina in het formulier" : [t?.title, detail, showIf ? `enkel als: ${String(showIf).split("\n").join(" / ")}` : null].filter(Boolean).join(" · "),
                 media: t?.icon,
               };
             },

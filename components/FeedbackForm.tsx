@@ -1,21 +1,23 @@
 "use client";
 
 import Link from "next/link";
-import { useActionState, useEffect, useRef, useState, type CSSProperties } from "react";
+import { useActionState, useEffect, useRef, useState, type KeyboardEvent } from "react";
 import { sendFeedback, type FormState } from "@/app/actions/forms";
 import { getDictionary } from "@/lib/dictionary";
-import { maxOf, optionsOf, rowName, rowsOf, type ReviewQuestion } from "@/lib/review-form";
+import type { ReviewQuestion } from "@/lib/review-form";
 import { href } from "@/lib/routes";
-import { formValues, otherName, qName, visibleKeys } from "@/lib/signup-form";
+import { formValues, questionSteps, visibleKeys } from "@/lib/signup-form";
 import type { Lang } from "@/sanity/site.config";
+import { QuestionField } from "./QuestionField";
 
 const idle: FormState = { status: "idle" };
 
 /**
- * A retreat's own feedback form (/retreats/<slug>/review; Studio → Formulieren → Feedbackformulieren):
- * one page like a Google Form, “Nieuw deel” as headings, a grid as a table (a list per row on a phone),
- * a scale, stars. Questions can depend on the one before (lib/signup-form.ts). Stored by sendFeedback.
- * The questions come with the defaults filled in (lib/review-form.ts → withDefaults).
+ * A retreat's own feedback form (/retreats/<slug>/review; Studio → Formulieren → Feedbackformulieren).
+ * Every “Nieuwe stap” is a page with a progress bar, like the sign-up form (a form without steps: one page);
+ * a step whose questions are all hidden is skipped. Questions can depend on the one before (lib/signup-form.ts).
+ * Every step stays in the DOM, so the whole form is posted at once and refilled after a failed submit.
+ * The questions come with the defaults filled in (lib/review-form.ts → withDefaults). Stored by sendFeedback.
  */
 export function FeedbackForm({ lang, retreatId, questions }: { lang: Lang; retreatId: string; questions: ReviewQuestion[] }) {
   const t = getDictionary(lang).review;
@@ -23,9 +25,19 @@ export function FeedbackForm({ lang, retreatId, questions }: { lang: Lang; retre
   const [state, action, pending] = useActionState(sendFeedback, idle);
   const v = state.values ?? {};
   const [vals, setVals] = useState<Record<string, string>>(v);
+  const [step, setStep] = useState(0);
+  const [dir, setDir] = useState<"fwd" | "back">("fwd");
   const formEl = useRef<HTMLFormElement>(null);
+  const moved = useRef(false);
   const qs = questions.filter((q) => q.label);
   const shown = visibleKeys(qs, (name) => vals[name] ?? "");
+  const groups = questionSteps(qs);
+  // a step whose questions are all hidden (by “Enkel tonen als …”) is skipped
+  const active = groups.filter((g) => g.questions.some((q) => shown.has(q._key)));
+  const total = Math.max(active.length, 1);
+  const paged = active.length > 1;
+  const at = Math.min(step, total - 1);
+  const last = at === total - 1;
 
   // Netlify Forms fallback for the team mail, like the other forms
   const posted = useRef<FormState["notify"]>(undefined);
@@ -36,9 +48,20 @@ export function FeedbackForm({ lang, retreatId, questions }: { lang: Lang; retre
     fetch("/__forms.html", { method: "POST", headers: { "Content-Type": "application/x-www-form-urlencoded" }, body: new URLSearchParams({ "form-name": "melding", ...n }).toString() }).catch(() => {});
   }, [state.notify]);
 
+  // Server said "invalid": go to the first step with a missing answer.
   useEffect(() => {
-    if (state.status === "invalid") formEl.current?.querySelector<HTMLElement>(":invalid")?.focus();
+    if (state.status !== "invalid") return;
+    const bad = formEl.current?.querySelector<HTMLElement>(":invalid:not(fieldset)");
+    const n = Number(bad?.closest<HTMLElement>("[data-step]")?.dataset.step ?? total - 1);
+    setStep(n);
+    setTimeout(() => bad?.focus(), 50);
   }, [state]);
+
+  // Focus the first field of a new step (not on page load).
+  useEffect(() => {
+    if (!moved.current) return;
+    formEl.current?.querySelector<HTMLElement>(`[data-step="${at}"] :is(input:not([type=hidden]):not(:disabled), textarea:not(:disabled))`)?.focus({ preventScroll: true });
+  }, [at]);
 
   if (state.status === "sent")
     return (
@@ -47,190 +70,94 @@ export function FeedbackForm({ lang, retreatId, questions }: { lang: Lang; retre
       </p>
     );
 
-  const label = (q: ReviewQuestion) => `${q.label}${q.required ? " *" : ""}`;
-  const help = (q: ReviewQuestion, id: string) =>
-    q.help ? (
-      <small className="muted" id={`${id}-help`}>
-        {q.help}
-      </small>
-    ) : null;
+  const go = (to: number) => {
+    const el = formEl.current;
+    if (!el) return;
+    if (to > at)
+      for (const f of el.querySelectorAll<HTMLInputElement>(`[data-step="${at}"] :is(input, textarea)`))
+        if (!f.checkValidity()) return void f.reportValidity();
+    moved.current = true;
+    setDir(to > at ? "fwd" : "back");
+    setStep(to);
+    el.scrollIntoView({ block: "start", behavior: "smooth" });
+  };
 
-  const question = (q: ReviewQuestion) => {
-    const name = qName(q);
-    const id = `f-q-${q._key}`;
-    const described = q.help ? `${id}-help` : undefined;
-    const type = q.type ?? "text";
-
-    if (type === "section") return <h3 className="fb-section">{q.label}</h3>;
-
-    if (type === "grid") {
-      const rows = rowsOf(q);
-      const cols = optionsOf(q);
-      return (
-        <fieldset className="field full choices fb-grid" aria-describedby={described}>
-          <legend className="select-label">{label(q)}</legend>
-          {help(q, id)}
-          <div className="fb-table" role="presentation" style={{ "--cols": cols.length } as CSSProperties}>
-            <div className="fb-head" aria-hidden="true">
-              <span />
-              {cols.map((c, ci) => (
-                <span key={ci}>{c}</span>
-              ))}
-            </div>
-            {rows.map((row, ri) => (
-              <div key={ri} className="fb-row" role="radiogroup" aria-label={row}>
-                <span className="fb-rowlabel">{row}</span>
-                {cols.map((c, ci) => (
-                  <label key={ci} className="fb-cell">
-                    <input type="radio" name={rowName(q, ri)} value={String(ci)} defaultChecked={v[rowName(q, ri)] === String(ci)} required={!!q.required} aria-label={`${row}: ${c}`} />
-                    <span className="fb-col">{c}</span>
-                  </label>
-                ))}
-              </div>
-            ))}
-          </div>
-        </fieldset>
-      );
-    }
-
-    if (type === "scale") {
-      const max = maxOf(q);
-      return (
-        <fieldset className="field full choices" aria-describedby={described}>
-          <legend className="select-label">{label(q)}</legend>
-          {help(q, id)}
-          <div className="fb-scale">
-            {q.low ? <span className="fb-end">{q.low}</span> : null}
-            <div className="fb-nums">
-              {Array.from({ length: max }, (_, i) => i + 1).map((n) => (
-                <label key={n}>
-                  <span>{n}</span>
-                  <input type="radio" name={name} value={String(n)} defaultChecked={v[name] === String(n)} required={!!q.required} aria-label={`${n}${n === 1 && q.low ? ` (${q.low})` : n === max && q.high ? ` (${q.high})` : ""}`} />
-                </label>
-              ))}
-            </div>
-            {q.high ? <span className="fb-end">{q.high}</span> : null}
-          </div>
-        </fieldset>
-      );
-    }
-
-    if (type === "stars") {
-      const max = maxOf(q);
-      return (
-        <fieldset className={`field full stars${max > 5 ? " many" : ""}`} aria-describedby={described}>
-          <legend className="select-label">{label(q)}</legend>
-          {help(q, id)}
-          {/* reversed in the DOM so "this star and the ones before it" light up with plain CSS */}
-          <div className="stars-row">
-            {Array.from({ length: max }, (_, i) => max - i).map((n) => (
-              <label key={n} title={t.stars(n)}>
-                <input type="radio" name={name} value={n} defaultChecked={v[name] === String(n)} required={!!q.required} />
-                <span aria-hidden="true">★</span>
-                <span className="visually-hidden">{t.stars(n)}</span>
-              </label>
-            ))}
-          </div>
-          {max > 5 ? <span className="fb-starnum" aria-hidden="true">{vals[name] ? `${vals[name]} / ${max}` : ""}</span> : null}
-        </fieldset>
-      );
-    }
-
-    if (type === "yesno" || type === "choice" || type === "publish" || type === "multi") {
-      const multi = type === "multi";
-      const opts: [string, string][] = type === "yesno" ? [["yes", s.yes], ["no", s.no]] : optionsOf(q).map((o, i) => [String(i), o]);
-      const ticked = (vals[name] ?? v[name] ?? "").split(",");
-      const none = !ticked.some(Boolean);
-      return (
-        <fieldset className="field full choices" aria-describedby={described}>
-          <legend className="select-label">{label(q)}</legend>
-          {help(q, id)}
-          <div className={`row${opts.length > 2 ? " stack" : ""}`}>
-            {opts.map(([value, text], i) => (
-              <label key={value} className="check">
-                <input
-                  type={multi ? "checkbox" : "radio"}
-                  name={name}
-                  value={value}
-                  defaultChecked={multi ? ticked.includes(value) : v[name] === value}
-                  required={!!q.required && (!multi || (none && i === 0))}
-                />{" "}
-                {text}
-              </label>
-            ))}
-            {(type === "choice" || multi) && q.other ? (
-              <label className="check other">
-                <input type={multi ? "checkbox" : "radio"} name={name} value="other" defaultChecked={multi ? ticked.includes("other") : v[name] === "other"} />{" "}
-                {s.other}:
-                <input
-                  name={otherName(q)}
-                  defaultValue={v[otherName(q)]}
-                  placeholder={s.otherPlaceholder}
-                  aria-label={`${q.label}: ${s.other}`}
-                  onFocus={(e) => {
-                    const box = e.currentTarget.parentElement?.querySelector<HTMLInputElement>("input[type=radio], input[type=checkbox]");
-                    if (box && !box.checked) box.click();
-                  }}
-                />
-              </label>
-            ) : null}
-          </div>
-        </fieldset>
-      );
-    }
-
-    const long = type === "textarea" || type === "quote";
-    return (
-      <div className="field full">
-        <label htmlFor={id}>{label(q)}</label>
-        {long ? (
-          <textarea id={id} name={name} defaultValue={v[name]} required={!!q.required} maxLength={type === "quote" ? 1200 : 2000} aria-describedby={described} />
-        ) : (
-          <input
-            id={id}
-            name={name}
-            type={type === "email" ? "email" : "text"}
-            autoComplete={type === "email" ? "email" : type === "name" ? "given-name" : undefined}
-            defaultValue={v[name]}
-            required={!!q.required}
-            maxLength={type === "name" ? 100 : 300}
-            aria-describedby={described}
-          />
-        )}
-        {help(q, id)}
-      </div>
-    );
+  // Enter = next step (not in a textarea, not on the last step where it submits).
+  const onKeyDown = (e: KeyboardEvent<HTMLFormElement>) => {
+    if (!paged || e.key !== "Enter" || last || (e.target as HTMLElement).tagName === "TEXTAREA") return;
+    e.preventDefault();
+    go(at + 1);
   };
 
   return (
-    <form className="form feedback" style={{ marginTop: 28 }} action={action} ref={formEl} onChange={(e) => setVals(formValues(new FormData(e.currentTarget)))}>
+    <form className="stepper feedback" style={{ marginTop: 28 }} action={action} ref={formEl} onKeyDown={onKeyDown} onChange={(e) => setVals(formValues(new FormData(e.currentTarget)))} data-dir={dir}>
       <input type="hidden" name="retreat" value={retreatId} />
       <input type="hidden" name="lang" value={lang} />
-      {qs.map((q) => (
-        <fieldset key={q._key} className="q-wrap" hidden={!shown.has(q._key)} disabled={!shown.has(q._key)}>
-          {question(q)}
-        </fieldset>
-      ))}
-      <p className="muted small full">
-        {t.feedbackPrivacy}{" "}
-        <Link href={href(lang, "privacy")} target="_blank">
-          {getDictionary(lang).privacy.link}
-        </Link>
-      </p>
+      {paged ? (
+        <>
+          <div className="progress" aria-hidden="true">
+            <span style={{ width: `${((at + 1) / total) * 100}%` }} />
+          </div>
+          <p className="progress-label" aria-live="polite">
+            <b>{s.step(at + 1, total)}</b>
+            {active[at]?.title ? ` · ${active[at].title}` : ""}
+          </p>
+        </>
+      ) : null}
+
+      {groups.map((g) => {
+        const n = active.indexOf(g);
+        return (
+          <fieldset key={g.key} data-step={n >= 0 ? n : undefined} hidden={paged && at !== n} disabled={n < 0} className={`form step${!paged || at === n ? " on" : ""}`}>
+            {g.title ? <h3 className={`fb-section${paged ? " visually-hidden" : ""}`}>{g.title}</h3> : null}
+            {g.help ? <p className="muted full step-help">{g.help}</p> : null}
+            {g.questions.map((q) => (
+              <fieldset key={q._key} className="q-wrap" hidden={!shown.has(q._key)} disabled={!shown.has(q._key)}>
+                <QuestionField q={q} lang={lang} v={v} vals={vals} prefix="f" />
+              </fieldset>
+            ))}
+            {n === total - 1 ? (
+              <p className="muted small full">
+                {t.feedbackPrivacy}{" "}
+                <Link href={href(lang, "privacy")} target="_blank">
+                  {getDictionary(lang).privacy.link}
+                </Link>
+              </p>
+            ) : null}
+          </fieldset>
+        );
+      })}
+
       <div className="visually-hidden" aria-hidden="true">
         <label>
           Website <input name="website" tabIndex={-1} autoComplete="off" />
         </label>
       </div>
       {state.status === "invalid" || state.status === "error" ? (
-        <p className="form-msg full" role="alert">
+        <p className="form-msg" role="alert">
           {state.status === "invalid" ? t.feedbackInvalid : t.error}
         </p>
       ) : null}
-      <div className="full">
-        <button className="btn" disabled={pending}>
-          {pending ? t.sending : t.feedbackSend}
-        </button>
+      <div className="step-nav">
+        {paged && at > 0 ? (
+          <button type="button" className="link" onClick={() => go(at - 1)}>
+            ← {s.back}
+          </button>
+        ) : (
+          <span />
+        )}
+        {last ? (
+          <button className="btn" disabled={pending}>
+            {pending ? t.sending : t.feedbackSend}
+          </button>
+        ) : (
+          <span className="step-next">
+            <span className="hint">{s.enterHint}</span>
+            <button type="button" className="btn" onClick={() => go(at + 1)}>
+              {s.next} →
+            </button>
+          </span>
+        )}
       </div>
     </form>
   );

@@ -19,16 +19,15 @@ import {
 import { getDictionary } from "@/lib/dictionary";
 import { href } from "@/lib/routes";
 import {
-  answerText,
   fieldName,
-  otherName,
-  qName,
   questionSteps,
   visibleKeys,
   formValues,
   type FormQuestion,
 } from "@/lib/signup-form";
 import type { Lang } from "@/sanity/site.config";
+import { answerParts } from "@/lib/review-form";
+import { QuestionField } from "./QuestionField";
 import { Icon } from "./icons";
 import { Select } from "./Select";
 
@@ -482,14 +481,11 @@ export function SignupForm({
         [t.room, standardRoom ? get("room") : ""],
         ...questions
           .filter((q) => q.type !== "section" && shown.has(q._key))
-          .map(
-            (q) =>
-              [
-                q.label ?? "",
-                q.type === "room" || q.type === "diet"
-                  ? get(fieldName(q))
-                  : answerText(q, get(qName(q)), get(otherName(q)), words),
-              ] as [string, string],
+          .flatMap((q): [string, string][] =>
+            q.type === "room" || q.type === "diet"
+              ? [[q.label ?? "", get(fieldName(q))]]
+              : // a grid: one line per row
+                answerParts(q, get, words).map((a) => [a.row ? `${q.label} · ${a.row}` : (q.label ?? ""), a.answer]),
           ),
         [t.diet, standardDiet ? get("diet") : ""],
         [t.message, get("message")],
@@ -544,14 +540,12 @@ export function SignupForm({
   );
 
   const question = (q: FormQuestion) => {
-    const name = qName(q);
     const id = `s-q-${q._key}`;
     const help = q.help ? (
       <small className="muted" id={`${id}-help`}>
         {q.help}
       </small>
     ) : null;
-    const label = `${q.label}${q.required ? " *" : ""}`;
     if (q.type === "room")
       return roomOptions.length ? roomSelect(q.label ?? t.room, q.help) : null;
     if (q.type === "diet")
@@ -568,142 +562,8 @@ export function SignupForm({
           {help}
         </div>
       );
-    if (q.type === "multi") {
-      const opts = (q.options ?? []).filter(Boolean);
-      const ticked = (vals[name] ?? v[name] ?? "").split(",");
-      // required: at least one ticked (the browser checks the first box while none is)
-      const none = !ticked.some(Boolean);
-      return (
-        <fieldset
-          className="field full choices"
-          aria-describedby={q.help ? `${id}-help` : undefined}
-        >
-          <legend className="select-label">{label}</legend>
-          {help}
-          <div className="row stack">
-            {opts.map((text, i) => (
-              <label key={i} className="check">
-                <input
-                  type="checkbox"
-                  name={name}
-                  value={String(i)}
-                  defaultChecked={ticked.includes(String(i))}
-                  required={!!q.required && none && i === 0}
-                />{" "}
-                {text}
-              </label>
-            ))}
-            {q.other ? (
-              <label className="check other">
-                <input
-                  type="checkbox"
-                  name={name}
-                  value="other"
-                  defaultChecked={ticked.includes("other")}
-                />{" "}
-                {t.other}:
-                <input
-                  name={otherName(q)}
-                  defaultValue={v[otherName(q)]}
-                  placeholder={t.otherPlaceholder}
-                  aria-label={`${q.label}: ${t.other}`}
-                  onFocus={(e) => {
-                    const box =
-                      e.currentTarget.parentElement?.querySelector<HTMLInputElement>(
-                        "input[type=checkbox]",
-                      );
-                    if (box && !box.checked) box.click();
-                  }}
-                />
-              </label>
-            ) : null}
-          </div>
-        </fieldset>
-      );
-    }
-    if (q.type === "yesno" || q.type === "choice") {
-      const opts =
-        q.type === "yesno"
-          ? [
-              ["yes", t.yes],
-              ["no", t.no],
-            ]
-          : (q.options ?? []).filter(Boolean).map((o, i) => [String(i), o]);
-      return (
-        <fieldset
-          className="field full choices"
-          aria-describedby={q.help ? `${id}-help` : undefined}
-        >
-          <legend className="select-label">{label}</legend>
-          {help}
-          <div
-            className={`row${q.type === "choice" && opts.length > 2 ? " stack" : ""}`}
-          >
-            {opts.map(([value, text]) => (
-              <label key={value} className="check">
-                <input
-                  type="radio"
-                  name={name}
-                  value={value}
-                  defaultChecked={v[name] === value}
-                  required={!!q.required}
-                />{" "}
-                {text}
-              </label>
-            ))}
-            {q.type === "choice" && q.other ? (
-              <label className="check other">
-                <input
-                  type="radio"
-                  name={name}
-                  value="other"
-                  defaultChecked={v[name] === "other"}
-                  required={!!q.required}
-                />{" "}
-                {t.other}:
-                <input
-                  name={otherName(q)}
-                  defaultValue={v[otherName(q)]}
-                  placeholder={t.otherPlaceholder}
-                  aria-label={`${q.label}: ${t.other}`}
-                  // typing here picks “Andere”
-                  onFocus={(e) => {
-                    const radio =
-                      e.currentTarget.parentElement?.querySelector<HTMLInputElement>(
-                        "input[type=radio]",
-                      );
-                    if (radio && !radio.checked) radio.click();
-                  }}
-                />
-              </label>
-            ) : null}
-          </div>
-        </fieldset>
-      );
-    }
-    return (
-      <div className="field full">
-        <label htmlFor={id}>{label}</label>
-        {q.type === "textarea" ? (
-          <textarea
-            id={id}
-            name={name}
-            defaultValue={v[name]}
-            required={!!q.required}
-            aria-describedby={q.help ? `${id}-help` : undefined}
-          />
-        ) : (
-          <input
-            id={id}
-            name={name}
-            defaultValue={v[name]}
-            required={!!q.required}
-            aria-describedby={q.help ? `${id}-help` : undefined}
-          />
-        )}
-        {help}
-      </div>
-    );
+    // every other type (text, choices, grid, scale…): shared with the feedback form
+    return <QuestionField q={q} lang={lang} v={v} vals={vals} prefix="s" />;
   };
 
   return (

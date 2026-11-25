@@ -14,6 +14,12 @@ export type FormQuestion = {
   other?: boolean | null;
   required: boolean | null;
   showIf?: string | null;
+  /** grid (sign-up + feedback): the rows; the columns are `options`. */
+  rows?: string[] | null;
+  /** scale / stars: 1…scaleMax; scale: the words at both ends. */
+  scaleMax?: number | null;
+  low?: string | null;
+  high?: string | null;
 };
 
 /** Field name of a question's answer (`q.<key>`), and of its “Andere: …” text. */
