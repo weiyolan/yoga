@@ -567,6 +567,47 @@ section.alt .quote { background: var(--bg); }
 .draft-bar a { color: var(--ember); font-weight: 600; }
 .schedule-empty { max-width: 60ch; }
 
+/* feedback form (components/FeedbackForm.tsx): one long page next to a sticky photo */
+.feedback-split { grid-template-columns: minmax(0, 2fr) minmax(0, 3fr); }
+.feedback-split > .ph { position: sticky; top: 0; height: 100vh; }
+@media (max-width: 860px) { .feedback-split { grid-template-columns: minmax(0, 1fr); } .feedback-split > .ph { position: relative; height: 300px; } }
+.feedback .q-wrap { display: contents; } .feedback .q-wrap[hidden] { display: none; }
+.fb-section { grid-column: 1 / -1; margin: 18px 0 -8px; padding-top: 22px; border-top: 1px solid var(--line); font: 1.5rem/1.2 var(--serif); }
+.fb-table { display: grid; grid-template-columns: minmax(8rem, 1.5fr) repeat(var(--cols), minmax(0, 1fr)); margin-top: 6px; }
+.fb-head, .fb-row { display: contents; }
+.fb-head span { padding: 0 4px 10px; font-size: .78rem; line-height: 1.3; color: var(--ink-soft); text-align: center; align-self: end; }
+.fb-rowlabel { padding: 12px 10px 12px 0; font-size: .92rem; line-height: 1.35; border-top: 1px solid var(--line); }
+.fb-cell { display: flex; justify-content: center; align-items: center; padding: 8px 4px; border-top: 1px solid var(--line); cursor: pointer; }
+.fb-row:hover > * { background: var(--bg-2); }
+.fb-cell input { width: 18px; height: 18px; margin: 0; accent-color: var(--ember); cursor: pointer; }
+.fb-col { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+@media (max-width: 700px) {
+  /* a phone: per row its label, then the answers as small chips */
+  .fb-table { display: block; }
+  .fb-head { display: none; }
+  .fb-row { display: flex; flex-wrap: wrap; gap: 6px; padding: 12px 0; border-top: 1px solid var(--line); }
+  .fb-row:hover > * { background: none; }
+  .fb-rowlabel { flex: 1 0 100%; padding: 0 0 4px; border: 0; font-weight: 500; }
+  .fb-cell { gap: 6px; padding: 6px 10px; border: 1px solid var(--line); border-radius: 99px; font-size: .85rem; }
+  .fb-cell:has(input:checked) { border-color: var(--ember); background: var(--bg-2); }
+  .fb-cell input { width: 14px; height: 14px; }
+  .fb-col { position: static; width: auto; height: auto; overflow: visible; clip: auto; white-space: normal; }
+}
+.fb-scale { display: flex; align-items: center; gap: 14px; flex-wrap: wrap; margin-top: 6px; }
+.fb-end { font-size: .85rem; color: var(--ink-soft); max-width: 12rem; }
+.fb-nums { display: flex; gap: 4px; }
+.fb-nums label { display: flex; flex-direction: column; align-items: center; gap: 6px; padding: 4px 8px; font-size: .85rem; cursor: pointer; }
+.fb-nums input { width: 18px; height: 18px; margin: 0; accent-color: var(--ember); }
+@media (max-width: 700px) { .fb-scale { gap: 8px; } .fb-nums label { padding: 4px 5px; } .fb-end { flex: 1 0 100%; } }
+.feedback label.fb-cell { display: flex; justify-content: center; align-items: center; gap: 6px; margin: 0; font: 400 .85rem/1.3 var(--sans); letter-spacing: normal; text-transform: none; color: var(--ink); }
+.feedback legend.select-label { padding: 0; }
+.feedback .fb-nums label { margin: 0; font: 400 .85rem/1 var(--sans); letter-spacing: normal; text-transform: none; }
+.feedback .stars label { position: relative; } .feedback .stars input { width: 1px; height: 1px; }
+/* questions read as sentences (the small caps labels are for short field names) */
+.feedback .field > label, .feedback legend.select-label { display: block; margin-bottom: 10px; font: 500 1rem/1.45 var(--sans); letter-spacing: normal; text-transform: none; color: var(--ink); }
+.stars.many label { font-size: 1.5rem; } .stars.many .stars-row { gap: 2px; flex-wrap: wrap; }
+.fb-starnum { margin-left: 10px; font-size: .85rem; color: var(--ink-soft); }
+
 /* reviews */
 .stars { border: 0; padding: 0; margin: 0; }
 .stars-row { display: inline-flex; flex-direction: row-reverse; gap: 4px; }

@@ -3,27 +3,29 @@ import { Box, Button, Card, Checkbox, Flex, Stack, Text } from "@sanity/ui";
 import { useToast } from "@sanity/ui/toast";
 import { useEffect, useState } from "react";
 import { useClient, type DocumentActionComponent } from "sanity";
-import { AUDIENCES, contacts, CONTACTS_QUERY, recipients, type ContactsData } from "../../lib/contacts";
+import { contacts, CONTACTS_QUERY, recipients, type ContactsData, type Recipients } from "../../lib/contacts";
 import { apiVersion } from "../../sanity/site.config";
 import { mailConfigured, siteApi } from "../lib/ai";
 
-type Newsletter = { _id: string; title?: string; audience?: string[]; sentAt?: string; sentCount?: number };
+type Newsletter = { _id: string; title?: string; audience?: string[]; to?: Recipients; sentAt?: string; sentCount?: number };
 
-/** Who it goes to right now (the contact book minus everyone who unsubscribed), per language. */
-function Summary({ audience, onCount }: { audience?: string[]; onCount: (n: number) => void }) {
+/** Who it goes to right now (Naar wie, minus everyone who unsubscribed), per language. */
+function Summary({ to, audience, onCount }: { to?: Recipients; audience?: string[]; onCount: (n: number) => void }) {
   const client = useClient({ apiVersion });
   const [counts, setCounts] = useState<{ nl: number; en: number } | null>(null);
   const [error, setError] = useState("");
+  const key = JSON.stringify([to ?? null, audience ?? null]);
   useEffect(() => {
     client.fetch<ContactsData>(CONTACTS_QUERY, {}, { perspective: "raw" }).then(
       (d) => {
-        const list = recipients(contacts(d), audience);
+        const list = recipients(contacts(d), to, audience);
         setCounts({ nl: list.filter((c) => c.lang === "nl").length, en: list.filter((c) => c.lang === "en").length });
         onCount(list.length);
       },
       (e: Error) => setError(e.message),
     );
-  }, [client, audience, onCount]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [client, key, onCount]);
   if (error) return <Text size={1}>Contactboek laden mislukt: {error}</Text>;
   if (!counts) return <Text size={1}>Ontvangers tellen…</Text>;
   return (
@@ -32,17 +34,14 @@ function Summary({ audience, onCount }: { audience?: string[]; onCount: (n: numb
         {counts.nl + counts.en} ontvangers ({counts.nl} NL, {counts.en} EN)
       </Text>
       <Text size={1} muted>
-        {AUDIENCES.filter((a) => (audience?.length ? audience : ["subscribers"]).includes(a.value))
-          .map((a) => a.title)
-          .join(" + ")}
-        , zonder wie zich afmeldde. Wijzig in het tabblad “Versturen”.
+        Zoals gekozen in het tabblad “Naar wie”, zonder wie zich afmeldde. Elk krijgt de brief in zijn taal, met een afmeldlink.
       </Text>
     </Stack>
   );
 }
 
 /**
- * Nieuwsbrief → “Nieuwsbrief versturen”: the published version to its audience, after a confirm with
+ * Brief → “Brief versturen”: the published version to its recipients (`to`), after a confirm with
  * the number of recipients (app/api/mail task "issue"). Once; again only with an extra tick. Only shown
  * when there are no unpublished changes (then it is the main button; else Publiceer is).
  */
@@ -69,7 +68,7 @@ export const sendNewsletterAction: DocumentActionComponent = ({ id, published, d
     setBusy(true);
     try {
       const res = await siteApi<{ sent: number; failed: string[] }>(client, "/api/mail", { task: "issue", id, again });
-      toast.push({ status: res.failed.length ? "warning" : "success", title: `Nieuwsbrief verstuurd naar ${res.sent} adressen`, description: res.failed.length ? `Mislukt: ${res.failed.join(", ")}` : undefined });
+      toast.push({ status: res.failed.length ? "warning" : "success", title: `Brief verstuurd naar ${res.sent} adressen`, description: res.failed.length ? `Mislukt: ${res.failed.join(", ")}` : undefined });
       close();
     } catch (err) {
       toast.push({ status: "error", title: "Versturen mislukt", description: String(err instanceof Error ? err.message : err) });
@@ -79,19 +78,19 @@ export const sendNewsletterAction: DocumentActionComponent = ({ id, published, d
   };
 
   return {
-    label: doc?.sentAt ? "Opnieuw versturen…" : "Nieuwsbrief versturen…",
+    label: doc?.sentAt ? "Opnieuw versturen…" : "Brief versturen…",
     icon: EnvelopeIcon,
     tone: "primary",
     disabled: !!blocked || busy,
-    title: blocked || (doc.sentAt ? `Al verstuurd op ${doc.sentAt.slice(0, 10)} naar ${doc.sentCount ?? 0} adressen` : "Naar het contactboek versturen"),
+    title: blocked || (doc.sentAt ? `Al verstuurd op ${doc.sentAt.slice(0, 10)} naar ${doc.sentCount ?? 0} adressen` : "Naar de gekozen ontvangers versturen"),
     onHandle: () => setOpen(true),
     dialog: open && {
       type: "dialog",
-      header: `“${doc?.title ?? "Nieuwsbrief"}” versturen`,
+      header: `“${doc?.title ?? "Brief"}” versturen`,
       onClose: close,
       content: (
         <Stack gap={4} padding={1}>
-          <Summary audience={doc?.audience} onCount={setCount} />
+          <Summary to={doc?.to} audience={doc?.audience} onCount={setCount} />
           {doc?.sentAt ? (
             <Card padding={3} radius={2} tone="caution" border>
               <Flex gap={3} align="center">

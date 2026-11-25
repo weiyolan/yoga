@@ -31,10 +31,10 @@ export function Help() {
           Tekst tussen [haken], zoals [IBAN], moet nog ingevuld worden: dat veld krijgt een gele waarschuwing, en “Nog in te vullen [ ]” in het menu toont alle plaatsen.
         </Text>
         <Text size={1} muted>
-          Bij elke nieuwe inschrijving krijgen jullie een mail. De deelnemer bevestigen: open de inschrijving → Bevestigingsmail. Die gebruikt de tekst uit Mails → Inschrijving bevestiging. Elke mail heeft rechts een voorbeeld (het oog bovenaan).
+          Bij elke nieuwe inschrijving krijgen jullie een mail. De deelnemer bevestigen: open de inschrijving → Bevestigingsmail. Die gebruikt de tekst uit Bevestigingsmails → Inschrijving bevestiging. Elke mail heeft rechts een voorbeeld (het oog bovenaan).
         </Text>
         <Text size={1} muted>
-          Nieuwsbrief: Contact → Nieuwsbrieven → +. Schrijf, kijk het voorbeeld rechts na, stuur een testmail naar jezelf, publiceer, dan “Nieuwsbrief versturen…” onderaan. Het paneel rechts toont bij welke stap je bent. Wie hem krijgt zie je in Contact → Contactboek.
+          Brieven (een nieuwsbrief, een bedankje na een retreat…): Contact → Brieven → +. Schrijf, kies in het tabblad “Naar wie” de ontvangers (groepen, de deelnemers van één retreat, of losse personen), kijk het voorbeeld rechts na, stuur een testmail naar jezelf, publiceer, dan “Brief versturen…” onderaan. Bevestigingsmails zijn iets anders: die vertrekken vanzelf na een formulier. Na een retreat: open de retreat → Achteraf → “Bedankbrief maken” (met een knop naar het feedbackformulier).
         </Text>
         <Text size={1} muted>
           Google: elke pagina en retreat heeft “SEO & delen” met bovenaan een voorbeeld van hoe Google ze toont (NL en EN). Geef elke pagina een eigen beschrijving van 120–155 tekens; leeg = de introtekst. Elke foto in de Fotobank een alt-tekst (Fotobank → Alt-teksten aanvullen), en waar je het weet de fotograaf: die staat onder de foto op volledig scherm en Google krijgt hem mee als maker (Fotobank → Fotografen).

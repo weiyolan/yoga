@@ -14,6 +14,7 @@ import { defineArrayMember, defineField, defineType } from "sanity";
 import { i18nLines, i18nString, i18nText, pick } from "../shared/i18n";
 import { mediaArrayField, mediaField } from "../shared/media";
 import { RetreatOverviewInput } from "../../components/PageOverview";
+import { ReviewLinkInput } from "../../components/ReviewLink";
 
 /**
  * A retreat. Sections follow the detail page (and the Dahab Facebook event):
@@ -330,6 +331,24 @@ export const retreat = defineType({
       hidden: ({ document }) =>
         !document?.endDate ||
         String(document.endDate) >= new Date().toISOString().slice(0, 10),
+    }),
+    defineField({
+      name: "reviewLink",
+      title: "Feedback",
+      type: "string",
+      group: "recap",
+      readOnly: true,
+      description: "De link naar het feedbackformulier van deze retreat, om naar de deelnemers te sturen (of maak meteen een bedankbrief). Ook via ⋯ naast Publiceren → “Kopieer reviewlink”.",
+      components: { input: ReviewLinkInput },
+    }),
+    defineField({
+      name: "reviewForm",
+      title: "Feedbackformulier",
+      type: "reference",
+      to: [{ type: "reviewForm" }],
+      group: "recap",
+      options: { disableNew: true },
+      description: "Welke vragen de reviewpagina van deze retreat stelt (Formulieren → Feedbackformulieren). Enkel een gepubliceerd formulier verschijnt. Leeg = het standaard-feedbackformulier, of anders het korte reviewformulier (sterren, naam, tekst).",
     }),
     mediaArrayField("recapPhotos", {
       title: "Foto's achteraf",

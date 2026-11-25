@@ -205,7 +205,7 @@ export const structure: StructureResolver = (S) =>
         .icon(WarningOutlineIcon)
         .child(S.component(Placeholders).id("todo").title("Nog in te vullen")),
 
-      /* ---- 1. contact: what comes in from people, and the newsletters going out to them ---- */
+      /* ---- 1. contact: what comes in from people, and the letters (Brieven) going out to them ---- */
       S.divider().title("Contact"),
       S.listItem()
         .id("signups")
@@ -290,8 +290,9 @@ export const structure: StructureResolver = (S) =>
         .title("Contactboek")
         .icon(BookIcon)
         .child(S.component(ContactBook).id("contacts").title("Contactboek")),
+      // mails you write and send yourself to a group: a newsletter, a thank-you after a retreat… (schemaTypes/documents/newsletter.ts)
       S.documentTypeListItem("newsletter")
-        .title("Nieuwsbrieven")
+        .title("Brieven")
         .icon(DocumentTextIcon),
 
       /* ---- 2. main documents ---- */
@@ -324,17 +325,24 @@ export const structure: StructureResolver = (S) =>
           liveList(S, "forms", "Formulieren", [singleton(S, "signupSettings", "Inschrijving pagina", ControlsIcon)], [
             // the default form first
             { title: "Inschrijfformulieren", type: "signupForm", sort: (a, b) => Number(!!b.isDefault) - Number(!!a.isDefault) || byName(a, b) },
-          ], [{ type: "signupForm", title: "Nieuw formulier" }]),
+            // the review page of a retreat (/retreats/<slug>/review), picked in the retreat's tab Achteraf
+            { title: "Feedbackformulieren", type: "reviewForm", sort: (a, b) => Number(!!b.isDefault) - Number(!!a.isDefault) || byName(a, b) },
+          ], [
+            { type: "signupForm", title: "Nieuw inschrijfformulier" },
+            { type: "reviewForm", title: "Nieuw feedbackformulier" },
+            { type: "reviewForm", title: "Voorbeeld: evaluatie Eifel", template: "reviewForm-example" },
+          ]),
         ),
+      // the automatic mails: what the site sends by itself after a form (Brieven = the ones you send yourself)
       S.listItem()
         .id("mails")
-        .title("Mails")
+        .title("Bevestigingsmails")
         .icon(ComposeIcon)
         .child(
           liveList(
             S,
             "mails",
-            "Mails",
+            "Bevestigingsmails",
             [
               singleton(S, "mailSettings", "Opties", ControlsIcon),
               singleton(S, "newsletterMail", "Nieuwsbrief bevestiging", BellIcon),

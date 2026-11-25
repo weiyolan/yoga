@@ -6,9 +6,17 @@ import { SplitHorizontalIcon } from "@sanity/icons/SplitHorizontal";
 import { StringIcon } from "@sanity/icons/String";
 import { TextIcon } from "@sanity/icons/Text";
 import { ThumbsUpIcon } from "@sanity/icons/ThumbsUp";
+import { CommentIcon } from "@sanity/icons/Comment";
+import { ControlsIcon } from "@sanity/icons/Controls";
+import { EnvelopeIcon } from "@sanity/icons/Envelope";
+import { EyeOpenIcon } from "@sanity/icons/EyeOpen";
+import { StarIcon } from "@sanity/icons/Star";
+import { ThLargeIcon } from "@sanity/icons/ThLarge";
+import { UserIcon } from "@sanity/icons/User";
 import { Box, Card, Checkbox, Flex, Stack, Switch, Text, TextInput } from "@sanity/ui";
 import type { ComponentType } from "react";
 import { Help } from "./InlineFields";
+import { PUBLISH_DEFAULT } from "../../lib/review-form";
 import { ObjectInputMember, set, setIfMissing, unset, useFormValue, type FieldMember, type ObjectInputProps, type StringInputProps, type TextInputProps } from "sanity";
 
 /** The question types, with an icon and one line of explanation (Inschrijfformulier → Extra vragen). */
@@ -24,12 +32,32 @@ export const QUESTION_TYPES: { title: string; value: string; icon: ComponentType
 ];
 export const questionType = (v?: string) => QUESTION_TYPES.find((q) => q.value === v);
 
+type QType = (typeof QUESTION_TYPES)[number];
+const pickTypes = (...values: string[]) => values.map((v) => QUESTION_TYPES.find((q) => q.value === v)!);
+
+/** The question types of a feedback form (Feedbackformulier → Vragen, lib/review-form.ts). */
+export const REVIEW_QUESTION_TYPES: QType[] = [
+  ...pickTypes("text", "textarea", "yesno", "choice", "multi"),
+  { title: "Raster", value: "grid", icon: ThLargeIcon, hint: "Rijen × kolommen: per rij één antwoord (bv. Organisatie, Maaltijden… × Niet goed … Uitstekend)" },
+  { title: "Schaal", value: "scale", icon: ControlsIcon, hint: "Cijfers 1 tot …, met een woord aan beide kanten" },
+  { title: "Sterren", value: "stars", icon: StarIcon, hint: "1 tot 5 (of 10) sterren. De eerste sterrenvraag is de score van de testimonial" },
+  { title: "Quote voor de site", value: "quote", icon: CommentIcon, hint: "Open vak: wordt de tekst van de testimonial als je hem publiceert" },
+  { title: "Toestemming publicatie", value: "publish", icon: EyeOpenIcon, hint: "Met voornaam / anoniem / niet publiceren" },
+  { title: "Naam", value: "name", icon: UserIcon, hint: "Hun (voor)naam, bij de testimonial" },
+  { title: "E-mail", value: "email", icon: EnvelopeIcon, hint: "Voor de bedankmail en het contactboek" },
+  { title: "Nieuw deel", value: "section", icon: SplitHorizontalIcon, hint: "Een titel tussen de vragen (bv. “Deel 2: Prijs-kwaliteit”)" },
+];
+export const reviewQuestionType = (v?: string) => REVIEW_QUESTION_TYPES.find((q) => q.value === v);
+
 /** “Soort”: tiles with icon + explanation instead of a row of radio buttons. */
-export function QuestionTypeInput(props: StringInputProps) {
-  const { value, onChange, readOnly } = props;
+export const QuestionTypeInput = (props: StringInputProps) => <TypeTiles {...props} types={QUESTION_TYPES} />;
+export const ReviewQuestionTypeInput = (props: StringInputProps) => <TypeTiles {...props} types={REVIEW_QUESTION_TYPES} />;
+
+function TypeTiles(props: StringInputProps & { types: QType[] }) {
+  const { value, onChange, readOnly, types } = props;
   return (
     <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(170px, 1fr))", gap: 8 }}>
-      {QUESTION_TYPES.map((t) => {
+      {types.map((t) => {
         const on = value === t.value;
         return (
           <Card
@@ -83,11 +111,11 @@ export function ShowIfInput(props: TextInputProps) {
   const lines = (value ?? "").split("\n").map((l) => l.trim()).filter(Boolean);
   const save = (next: string[]) => onChange(next.length ? set(next.join("\n")) : unset());
 
-  if (!prev || prev.type === "section")
+  if (!prev || prev.type === "section" || prev.type === "grid")
     return (
       <Card padding={3} radius={2} tone="transparent" border>
         <Text size={1} muted>
-          {prev ? "De vraag hierboven is een nieuwe stap: deze vraag wordt altijd getoond." : "Dit is de eerste vraag: wordt altijd getoond."}
+          {prev?.type === "grid" ? "De vraag hierboven is een raster: deze vraag wordt altijd getoond." : prev ? "De vraag hierboven is een nieuwe stap (of deel): deze vraag wordt altijd getoond." : "Dit is de eerste vraag: wordt altijd getoond."}
           {lines.length ? ` (Nu ingesteld: ${lines.join(" / ")}; zet de vraag direct onder de vraag waarvan ze afhangt.)` : ""}
         </Text>
       </Card>
@@ -98,7 +126,12 @@ export function ShowIfInput(props: TextInputProps) {
       ? ["Ja", "Nee"]
       : prev.type === "choice" || prev.type === "multi"
         ? [...nl(prev.options).split("\n").map((o) => o.trim()).filter(Boolean), ...(prev.other ? ["Andere"] : [])]
-        : null;
+        : prev.type === "publish"
+          ? (() => {
+              const own = nl(prev.options).split("\n").map((o) => o.trim()).filter(Boolean);
+              return own.length === 3 ? own : PUBLISH_DEFAULT.nl;
+            })()
+          : null;
 
   return (
     <Stack gap={3}>

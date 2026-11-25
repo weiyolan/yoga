@@ -1,6 +1,6 @@
 /**
- * A newsletter (Studio → Contact → Nieuwsbrieven) as an HTML mail: header photo, title, rich text,
- * then the blocks under it in their order (retreat / lesstijl / own cards, buttons, extra text),
+ * A Brief / newsletter (Studio → Contact → Brieven) as an HTML mail: header photo, title, rich text,
+ * then the blocks under it in their order (retreat / lesstijl / own cards, buttons, feedback button, extra text),
  * unsubscribe link at the bottom. Shared by the site (sending,
  * app/api/mail) and the Studio preview. No `@/` imports: the Studio imports this too.
  */
@@ -10,13 +10,13 @@ import { fill } from "./confirmation";
 import { firstName } from "./newsletter";
 import { dateRange } from "./format";
 import { blocksText, type MailBlock, type MailContent, type MailSection } from "./mail-template";
-import { href, retreatHref, translatePath } from "./routes";
+import { href, retreatHref, reviewHref, translatePath } from "./routes";
 
 const t = (f: string) => `coalesce(${f}[language == $lang][0].value, ${f}[language == "nl"][0].value)`;
 
 /** One newsletter in one language. `$id` (published id; with the drafts perspective: the draft), `$lang`. */
 export const NEWSLETTER_ISSUE_QUERY = `*[_id == $id][0]{
-  _id, title, audience, sentAt, sentCount,
+  _id, title, audience, to, sentAt, sentCount,
   "subject": ${t("subject")},
   "heading": ${t("heading")},
   "image": image->image.asset->url,
@@ -27,6 +27,7 @@ export const NEWSLETTER_ISSUE_QUERY = `*[_id == $id][0]{
     _type == "reference" => @->{ _type, "title": coalesce(${t("title")}, name), "country": ${t("country")}, "tagline": ${t("tagline")}, startDate, endDate, "slug": slug.current, "photo": coalesce(hero.photo, cardPhoto, photo)->image.asset->url },
     _type == "newsletterCard" => { "title": ${t("title")}, "text": ${t("text")}, "more": ${t("more")}, url, "photo": photo->image.asset->url },
     _type == "newsletterButton" => { "label": ${t("label")}, url },
+    _type == "newsletterReview" => { "label": ${t("label")}, "slug": retreat->slug.current },
     _type == "newsletterText" => { "body": ${t("body")} }
   },
   // before the blocks: a list of retreats + one button (still read for newsletters made back then)
@@ -37,6 +38,7 @@ export type NewsletterIssue = {
   _id: string;
   title?: string | null;
   audience?: string[] | null;
+  to?: unknown;
   sentAt?: string | null;
   sentCount?: number | null;
   subject?: string | null;
@@ -54,6 +56,7 @@ export type NewsletterBlock = { _key: string } & (
   | { _type: "retreat" | "yogaClass"; title?: string | null; country?: string | null; tagline?: string | null; startDate?: string | null; endDate?: string | null; slug?: string | null; photo?: string | null }
   | ({ _type: "newsletterCard" } & Linked)
   | { _type: "newsletterButton"; label?: string | null; url?: string | null }
+  | { _type: "newsletterReview"; label?: string | null; slug?: string | null }
   | { _type: "newsletterText"; body?: MailBlock[] | null }
   | { _type: "reference" } // a reference to a deleted document
 );
@@ -83,6 +86,8 @@ export function newsletterIssueContent(lang: Lang, issue: NewsletterIssue, name:
         const url = link(b.url);
         return b.label && url ? { button: { label: f(b.label), url } } : null;
       }
+      case "newsletterReview":
+        return b.slug ? { button: { label: f(b.label || (lang === "en" ? "Tell us how it was" : "Vertel ons hoe het was")), url: `${site}${reviewHref(lang, b.slug)}` } } : null;
       case "newsletterText":
         return b.body?.length ? { blocks: b.body } : null;
       default:

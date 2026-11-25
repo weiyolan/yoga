@@ -1,10 +1,11 @@
-import { EnvelopeIcon } from "@sanity/icons/Envelope";
 import { BlockContentIcon } from "@sanity/icons/BlockContent";
 import { DocumentTextIcon } from "@sanity/icons/DocumentText";
 import { LinkIcon } from "@sanity/icons/Link";
 import { ThLargeIcon } from "@sanity/icons/ThLarge";
 import { defineArrayMember, defineField, defineType } from "sanity";
-import { AUDIENCES } from "../../../lib/contacts";
+import { StarIcon } from "@sanity/icons/Star";
+import { UsersIcon } from "@sanity/icons/Users";
+import { RecipientsInput } from "../../components/RecipientsInput";
 import { i18nBlocks, i18nString, i18nText, pick } from "../shared/i18n";
 import { mediaField } from "../shared/media";
 
@@ -57,6 +58,21 @@ const BLOCKS = [
     },
   }),
   defineArrayMember({
+    name: "newsletterReview",
+    title: "Knop: feedbackformulier",
+    type: "object",
+    icon: StarIcon,
+    description: "Een knop naar het feedback- / reviewformulier van een retreat (zelfde link als in de retreat → Achteraf), in de taal van de lezer.",
+    fields: [
+      defineField({ name: "retreat", title: "Retreat", type: "reference", to: [{ type: "retreat" }], options: { disableNew: true }, description: "Van welke retreat het formulier is.", validation: (rule) => rule.required() }),
+      i18nString("label", { title: "Tekst", max: 40, description: "Wat er op de knop staat. Leeg = “Vertel ons hoe het was”." }),
+    ],
+    preview: {
+      select: { label: "label", retreat: "retreat.title" },
+      prepare: ({ label, retreat }) => ({ title: pick(label) ?? "Vertel ons hoe het was", subtitle: `Knop naar feedbackformulier · ${pick(retreat) ?? "kies een retreat"}`, media: StarIcon }),
+    },
+  }),
+  defineArrayMember({
     name: "newsletterText",
     title: "Tekst",
     type: "object",
@@ -74,21 +90,22 @@ const BLOCKS = [
 ];
 
 /**
- * Nieuwsbrief: a mail to the contact book (lib/newsletter-issue.ts). Write it, check the preview on
- * the right (+ a test mail to yourself), publish, then “Nieuwsbrief versturen” (actions/newsletter.tsx).
+ * Brief (Contact → Brieven; type `newsletter`): a mail you send yourself to people of the contact book: a newsletter,
+ * a thank-you after a retreat… (lib/newsletter-issue.ts). Write it, pick “Naar wie” (`to`, components/RecipientsInput.tsx),
+ * check the preview on the right (+ a test mail to yourself), publish, then “Brief versturen” (actions/newsletter.tsx).
  * Everyone gets it in their own language (EN empty = NL) with their own unsubscribe link.
  */
 export const newsletter = defineType({
   name: "newsletter",
-  title: "Nieuwsbrief",
+  title: "Brief",
   type: "document",
   icon: DocumentTextIcon,
   groups: [
     { name: "content", title: "Inhoud", icon: DocumentTextIcon, default: true },
-    { name: "send", title: "Versturen", icon: EnvelopeIcon },
+    { name: "send", title: "Naar wie", icon: UsersIcon },
   ],
   fields: [
-    defineField({ name: "title", title: "Naam", type: "string", group: "content", description: "Niet op de site: enkel om de nieuwsbrief terug te vinden in de Studio, bv. “Nieuwe retreats 2027”. Lezers zien dit niet.", validation: (rule) => rule.required() }),
+    defineField({ name: "title", title: "Naam", type: "string", group: "content", description: "Niet op de site: enkel om de brief terug te vinden in de Studio, bv. “Nieuwe retreats 2027” of “Bedankt: Eifel 2026”. Lezers zien dit niet.", validation: (rule) => rule.required() }),
     i18nString("subject", { title: "Onderwerp", group: "content", required: true, max: 90, description: "Het onderwerp van de nieuwsbrief-mail: wat ze in hun inbox zien. Gebruik {naam} voor hun voornaam." }),
     mediaField("image", { title: "Foto bovenaan", group: "content", description: "Brede foto helemaal bovenaan de nieuwsbrief-mail, boven de titel. Wordt 2:1 bijgesneden. Optioneel." }),
     i18nString("heading", { title: "Titel", group: "content", description: "Grote titel in de nieuwsbrief-mail, onder de foto en boven de tekst. Optioneel." }),
@@ -116,22 +133,35 @@ export const newsletter = defineType({
     i18nString("buttonLabel", { title: "Knop: tekst (oud)", group: "content", description: "Oud veld: tekst van de knop onderaan de nieuwsbrief-mail (wordt nog meegestuurd). Gebruik liever een “Knop” in “Onder de tekst”.", hidden: ({ value }) => !(value as unknown[] | undefined)?.length }),
     defineField({ name: "buttonUrl", title: "Knop: link (oud)", type: "url", group: "content", description: "Oud veld: waar de oude knop onderaan de nieuwsbrief-mail naartoe gaat. Gebruik liever een “Knop” in “Onder de tekst”.", hidden: ({ value }) => !value, validation: (rule) => rule.uri({ scheme: ["https", "http", "mailto"], allowRelative: true }) }),
     defineField({
-      name: "audience",
+      name: "to",
       title: "Naar wie",
-      type: "array",
+      type: "object",
       group: "send",
-      of: [defineArrayMember({ type: "string" })],
-      options: { list: AUDIENCES.map(({ value, title }) => ({ value, title })), layout: "grid" },
-      initialValue: ["subscribers", "participants"],
-      description: `Niet op de site: wie deze nieuwsbrief krijgt als je op “Nieuwsbrief versturen” klikt (wie zich afmeldde nooit). ${AUDIENCES.map((a) => `${a.title}: ${a.description}`).join(" ")}`,
-      validation: (rule) => rule.required().min(1),
+      description: "Niet op de site: wie deze brief krijgt als je op “Brief versturen…” klikt. Kies groepen, de deelnemers van één of meer retreats, of losse personen; wie zich afmeldde krijgt hem nooit.",
+      components: { input: RecipientsInput },
+      initialValue: { groups: ["subscribers", "participants"], statuses: ["confirmed"] },
+      fields: [
+        defineField({ name: "groups", title: "Groepen", type: "array", of: [defineArrayMember({ type: "string" })] }),
+        defineField({ name: "retreats", title: "Deelnemers van", type: "array", of: [defineArrayMember({ type: "reference", to: [{ type: "retreat" }] })] }),
+        defineField({ name: "statuses", title: "Met status", type: "array", of: [defineArrayMember({ type: "string" })] }),
+        defineField({ name: "include", title: "Ook naar", type: "array", of: [defineArrayMember({ type: "string" })] }),
+        defineField({ name: "exclude", title: "Niet naar", type: "array", of: [defineArrayMember({ type: "string" })] }),
+      ],
+      validation: (rule) =>
+        rule.custom((v: { groups?: string[]; retreats?: unknown[]; include?: string[] } | undefined, ctx) => {
+          const old = (ctx.document as { audience?: string[] } | undefined)?.audience;
+          if (!v) return old?.length ? true : "Kies wie de brief krijgt";
+          return v.groups?.length || v.retreats?.length || v.include?.length ? true : "Kies minstens een groep, een retreat of een persoon";
+        }),
     }),
-    defineField({ name: "sentAt", title: "Verstuurd op", type: "datetime", group: "send", readOnly: true, description: "Niet op de site: wordt automatisch ingevuld bij het versturen, zodat je ziet wanneer deze nieuwsbrief vertrok (en hem niet per ongeluk twee keer stuurt)." }),
-    defineField({ name: "sentCount", title: "Aantal ontvangers", type: "number", group: "send", readOnly: true, description: "Niet op de site: wordt automatisch ingevuld bij het versturen, met hoeveel mensen deze nieuwsbrief kregen." }),
+    // before “to”: only groups. Still read for letters made back then (RecipientsInput starts from it).
+    defineField({ name: "audience", title: "Naar wie (oud)", type: "array", group: "send", hidden: true, of: [defineArrayMember({ type: "string" })] }),
+    defineField({ name: "sentAt", title: "Verstuurd op", type: "datetime", group: "send", readOnly: true, description: "Niet op de site: wordt automatisch ingevuld bij het versturen, zodat je ziet wanneer deze brief vertrok (en hem niet per ongeluk twee keer stuurt)." }),
+    defineField({ name: "sentCount", title: "Aantal ontvangers", type: "number", group: "send", readOnly: true, description: "Niet op de site: wordt automatisch ingevuld bij het versturen, met hoeveel mensen deze brief kregen." }),
   ],
   orderings: [{ title: "Nieuwste eerst", name: "createdDesc", by: [{ field: "_createdAt", direction: "desc" }] }],
   preview: {
     select: { title: "title", sentAt: "sentAt", sentCount: "sentCount", media: "image.image" },
-    prepare: ({ title, sentAt, sentCount, media }) => ({ title: title ?? "Nieuwsbrief", subtitle: sentAt ? `Verstuurd ${sentAt.slice(0, 10)} · ${sentCount ?? 0} ontvangers` : "Nog niet verstuurd", media }),
+    prepare: ({ title, sentAt, sentCount, media }) => ({ title: title ?? "Brief", subtitle: sentAt ? `Verstuurd ${sentAt.slice(0, 10)} · ${sentCount ?? 0} ontvangers` : "Nog niet verstuurd", media }),
   },
 });

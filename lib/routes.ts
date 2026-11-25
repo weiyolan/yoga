@@ -36,7 +36,7 @@ export const retreatHref = (lang: Lang, slug: string | null | undefined, hash?: 
 /** A retreat's sign-up page (also the waiting list when it's full). */
 export const signupHref = (lang: Lang, slug: string | null | undefined) => href(lang, "retreats", { slug: slug ? `${slug}/${signupSegment[lang]}` : undefined });
 
-/** A past retreat's review page: only reached through the link Rita & Philippe send (Studio → “Kopieer reviewlink”). */
+/** A retreat's review / feedback page: only reached through the link Rita & Philippe send (Studio → retreat → Achteraf → Feedback). */
 export const reviewHref = (lang: Lang, slug: string | null | undefined) => href(lang, "retreats", { slug: slug ? `${slug}/review` : undefined });
 
 /** Internal (Dutch) folder for a localized first segment, e.g. `about` → `over-ons`. */
